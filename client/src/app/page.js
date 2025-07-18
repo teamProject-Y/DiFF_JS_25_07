@@ -17,7 +17,7 @@ export default function Home() {
     return (
         <main>
             <h1>API 테스트</h1>
-            <pre>{data ? JSON.stringify(data, null, 2) : '로딩 중...'}</pre>
+            <pre>{data ? JSON.stringify(data, null, 2) : '로딩 중…'}</pre>
         </main>
     );
 }
