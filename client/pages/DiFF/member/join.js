@@ -33,14 +33,14 @@ export default function JoinPage() {
         if (!email.trim() || !email.includes('@')) return setError('유효한 이메일을 입력해주세요')
 
         try {
-            const res = await fetch('http://localhost:8080/DiFF/member/doJoin', {
+            const res = await fetch('http://localhost:8080/api/member/doJoin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify(form),
             })
             if (res.ok) {
-                router.push('/DiFF/home/main')
+                router.push('/api/home/main')
             } else {
                 const text = await res.text()
                 setError(text || '회원가입에 실패했습니다')
@@ -82,7 +82,7 @@ export default function JoinPage() {
                 </button>
             </form>
             <div className="sub-menu text-center my-4">
-                <Link href="/DiFF/member/login">Login</Link>
+                <Link href="/api/member/login">Login</Link>
             </div>
         </div>
     )

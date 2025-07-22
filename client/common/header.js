@@ -1,8 +1,14 @@
 // common/header.js
+
+'use client';
+
 import Link from 'next/link'
-import { getSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 
 export default function Header() {
+    const { data: session, status } = useSession();
+    console.log('session: ', session, 'status: ', status);
+
     return (
         <header className="flex h-22 w-full p-4 m-2 text-neutral-600">
             <div className="logo pl-4">
@@ -11,7 +17,9 @@ export default function Header() {
                     <i className="fa-solid fa-star"></i>
                 </Link>
             </div>
+
             <div className="flex-grow" />
+
             <nav className="items-center mr-6 text-4xl text-neutral-800">
                 <ul className="flex">
                     <li className="hover:underline hover:text-neutral-400">
@@ -32,7 +40,7 @@ export default function Header() {
                             {['전체 게시판','공지사항','자유 게시판','QnA'].map((label, id) => (
                                 <li key={id}>
                                     <Link
-                                        href={`/DiFF/article/list?boardId=${id}`}
+                                        href={`/client/pages/DiFF/article/list?boardId=${id}`}
                                         className="block h-full p-1 hover:underline hover:text-neutral-400"
                                     >
                                         {label}
@@ -42,17 +50,19 @@ export default function Header() {
                         </ul>
                     </li>
 
-                    {/* 로그인 훅 없이 고정 버튼 */}
-                    <li className="hover:underline hover:text-neutral-400">
-                        <Link href="/DiFF/member/login" className="block px-6">
-                            LOGIN
-                        </Link>
-                    </li>
-                    <li className="hover:underline hover:text-neutral-400">
-                        <Link href="/DiFF/member/join" className="block px-6">
-                            JOIN
-                        </Link>
-                    </li>
+                    {session ? (
+                        <>
+                        <Link href="/DiFF/member/logout">LOGOUT</Link>
+                        <Link href="/DiFF/member/myPage">MYPAGE</Link>
+                        </>
+                    ) : (
+                        <>
+                            <Link href="/DiFF/member/login">LOGIN</Link>
+                            &nbsp;
+                            &nbsp;
+                            <Link href="/DiFF/member/join">JOIN</Link>
+                        </>
+                    )}
                 </ul>
             </nav>
         </header>

@@ -17,7 +17,7 @@ export default function CheckPw({ loginId }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const res = await fetch('/usr/member/doCheckPw', {
+        const res = await fetch('/member/doCheckPw', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ loginPw }),

@@ -1,9 +1,13 @@
 // common/layout.js
+"use client"
+
 import Script from 'next/script'
 import Head from 'next/head'
-import Header from './header'
+import Header from '../common/header'
+import { signOut, useSession } from 'next-auth/react'
 
 export default function Layout({ children, pageTitle = 'DiFF' }) {
+    const { data: session, status } = useSession()
     return (
         <>
             <Head>

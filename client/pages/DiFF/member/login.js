@@ -1,11 +1,55 @@
-// pages/usr/login.js
-import Head from 'next/head'
-import { useRouter } from 'next/router'
-import { useSession, signIn, signOut } from "next-auth/react"
+// pages/DiFF/member/login.js
+import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from "next-auth/react";
+import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/postcss";
+import {redirects} from "../../../next.config";
 
-export default function MemberLogin() {
-    const router = useRouter()
-    const { error } = router.query
+export default function LoginPage() {
+    const { status } = useSession();
+    const router = useRouter();
+    const callbackUrl = router.query.callbackUrl || '/DiFF/home/main'
+
+    useEffect(() => {
+
+        if(status === 'authenticated') {
+            router.replace(callbackUrl)
+        }
+    }, [status, router, callbackUrl])
+
+    const [error, setError] = useState(null)
+
+    // // state - loginId, loginPw
+    //  const [loginId, setLoginId] = useState('');
+    //  const [loginPw, setloginPw] = useState('');
+
+    // 로컬 로그인
+    const onSubmit = async (e) => {
+        e.preventDefault()
+        const loginId = e.currentTarget.loginId.value
+        const loginPw = e.currentTarget.loginPw.value
+
+        const res = await signIn('credentials', {
+            redirect: false,
+            loginId,
+            loginPw,
+            callbackUrl,
+        })
+
+        if (res?.error) {
+            setError(res.error)
+        } else {
+            router.replace(res.url)
+        }
+
+        // await signIn("credentials", {
+        //     loginId,
+        //     loginPw,
+        //     callbackUrl: "/home/main",
+        // });
+    };
 
     return (
         <>
@@ -28,19 +72,41 @@ export default function MemberLogin() {
 
                 <form
                     name="login"
-                    action="DiFF/member/doLogin"
-                    method="POST"
+                    onSubmit={async (e) => {
+                        e.preventDefault();
+                        const loginId = e.currentTarget.loginId.value;
+                        const loginPw = e.currentTarget.loginPw.value;
+
+                        try {
+                            const res = await fetch('/DiFF/member/doLogin', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ loginId, loginPw }),
+                                credentials: 'include'
+                            });
+                            if (!res.ok) throw new Error('로그인 실패');
+
+                            // 로그인 성공
+                            router.replace(callbackUrl);
+                        } catch (err) {
+                            alert(err.message);   // ← alert 띄움
+                        }
+                    }}
                     className="flex flex-col items-center"
                 >
                     <input
                         type="text"
                         name="loginId"
+
+                        //onChange={(e) => setLoginId(e.target.value)}
                         placeholder="ID"
                         className="mb-6 bg-neutral-50 border border-neutral-300 text-neutral-800 text-sm rounded-lg w-96 p-2.5"
                     />
                     <input
                         type="password"
                         name="loginPw"
+
+                        //onChange={(e) => setloginPw(e.target.value)}
                         placeholder="Password"
                         className="mb-6 bg-neutral-50 border border-neutral-300 text-neutral-800 text-sm rounded-lg w-96 p-2.5"
                     />

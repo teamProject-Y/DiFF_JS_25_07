@@ -8,7 +8,7 @@ export default class MyDocument extends Document {
             <Html lang="ko">
                 <Head>
                     {/* 백엔드 정적 리소스 */}
-                    <link rel="stylesheet" href="public/resource/common.css" />
+                    <link rel="stylesheet" href="/resource/common.css" />
 
                     {/* CDN 스타일 */}
                     <link

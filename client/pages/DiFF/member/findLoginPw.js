@@ -40,7 +40,7 @@ export default function FindLoginPw() {
                 <div className="mx-auto">
                     <form
                         ref={formRef}
-                        action="/DiFF/member/doFindLoginPw"
+                        action="/api/member/doFindLoginPw"
                         method="POST"
                         onSubmit={handleSubmit}
                     >
@@ -92,7 +92,7 @@ export default function FindLoginPw() {
                                 <td>
                                     <a
                                         className="btn btn-active btn-ghost"
-                                        href="/DiFF/member/login"
+                                        href="api//member/login"
                                     >
                                         로그인
                                     </a>

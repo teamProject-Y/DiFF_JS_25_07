@@ -32,7 +32,7 @@ export default function FindLoginId() {
                 <div className="mx-auto">
                     <form
                         ref={formRef}
-                        action="/DiFF/member/doFindLoginId"
+                        action="/api/member/doFindLoginId"
                         method="POST"
                         onSubmit={handleSubmit}
                     >
@@ -84,13 +84,13 @@ export default function FindLoginId() {
                                 <td className="text-center p-2 space-x-2">
                                     <a
                                         className="btn btn-outline btn-primary"
-                                        href="/DiFF/member/login"
+                                        href="/api/member/login"
                                     >
                                         로그인
                                     </a>
                                     <a
                                         className="btn btn-outline btn-success"
-                                        href="/DiFF/member/findLoginPw"
+                                        href="/api/member/findLoginPw"
                                     >
                                         비밀번호찾기
                                     </a>

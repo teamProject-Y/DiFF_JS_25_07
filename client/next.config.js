@@ -1,63 +1,53 @@
-// next.config.js (프로젝트 루트)
-const path = require('path');
+// next.config.js
+const BACKEND = 'http://localhost:8080/DiFF';
 
 module.exports = {
-    async rewrites() {
+    // 1) 브라우저 URL 자체를 바꿀 필요가 있을 때 redirects 사용
+    async redirects() {
         return [
-            // NextAuth 기본 엔드포인트 프록시
+            // 루트 → 메인 페이지
             {
-                source: '/api/auth/session',
-                destination: 'http://localhost:8080/session',
+                source: '/',              // 브라우저가 / 로 들어오면
+                destination: '/DiFF/home/main', // /member/login 으로 302 리다이렉트
+                permanent: false,
             },
-            {
-                source: '/api/auth/_log',
-                destination: 'http://localhost:8080/log',
-            },
-
-            // 여러분이 직접 만든 세션/로그 API
-            {
-                source: '/session',
-                destination: 'http://localhost:8080/session',
-            },
-            {
-                source: '/_log',
-                destination: 'http://localhost:8080/log',
-            },
-
             // OAuth2 로그인 라우트
             {
                 source: '/login/github',
                 destination: 'http://localhost:8080/oauth2/authorization/github',
+                permanent: false
             },
             {
                 source: '/login/google',
                 destination: 'http://localhost:8080/oauth2/authorization/google',
+                permanent: false
             },
-
-            // /usr/** API 프록시
+            // 메인 페이지를 바로 열고 싶으면
             {
-                source: '/DiFF/:path*',
-                destination: 'http://localhost:8080/DiFF/:path*',
-            },
-
-            // /DiFF/** 페이지용 프로토타입 (필요하다면)
-            {
-                source: '/DiFF/:path*',
-                destination: 'http://localhost:8080/DiFF/:path*',
-            },
-            {
-                source: '/',
+                source: '/home',          // /home → /home/main
                 destination: '/DiFF/home/main',
+                permanent: false,
             },
         ];
     },
 
-    webpack(config) {
-        config.module.rules.unshift({
-            test: /\.css$/,
-            include: path.resolve(__dirname, 'public'),  // common.css/js는 public으로 옮겨두세요
-            use: ['style-loader', 'css-loader'],
-        });
-        return config;
+    // 2) API 호출처럼 내부 경로만 프록시하고 싶을 때 rewrites 사용
+    async rewrites() {
+        return [
+            // 1) NextAuth 엔드포인트는 Next.js가 처리
+            { source: '/DiFF/api/auth/:path*', destination: '/api/auth/:path*' },
+
+            // 2) OAuth2 콜백은 백엔드로
+            { source: '/login/oauth2/code/:provider', destination: `${BACKEND}/login/oauth2/code/:provider` },
+
+            // 3) 회원 관련 API는 백엔드로
+            { source: '/member/:path*', destination: `${BACKEND}/member/:path*` },
+
+            // 4) 정적 리소스
+            { source: '/resource/:path*', destination: '/resource/:path*' },
+
+            // 5) 프론트 라우팅 (직접 렌더링할 페이지)
+            { source: '/home/main', destination: '/home/main' },
+        ];
     },
 };
