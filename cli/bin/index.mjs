@@ -4,8 +4,13 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import axios from 'axios';
 import { execSync } from 'child_process';
+import readline from 'readline/promises';
+import { stdin as input, stdout as output } from 'node:process';
 
 const program = new Command();
+
+// 사용자 입력 함수
+const rl = readline.createInterface({ input, output });
 
 // git login Email 가져오기
 async function getGitEmail() {
@@ -20,60 +25,72 @@ async function getGitEmail() {
 
 // 등록된 멤버인지 확인
 async function verifyGitUser(email) {
-
     try {
-        const userVerifyRD = await axios.post(
+        let userVerifyRQ = await axios.post(
             'http://localhost:8080/usr/member/verifyGitUser', {
                 email: email
         });
+        let RD = userVerifyRQ.data;
 
-        let RD = userVerifyRD.data;
+        if (RD.resultCode.startsWith('S-')) { // 인증 성공
+            return RD.data1; // memberId 리턴
 
-        if (RD.resultCode.startsWith('S-')) {
-            console.log("user verifying successful");
-            return true; // 인증 성공
-        } else {
+        } else { // 인증 실패
             console.log(chalk.red("error: you can use Diff after join"));
-            return false; // 인증 실패
+            return null;
         }
     } catch (err) {
-        // console.log(chalk.red("user verifying failed"));
         console.error(chalk.red('error:'), err.message);
-        return false;
+        return null;
     }
 }
 
 // 현재 리포가 DB에 저장되어 있다면 마지막 커밋 가져오기
 // 저장되어 있지 않다면 리포, 마지막 커밋 저장 / .DiFF 파일 만들기
-async function getLastCommit() {
+async function getLastCommit(memberId) {
     try {
         let DiFFexists = execSync('[ -f .DiFF ] && echo true || echo false').toString().trim();
+        console.log(memberId);
 
-        if(DiFFexists) {
+        if(DiFFexists === 'true') { // 연결 되어 있음
 
-        }else {
+            // const res = await axios.post(
+            //     'http://localhost:8080/usr/member/verifyGitUser', {
+            //        memberId: memberId
+            //         // .diff 의 내용, member id 전달
+            //     });
+
+        }else { // 연결 안되어 있음
+
             console.log(chalk.red('Your repository isn\'t connected.'));
+            const repoName = await rl.question('Please enter your new DiFF repository name: ');
+
+            // 서버에 리포 생성 요청, id 반환
+            // let makeRepoRQ = await axios.post(
+            //     'http://localhost:8080/usr/member/verifyGitUser', {
+            //         memberId: memberId,
+            //         repoName: repoName
+            //     });
+
+            // .DiFF 파일 생성
+            execSync('touch .DiFF');
+
+            // id, 첫번째 커밋 체크섬 .DiFF에 저장
 
         }
+        rl.close();
 
-        const res = await axios.post(
-            'http://localhost:8080/usr/member/verifyGitUser', {
-                // .diff 의 내용, member id 전달
-            });
-        return res.data.verified;
     } catch (err) {
         console.error(chalk.red('error:'), err.message);
         return false;
     }
 }
 
-
-
 // git login Email 가져오기
 async function getGitLog() {
     try {
         const logCount = execSync('git config user.email').toString().trim();
-        return email;
+        return logCount;
     } catch (err) {
         console.error(chalk.red('\n' + 'You can use it after login to git'));
         return null;
@@ -99,13 +116,14 @@ program
             process.exit(1);
         }
 
-        const verified = await verifyGitUser(email);
-        if (!verified) {
+        const memberId = await verifyGitUser(email);
+        if (memberId === null) {
             console.error(chalk.red(`You are an unregistered user: ${email}`));
             process.exit(1);
         }
-
         console.log('User authentication completed');
+
+        const DiFF = await getLastCommit(memberId);
 
         console.log('Making to draft...');
         // console.log('*', chalk.green(branch));
