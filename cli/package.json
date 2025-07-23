@@ -1,5 +1,5 @@
 {
-  "name": "git-draft-cli",
+  "name": "git-mkdraft",
   "version": "1.0.0",
   "description": "Git 확장 명령어 CLI 도구",
   "type": "module",
