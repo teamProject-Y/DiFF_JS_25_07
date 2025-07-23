@@ -47,38 +47,63 @@ async function verifyGitUser(email) {
 
 // 현재 리포가 DB에 저장되어 있다면 마지막 커밋 가져오기
 // 저장되어 있지 않다면 리포, 마지막 커밋 저장 / .DiFF 파일 만들기
-async function getLastCommit(memberId) {
+async function getLastCommit(memberId, branch) {
     try {
-        let DiFFexists = execSync('[ -f .DiFF ] && echo true || echo false').toString().trim();
-        console.log(memberId);
 
-        if(DiFFexists === 'true') { // 연결 되어 있음
+        // git repository 여부 확인
+        let gitExists = execSync('[ -d .git ] && echo true || echo false').toString().trim();
+        if(gitExists === 'false') {
+            console.log('fatal: not a git repository (or any of the parent directories): .git');
+            return null;
+        }
+
+        // Diff 파일 존재 여부 확인
+        let DiFFexists = execSync('[ -f .DiFF ] && echo true || echo false').toString().trim();
+
+        if(DiFFexists === 'true') {
 
             // const res = await axios.post(
-            //     'http://localhost:8080/usr/member/verifyGitUser', {
+            //     'http://localhost:8080/usr/draft/verifyGitUser', {
             //        memberId: memberId
             //         // .diff 의 내용, member id 전달
             //     });
 
-        }else { // 연결 안되어 있음
+        }else {
 
-            console.log(chalk.red('Your repository isn\'t connected.'));
-            const repoName = await rl.question('Please enter your new DiFF repository name: ');
+            // repo 이름 입력 받기
+            console.log(' Your repository isn\'t connected.');
+            const repoName = await rl.question(' Please enter your new DiFF repository name: ');
+
+            // 첫 커밋 가져오기
+            let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
+                .toString().trim();
+
+            const commitHash = firstCommit.split(' ')[0];
+            const commitMessage = firstCommit.split(' ').slice(1).join(' ');
+
+            console.log(commitHash);
+            console.log(commitMessage);
+            console.log("memberID: " + memberId);
 
             // 서버에 리포 생성 요청, id 반환
-            // let makeRepoRQ = await axios.post(
-            //     'http://localhost:8080/usr/member/verifyGitUser', {
-            //         memberId: memberId,
-            //         repoName: repoName
-            //     });
+            let makeRepoRQ = await axios.post(
+                'http://localhost:8080/usr/draft/mkRepo', {
+                    memberId: memberId,
+                    repoName: repoName,
+                    firstCommit: commitHash
+                });
+
+            console.log(makeRepoRQ.data);
 
             // .DiFF 파일 생성
             execSync('touch .DiFF');
 
             // id, 첫번째 커밋 체크섬 .DiFF에 저장
 
+
+            rl.close();
+            return commitHash;
         }
-        rl.close();
 
     } catch (err) {
         console.error(chalk.red('error:'), err.message);
@@ -107,6 +132,8 @@ program
     .option('--last-only', '첫커밋과 마지막 커밋만 추적')
     .action(async (branch, options) => {
 
+        const selectedBranch = branch;
+
         console.log(`\nGit user verfying...`);
 
         const email = await getGitEmail();
@@ -122,7 +149,10 @@ program
         }
         console.log('User authentication completed');
 
-        const DiFF = await getLastCommit(memberId);
+        const DiFF = await getLastCommit(memberId, branch);
+        if(DiFF === null){
+            process.exit(1);
+        }
 
         console.log('Making to draft...');
         // console.log('*', chalk.green(branch));
