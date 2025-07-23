@@ -58,7 +58,7 @@ async function getLastCommit(memberId, branch) {
         }
 
         // Diff 파일 존재 여부 확인
-        let DiFFexists = execSync('[ -f .DiFF ] && echo true || echo false').toString().trim();
+        let DiFFexists = execSync('[ -d .DiFF ] && echo true || echo false').toString().trim();
 
         if(DiFFexists === 'true') {
 
@@ -73,6 +73,7 @@ async function getLastCommit(memberId, branch) {
             // repo 이름 입력 받기
             console.log(' Your repository isn\'t connected.');
             const repoName = await rl.question(' Please enter your new DiFF repository name: ');
+            // repo 이름 중복인지 확인하기
 
             // 첫 커밋 가져오기
             let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
@@ -96,7 +97,7 @@ async function getLastCommit(memberId, branch) {
             console.log(makeRepoRQ.data);
 
             // .DiFF 파일 생성
-            execSync('touch .DiFF');
+            execSync('mkdir .DiFF');
 
             // id, 첫번째 커밋 체크섬 .DiFF에 저장
 
