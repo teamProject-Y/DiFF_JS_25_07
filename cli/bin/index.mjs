@@ -97,7 +97,6 @@ async function getGitLog() {
     }
 }
 
-
 program
     .name("git-mkdraft")
     .description("Git 커밋 기반 블로그 초안 생성 CLI")
