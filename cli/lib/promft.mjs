@@ -2,7 +2,7 @@
 import readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 
-/** 생성된 rl을 통해 ask, close 메서드를 제공 **/
+/** 사용자 입력 상호작용 **/
 export async function getResponse() {
 
     const rl = readline.createInterface({ input, output });

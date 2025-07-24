@@ -9,70 +9,19 @@ import { execSync } from 'child_process';
 
 import { getGitEmail } from '../lib/gitUtils.mjs';
 import { verifyGitUser, isUsableRepoName } from '../lib/api.mjs';
-import { getResponse } from "../lib/promft.mjs";
-import { existsGitDirectory, existsDiFF } from '../lib/execSync.mjs';
+// import { getResponse } from "../lib/promft.mjs";
+import {existsGitDirectory, existsDiFF, mkDiFF} from '../lib/execSync.mjs';
 
 const program = new Command();
-const q = await getResponse();
+// const q = await getResponse();
 
-// 사용자 입력 함수
-// const rl = readline.createInterface({ input, output });
-
-// git login Email 가져오기
-// async function getGitEmail() {
-//     try {
-//         const email = execSync('git config user.email').toString().trim();
-//         return email;
-//     } catch (err) {
-//         console.error(chalk.red('\n' + 'You can use it after login to git'));
-//         return null;
-//     }
-// }
-
-// // 등록된 멤버인지 확인
-// async function verifyGitUser(email) {
-//     try {
-//         let userVerifyRQ = await axios.post(
-//             'http://localhost:8080/usr/member/verifyGitUser', {
-//                 email: email
-//         });
-//         let RD = userVerifyRQ.data;
-//
-//         if (RD.resultCode.startsWith('S-')) { // 인증 성공
-//             return RD.data1; // memberId 리턴
-//
-//         } else { // 인증 실패
-//             console.log(chalk.red("error: you can use Diff after join"));
-//             return null;
-//         }
-//     } catch (err) {
-//         console.error(chalk.red('error:'), err.message);
-//         return null;
-//     }
-// }
-
-// 현재 리포가 DB에 저장되어 있다면 마지막 커밋 가져오기
-// 저장되어 있지 않다면 리포, 마지막 커밋 저장 / .DiFF 파일 만들기
 async function getLastCommit(memberId, branch) {
     try {
-
-        // git repository 여부 확인
-        // let gitExists = execSync('[ -d .git ] && echo true || echo false').toString().trim();
-        // if(gitExists === 'false') {
-        //     console.log('fatal: not a git repository (or any of the parent directories): .git');
-        //     return null;
-        // }
 
         // Diff 파일 존재 여부 확인
         let DiFFexists = await existsDiFF();
 
         if(DiFFexists === 'true') {
-
-            // const res = await axios.post(
-            //     'http://localhost:8080/usr/draft/verifyGitUser', {
-            //        memberId: memberId
-            //         // .diff 의 내용, member id 전달
-            //     });
 
         }else {
 
@@ -138,35 +87,45 @@ program
 
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
+        console.log("selectedBranch: ", selectedBranch);
 
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if(checkIsRepo === 'false') {
             process.exit(1);
+            console.log("checkIsRepo: ", checkIsRepo);
         }
-        //console.log(`\nGit user verfying...`);
+        console.log("checkIsRepo: ", checkIsRepo);
 
         /** 이메일 가져오기 **/
         const email = await getGitEmail();
         if (email === null) {
+            console.log("email not found");
             process.exit(1);
         }
+        console.log("email :",  email);
 
         /** git 설정 이메일, DiFF 회원 이메일 체크 **/
         const memberId = await verifyGitUser(email);
         if (memberId === null) {
+            console.log("memberId not found");
             process.exit(1);
         }
-        // console.log('User authentication completed');
+        console.log("memberId :",  memberId);
 
-        const DiFF = await getLastCommit(memberId, branch);
-        if(DiFF === null){
-            process.exit(1);
+        /** DiFF 디렉토리 존재 여부 **/
+        const isDiFF = await existsDiFF();
+        if(isDiFF === 'true'){
+            console.log("DiFF is exists")
+
+        } else {
+            console.log('DiFF is not exists');
+            const diff = await mkDiFF(memberId, branch);
         }
 
-        console.log('Making to draft...');
+        // console.log('Making to draft...');
         // console.log('*', chalk.green(branch));
-        console.log('Options:', options);
+        // console.log('Options:', options);
         // console.log('done.');
     });
 

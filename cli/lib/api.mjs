@@ -4,14 +4,14 @@ import axios from 'axios';
 /** 등록된 멤버인지 확인 **/
 export async function verifyGitUser(email) {
     try {
-        let userVerifyRQ = await axios.post(
+        const { data } = await axios.post(
             'http://localhost:8080/usr/member/verifyGitUser', {
                 email: email
             });
-        let RD = userVerifyRQ.data;
+        console.log(data);
 
-        if (RD.resultCode.startsWith('S-')) { // 인증 성공
-            return RD.data1; // memberId 리턴
+        if (data.resultCode.startsWith('S-')) { // 인증 성공
+            return data.data1; // memberId 리턴
 
         } else { // 인증 실패
             console.log(chalk.red("You can use Diff after join"));
@@ -35,7 +35,7 @@ export async function isUsableRepoName(memberId, repoName){
     return data.data1;
 }
 
-export async function mkRepository(memberId, repoName, commitHash){
+export async function mkRepo(memberId, repoName, commitHash){
 
     const { data } = await axios.post(
         'http://localhost:8080/usr/draft/mkRepo', {
