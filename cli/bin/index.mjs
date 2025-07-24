@@ -9,11 +9,9 @@ import { execSync } from 'child_process';
 
 import { getGitEmail } from '../lib/gitUtils.mjs';
 import { verifyGitUser, isUsableRepoName } from '../lib/api.mjs';
-// import { getResponse } from "../lib/promft.mjs";
-import {existsGitDirectory, existsDiFF, mkDiFF} from '../lib/execSync.mjs';
+import {existsGitDirectory, existsDiFF, DiFFinit} from '../lib/execSync.mjs';
 
 const program = new Command();
-// const q = await getResponse();
 
 async function getLastCommit(memberId, branch) {
     try {
@@ -55,7 +53,7 @@ async function getLastCommit(memberId, branch) {
                     firstCommit: commitHash
                 });
 
-            console.log(makeRepoRQ.data);
+            console.log("", makeRepoRQ.data);
 
             // .DiFF 디렉토리 생성
             execSync('mkdir .DiFF');
@@ -87,28 +85,28 @@ program
 
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
-        console.log("selectedBranch: ", selectedBranch);
+        console.log(chalk.bgYellow("selectedBranch: ", selectedBranch));
 
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if(checkIsRepo === 'false') {
             process.exit(1);
-            console.log("checkIsRepo: ", checkIsRepo);
+            console.log(chalk.bgYellow("checkIsRepo: ", checkIsRepo));
         }
-        console.log("checkIsRepo: ", checkIsRepo);
+        console.log(chalk.bgYellow("checkIsRepo: ", checkIsRepo));
 
         /** 이메일 가져오기 **/
         const email = await getGitEmail();
         if (email === null) {
-            console.log("email not found");
+            console.log(chalk.bgYellow("email not found"));
             process.exit(1);
         }
-        console.log("email :",  email);
+        console.log(chalk.bgYellow("email :",  email));
 
         /** git 설정 이메일, DiFF 회원 이메일 체크 **/
         const memberId = await verifyGitUser(email);
         if (memberId === null) {
-            console.log("memberId not found");
+            console.log(chalk.bgYellow("memberId not found"));
             process.exit(1);
         }
         console.log("memberId :",  memberId);
@@ -116,11 +114,14 @@ program
         /** DiFF 디렉토리 존재 여부 **/
         const isDiFF = await existsDiFF();
         if(isDiFF === 'true'){
-            console.log("DiFF is exists")
+            console.log(chalk.bgYellow("DiFF is exists"))
 
         } else {
-            console.log('DiFF is not exists');
-            const diff = await mkDiFF(memberId, branch);
+            console.log(chalk.bgYellow('DiFF is not exists'));
+            const diff = await DiFFinit(memberId, branch);
+            if(diff === null) {
+                console.log(chalk.red("뭔가 문제 있음"))
+            }
         }
 
         // console.log('Making to draft...');

@@ -44,5 +44,13 @@ export async function mkRepo(memberId, repoName, commitHash){
             firstCommit: commitHash
         });
 
+    if (data.resultCode.startsWith('S-')) { // 인증 성공
+        return data.data1; // memberId 리턴
+
+    } else { // 인증 실패
+        console.log("This repository name is already in use.");
+        return null;
+    }
+
     return data.data1;
 }
