@@ -9,7 +9,7 @@ import { execSync } from 'child_process';
 
 import { getGitEmail } from '../lib/gitUtils.mjs';
 import { verifyGitUser, isUsableRepoName } from '../lib/api.mjs';
-import {existsGitDirectory, existsDiFF, DiFFinit} from '../lib/execSync.mjs';
+import {existsGitDirectory, existsDiFF, DiFFinit, mkZip} from '../lib/execSync.mjs';
 
 const program = new Command();
 
@@ -30,7 +30,7 @@ async function getLastCommit(memberId, branch) {
             // repo 이름 중복인지 확인하기
             let usable = await isUsableRepoName(repoName);
             while(!usable){
-                repoName = q.ask(' This repository name is already in use. Try a different one: ');
+                repoName = await q.ask(' This repository name is already in use. Try a different one: ');
                 usable = await isUsableRepoName(repoName);
             }
 
@@ -86,6 +86,13 @@ program
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
         console.log(chalk.bgYellow("selectedBranch: ", selectedBranch));
+        const zip = await mkZip(selectedBranch);
+        if(zip === null){
+            console.log("zip error");
+            process.exit(1);
+        }else {
+            console.log("zip success");
+        }
 
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
@@ -121,6 +128,7 @@ program
             const diff = await DiFFinit(memberId, branch);
             if(diff === null) {
                 console.log(chalk.red("뭔가 문제 있음"))
+                process.exit(1);
             }
         }
 

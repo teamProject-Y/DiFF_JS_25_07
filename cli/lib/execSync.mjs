@@ -70,6 +70,7 @@ export async function gg(){
 
     if(isGitDirectory === 'false') {
         console.log('fatal: not a git repository (or any of the parent directories): .git');
+        return null;
     }
     return isGitDirectory;
 }
@@ -88,8 +89,24 @@ export async function mkDiFFdirectory(){
 }
 
 /** zip 파일 **/
-export async function mkZip(){
+export function mkZip(branch) {
+    try {
+        execSync(`
+      git archive --format=zip --output=withoutTarget.zip ${branch} &&
+      rm -rf tempdir &&
+      mkdir tempdir &&
+      unzip withoutTarget.zip -d tempdir &&
+      cp -r target tempdir/ &&
+      cd tempdir && zip -r ../difftest.zip . &&
+      cd .. &&
+      rm withoutTarget.zip &&
+      rm -rf tempdir
+    `);
 
-    const zip = execSync("git archive --format=zip --output=project.zip HEAD");
-    return zip;
+        execSync(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+        return true;
+    } catch (err) {
+        console.error("zip error:", err.message);
+        return false;
+    }
 }
