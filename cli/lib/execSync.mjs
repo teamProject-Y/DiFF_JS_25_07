@@ -90,6 +90,7 @@ export async function mkDiFFdirectory(){
 
 /** zip 파일 **/
 export function mkZip(branch) {
+
     try {
         execSync(`
       git archive --format=zip --output=withoutTarget.zip ${branch} &&
@@ -104,9 +105,25 @@ export function mkZip(branch) {
     `);
 
         execSync(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+
         return true;
+
     } catch (err) {
         console.error("zip error:", err.message);
         return false;
     }
 }
+
+function startAsciiAnimation() {
+    const frames = [ `...frame1...`, `...frame2...`, `...frame3...`, `...frame4...` ]; // 위 내용 넣기
+    let index = 0;
+
+    const interval = setInterval(() => {
+        process.stdout.write('\x1Bc'); // clear terminal
+        console.log(frames[index % frames.length]);
+        index++;
+    }, 4000);
+
+    return interval; // 나중에 clearInterval() 호출할 수 있도록
+}
+
