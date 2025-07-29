@@ -43,12 +43,12 @@ export async function DiFFinit(memberId, branch) {
     let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
         .toString().trim();
 
-    const checksum = firstCommit.split(' ')[0];
+    const commitHash = firstCommit.split(' ')[0];
     const commitMessage = firstCommit.split(' ').slice(1).join(' ');
     console.log(chalk.bgYellow("first commit: ", firstCommit));
 
     // 서버에 리포지토리 DB 데이터 생성 요청
-    let mkRepoAndGetId = await mkRepo(memberId, repoName, checksum);
+    let mkRepoAndGetId = await mkRepo(memberId, repoName, commitHash);
     if(mkRepoAndGetId === null){
         return null;
     }
@@ -59,7 +59,7 @@ export async function DiFFinit(memberId, branch) {
 
 
     q.close();
-    return checksum;
+    return commitMessage;
 }
 
 
@@ -92,21 +92,20 @@ export async function mkDiFFdirectory(){
 export function mkZip(branch) {
 
     try {
-        const target = execSync(`[ -d target ] && echo true || echo false`);
         execSync(`
-            git archive --format=zip --output=withoutTarget.zip ${branch} &&
-            rm -rf tempdir &&
-            mkdir tempdir &&
-            unzip withoutTarget.zip -d tempdir &&
-            cp -r target tempdir/ &&
-            cd tempdir && zip -r ../difftest.zip . &&
-            cd .. &&
-            rm withoutTarget.zip &&
-            rm -rf tempdir
-        `);
-        console.log("zip su");
+      git archive --format=zip --output=withoutTarget.zip ${branch} &&
+      rm -rf tempdir &&
+      mkdir tempdir &&
+      unzip withoutTarget.zip -d tempdir &&
+      cp -r target tempdir/ &&
+      cd tempdir && zip -r ../difftest.zip . &&
+      cd .. &&
+      rm withoutTarget.zip &&
+      rm -rf tempdir
+    `);
 
         execSync(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+
         return true;
 
     } catch (err) {
@@ -115,27 +114,15 @@ export function mkZip(branch) {
     }
 }
 
-export function getLastChecksum(branch) {
-    return execSync(`git rev-parse ${branch}`).toString().trim();
-}
-
-export function getDiFF(firstChecksum, lastChecksum) {
-    const command = `git diff -W ${firstChecksum} ${lastChecksum} | grep -E "^[+-]|^@@"`.trim().replace(/\n/g, ' ');
-    return execSync(`sh -c '${command}'`).toString();
-
-}
-
-
 function startAsciiAnimation() {
-    const frames = [ `wating`, `...frame2...`, `...frame3...`, `...frame4...` ]; // 위 내용 넣기
+    const frames = [ `...frame1...`, `...frame2...`, `...frame3...`, `...frame4...` ]; // 위 내용 넣기
     let index = 0;
 
-    console.log("start 압축")
     const interval = setInterval(() => {
         process.stdout.write('\x1Bc'); // clear terminal
         console.log(frames[index % frames.length]);
         index++;
-    }, 2000);
+    }, 4000);
 
     return interval; // 나중에 clearInterval() 호출할 수 있도록
 }

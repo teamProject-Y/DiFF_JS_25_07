@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import axios from 'axios';
-import {getDiFF, getLastChecksum} from "./execSync.mjs";
 
 /** 등록된 멤버인지 확인 **/
 export async function verifyGitUser(email) {
@@ -54,23 +53,4 @@ export async function mkRepo(memberId, repoName, commitHash){
     }
 
     return data.data1;
-}
-
-export async function mkDraft(memberId, branch, firstChecksum){
-    const lastChecksum = getLastChecksum(branch);
-    const diff = getDiFF(firstChecksum, lastChecksum);
-    const { data } = await axios.post(
-        'http://localhost:8080/usr/draft/receiveDiff', {
-            memberId: memberId,
-            lastChecksum: lastChecksum,
-            diff: diff
-        });
-
-    if(data.resultCode.startsWith('S-')) {
-        console.log(chalk.bgYellow("server에 diff 보내기 성공"));
-        return true;
-    }else {
-        console.log(chalk.bgYellow("server에 diff 보내기 실패"));
-        return false;
-    }
 }
