@@ -4,11 +4,13 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import axios from 'axios';
 import { execSync } from 'child_process';
+import { simpleGit } from 'simple-git';
+const git = simpleGit();
 // import readline from 'readline/promises';
 // import { stdin as input, stdout as output } from 'node:process';
 
 import { getGitEmail } from '../lib/gitUtils.mjs';
-import { verifyGitUser, isUsableRepoName } from '../lib/api.mjs';
+import {verifyGitUser, isUsableRepoName, mkDraft} from '../lib/api.mjs';
 import {existsGitDirectory, existsDiFF, DiFFinit, mkZip} from '../lib/execSync.mjs';
 
 const program = new Command();
@@ -77,23 +79,27 @@ program
     .name("git-mkdraft")
     .description("Git 커밋 기반 블로그 초안 생성 CLI")
     .argument('<branch>', '분석할 브랜치 이름')
-    .option('--no-title', '제목 제외')
     .option('--no-filename', '파일명 제외')
-    .option('--full-code', '변경 전 코드 포함')
+    .option('--full-code', '변경 전 코드 포함') // 보류
     .option('--last-only', '첫커밋과 마지막 커밋만 추적')
+    // 분석 제외
     .action(async (branch, options) => {
 
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
+
+        // const log = await git.log({ n: 1 });
+        // const latestCommit = log.latest;
+        // const diff = await git.diff([`${latestCommit.hash}^!`]);
+
         console.log(chalk.bgYellow("selectedBranch: ", selectedBranch));
-        const zip = await mkZip(selectedBranch);
-        if(zip === null){
+        const zip = mkZip(selectedBranch);
+        if(zip === false){
             console.log("zip error");
             process.exit(1);
         }else {
             console.log("zip success");
         }
-
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if(checkIsRepo === 'false') {
@@ -120,17 +126,23 @@ program
 
         /** DiFF 디렉토리 존재 여부 **/
         const isDiFF = await existsDiFF();
+
+        let firstChecksum;
         if(isDiFF === 'true'){
             console.log(chalk.bgYellow("DiFF is exists"))
-
+            // 파일에서 마지막 요청커밋 가져오기
         } else {
             console.log(chalk.bgYellow('DiFF is not exists'));
-            const diff = await DiFFinit(memberId, branch);
-            if(diff === null) {
+            firstChecksum = await DiFFinit(memberId, branch);
+            if(firstChecksum === null) {
                 console.log(chalk.red("뭔가 문제 있음"))
                 process.exit(1);
             }
         }
+
+        await mkDraft(memberId, branch, firstChecksum);
+        console.log(chalk.bgYellow("draft successfully"));
+
 
         // console.log('Making to draft...');
         // console.log('*', chalk.green(branch));
