@@ -4,8 +4,6 @@ import {isUsableRepoName, mkRepo} from "./api.mjs";
 import chalk from "chalk";
 import fs from "fs";
 
-const q = await getResponse();
-
 /** git repository 여부 **/
 export async function existsGitDirectory(){
 
@@ -22,22 +20,32 @@ export async function existsDiFF() {
     return execSync('[ -d .DiFF ] && echo true || echo false').toString().trim();
 }
 
+/** 브랜치 존재 여부 **/
+export async function branchExists(branch) {
+    const checkBranch =
+        execSync(`git show-ref --verify --quiet refs/heads/${branch} && echo "true" || echo "false"`).toString().trim();
+    return checkBranch === "true";
+}
+
 /** .DiFF 디렉토리 만들기 **/
 export async function DiFFinit(memberId, branch) {
 
+    const q = await getResponse();
     console.log(' Your repository isn\'t connected.');
 
     // repository 이름 중복 확인
     let repoName = await q.ask(' Please enter your new DiFF repository name: ');
     let usable = await isUsableRepoName(memberId, repoName);
-        // console.log('usable =', usable, typeof usable);
     while(!usable){
         repoName = await q.ask(' This repository name is already in use. Try a different one: ');
         usable = await isUsableRepoName(memberId, repoName);
     }
 
-    console.log("repoName: " + repoName);
-    console.log("usable: " + usable);
+    console.log(chalk.bgYellow("repoName: " + repoName));
+    console.log(chalk.bgYellow("usable: " + usable));
+
+    // git log --reverse --pretty=oneline ${nowBranch} ^${default} | head -n 1
+    // head -n 1 .git/logs/refs/heads/yunzivv
 
     // 첫 커밋 가져오기
     let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)

@@ -2,78 +2,14 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import axios from 'axios';
-import { execSync } from 'child_process';
 import { simpleGit } from 'simple-git';
 const git = simpleGit();
-// import readline from 'readline/promises';
-// import { stdin as input, stdout as output } from 'node:process';
 
 import { getGitEmail } from '../lib/gitUtils.mjs';
 import {verifyGitUser, isUsableRepoName, mkDraft} from '../lib/api.mjs';
-import {existsGitDirectory, existsDiFF, DiFFinit, mkZip} from '../lib/execSync.mjs';
+import {existsGitDirectory, existsDiFF, DiFFinit, mkZip, branchExists} from '../lib/execSync.mjs';
 
 const program = new Command();
-
-async function getLastCommit(memberId, branch) {
-    try {
-
-        // Diff 파일 존재 여부 확인
-        let DiFFexists = await existsDiFF();
-
-        if(DiFFexists === 'true') {
-
-        }else {
-
-            // repo 이름 입력 받기
-            console.log(' Your repository isn\'t connected.');
-            let repoName = q.ask(' Please enter your new DiFF repository name: ');
-
-            // repo 이름 중복인지 확인하기
-            let usable = await isUsableRepoName(repoName);
-            while(!usable){
-                repoName = await q.ask(' This repository name is already in use. Try a different one: ');
-                usable = await isUsableRepoName(repoName);
-            }
-
-            // 첫 커밋 가져오기
-            let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
-                .toString().trim();
-
-            const commitHash = firstCommit.split(' ')[0];
-            const commitMessage = firstCommit.split(' ').slice(1).join(' ');
-
-            console.log(commitHash);
-            console.log(commitMessage);
-            console.log("memberID: " + memberId);
-
-            // 서버에 리포 생성 요청, id 반환
-            let makeRepoRQ = await axios.post(
-                'http://localhost:8080/usr/draft/mkRepo', {
-                    memberId: memberId,
-                    repoName: repoName,
-                    firstCommit: commitHash
-                });
-
-            console.log("", makeRepoRQ.data);
-
-            // .DiFF 디렉토리 생성
-            execSync('mkdir .DiFF');
-
-            // id, 첫번째 커밋 체크섬 .DiFF에 저장
-
-
-            q.close();
-
-            return commitHash;
-        }
-
-    } catch (err) {
-        console.error(chalk.red('error:'), err.message);
-        return false;
-    }
-}
-
 
 program
     .name("git-mkdraft")
@@ -87,24 +23,30 @@ program
 
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
-
-        // const log = await git.log({ n: 1 });
-        // const latestCommit = log.latest;
-        // const diff = await git.diff([`${latestCommit.hash}^!`]);
-
         console.log(chalk.bgYellow("selectedBranch: ", selectedBranch));
+
+        /** 브랜치 존재 여부 **/
+        const branchCheck = await branchExists(branch);
+        console.log(branchCheck);
+        if (branchCheck) {
+            console.log(chalk.bgYellow("branchExists"));
+        }else {
+            console.log(chalk.bgYellow("branch is not exists"));
+            process.exit(1);
+        }
+
         const zip = mkZip(selectedBranch);
         if(zip === false){
-            console.log("zip error");
+            console.log(chalk.bgYellow("zip error"));
             process.exit(1);
         }else {
-            console.log("zip success");
+            console.log(chalk.bgYellow("zip success"));
         }
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if(checkIsRepo === 'false') {
-            process.exit(1);
             console.log(chalk.bgYellow("checkIsRepo: ", checkIsRepo));
+            process.exit(1);
         }
         console.log(chalk.bgYellow("checkIsRepo: ", checkIsRepo));
 
@@ -122,7 +64,7 @@ program
             console.log(chalk.bgYellow("memberId not found"));
             process.exit(1);
         }
-        console.log("memberId :",  memberId);
+        console.log(chalk.bgYellow("memberId :",  memberId));
 
         /** DiFF 디렉토리 존재 여부 **/
         const isDiFF = await existsDiFF();
