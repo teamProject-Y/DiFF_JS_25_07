@@ -100,7 +100,6 @@ program
         }else {
             console.log("zip success");
         }
-
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if(checkIsRepo === 'false') {
@@ -127,6 +126,7 @@ program
 
         /** DiFF 디렉토리 존재 여부 **/
         const isDiFF = await existsDiFF();
+
         let firstChecksum;
         if(isDiFF === 'true'){
             console.log(chalk.bgYellow("DiFF is exists"))
@@ -142,7 +142,6 @@ program
 
         await mkDraft(memberId, branch, firstChecksum);
         console.log(chalk.bgYellow("draft successfully"));
-
 
 
         // console.log('Making to draft...');
