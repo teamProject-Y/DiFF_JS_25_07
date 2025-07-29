@@ -27,13 +27,53 @@ export async function branchExists(branch) {
     return checkBranch === "true";
 }
 
+/** 브랜치 읽기 **/
+export async function getLocalBranches() {
+    const result = execSync('git branch', { encoding: 'utf-8' });
+    const branches = result
+        .split('\n')
+        .map(b => b.replace('*', '').trim())
+        .filter(b => b.length > 0);
+    return branches;
+}
+
+/** 브랜치의 첫 커밋 매칭 **/
+export async function getFirstCommitOfBranch(branch) {
+
+    if (!fs.existsSync(`.git/logs/refs/heads/${branch}`)) return null;
+    const firstHistory = execSync(`head -n 1 .git/logs/refs/heads/${branch}`).toString().trim();;
+
+    // from to author <email> UNIXtimeStamp timeZone	clone: from https://github.com/teamProject-Y/DiFF.git
+    // from to author <email> UNIXtimeStamp timeZone	branch: Created from HEAD
+    console.log(firstHistory);
+    const info = firstHistory.split('\t')[0].split(' ', 6);
+    console.log(info[0]);
+    console.log(chalk.bgCyanBright(info[1]));
+    console.log(info[2]);
+    console.log(info[3]);
+    console.log(info[4]);
+    console.log(info[5]);
+
+    const commitInfo = firstHistory.split('\t')[1];
+    console.log(commitInfo);
+
+    let type;
+    if(commitInfo.startsWith('commit (initial):' || 'clone:')) { // commit ? commit (initial): ?
+        type = "default";
+    } else {
+        type = "branch";
+    }
+
+    return { branch, checksum: info[1], type, logInfo: commitInfo };
+}
+
 /** .DiFF 디렉토리 만들기 **/
 export async function DiFFinit(memberId, branch) {
 
     const q = await getResponse();
     console.log(' Your repository isn\'t connected.');
 
-    // repository 이름 중복 확인
+    // repository 이름 입력, 중복 확인
     let repoName = await q.ask(' Please enter your new DiFF repository name: ');
     let usable = await isUsableRepoName(memberId, repoName);
     while(!usable){
