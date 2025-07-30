@@ -1,13 +1,15 @@
 import chalk from 'chalk';
 import axios from 'axios';
-import {getDiFF, getLastChecksum} from "./execSync.mjs";
+import {getDiFF, getLastChecksum} from "../git/execSync.mjs";
+
+const token = "7a36d8d1c41b9e4d8f4260fa38fca973b33c14f2cfd7f1a9d3c848057c12a1e8b2dca3120f2ed014f9a4568ce841fb15b23051cd1e8763b64a0f12c29b2d9d0a";
 
 /** 등록된 멤버인지 확인 **/
 export async function verifyGitUser(email) {
     try {
         const { data } = await axios.post(
-            'http://localhost:8080/usr/member/verifyGitUser', {
-                email: email
+            'http://localhost:8080/usr/draft/verifyGitUser', {
+                email
             });
         console.log(chalk.bgCyanBright(chalk.black(data)));
 

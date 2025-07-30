@@ -1,9 +1,8 @@
-import { execSync } from 'child_process';
-import {getResponse} from "./promft.mjs";
-import {isUsableRepoName, mkRepo} from "./api.mjs";
+import {execSync} from 'child_process';
+import {getResponse} from "../util/promft.mjs";
+import {isUsableRepoName, mkRepo} from "../api/api.mjs";
 import chalk from "chalk";
-import fs from "fs";
-import path from "path";
+import {mkDiFFdirectory} from "../DiFF/init.mjs";
 
 /** git repository 여부 **/
 export async function existsGitDirectory(){
@@ -31,64 +30,10 @@ export async function branchExists(branch) {
 /** 브랜치 읽기 **/
 export async function getLocalBranches() {
     const result = execSync('git branch', { encoding: 'utf-8' });
-    const branches = result
+    return result
         .split('\n')
         .map(b => b.replace('*', '').trim())
         .filter(b => b.length > 0);
-    return branches;
-}
-
-/** 브랜치 생성 순 반환 **/
-export async function getBranchCreationTimes() {
-    const dir = ".git/logs/refs/heads";
-    const branches = fs.readdirSync(dir);
-    const result = [];
-
-    for (const branch of branches) {
-        const content = fs.readFileSync(path.join(dir, branch), "utf-8");
-        const firstLine = content.split("\n")[0];
-        const parts = firstLine.split(" ");
-
-        const fromHash = parts[0];
-        const toHash = parts[1];
-        const timestamp = parseInt(parts[4], 10);
-        const event = firstLine.split('\t')[1];
-
-        result.push({ branch, timestamp, fromHash, toHash, event });
-    }
-
-    result.sort((a, b) => a.timestamp - b.timestamp);
-    return result;
-}
-
-/** 브랜치의 첫 이벤트 **/
-function getFirstCommitOfBranch(branch) {
-
-    if (!fs.existsSync(`.git/logs/refs/heads/${branch}`)) return null;
-    const firstHistory = execSync(`head -n 1 .git/logs/refs/heads/${branch}`).toString().trim();
-
-    // from to author <email> UNIXtimeStamp timeZone	clone: from https://github.com/teamProject-Y/DiFF.git
-    // from to author <email> UNIXtimeStamp timeZone	branch: Created from HEAD
-    console.log(firstHistory);
-    const info = firstHistory.split('\t')[0].split(' ', 6);
-    console.log(info[0]);
-    console.log(chalk.bgCyanBright(chalk.black(info[1])));
-    console.log(info[2]);
-    console.log(info[3]);
-    console.log(chalk.bgCyanBright(chalk.black(info[4])));
-    console.log(info[5]);
-
-    const commitInfo = firstHistory.split('\t')[1];
-    console.log(chalk.bgCyanBright(chalk.black("git event: ", commitInfo)));
-
-    let type;
-    if(commitInfo.startsWith('commit' || 'clone:')) {
-        type = "default";
-    } else {
-        type = "branch";
-    }
-
-    return { branch, checksum: info[1], UNIXtimeStamp: info[4], type, logInfo: commitInfo };
 }
 
 /** 요청 브랜치 마지막 체크섬 **/
@@ -121,7 +66,6 @@ export async function DiFFinit(memberId, branch) {
         .toString().trim();
 
     const checksum = firstCommit.split(' ')[0];
-    const commitMessage = firstCommit.split(' ').slice(1).join(' ');
     console.log(chalk.bgCyanBright(chalk.black("first commit: ", firstCommit)));
 
     // 서버에 리포지토리 DB 데이터 생성 요청
@@ -132,7 +76,7 @@ export async function DiFFinit(memberId, branch) {
     console.log(chalk.bgCyanBright(chalk.black("repoID: ", mkRepoAndGetId)));
 
     // .DiFF 생성
-
+    await mkDiFFdirectory(mkRepoAndGetId);
 
 
     q.close();
@@ -151,22 +95,21 @@ export async function gg(){
     return isDiFFdirectory;
 }
 
-/** DiFF 디렉토리 만들기 **/
-export async function mkDiFFdirectory(branches){
-
-    if (fs.existsSync(".DiFF")) return null;
-
-    const DiFFdir = execSync("mkdir .DiFF");
-    const config = execSync("touch .DiFF/config");
-    const meta = execSync("touch .DiFF/meta");
-    const branchesDir = execSync("mkdir .DiFF/branches");
-    execSync("cd .DiFF/branches");
-    for(let branch in branches){
-
-    }
-
-    return null;
-}
+// export async function mkDiFFdirectory(branches, repositoryId){
+//
+//     if (fs.existsSync(".DiFF")) return null;
+//
+//     const DiFFdir = execSync("mkdir .DiFF");
+//     const config = execSync("touch .DiFF/config");
+//     const meta = execSync("touch .DiFF/meta");
+//     const branchesDir = execSync("mkdir .DiFF/branches");
+//     execSync("cd .DiFF/branches");
+//     for(let branch in branches){
+//
+//     }
+//
+//     return null;
+// }
 
 /** zip 파일 **/
 export function mkZip(branch) {
@@ -203,7 +146,7 @@ export function mkZip(branch) {
 /** 첫 체크섬과 마지막 체크섬 사이의 diff **/
 export function getDiFF(firstChecksum, lastChecksum) {
 
-    const command = `git diff -W f2b1257e9dfa51eea690b1872b99f8ffc21ba731 ${lastChecksum} | grep -E "^[+-]|^@@"`.trim().replace(/\n/g, ' ');
+    const command = `git diff -W dcbdf96aee585f7f624c2003eeeb14b7c035d877 ${lastChecksum} | grep -E "^[+-]|^@@"`.trim().replace(/\n/g, ' ');
     return execSync(`sh -c '${command}'`, {
         maxBuffer: 1024 * 1024 * 50 // 50MB 까지 버퍼 허용
     }).toString();
