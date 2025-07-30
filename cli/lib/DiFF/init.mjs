@@ -1,20 +1,23 @@
 import fs from "fs";
 import path from "path";
 import {getRemoteUrl} from "../git/simpleGit.mjs";
+import {DateTime} from "luxon";
 
 /** DiFF 디렉토리 만들기 **/
 export async function mkDiFFdirectory(repositoryId) {
     if (fs.existsSync(".DiFF")) return;
 
+    const branches = await getBranchCreationTimes();
+
     createDiFFRoot();
     await createConfigFile(repositoryId);
-    // createMetaFile(branches);
+    createMetaFile(branches);
     // createBranchLogs(branches);
 }
 
 
 /** 브랜치 생성 순 반환 **/
-export async function getBranchCreationTimes() {
+async function getBranchCreationTimes() {
     const dir = ".git/logs/refs/heads";
     const branches = fs.readdirSync(dir);
     const result = [];
@@ -29,7 +32,7 @@ export async function getBranchCreationTimes() {
         const timestamp = parseInt(parts[4], 10);
         const event = firstLine.split('\t')[1];
 
-        result.push({ branch, timestamp, fromHash, toHash, event });
+        result.push({ name: branch, timestamp: timestamp, fromHash: fromHash, toHash: toHash, event: event });
     }
 
     result.sort((a, b) => a.timestamp - b.timestamp);
@@ -53,16 +56,20 @@ async function createConfigFile(repositoryId) {
     fs.writeFileSync(".DiFF/config", JSON.stringify(config, null, 2));
 }
 
+
 function createMetaFile(branches) {
-    const meta = branches.map(branch => ({
-        branchName: branch,
-        branchId: generateBranchId(branch),
-        lastRequestedCommit: null,
+    const meta = branches.map((branch, index) => ({
+        branchName: branch.name,
+        root: index === 0,
+        // branchId: generateBranchId(branch),
+        createdAt: DateTime.local().toISO(),
+        lastRequestedCommit: branch.toHash,
         lastRequestedAt: null,
         requestCount: 0
     }));
     fs.writeFileSync(".DiFF/meta", JSON.stringify(meta, null, 2));
 }
+
 
 function createBranchLogs(branches) {
     for (const branch of branches) {

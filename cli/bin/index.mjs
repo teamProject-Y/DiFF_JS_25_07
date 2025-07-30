@@ -26,22 +26,24 @@ program
     // 분석 제외
     .action(async (branch, options) => {
 
-        // const branches = await getFirstCommitOfBranch(branch);
+        //const branches = await getBranchCreationTimes(branch);
         // console.log(branches);
 
         // const firstBranch = await getBranchCreationTimes();
         // // branch, timestamp, fromHash, toHash, event
-        // console.log(`${firstBranch[0].branch}
+        // console.log(`
+        // name: ${firstBranch[0].name}
         // from: ${firstBranch[0].fromHash}
         // to: ${firstBranch[0].toHash}
         // event: ${firstBranch[0].event}
-        // (${new Date(firstBranch[0].timestamp * 1000).toLocaleString()})`);
+        // at: ${new Date(firstBranch[0].timestamp * 1000).toLocaleString()}`);
         //
-        // console.log(`${firstBranch[1].branch}
+        // console.log(`
+        // name: ${firstBranch[1].name}
         // from: ${firstBranch[1].fromHash}
         // to: ${firstBranch[1].toHash}
         // event: ${firstBranch[1].event}
-        // (${new Date(firstBranch[1].timestamp * 1000).toLocaleString()})`);
+        // at: ${new Date(firstBranch[1].timestamp * 1000).toLocaleString()}`);
 
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
@@ -102,7 +104,6 @@ program
 
         // await mkDraft(memberId, branch, firstChecksum);
         // console.log(chalk.bgCyanBright(chalk.black("draft successfully")));
-
 
         // console.log('Making to draft...');
         // console.log('*', chalk.green(branch));
