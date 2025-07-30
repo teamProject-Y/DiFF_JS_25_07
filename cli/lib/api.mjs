@@ -9,7 +9,7 @@ export async function verifyGitUser(email) {
             'http://localhost:8080/usr/member/verifyGitUser', {
                 email: email
             });
-        console.log(data);
+        console.log(chalk.bgCyanBright(chalk.black(data)));
 
         if (data.resultCode.startsWith('S-')) { // 인증 성공
             return data.data1; // memberId 리턴
@@ -52,8 +52,6 @@ export async function mkRepo(memberId, repoName, commitHash){
         console.log("This repository name is already in use.");
         return null;
     }
-
-    return data.data1;
 }
 
 export async function mkDraft(memberId, branch, firstChecksum){
@@ -67,10 +65,10 @@ export async function mkDraft(memberId, branch, firstChecksum){
         });
 
     if(data.resultCode.startsWith('S-')) {
-        console.log(chalk.bgYellow("server에 diff 보내기 성공"));
+        console.log(chalk.bgCyanBright(chalk.black("server에 diff 보내기 성공")));
         return true;
     }else {
-        console.log(chalk.bgYellow("server에 diff 보내기 실패"));
+        console.log(chalk.bgCyanBright(chalk.black("server에 diff 보내기 실패")));
         return false;
     }
 }
