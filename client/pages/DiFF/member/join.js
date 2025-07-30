@@ -40,7 +40,7 @@ export default function JoinPage() {
                 body: JSON.stringify(form),
             })
             if (res.ok) {
-                router.push('/api/home/main')
+                router.push('/home/main')
             } else {
                 const text = await res.text()
                 setError(text || '회원가입에 실패했습니다')
@@ -82,7 +82,7 @@ export default function JoinPage() {
                 </button>
             </form>
             <div className="sub-menu text-center my-4">
-                <Link href="/api/member/login">Login</Link>
+                <Link href="/DiFF/member/login">Login</Link>
             </div>
         </div>
     )

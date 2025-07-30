@@ -6,6 +6,7 @@ import {redirect} from "next/navigation";
 export default function MyInfoPage({ member }) {
     const router = useRouter()
 
+
     return (
         <Layout pageTitle="MYPAGE" member={member}>
             <section className="mt-24 text-xl px-4">
@@ -64,16 +65,11 @@ export default function MyInfoPage({ member }) {
 export async function getServerSideProps(context) {
     const session = await getSession(context)
 
-    if(!session) {
-        return (
-            redirect: {
-                desination: "/DiFF/member/login",
-                permanent: false,
-            }
-        )
-    }
+    useEffect(() => {
+        if (!session) {
+            router.push("/DiFF/member/login");
+        }
+    }, [session, router]);
 
-    return (
-        props: { session }
-    )
+    if (!session) return null;
 }

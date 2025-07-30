@@ -1,7 +1,6 @@
 // pages/_app.js
 import Script from 'next/script'
-import Layout from '../common/layout'  // 네가 쓰던 그대로
-import { SessionProvider } from "next-auth/react"
+import Layout from '../common/layout'
 
 export default function App({ Component, pageProps }) {
     // const { session, member, ...rest } = pageProps
@@ -12,13 +11,9 @@ export default function App({ Component, pageProps }) {
                 src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
                 strategy="beforeInteractive"
             />
-
-            {/* NextAuth 세션 프로바이더로 감싸기 */}
-            <SessionProvider>
                 <Layout>
                     <Component {...pageProps} />
                 </Layout>
-            </SessionProvider>
         </>
     )
 }

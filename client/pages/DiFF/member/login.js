@@ -1,55 +1,49 @@
 // pages/DiFF/member/login.js
+
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import { signIn, useSession } from "next-auth/react";
-import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/postcss";
-import {redirects} from "../../../next.config";
+import {login, setAuthHeader} from "@/lib/UserAPI";
 
 export default function LoginPage() {
-    const { status } = useSession();
     const router = useRouter();
-    const callbackUrl = router.query.callbackUrl || '/DiFF/home/main'
+    const callbackUrl = router.query.callbackUrl || '/DiFF/home/main';
+    const [values, setValues] = useState({ loginId: "", loginPw: "" });
+    const [error, setError] = useState(null);
 
-    useEffect(() => {
+    // 🎯 input 값 변경시 상태 업데이트
+    const handleChange = (e) => {
+        setValues({...values, [e.target.name]: e.target.value });
+    }
 
-        if(status === 'authenticated') {
-            router.replace(callbackUrl)
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        if (!values.loginId || !values.loginPw) {
+            setError('아이디와 비밀번호를 입력하세요.');
+            return;
         }
-    }, [status, router, callbackUrl])
-
-    const [error, setError] = useState(null)
-
-    // // state - loginId, loginPw
-    //  const [loginId, setLoginId] = useState('');
-    //  const [loginPw, setloginPw] = useState('');
-
-    // 로컬 로그인
-    const onSubmit = async (e) => {
-        e.preventDefault()
-        const loginId = e.currentTarget.loginId.value
-        const loginPw = e.currentTarget.loginPw.value
-
-        const res = await signIn('credentials', {
-            redirect: false,
-            loginId,
-            loginPw,
-            callbackUrl,
-        })
-
-        if (res?.error) {
-            setError(res.error)
-        } else {
-            router.replace(res.url)
+        try {
+            const result = await login(values);
+            if (result.resultCode !== "S-1") {
+                setError(result.msg || '로그인 실패');
+                return;
+            }
+            if (!result.data1) {
+                setError('토큰 없음');
+                return;
+            }
+            localStorage.setItem('tokenType', result.dataName || 'Bearer');
+            localStorage.setItem('accessToken', result.data1);
+            localStorage.setItem('refreshToken', result.data2 || '');
+            setAuthHeader();
+            window.location.href = `/DiFF/home/main`;
+        } catch (error) {
+            console.log("로그인 axios error", error, error.response);
+            setError('로그인 실패: 아이디/비밀번호를 확인하세요.');
         }
-
-        // await signIn("credentials", {
-        //     loginId,
-        //     loginPw,
-        //     callbackUrl: "/home/main",
-        // });
     };
+
 
     return (
         <>
@@ -62,51 +56,28 @@ export default function LoginPage() {
                 <div className="title mt-4 mb-8 text-center text-2xl font-semibold">
                     Login
                 </div>
-
-                {/* 로그인 실패 메시지 */}
                 {error && (
                     <div className="text-red-500 text-center mb-4">
-                        ❌ 로그인 실패: 아이디 또는 비밀번호를 확인하세요.
+                        {error}
                     </div>
                 )}
 
-                <form
-                    name="login"
-                    onSubmit={async (e) => {
-                        e.preventDefault();
-                        const loginId = e.currentTarget.loginId.value;
-                        const loginPw = e.currentTarget.loginPw.value;
-
-                        try {
-                            const res = await fetch('/DiFF/member/doLogin', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ loginId, loginPw }),
-                                credentials: 'include'
-                            });
-                            if (!res.ok) throw new Error('로그인 실패');
-
-                            // 로그인 성공
-                            router.replace(callbackUrl);
-                        } catch (err) {
-                            alert(err.message);   // ← alert 띄움
-                        }
-                    }}
-                    className="flex flex-col items-center"
-                >
+                <form name="login" className="flex flex-col items-center" onSubmit={handleSubmit}>
                     <input
                         type="text"
                         name="loginId"
-
-                        //onChange={(e) => setLoginId(e.target.value)}
+                        id="loginId"
+                        value={values.loginId}
+                        onChange={handleChange}
                         placeholder="ID"
                         className="mb-6 bg-neutral-50 border border-neutral-300 text-neutral-800 text-sm rounded-lg w-96 p-2.5"
                     />
                     <input
                         type="password"
                         name="loginPw"
-
-                        //onChange={(e) => setloginPw(e.target.value)}
+                        id="loginPw"
+                        value={values.loginPw}
+                        onChange={handleChange}
                         placeholder="Password"
                         className="mb-6 bg-neutral-50 border border-neutral-300 text-neutral-800 text-sm rounded-lg w-96 p-2.5"
                     />

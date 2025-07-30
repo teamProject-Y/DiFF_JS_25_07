@@ -4,10 +4,26 @@
 import Script from 'next/script'
 import Head from 'next/head'
 import Header from '../common/header'
-import { signOut, useSession } from 'next-auth/react'
+import { useEffect } from "react";
+import {useRouter} from 'next/router';
 
 export default function Layout({ children, pageTitle = 'DiFF' }) {
-    const { data: session, status } = useSession()
+    const router = useRouter();
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const accessToken = params.get("accessToken");
+            const refreshToken = params.get("refreshToken");
+            if (accessToken && refreshToken) {
+                localStorage.setItem("accessToken", accessToken);
+                localStorage.setItem("refreshToken", refreshToken);
+                // 필요하다면, 토큰 파라미터를 URL에서 제거:
+                router.replace("/DiFF/home/main", undefined, { shallow: true });
+            }
+        }
+    }, [router]);
+
     return (
         <>
             <Head>

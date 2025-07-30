@@ -2,7 +2,8 @@
 'use client';
 
 import { userEffect } from 'react';
-import { getUsers } from '@/lib/userApi';
+import { getUsers } from '@/lib/UserAPI';
+import * as BCryptPasswordEncoder from "next-auth/jwt";
 
 export default function Main() {
     return <div>메인입니다.</div>
