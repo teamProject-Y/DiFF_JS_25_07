@@ -2,78 +2,19 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import axios from 'axios';
-import { execSync } from 'child_process';
 import { simpleGit } from 'simple-git';
-const git = simpleGit();
-// import readline from 'readline/promises';
-// import { stdin as input, stdout as output } from 'node:process';
 
-import { getGitEmail } from '../lib/gitUtils.mjs';
-import {verifyGitUser, isUsableRepoName, mkDraft} from '../lib/api.mjs';
-import {existsGitDirectory, existsDiFF, DiFFinit, mkZip} from '../lib/execSync.mjs';
+import { getGitEmail } from '../lib/git/simpleGit.mjs';
+import {verifyGitUser, isUsableRepoName, mkDraft} from '../lib/api/api.mjs';
+import {
+    existsGitDirectory,
+    existsDiFF,
+    DiFFinit,
+    mkZip,
+    branchExists
+} from '../lib/git/execSync.mjs';
 
 const program = new Command();
-
-async function getLastCommit(memberId, branch) {
-    try {
-
-        // Diff 파일 존재 여부 확인
-        let DiFFexists = await existsDiFF();
-
-        if(DiFFexists === 'true') {
-
-        }else {
-
-            // repo 이름 입력 받기
-            console.log(' Your repository isn\'t connected.');
-            let repoName = q.ask(' Please enter your new DiFF repository name: ');
-
-            // repo 이름 중복인지 확인하기
-            let usable = await isUsableRepoName(repoName);
-            while(!usable){
-                repoName = await q.ask(' This repository name is already in use. Try a different one: ');
-                usable = await isUsableRepoName(repoName);
-            }
-
-            // 첫 커밋 가져오기
-            let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
-                .toString().trim();
-
-            const commitHash = firstCommit.split(' ')[0];
-            const commitMessage = firstCommit.split(' ').slice(1).join(' ');
-
-            console.log(commitHash);
-            console.log(commitMessage);
-            console.log("memberID: " + memberId);
-
-            // 서버에 리포 생성 요청, id 반환
-            let makeRepoRQ = await axios.post(
-                'http://localhost:8080/usr/draft/mkRepo', {
-                    memberId: memberId,
-                    repoName: repoName,
-                    firstCommit: commitHash
-                });
-
-            console.log("", makeRepoRQ.data);
-
-            // .DiFF 디렉토리 생성
-            execSync('mkdir .DiFF');
-
-            // id, 첫번째 커밋 체크섬 .DiFF에 저장
-
-
-            q.close();
-
-            return commitHash;
-        }
-
-    } catch (err) {
-        console.error(chalk.red('error:'), err.message);
-        return false;
-    }
-}
-
 
 program
     .name("git-mkdraft")
@@ -85,63 +26,82 @@ program
     // 분석 제외
     .action(async (branch, options) => {
 
+        // const branches = await getFirstCommitOfBranch(branch);
+        // console.log(branches);
+
+        // const firstBranch = await getBranchCreationTimes();
+        // // branch, timestamp, fromHash, toHash, event
+        // console.log(`${firstBranch[0].branch}
+        // from: ${firstBranch[0].fromHash}
+        // to: ${firstBranch[0].toHash}
+        // event: ${firstBranch[0].event}
+        // (${new Date(firstBranch[0].timestamp * 1000).toLocaleString()})`);
+        //
+        // console.log(`${firstBranch[1].branch}
+        // from: ${firstBranch[1].fromHash}
+        // to: ${firstBranch[1].toHash}
+        // event: ${firstBranch[1].event}
+        // (${new Date(firstBranch[1].timestamp * 1000).toLocaleString()})`);
+
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
+        console.log(chalk.bgCyanBright(chalk.black("selectedBranch: ", selectedBranch)));
 
-        // const log = await git.log({ n: 1 });
-        // const latestCommit = log.latest;
-        // const diff = await git.diff([`${latestCommit.hash}^!`]);
+        /** 브랜치 존재 여부 **/
+        const branchCheck = await branchExists(selectedBranch);
+        console.log(chalk.bgCyanBright(chalk.black(branchCheck)));
+        if (branchCheck) {
+            console.log(chalk.bgCyanBright(chalk.black("branchExists")));
+        }else {
+            console.log(chalk.bgCyanBright(chalk.black("branch is not exists")));
+            process.exit(1);
+        }
 
-        console.log(chalk.bgYellow("selectedBranch: ", selectedBranch));
         const zip = mkZip(selectedBranch);
         if(zip === false){
-            console.log("zip error");
+            console.log(chalk.bgCyanBright(chalk.black("zip error")));
             process.exit(1);
         }else {
-            console.log("zip success");
+            console.log(chalk.bgCyanBright(chalk.black("zip success")));
         }
+
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if(checkIsRepo === 'false') {
+            console.log(chalk.bgCyanBright(chalk.black("checkIsRepo: ", checkIsRepo)));
             process.exit(1);
-            console.log(chalk.bgYellow("checkIsRepo: ", checkIsRepo));
         }
-        console.log(chalk.bgYellow("checkIsRepo: ", checkIsRepo));
+        console.log(chalk.bgCyanBright(chalk.black("checkIsRepo: ", checkIsRepo)));
 
         /** 이메일 가져오기 **/
         const email = await getGitEmail();
         if (email === null) {
-            console.log(chalk.bgYellow("email not found"));
+            console.log(chalk.bgCyanBright(chalk.black("email not found")));
             process.exit(1);
         }
-        console.log(chalk.bgYellow("email :",  email));
+        console.log(chalk.bgCyanBright(chalk.black("email :",  email)));
 
         /** git 설정 이메일, DiFF 회원 이메일 체크 **/
         const memberId = await verifyGitUser(email);
         if (memberId === null) {
-            console.log(chalk.bgYellow("memberId not found"));
+            console.log(chalk.bgCyanBright(chalk.black("memberId not found")));
             process.exit(1);
         }
-        console.log("memberId :",  memberId);
+        console.log(chalk.bgCyanBright(chalk.black("memberId :",  memberId)));
 
         /** DiFF 디렉토리 존재 여부 **/
         const isDiFF = await existsDiFF();
 
-        let firstChecksum;
         if(isDiFF === 'true'){
-            console.log(chalk.bgYellow("DiFF is exists"))
+            console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
             // 파일에서 마지막 요청커밋 가져오기
         } else {
-            console.log(chalk.bgYellow('DiFF is not exists'));
-            firstChecksum = await DiFFinit(memberId, branch);
-            if(firstChecksum === null) {
-                console.log(chalk.red("뭔가 문제 있음"))
-                process.exit(1);
-            }
+            console.log(chalk.bgCyanBright(chalk.black('DiFF is not exists')));
+            await DiFFinit(memberId, selectedBranch);
         }
 
-        await mkDraft(memberId, branch, firstChecksum);
-        console.log(chalk.bgYellow("draft successfully"));
+        // await mkDraft(memberId, branch, firstChecksum);
+        // console.log(chalk.bgCyanBright(chalk.black("draft successfully")));
 
 
         // console.log('Making to draft...');
