@@ -34,24 +34,24 @@ export default function JoinPage() {
         try {
             const res = await signUp({loginId, loginPw, checkLoginPw, name, nickName, email});
 
-            console.log("✅ 회원가입 응답:", res);
+            console.log("🔍 응답 전체:", res);
+            const resultCode = res?.resultCode;
+            const message = res?.msg || '회원가입에 실패했습니다';
 
-            // axios 사용 시 status로 판단
-            const message = res.data?.msg || res.msg || '회원가입에 실패했습니다';
-
-            if (res.status === 200 && (res.data?.resultCode === "S-1" || res.resultCode === "S-1")) {
+            if (resultCode === 'S-1') {
+                console.log('✅ 메인 페이지로 이동합니다!');
                 router.push('/DiFF/home/main');
-                return ;
             } else {
                 setError(message);
             }
+
 
         } catch (e) {
             setError(e.response?.data?.msg || '서버 요청 중 오류가 발생했습니다');
             console.error("회원가입 실패:", e.response?.data || e.message);
         }
-    }
 
+    }
         return (
         <div className="container mx-auto mt-12 max-w-min p-4 bg-neutral-200 border border-neutral-300 rounded-lg">
             <div className="title my-3 text-center text-2xl font-semibold">Join</div>
