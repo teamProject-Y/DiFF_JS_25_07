@@ -63,10 +63,6 @@ export default function MyInfoPage() {
                             <td className="border p-2 text-center">{member.email}</td>
                         </tr>
                         <tr>
-                            <th className="border p-2">전화번호</th>
-                            <td className="border p-2 text-center">{member.cellPhone}</td>
-                        </tr>
-                        <tr>
                             <th className="border p-2">회원정보 수정</th>
                             <td className="border p-2 text-center">
                                 <Link

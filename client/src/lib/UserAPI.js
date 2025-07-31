@@ -95,10 +95,16 @@ export const fetchUser = async () => {
 };
 
 // 5-4. 회원 수정
-export const updateUser = async (data) => {
-    const response = await UserApi.put(`/DiFF/member`, data);
+export const modifyUser = async ({ id, loginId, name, nickName, email }) => {
+    const data = { id, loginId, name, nickName, email };
+    const response = await UserApi.put(`api/DiFF/member/modify`, data);
     return response.data;
 };
+
+export const checkPwUser = async (data) => {
+    const response = await UserApi.put(`/api/DiFF/member/checkPw`, data);
+    return response.data;
+}
 
 // 5-5. 회원 탈퇴
 export const deleteUser = async () => {
