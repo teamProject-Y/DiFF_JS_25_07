@@ -10,7 +10,6 @@ export async function getGitEmail() {
         const email = configList.all['user.email'];
 
         if (!email) {
-            console.error(chalk.red('\nGit email not configured.'));
             return null;
         }
 
@@ -22,33 +21,14 @@ export async function getGitEmail() {
     }
 }
 
+/** git remote repository url **/
 export async function getRemoteUrl() {
     try {
         const remotes = await git.getRemotes(true); // true → remote URL 포함
         const origin = remotes.find(remote => remote.name === 'origin');
         return origin?.refs?.fetch || null;
     } catch (err) {
-        console.error("❌ Failed to get remote URL:", err.message);
+        console.error("Failed to get remote URL:", err.message);
         return null;
     }
 }
-
-
-// /** 전체 커밋 목록 가져오기 */
-// async function getCommitHashes() {
-//     const log = await git.log();
-//     return log.all.map(commit => commit.hash);
-// }
-//
-// /** 마지막 커밋 1개 가져오기 */
-// async function getLastCommitHash() {
-//     const log = await git.log({ n: 1 });
-//     return log.latest.hash;
-// }
-//
-// /** 커밋 사이 변경 내용 가져오기 */
-// async function getDiffBetweenCommits(fromHash, toHash, includeOld = false) {
-//     const diffOptions = includeOld ? [] : ['--unified=0'];
-//     const diff = await git.diff([...diffOptions, `${fromHash}..${toHash}`]);
-//     return diff;
-// }

@@ -9,14 +9,39 @@ export async function mkDiFFdirectory(repositoryId) {
 
     const branches = await getBranchCreationTimes();
 
-    createDiFFRoot();
+    await createDiFFRoot();
     await createConfigFile(repositoryId);
     await createMetaFile();
 
-    branches.forEach((branch, index) => {
-        appendMeta(branch, index === 0);
-        createBranchLog(branch.name);
-    });
+    for (const branch of branches) {
+        const index = branches.indexOf(branch);
+        await appendMeta(branch, index === 0);
+        await createBranchLog(branch.name);
+    }
+}
+
+/** directory 생성 **/
+async function createDiFFRoot() {
+    fs.mkdirSync(".DiFF");
+    fs.mkdirSync(".DiFF/logs");
+}
+
+/** config file 생성, 작성 **/
+async function createConfigFile(repositoryId) {
+    const repositoryUrl = await getRemoteUrl();
+
+    const config = {
+        repositoryId,
+        repositoryUrl,
+        createdAt: DateTime.local().toISO()
+    };
+
+    fs.writeFileSync(".DiFF/config", JSON.stringify(config, null, 2));
+}
+
+/** meta file 생성 **/
+async function createMetaFile() {
+    fs.writeFileSync(".DiFF/meta", JSON.stringify([], null, 2));
 }
 
 /** 브랜치 생성 순 반환 **/
@@ -42,41 +67,8 @@ async function getBranchCreationTimes() {
     return result;
 }
 
-function createDiFFRoot() {
-    fs.mkdirSync(".DiFF");
-    fs.mkdirSync(".DiFF/logs");
-}
-
-async function createConfigFile(repositoryId) {
-    const repositoryUrl = await getRemoteUrl();
-
-    const config = {
-        repositoryId,
-        repositoryUrl,
-        createdAt: DateTime.local().toISO()
-    };
-
-    fs.writeFileSync(".DiFF/config", JSON.stringify(config, null, 2));
-}
-
-// function createMetaFile(branches) {
-//     const meta = branches.map((branch, index) => ({
-//         branchName: branch.name,
-//         root: index === 0,
-//         // branchId: generateBranchId(branch),
-//         createdAt: DateTime.local().toISO(),
-//         lastRequestedCommit: branch.toHash,
-//         lastRequestedAt: null,
-//         requestCount: 0
-//     }));
-//     fs.writeFileSync(".DiFF/meta", JSON.stringify(meta, null, 2));
-// }
-
-function createMetaFile() {
-    fs.writeFileSync(".DiFF/meta", JSON.stringify([], null, 2));
-}
-
-function appendMeta(branch, isRoot = false) {
+/** meta file에 브랜치 정보 추가 **/
+async function appendMeta(branch, isRoot = false) {
     const newEntry = {
         branchName: branch.name,
         root: isRoot,
@@ -95,17 +87,13 @@ function appendMeta(branch, isRoot = false) {
     fs.writeFileSync(metaPath, JSON.stringify(current, null, 2));
 }
 
-function createBranchLogs(branches) {
-    for (const branch of branches) {
-        fs.writeFileSync(`.DiFF/logs/${branch}.json`, "[]");
-    }
-}
-
-function createBranchLog(branchName) {
+/** log 폴더, 브랜치.json 파일 생성 **/
+async function createBranchLog(branchName) {
 
     const logsDir = ".DiFF/logs";
     if (!fs.existsSync(logsDir)) {
-        fs.mkdirSync(logsDir, { recursive: true }); // 상위부터 생성
+        console.error(".DiFF directory doesn't exist.");
+        return false;
     }
 
     const logPath = path.join(logsDir, `${branchName}.json`);
