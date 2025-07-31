@@ -11,10 +11,13 @@ export async function mkDiFFdirectory(repositoryId) {
 
     createDiFFRoot();
     await createConfigFile(repositoryId);
-    createMetaFile(branches);
-    // createBranchLogs(branches);
-}
+    await createMetaFile();
 
+    branches.forEach((branch, index) => {
+        appendMeta(branch, index === 0);
+        createBranchLog(branch.name);
+    });
+}
 
 /** 브랜치 생성 순 반환 **/
 async function getBranchCreationTimes() {
@@ -41,43 +44,71 @@ async function getBranchCreationTimes() {
 
 function createDiFFRoot() {
     fs.mkdirSync(".DiFF");
-    fs.mkdirSync(".DiFF/branches");
+    fs.mkdirSync(".DiFF/logs");
 }
 
 async function createConfigFile(repositoryId) {
-
     const repositoryUrl = await getRemoteUrl();
 
     const config = {
         repositoryId,
-        repositoryUrl
+        repositoryUrl,
+        createdAt: DateTime.local().toISO()
     };
 
     fs.writeFileSync(".DiFF/config", JSON.stringify(config, null, 2));
 }
 
+// function createMetaFile(branches) {
+//     const meta = branches.map((branch, index) => ({
+//         branchName: branch.name,
+//         root: index === 0,
+//         // branchId: generateBranchId(branch),
+//         createdAt: DateTime.local().toISO(),
+//         lastRequestedCommit: branch.toHash,
+//         lastRequestedAt: null,
+//         requestCount: 0
+//     }));
+//     fs.writeFileSync(".DiFF/meta", JSON.stringify(meta, null, 2));
+// }
 
-function createMetaFile(branches) {
-    const meta = branches.map((branch, index) => ({
+function createMetaFile() {
+    fs.writeFileSync(".DiFF/meta", JSON.stringify([], null, 2));
+}
+
+function appendMeta(branch, isRoot = false) {
+    const newEntry = {
         branchName: branch.name,
-        root: index === 0,
-        // branchId: generateBranchId(branch),
+        root: isRoot,
         createdAt: DateTime.local().toISO(),
         lastRequestedCommit: branch.toHash,
         lastRequestedAt: null,
         requestCount: 0
-    }));
-    fs.writeFileSync(".DiFF/meta", JSON.stringify(meta, null, 2));
-}
+    };
 
+    const metaPath = ".DiFF/meta";
+    const current = fs.existsSync(metaPath)
+        ? JSON.parse(fs.readFileSync(metaPath, "utf-8"))
+        : [];
+
+    current.push(newEntry);
+    fs.writeFileSync(metaPath, JSON.stringify(current, null, 2));
+}
 
 function createBranchLogs(branches) {
     for (const branch of branches) {
-        fs.writeFileSync(`.DiFF/branches/${branch}.json`, "[]");
+        fs.writeFileSync(`.DiFF/logs/${branch}.json`, "[]");
     }
 }
 
-function generateBranchId(branchName) {
-    // 간단한 ID 생성 (원하면 uuid도 가능)
-    return `branch-${branchName}-${Date.now()}`;
+function createBranchLog(branchName) {
+
+    const logsDir = ".DiFF/logs";
+    if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true }); // 상위부터 생성
+    }
+
+    const logPath = path.join(logsDir, `${branchName}.json`);
+    fs.writeFileSync(logPath, "[]");
 }
+
