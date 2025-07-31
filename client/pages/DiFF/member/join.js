@@ -23,7 +23,7 @@ export default function JoinPage() {
         e.preventDefault()
         setError('')
 
-        const { loginId, loginPw, checkLoginPw, name, nickName, email } = form
+        const {loginId, loginPw, checkLoginPw, name, nickName, email} = form
         if (!loginId.trim()) return setError('아이디를 입력해주세요')
         if (!loginPw.trim()) return setError('비밀번호를 입력해주세요')
         if (loginPw !== checkLoginPw) return setError('비밀번호가 일치하지 않습니다')
@@ -32,23 +32,27 @@ export default function JoinPage() {
         if (!email.trim() || !email.includes('@')) return setError('유효한 이메일을 입력해주세요')
 
         try {
-
             const res = await signUp({loginId, loginPw, checkLoginPw, name, nickName, email});
-            console.log(res)
-            if (res.ok) {
-                router.push('/DiFF/home/main')
-            } else {
-                const text = await res.text()
-                setError(text || '회원가입에 실패했습니다')
 
-                console.error("회원가입 실패:", e.response?.data?.msg || e.message);
+            console.log("✅ 회원가입 응답:", res);
+
+            // axios 사용 시 status로 판단
+            const message = res.data?.msg || res.msg || '회원가입에 실패했습니다';
+
+            if (res.status === 200 && (res.data?.resultCode === "S-1" || res.resultCode === "S-1")) {
+                router.push('/DiFF/home/main');
+                return ;
+            } else {
+                setError(message);
             }
-        } catch {
-            setError('서버 요청 중 오류가 발생했습니다')
+
+        } catch (e) {
+            setError(e.response?.data?.msg || '서버 요청 중 오류가 발생했습니다');
+            console.error("회원가입 실패:", e.response?.data || e.message);
         }
     }
 
-    return (
+        return (
         <div className="container mx-auto mt-12 max-w-min p-4 bg-neutral-200 border border-neutral-300 rounded-lg">
             <div className="title my-3 text-center text-2xl font-semibold">Join</div>
             {error && <p className="text-red-500 mb-4">{error}</p>}
