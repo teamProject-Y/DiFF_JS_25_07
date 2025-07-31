@@ -8,18 +8,36 @@ export const UserApi = axios.create({
     }
 });
 
-/** 2. 토큰/헤더 동적 세팅 */
-export const setAuthHeader = () => {
-    if (typeof window !== "undefined") {
-        const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer ';
-        const ACCESS_TOKEN = localStorage.getItem("accessToken");
-        UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
-        const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        if (REFRESH_TOKEN) {
-            UserApi.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+UserApi.interceptors.request.use(
+    (config) => {
+        if (typeof window !== "undefined") {
+            const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
+            const ACCESS_TOKEN = localStorage.getItem("accessToken");
+            if (ACCESS_TOKEN) {
+                config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+            }
+            const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+            if (REFRESH_TOKEN) {
+                config.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+            }
         }
-    }
-};
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// /** 2. 토큰/헤더 동적 세팅 */
+// export const setAuthHeader = () => {
+//     if (typeof window !== "undefined") {
+//         const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer ';
+//         const ACCESS_TOKEN = localStorage.getItem("accessToken");
+//         UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+//         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+//         if (REFRESH_TOKEN) {
+//             UserApi.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+//         }
+//     }
+// };
 
 /** 3. 토큰 자동 재발급 (Refresh) */
 const refreshAccessToken = async () => {
@@ -72,8 +90,7 @@ export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, e
 
 // 5-3. 회원 조회
 export const fetchUser = async () => {
-    setAuthHeader();
-    const response = await UserApi.get(`/api/DiFF/member/myPage`);
+    const response = await UserApi.get(`/api/DiFF/member/myInfo`);
     return response.data;
 };
 
