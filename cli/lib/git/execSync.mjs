@@ -111,10 +111,11 @@ export function getDiFF(from, to) {
     console.log(chalk.bgCyanBright(chalk.black(from)));
     console.log(chalk.bgCyanBright(chalk.black(to)));
 
-    const wow = '3eed53cf962125bebcabeb00755738a2f3cbb455';
+    const wow = '940b80234a7108d69a2602ea794b5a5ae6d40101';
 
     return new Promise((resolve, reject) => {
-        const extensions = ['*.mjs', '*.js', '*.jsx', '*.java', '*.py', '*.jsp'];
+        const extensions = ['*.mjs', '*.js', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp',
+            '*.py', '*.c', '*.cs', '*.cpp', '*.php', '*.go', '*.rs', '*.rb', '*.kt', '*.swift'];
 
         const args = ['diff', '-W', wow, to, '--', ...extensions];
         const child = spawn('git', args, { shell: true });
