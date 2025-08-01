@@ -111,7 +111,7 @@ export function getDiFF(from, to) {
     console.log(chalk.bgCyanBright(chalk.black(from)));
     console.log(chalk.bgCyanBright(chalk.black(to)));
 
-    const wow = '940b80234a7108d69a2602ea794b5a5ae6d40101';
+    const wow = '7a315432b20dbeaf6403ef8c7ece8fe33a0c674c';
 
     return new Promise((resolve, reject) => {
         const extensions = ['*.mjs', '*.js', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp',

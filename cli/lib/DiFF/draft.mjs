@@ -56,7 +56,7 @@ export async function updateMeta(branchName, lastChecksum) {
 
 /** logs 업데이트 **/
 export async function appendLogs(branch, from, to) {
-    const logPath = path.join('.DiFF', 'logs', branch);
+    const logPath = path.join('.DiFF', 'logs', `${branch}.json`);
 
     try {
         let logs = [];
@@ -64,22 +64,28 @@ export async function appendLogs(branch, from, to) {
         try {
             const content = await fsp.readFile(logPath, 'utf-8');
             logs = JSON.parse(content);
+            console.log('기존 로그 읽기 성공:', logs);
         } catch (e) {
             if (e.code !== 'ENOENT') throw e;
+            console.log('로그 파일 새로 생성');
         }
 
-        logs.push({
+        const newLog = {
             requestAt: DateTime.local().toISO(),
             from,
             to
-        });
+        };
+        logs.push(newLog);
 
         await fsp.writeFile(logPath, JSON.stringify(logs, null, 2), { encoding: 'utf-8' });
+        console.log('로그 추가 완료:', newLog);
+
     } catch (err) {
         console.error(`로그 추가 실패: ${err.message}`);
         throw err;
     }
 }
+
 
 /** .DiFF 디렉토리에서 브랜치 내용 읽기 **/
 export async function getLastRequestChecksum(branch){
