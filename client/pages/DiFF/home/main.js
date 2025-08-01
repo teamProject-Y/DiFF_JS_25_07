@@ -1,7 +1,7 @@
 // pages/usr/home/main.js
 'use client';
 
-import { userEffect } from 'react';
+import { useEffect } from 'react';
 import { getUsers } from '@/lib/UserAPI';
 import * as BCryptPasswordEncoder from "next-auth/jwt";
 

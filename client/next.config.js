@@ -8,7 +8,7 @@ module.exports = {
             // 루트 → 메인 페이지
             {
                 source: '/',              // 브라우저가 / 로 들어오면
-                destination: '/DiFF/home/main', // /member/login 으로 302 리다이렉트
+                destination: '/DiFF/home/main', // main으로
                 permanent: false,
             },
             // OAuth2 로그인 라우트
