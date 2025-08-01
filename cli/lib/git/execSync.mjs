@@ -1,7 +1,9 @@
 import {execSync} from 'child_process';
-import {getResponse} from "../util/promft.mjs";
-import {isUsableRepoName, mkRepo} from "../api/api.mjs";
+import { spawn } from 'child_process';
 import chalk from "chalk";
+
+import {getResponse} from "../util/interaction.mjs";
+import {isUsableRepoName, mkRepo} from "../api/api.mjs";
 import {mkDiFFdirectory} from "../DiFF/init.mjs";
 
 /** git repository 여부 **/
@@ -27,17 +29,8 @@ export async function branchExists(branch) {
     return checkBranch === "true";
 }
 
-/** 브랜치 읽기 **/
-export async function getLocalBranches() {
-    const result = execSync('git branch', { encoding: 'utf-8' });
-    return result
-        .split('\n')
-        .map(b => b.replace('*', '').trim())
-        .filter(b => b.length > 0);
-}
-
 /** 요청 브랜치 마지막 체크섬 **/
-export function getLastChecksum(branch) {
+export async function getLastChecksum(branch) {
     return execSync(`git rev-parse ${branch}`).toString().trim();
 }
 
@@ -57,9 +50,6 @@ export async function DiFFinit(memberId, branch) {
 
     console.log(chalk.bgCyanBright(chalk.black("repoName: " + repoName)));
     console.log(chalk.bgCyanBright(chalk.black("usable: " + usable)));
-
-    // git log --reverse --pretty=oneline ${nowBranch} ^${default} | head -n 1
-    // head -n 1 .git/logs/refs/heads/yunzivv
 
     // 첫 커밋 가져오기
     let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
@@ -83,36 +73,9 @@ export async function DiFFinit(memberId, branch) {
     return checksum;
 }
 
-/** .DiFF 디렉토리에서 브랜치 내용 읽기 **/
-export async function gg(){
-
-    const isDiFFdirectory = execSync('[ -d .DiFF ] && echo true || echo false').toString().trim();
-
-    if(isDiFFdirectory === 'false') {
-        console.log('fatal: not a DiFF repository: .DiFF');
-        return null;
-    }
-    return isDiFFdirectory;
-}
-
-// export async function mkDiFFdirectory(branches, repositoryId){
-//
-//     if (fs.existsSync(".DiFF")) return null;
-//
-//     const DiFFdir = execSync("mkdir .DiFF");
-//     const config = execSync("touch .DiFF/config");
-//     const meta = execSync("touch .DiFF/meta");
-//     const branchesDir = execSync("mkdir .DiFF/branches");
-//     execSync("cd .DiFF/branches");
-//     for(let branch in branches){
-//
-//     }
-//
-//     return null;
-// }
 
 /** zip 파일 **/
-export function mkZip(branch) {
+export function doAnalysis(branch) {
     try {
         const hasTarget = execSync(`[ -d target ] && echo true || echo false`).toString().trim();
 
@@ -143,28 +106,45 @@ export function mkZip(branch) {
     }
 }
 
-/** 첫 체크섬과 마지막 체크섬 사이의 diff **/
-export function getDiFF(firstChecksum, lastChecksum) {
+export function getDiFF(from, to) {
 
-    const command = `git diff -W dcbdf96aee585f7f624c2003eeeb14b7c035d877 ${lastChecksum} | grep -E "^[+-]|^@@"`.trim().replace(/\n/g, ' ');
-    return execSync(`sh -c '${command}'`, {
-        maxBuffer: 1024 * 1024 * 50 // 50MB 까지 버퍼 허용
-    }).toString();
+    console.log(chalk.bgCyanBright(chalk.black(from)));
+    console.log(chalk.bgCyanBright(chalk.black(to)));
 
-}
+    const wow = '3eed53cf962125bebcabeb00755738a2f3cbb455';
 
-/** 로딩 애니메이션 **/
-function startAsciiAnimation() {
-    const frames = [ `wating`, `...frame2...`, `...frame3...`, `...frame4...` ]; // 위 내용 넣기
-    let index = 0;
+    return new Promise((resolve, reject) => {
+        const extensions = ['*.mjs', '*.js', '*.jsx', '*.java', '*.py', '*.jsp'];
 
-    console.log("start 압축")
-    const interval = setInterval(() => {
-        process.stdout.write('\x1Bc');
-        console.log(frames[index % frames.length]);
-        index++;
-    }, 2000);
+        const args = ['diff', '-W', wow, to, '--', ...extensions];
+        const child = spawn('git', args, { shell: true });
 
-    return interval;
+        let output = '';
+
+        child.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+
+        child.stderr.on('data', (data) => {
+            console.error('stderr:', data.toString());
+        });
+
+        child.on('close', (code) => {
+            if (code === 0) {
+                const filtered = output;
+
+                // 디버깅용
+                console.log('+++ raw diff preview:', filtered.slice(0, 100));
+                const preview = filtered.length > 100 ? filtered.slice(0, 100) + '...' : filtered;
+                console.log('/// diff 미리보기 (앞 100자):');
+                console.log(preview);
+                console.log('/// diff 미리보기 끝');
+
+                resolve(filtered);
+            } else {
+                reject(new Error(`git diff exited with code ${code}`));
+            }
+        });
+    });
 }
 
