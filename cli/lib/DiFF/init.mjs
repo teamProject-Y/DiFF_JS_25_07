@@ -1,4 +1,5 @@
-import fs from "fs";
+import fs from 'fs';
+import fsp from 'fs/promises';
 import path from "path";
 import {getRemoteUrl} from "../git/simpleGit.mjs";
 import {DateTime} from "luxon";
@@ -68,7 +69,7 @@ async function getBranchCreationTimes() {
 }
 
 /** meta file에 브랜치 정보 추가 **/
-async function appendMeta(branch, isRoot = false) {
+export async function appendMeta(branch, isRoot = false) {
     const newEntry = {
         branchName: branch.name,
         root: isRoot,

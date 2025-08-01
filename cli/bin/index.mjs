@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 
-import { getGitEmail } from '../lib/git/simpleGit.mjs';
 import {verifyGitUser} from '../lib/api/api.mjs';
 import { existsGitDirectory, existsDiFF, DiFFinit,
     branchExists, doAnalysis } from '../lib/git/execSync.mjs';
@@ -31,14 +30,14 @@ program
         if (branchCheck) {
             console.log(chalk.bgCyanBright(chalk.black("branchExists")));
         }else {
-            console.log(chalk.bgCyanBright(chalk.black("branch is not exists")));
+            console.log(chalk.bgRedBright(chalk.black("branch is not exists")));
             process.exit(1);
         }
 
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if(checkIsRepo === 'false') {
-            console.log(chalk.bgCyanBright(chalk.black("checkIsRepo: ", checkIsRepo)));
+            console.log(chalk.bgRedBright(chalk.black("checkIsRepo: ", checkIsRepo)));
             process.exit(1);
         }
         console.log(chalk.bgCyanBright(chalk.black("checkIsRepo: ", checkIsRepo)));
@@ -46,7 +45,7 @@ program
         /** git 설정 이메일, DiFF 회원 이메일 체크 **/
         const memberId = await verifyGitUser();
         if (memberId === null) {
-            console.log(chalk.bgCyanBright(chalk.black("memberId not found")));
+            console.log(chalk.bgRedBright(chalk.black("memberId not found")));
             process.exit(1);
         }
         console.log(chalk.bgCyanBright(chalk.black("memberId :",  memberId)));
@@ -56,7 +55,7 @@ program
             console.log(chalk.bgCyanBright(chalk.black('분석 시작')));
             const analysis = doAnalysis(selectedBranch);
             if(analysis === false){
-                console.log(chalk.bgCyanBright(chalk.black("analysis error")));
+                console.log(chalk.bgRedBright(chalk.black("analysis error")));
                 process.exit(1);
             }else {
                 console.log(chalk.bgCyanBright(chalk.black("analysis success")));
@@ -71,12 +70,15 @@ program
         if(isDiFF === 'true'){
             console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
         } else {
-            console.log(chalk.bgCyanBright(chalk.black('DiFF is not exists')));
+            console.log(chalk.bgRedBright(chalk.black('DiFF is not exists')));
             await DiFFinit(memberId, selectedBranch);
         }
 
-        await mkDraft(memberId, selectedBranch);
-        // console.log(chalk.bgCyanBright(chalk.black("draft successfully")));
+        const draft = await mkDraft(memberId, selectedBranch);
+        if(draft === null){
+            console.log(chalk.bgRedBright(chalk.black('fail to make draft.')));
+        }
+        console.log(chalk.bgCyanBright(chalk.black("make draft successfully")));
 
         // console.log('Making to draft...');
         // console.log('*', chalk.green(branch));

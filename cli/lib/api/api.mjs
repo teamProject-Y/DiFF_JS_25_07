@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import axios from 'axios';
-import {getDiFF, getLastChecksum} from "../git/execSync.mjs";
 import {getGitEmail} from "../git/simpleGit.mjs";
 
 /** diff member check **/

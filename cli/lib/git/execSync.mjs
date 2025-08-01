@@ -105,23 +105,18 @@ export function doAnalysis(branch) {
     }
 }
 
-/** 첫 체크섬과 마지막 체크섬 사이의 diff **/
-// export async function getDiFF(from, to) {
-//     // const gitDiffCmd = `git diff -W -- ${from} ${to} | grep -E "^[+-]|^@@"`;
-//     const diffCmd = execSync(`git diff ${from} ${to}`);
-//
-//     return execSync(diffCmd, {
-//         shell: true,
-//         maxBuffer: 1024 * 1024 * 500 // 500MB
-//     }).toString();
-// }
 export function getDiFF(from, to) {
 
     console.log(chalk.bgCyanBright(chalk.black(from)));
     console.log(chalk.bgCyanBright(chalk.black(to)));
 
+    const wow = '3eed53cf962125bebcabeb00755738a2f3cbb455';
+
     return new Promise((resolve, reject) => {
-        const child = spawn('git', ['diff', '-W', from, to]);
+        const extensions = ['*.mjs', '*.js', '*.jsx', '*.java', '*.py', '*.jsp'];
+
+        const args = ['diff', '-W', wow, to, '--', ...extensions];
+        const child = spawn('git', args, { shell: true });
 
         let output = '';
 
@@ -138,8 +133,7 @@ export function getDiFF(from, to) {
                 const filtered = output;
 
                 // 디버깅용
-                console.log('+++ raw diff preview:', output.slice(0, 100)); // 원본
-                console.log('+++ filtered diff preview:', filtered.slice(0, 100)); // 필터 후
+                console.log('+++ raw diff preview:', filtered.slice(0, 100));
                 const preview = filtered.length > 100 ? filtered.slice(0, 100) + '...' : filtered;
                 console.log('/// diff 미리보기 (앞 100자):');
                 console.log(preview);
@@ -152,4 +146,3 @@ export function getDiFF(from, to) {
         });
     });
 }
-
