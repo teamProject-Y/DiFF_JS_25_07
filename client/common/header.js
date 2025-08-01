@@ -46,7 +46,6 @@ export default function Header() {
     return (
         <header className="flex h-22 w-full p-4 m-2 text-neutral-600">
             <div className="logo pl-4">
-                {/* 아이콘도 이렇게 */}
                 <Link href="/" className="block px-6">
                     <i className="fa-solid fa-star"></i>
                 </Link>
@@ -86,8 +85,10 @@ export default function Header() {
 
                     {accessToken ? (
                         <>
-                        <Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link>
-                        <Link href="/DiFF/member/myPage">MYPAGE</Link>
+                            <Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link>
+                            &nbsp;
+                            &nbsp;
+                            <Link href="/DiFF/member/myPage">MYPAGE</Link>
                         </>
                     ) : (
                         <>
