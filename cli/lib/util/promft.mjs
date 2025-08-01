@@ -14,18 +14,3 @@ export async function getResponse() {
         close: () => rl.close(),
     };
 }
-
-/** 로딩 애니메이션 **/
-function startAsciiAnimation() {
-    const frames = [ `wating`, `...frame2...`, `...frame3...`, `...frame4...` ];
-    let index = 0;
-
-    console.log("start 압축")
-    const interval = setInterval(() => {
-        process.stdout.write('\x1Bc');
-        console.log(frames[index % frames.length]);
-        index++;
-    }, 2000);
-
-    return interval;
-}
