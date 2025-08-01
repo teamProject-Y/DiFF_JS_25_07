@@ -4,7 +4,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
-import { fetchUser } from '@/lib/UserAPI';
+import {fetchUser } from '@/lib/UserAPI';
 
 export default function Header() {
     const [user, setUser] = useState({});
@@ -13,6 +13,18 @@ export default function Header() {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
+            // 소셜
+            const url = new URL(window.location.href);
+            const urlAccessToken = url.searchParams.get("access_token");
+            const urlRefreshToken = url.searchParams.get("refresh_token");
+            if (urlAccessToken && urlRefreshToken) {
+                localStorage.setItem("accessToken", urlAccessToken);
+                localStorage.setItem("refreshToken", urlRefreshToken);
+                localStorage.setItem("tokenType", "Bearer");
+                window.history.replaceState({}, document.title, url.pathname); // URL 정리
+            }
+
+            // 로컬
             const token = localStorage.getItem('accessToken');
             setAccessToken(token);
 

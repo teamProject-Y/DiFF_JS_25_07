@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import axios from 'axios';
+
 import {getGitEmail} from "../git/simpleGit.mjs";
 
 /** diff member check **/
@@ -65,24 +66,8 @@ export async function mkRepo(memberId, repoName, commitHash){
     }
 }
 
-/**  **/
-// export async function sendDiFF(memberId, to, diff){
-//
-//     const { data } = await axios.post(
-//         'http://localhost:8080/usr/draft/mkDraft', {
-//             memberId: memberId,
-//             lastChecksum: to,
-//             diff: diff
-//         });
-//
-//     if(data.resultCode.startsWith('S-')) {
-//         console.log(chalk.bgCyanBright(chalk.black("server에 diff 보내기 성공")));
-//         return true;
-//     }else {
-//         console.log(chalk.bgCyanBright(chalk.black("server에 diff 보내기 실패")));
-//         return false;
-//     }
-// }
+
+/** 서버에 diff 보내기 **/
 export async function sendDiFF(memberId, to, diff) {
     try {
         const { data } = await axios.post(

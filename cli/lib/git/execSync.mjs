@@ -1,8 +1,9 @@
 import {execSync} from 'child_process';
 import { spawn } from 'child_process';
+import chalk from "chalk";
+
 import {getResponse} from "../util/interaction.mjs";
 import {isUsableRepoName, mkRepo} from "../api/api.mjs";
-import chalk from "chalk";
 import {mkDiFFdirectory} from "../DiFF/init.mjs";
 
 /** git repository 여부 **/
@@ -146,3 +147,4 @@ export function getDiFF(from, to) {
         });
     });
 }
+
