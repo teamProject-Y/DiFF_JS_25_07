@@ -3,7 +3,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import {login, setAuthHeader} from "@/lib/UserAPI";
+import { login } from "@/lib/UserAPI";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -36,7 +36,6 @@ export default function LoginPage() {
             localStorage.setItem('tokenType', result.dataName || 'Bearer');
             localStorage.setItem('accessToken', result.data1);
             localStorage.setItem('refreshToken', result.data2 || '');
-            setAuthHeader();
             window.location.href = `/DiFF/home/main`;
         } catch (error) {
             console.log("로그인 axios error", error, error.response);

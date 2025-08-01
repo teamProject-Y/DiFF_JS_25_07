@@ -1,31 +1,35 @@
 // pages/usr/member/checkPw.js
 import { useState, useEffect } from 'react';
-import { getSession, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { checkPwUser } from "@/lib/UserAPI";
 
 export default function CheckPw({ loginId }) {
-    const { status } = useSession();
     const router = useRouter();
-    const [loginPw, setLoginPw] = useState('');
+    const [pw, setPw] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            router.replace('/api/auth/signin');
+        // JWT 기반: accessToken 없으면 로그인 페이지로
+        if (typeof window !== 'undefined') {
+            if (!localStorage.getItem('accessToken')) {
+                router.replace('/DiFF/member/login');
+            }
         }
-    }, [status, router]);
+    }, [router]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const res = await fetch('/member/doCheckPw', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ loginPw }),
-        });
-        if (res.ok) {
-            router.back();
-        } else {
-            alert('비밀번호가 올바르지 않습니다.');
+        setError('');
+        try {
+            const data = await checkPwUser({ pw });
+            if (data.resultCode === 'S-1') {
+                router.back();
+            } else {
+                setError('비밀번호가 올바르지 않습니다.');
+            }
+        } catch (e) {
+            setError('서버 오류가 발생했습니다.');
         }
     };
 
@@ -55,7 +59,7 @@ export default function CheckPw({ loginId }) {
                                         required
                                         className="input input-bordered input-primary input-sm w-full max-w-xs"
                                         value={loginPw}
-                                        onChange={(e) => setLoginPw(e.target.value)}
+                                        onChange={(e) => setPw(e.target.value)}
                                     />
                                 </td>
                             </tr>
@@ -69,6 +73,7 @@ export default function CheckPw({ loginId }) {
                             </tr>
                             </tbody>
                         </table>
+                        {error && <div className="text-red-500 text-center mt-2">{error}</div>}
                     </form>
                     <div className="mt-4">
                         <button
@@ -85,17 +90,3 @@ export default function CheckPw({ loginId }) {
     );
 }
 
-export async function getServerSideProps(ctx) {
-    const session = await getSession(ctx);
-    if (!session) {
-        return {
-            redirect: { destination: '/api/auth/signin', permanent: false },
-        };
-    }
-
-    return {
-        props: {
-            loginId: session.user.email, // 혹은 session.user.name 등 실제 loginId 필드로 조정
-        },
-    };
-}
