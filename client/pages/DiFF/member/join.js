@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import {signUp} from "@/lib/UserAPI";
 
 export default function JoinPage() {
     const router = useRouter()
@@ -10,7 +11,6 @@ export default function JoinPage() {
         checkLoginPw: '',
         name: '',
         nickName: '',
-        cellPhone: '',
         email: '',
     })
     const [error, setError] = useState('')
@@ -23,38 +23,40 @@ export default function JoinPage() {
         e.preventDefault()
         setError('')
 
-        const { loginId, loginPw, checkLoginPw, name, nickName, cellPhone, email } = form
+        const {loginId, loginPw, checkLoginPw, name, nickName, email} = form
         if (!loginId.trim()) return setError('아이디를 입력해주세요')
         if (!loginPw.trim()) return setError('비밀번호를 입력해주세요')
         if (loginPw !== checkLoginPw) return setError('비밀번호가 일치하지 않습니다')
         if (!name.trim()) return setError('이름을 입력해주세요')
         if (!nickName.trim()) return setError('닉네임을 입력해주세요')
-        if (!cellPhone.trim()) return setError('전화번호를 입력해주세요')
         if (!email.trim() || !email.includes('@')) return setError('유효한 이메일을 입력해주세요')
 
         try {
-            const res = await fetch('http://localhost:8080/api/member/doJoin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(form),
-            })
-            if (res.ok) {
-                router.push('/home/main')
-            } else {
-                const text = await res.text()
-                setError(text || '회원가입에 실패했습니다')
-            }
-        } catch {
-            setError('서버 요청 중 오류가 발생했습니다')
-        }
-    }
+            const res = await signUp({loginId, loginPw, checkLoginPw, name, nickName, email});
 
-    return (
+            console.log("🔍 응답 전체:", res);
+            const resultCode = res?.resultCode;
+            const message = res?.msg || '회원가입에 실패했습니다';
+
+            if (resultCode === 'S-1') {
+                console.log('✅ 메인 페이지로 이동합니다!');
+                router.push('/DiFF/home/main');
+            } else {
+                setError(message);
+            }
+
+
+        } catch (e) {
+            setError(e.response?.data?.msg || '서버 요청 중 오류가 발생했습니다');
+            console.error("회원가입 실패:", e.response?.data || e.message);
+        }
+
+    }
+        return (
         <div className="container mx-auto mt-12 max-w-min p-4 bg-neutral-200 border border-neutral-300 rounded-lg">
             <div className="title my-3 text-center text-2xl font-semibold">Join</div>
             {error && <p className="text-red-500 mb-4">{error}</p>}
-            <form onSubmit={handleSubmit} className="flex flex-col items-center">
+            <form onSubmit={handleSubmit} className="flex flex-col items-center" >
                 <input name="loginId" value={form.loginId} onChange={handleChange}
                        className="mb-6 border border-neutral-300 rounded-lg w-96 p-2.5"
                        placeholder="ID" />
@@ -70,9 +72,6 @@ export default function JoinPage() {
                 <input name="nickName" value={form.nickName} onChange={handleChange}
                        className="mb-6 border border-neutral-300 rounded-lg w-96 p-2.5"
                        placeholder="NickName" />
-                <input name="cellPhone" value={form.cellPhone} onChange={handleChange}
-                       className="mb-6 border border-neutral-300 rounded-lg w-96 p-2.5"
-                       placeholder="Cell Phone" />
                 <input type="email" name="email" value={form.email} onChange={handleChange}
                        className="mb-6 border border-neutral-300 rounded-lg w-96 p-2.5"
                        placeholder="E-mail" />
