@@ -68,7 +68,6 @@ export async function DiFFinit(memberId, branch) {
     // .DiFF 생성
     await mkDiFFdirectory(mkRepoAndGetId);
 
-
     q.close();
     return checksum;
 }
@@ -114,10 +113,10 @@ export function getDiFF(from, to) {
     const wow = '7a315432b20dbeaf6403ef8c7ece8fe33a0c674c';
 
     return new Promise((resolve, reject) => {
-        const extensions = ['*.mjs', '*.js', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp',
+        const extensions = ['*.mjs', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp', // '*.js',
             '*.py', '*.c', '*.cs', '*.cpp', '*.php', '*.go', '*.rs', '*.rb', '*.kt', '*.swift'];
 
-        const args = ['diff', '-W', wow, to, '--', ...extensions];
+        const args = ['diff', '-W', from, to, '--', ...extensions];
         const child = spawn('git', args, { shell: true });
 
         let output = '';

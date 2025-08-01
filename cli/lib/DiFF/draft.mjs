@@ -21,13 +21,10 @@ export async function mkDraft(memberId, branch) {
 
     const getDraft = await sendDiFF(memberId, to, diff);
     if(getDraft){
-        const lastChecksum = await updateMeta(branch, to);
-        if(lastChecksum) {
-            await appendLogs(branch, from, to);
-        }
+        await updateMeta(branch, to);
+        await appendLogs(branch, from, to);
+
     }
-
-
 }
 
 /** meta 마지막 체크섬 업데이트 **/
@@ -40,7 +37,6 @@ export async function updateMeta(branchName, lastChecksum) {
         if (!branch) {
             console.log(chalk.bgBlueBright(`meta에 branch가 존재하지 않아 새로 생성합니다.`));
             await appendMeta({ name: branchName, toHash: lastChecksum });
-            return true;
         }
 
         branch.lastRequestedCommit = lastChecksum;
@@ -56,36 +52,32 @@ export async function updateMeta(branchName, lastChecksum) {
 
 /** logs 업데이트 **/
 export async function appendLogs(branch, from, to) {
-    const logPath = path.join('.DiFF', 'logs', `${branch}.json`);
+    const logPath = `.DiFF/logs/${branch}.json`;
 
+    let logs = [];
+
+    // 1. 파일이 이미 존재한다면 내용 읽기
     try {
-        let logs = [];
-
-        try {
-            const content = await fsp.readFile(logPath, 'utf-8');
-            logs = JSON.parse(content);
-            console.log('기존 로그 읽기 성공:', logs);
-        } catch (e) {
-            if (e.code !== 'ENOENT') throw e;
-            console.log('로그 파일 새로 생성');
-        }
-
-        const newLog = {
-            requestAt: DateTime.local().toISO(),
-            from,
-            to
-        };
-        logs.push(newLog);
-
-        await fsp.writeFile(logPath, JSON.stringify(logs, null, 2), { encoding: 'utf-8' });
-        console.log('로그 추가 완료:', newLog);
-
+        const content = await fsp.readFile(logPath, 'utf-8');
+        logs = JSON.parse(content);
     } catch (err) {
-        console.error(`로그 추가 실패: ${err.message}`);
-        throw err;
+        if (err.code === 'ENOENT') {
+            logs = [];
+        } else {
+            throw err;
+        }
     }
-}
 
+    // 2. 새 로그 추가
+    logs.push({
+        requestAt: DateTime.local().toISO(),
+        from,
+        to
+    });
+
+    // 3. 파일에 다시 쓰기
+    await fsp.writeFile(logPath, JSON.stringify(logs, null, 2), { encoding: 'utf-8' });
+}
 
 /** .DiFF 디렉토리에서 브랜치 내용 읽기 **/
 export async function getLastRequestChecksum(branch){

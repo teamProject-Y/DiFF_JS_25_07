@@ -69,6 +69,11 @@ program
 
         if(isDiFF === 'true'){
             console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
+            // const draft = await mkDraft(memberId, selectedBranch);
+            // if(draft === null){
+            //     console.err("mkdraft error");
+            //     process.exit(1);
+            // }
         } else {
             console.log(chalk.bgRedBright(chalk.black('DiFF is not exists')));
             await DiFFinit(memberId, selectedBranch);
