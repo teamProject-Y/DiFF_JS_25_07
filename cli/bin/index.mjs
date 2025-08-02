@@ -6,7 +6,7 @@ import chalk from 'chalk';
 import {verifyGitUser} from '../lib/api/api.mjs';
 import { existsGitDirectory, existsDiFF, DiFFinit,
     branchExists, doAnalysis } from '../lib/git/execSync.mjs';
-import {mkDraft} from "../lib/DiFF/draft.mjs";
+import {appendLogs, mkDraft} from "../lib/DiFF/draft.mjs";
 
 const program = new Command();
 
@@ -69,6 +69,11 @@ program
 
         if(isDiFF === 'true'){
             console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
+            // const draft = await mkDraft(memberId, selectedBranch);
+            // if(draft === null){
+            //     console.err("mkdraft error");
+            //     process.exit(1);
+            // }
         } else {
             console.log(chalk.bgRedBright(chalk.black('DiFF is not exists')));
             await DiFFinit(memberId, selectedBranch);
@@ -79,11 +84,6 @@ program
             console.log(chalk.bgRedBright(chalk.black('fail to make draft.')));
         }
         console.log(chalk.bgCyanBright(chalk.black("make draft successfully")));
-
-        // console.log('Making to draft...');
-        // console.log('*', chalk.green(branch));
-        // console.log('Options:', options);
-        // console.log('done.');
     });
 
 program.parse();
