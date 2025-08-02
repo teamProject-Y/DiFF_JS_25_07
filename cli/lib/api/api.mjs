@@ -81,10 +81,11 @@ export async function sendDiFF(memberId, to, diff) {
 
         if (data.resultCode?.startsWith('S-')) {
             console.log(chalk.bgCyanBright(chalk.black("✅ server에 diff 보내기 성공")));
+
             return true;
         } else {
-            console.log(chalk.bgRedBright(chalk.white("❌ server에 diff 보내기 실패")));
-            console.log('📦 서버 응답 데이터:', data);
+            console.log(chalk.bgRedBright(chalk.white(data.msg)));
+            console.log('서버 응답 데이터:', data);
             return false;
         }
 

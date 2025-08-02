@@ -1,0 +1,18 @@
+[
+  {
+    "branchName": "main",
+    "root": true,
+    "createdAt": "2025-08-01T22:47:14.412+09:00",
+    "lastRequestedCommit": "903e983b64852591b902ea073670cc6a5a8377af",
+    "lastRequestedAt": null,
+    "requestCount": 0
+  },
+  {
+    "branchName": "yunzivv",
+    "root": false,
+    "createdAt": "2025-08-01T22:47:14.413+09:00",
+    "lastRequestedCommit": "6adfaff40e6a5761a596a3197ee8caaa6c8e784e",
+    "lastRequestedAt": "2025-08-02T00:05:01.978+09:00",
+    "requestCount": 1
+  }
+]
