@@ -24,14 +24,6 @@ program
     // .option('--last-only', '첫커밋과 마지막 커밋만 추적')
     .action(async (branch, options) => {
 
-        const isRunning = { value: true };
-        const animationPromise = runAnimation(isRunning);
-
-        await runMainTask();
-
-        isRunning.value = false;
-        await animationPromise;
-
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
         console.log(chalk.bgCyanBright(chalk.black("selectedBranch: ", selectedBranch)));

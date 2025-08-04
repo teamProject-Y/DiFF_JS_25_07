@@ -74,31 +74,70 @@ export async function DiFFinit(memberId, branch) {
 
 
 /** zip 파일 **/
+// export async function doAnalysis(branch) {
+//     try {
+//         const hasTarget = execSync(`[ -d target ] && echo true || echo false`).toString().trim();
+//
+//         if (hasTarget === "true") {
+//             execSync(`
+//                 git archive --format=zip --output=withoutTarget.zip ${branch} &&
+//                 rm -rf tempdir && rm -rf difftest.zip &&
+//                 mkdir tempdir &&
+//                 unzip withoutTarget.zip -d tempdir &&
+//                 cp -r target tempdir/ &&
+//                 cd tempdir && zip -r ../difftest.zip . &&
+//                 cd .. &&
+//                 rm withoutTarget.zip &&
+//                 rm -rf tempdir
+//             `);
+//         } else {
+//             execSync(`git archive --format=zip --output=difftest.zip ${branch}`);
+//         }
+//
+//         console.log(chalk.bgCyanBright(chalk.black("zip success")));
+//         execSync(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+//         execSync(`rm -f difftest.zip`);
+//         return true;
+//
+//     } catch (err) {
+//         console.error("zip error:", err.message);
+//         return false;
+//     }
+// }
+const sh = (cmd) => new Promise((resolve, reject) => {
+    const proc = spawn(cmd, { shell: true, stdio: 'ignore' });
+    proc.on('exit', code => code === 0 ? resolve() : reject(new Error(`${cmd} failed`)));
+});
+
+/**
+ * 애니메이션과 병렬 실행 가능한 doAnalysis
+ */
 export async function doAnalysis(branch) {
     try {
-        const hasTarget = execSync(`[ -d target ] && echo true || echo false`).toString().trim();
+        const hasTarget = await new Promise((resolve) => {
+            const p = spawn('[ -d target ] && echo true || echo false', { shell: true });
+            let out = '';
+            p.stdout.on('data', d => out += d.toString());
+            p.on('close', () => resolve(out.trim() === 'true'));
+        });
 
-        if (hasTarget === "true") {
-            execSync(`
-                git archive --format=zip --output=withoutTarget.zip ${branch} &&
-                rm -rf tempdir && rm -rf difftest.zip &&
-                mkdir tempdir &&
-                unzip withoutTarget.zip -d tempdir &&
-                cp -r target tempdir/ &&
-                cd tempdir && zip -r ../difftest.zip . &&
-                cd .. &&
-                rm withoutTarget.zip &&
-                rm -rf tempdir
-            `);
+        if (hasTarget) {
+            await sh(`git archive --format=zip --output=withoutTarget.zip ${branch}`);
+            await sh(`rm -rf tempdir difftest.zip`);
+            await sh(`mkdir tempdir`);
+            await sh(`unzip withoutTarget.zip -d tempdir`);
+            await sh(`cp -r target tempdir/`);
+            await sh(`cd tempdir && zip -r ../difftest.zip .`);
+            await sh(`rm withoutTarget.zip && rm -rf tempdir`);
         } else {
-            execSync(`git archive --format=zip --output=difftest.zip ${branch}`);
+            await sh(`git archive --format=zip --output=difftest.zip ${branch}`);
         }
 
         console.log(chalk.bgCyanBright(chalk.black("zip success")));
-        execSync(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
-        execSync(`rm -f difftest.zip`);
-        return true;
+        await sh(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+        await sh(`rm -f difftest.zip`);
 
+        return true;
     } catch (err) {
         console.error("zip error:", err.message);
         return false;
