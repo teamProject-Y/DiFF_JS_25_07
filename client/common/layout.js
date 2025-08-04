@@ -1,7 +1,6 @@
 // common/layout.js
 "use client"
 
-import Script from 'next/script'
 import Head from 'next/head'
 import Header from '../common/header'
 import { useEffect } from "react";
