@@ -105,6 +105,13 @@ export function doAnalysis(branch) {
     }
 }
 
+import { sleep } from '../util/interaction.mjs';
+
+export async function runMainTask() {
+    console.log("작업을 시작합니다. (3분 동안)");
+    await sleep(10 * 1000); // 3분
+}
+
 export function getDiFF(from, to) {
 
     console.log(chalk.bgCyanBright(chalk.black(from)));
