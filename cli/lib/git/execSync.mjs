@@ -74,7 +74,7 @@ export async function DiFFinit(memberId, branch) {
 
 
 /** zip 파일 **/
-export function doAnalysis(branch) {
+export async function doAnalysis(branch) {
     try {
         const hasTarget = execSync(`[ -d target ] && echo true || echo false`).toString().trim();
 
@@ -117,13 +117,13 @@ export function getDiFF(from, to) {
     console.log(chalk.bgCyanBright(chalk.black(from)));
     console.log(chalk.bgCyanBright(chalk.black(to)));
 
-    const wow = '7a315432b20dbeaf6403ef8c7ece8fe33a0c674c';
+    const wow = '783b303022a0ffacc2fb2b28cc15b60bb74f3bc7';
 
     return new Promise((resolve, reject) => {
         const extensions = ['*.mjs', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp', // '*.js',
             '*.py', '*.c', '*.cs', '*.cpp', '*.php', '*.go', '*.rs', '*.rb', '*.kt', '*.swift'];
 
-        const args = ['diff', '-W', from, to, '--', ...extensions];
+        const args = ['diff', '-W', wow, to, '--', ...extensions];
         const child = spawn('git', args, { shell: true });
 
         let output = '';
