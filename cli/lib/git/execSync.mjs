@@ -8,6 +8,8 @@ import {mkDiFFdirectory} from "../DiFF/init.mjs";
 import path from "path";
 import fs from "fs";
 
+let repoId = 0;
+
 /** git repository 여부 **/
 export async function existsGitDirectory(){
 
@@ -57,33 +59,96 @@ export async function DiFFinit(memberId, branch) {
     let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
         .toString().trim();
 
-    const checksum = firstCommit.split(' ')[0];
+    const firstChecksum = firstCommit.split(' ')[0];
     console.log(chalk.bgCyanBright(chalk.black("first commit: ", firstCommit)));
 
     // 서버에 리포지토리 DB 데이터 생성 요청
-    let mkRepoAndGetId = await mkRepo(memberId, repoName, checksum);
-    if(mkRepoAndGetId === null){
+    repoId = await mkRepo(memberId, repoName, firstChecksum);
+    if(repoId === null){
         return null;
     }
-    console.log(chalk.bgCyanBright(chalk.black("repoID: ", mkRepoAndGetId)));
+    console.log(chalk.bgCyanBright(chalk.black("repoID: ", repoId)));
 
     // .DiFF 생성
-    await mkDiFFdirectory(mkRepoAndGetId);
+    await mkDiFFdirectory(repoId);
 
     q.close();
-    return checksum;
+    return firstChecksum;
+}
+
+export async function getRepoId(branch) {
+    return repoId;
 }
 
 /** 애니메이션과 병렬 실행 가능한 doAnalysis **/
-export async function doAnalysis(branch) {
+// export async function doAnalysis(branch) {
+//     try {
+//         const hasTarget = await new Promise((resolve) => {
+//             const p = spawn('[ -d target ] && echo true || echo false', { shell: true });
+//             let out = '';
+//             p.stdout.on('data', d => out += d.toString());
+//             p.on('close', () => resolve(out.trim() === 'true'));
+//         });
+//
+//         if (hasTarget) {
+//             await sh(`git archive --format=zip --output=withoutTarget.zip ${branch}`);
+//             await sh(`rm -rf tempdir difftest.zip`);
+//             await sh(`mkdir tempdir`);
+//             await sh(`unzip withoutTarget.zip -d tempdir`);
+//             await sh(`cp -r target tempdir/`);
+//             await sh(`cd tempdir && zip -r ../difftest.zip .`);
+//             await sh(`rm withoutTarget.zip && rm -rf tempdir`);
+//         } else {
+//             await sh(`git archive --format=zip --output=difftest.zip ${branch}`);
+//         }
+//
+//         // console.log(chalk.bgCyanBright(chalk.black("zip success")));
+//         // await sh(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+//         await sh(`curl -s -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+//         await sh(`rm -f difftest.zip`);
+//
+//         return true;
+//     } catch (err) {
+//         console.error("zip error:", err.message);
+//         return false;
+//     }
+// }
+
+import FormData from 'form-data';
+import axios from "axios";
+import {getRepositoryId} from "../DiFF/draft.mjs";
+// import fs from 'fs';
+// import axios from 'axios';
+
+// import { sh } from './sh.mjs'; // 기존에 사용하던 유틸
+
+/** 코드 분석 **/
+export async function doAnalysis(branch, memberId) {
     try {
-        const hasTarget = await new Promise((resolve) => {
+        // console.log(chalk.blueBright(`📦 doAnalysis 시작: branch=${branch}, memberId=${memberId}`));
+        const lastChecksum = await getLastChecksum(branch);
+        const repositoryId = await getRepositoryId(branch);
+
+        // target 폴더 존재 여부 확인
+        const hasTarget = await new Promise((resolve, reject) => {
             const p = spawn('[ -d target ] && echo true || echo false', { shell: true });
             let out = '';
+            let err = '';
             p.stdout.on('data', d => out += d.toString());
-            p.on('close', () => resolve(out.trim() === 'true'));
+            p.stderr.on('data', d => err += d.toString());
+            p.on('close', code => {
+                if (code === 0) {
+                    resolve(out.trim() === 'true');
+                } else {
+                    reject(new Error(`target check failed: ${err}`));
+                }
+            });
+            p.on('error', err => reject(new Error(`spawn error: ${err.message}`)));
         });
 
+        // console.log(chalk.gray(`📁 hasTarget: ${hasTarget}`));
+
+        // 압축 준비
         if (hasTarget) {
             await sh(`git archive --format=zip --output=withoutTarget.zip ${branch}`);
             await sh(`rm -rf tempdir difftest.zip`);
@@ -96,14 +161,33 @@ export async function doAnalysis(branch) {
             await sh(`git archive --format=zip --output=difftest.zip ${branch}`);
         }
 
-        // console.log(chalk.bgCyanBright(chalk.black("zip success")));
-        // await sh(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
-        await sh(`curl -s -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
-        await sh(`rm -f difftest.zip`);
+        if (!fs.existsSync('difftest.zip')) {
+            throw new Error('difftest.zip 파일이 존재하지 않습니다.');
+        }
 
+        // FormData 생성 및 전송
+        const { default: FormData } = await import('form-data');
+        const form = new FormData();
+
+        form.append('file', fs.createReadStream('difftest.zip'));
+        form.append('meta', JSON.stringify({
+            memberId,
+            repositoryId,
+            lastChecksum
+        }));
+
+        const res = await axios.post('http://localhost:8080/upload', form, {
+            headers: form.getHeaders(),
+        });
+
+        //console.log(form.getHeaders());
+        // console.log(chalk.green(`✅ 서버 응답: ${JSON.stringify(res.data, null, 2)}`));
+
+        fs.unlinkSync('difftest.zip');
         return true;
     } catch (err) {
-        console.error("zip error:", err.message);
+        console.error(chalk.redBright(`doAnalysis 실패: ${err.message}`));
+        console.error(err.stack);
         return false;
     }
 }

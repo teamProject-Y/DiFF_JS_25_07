@@ -51,13 +51,23 @@ program
         }
         console.log(chalk.bgCyanBright(chalk.black("memberId :",  memberId)));
 
+        /** DiFF 디렉토리 존재 여부 **/
+        const isDiFF = await existsDiFF();
+
+        if(isDiFF === 'true'){
+            console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
+        } else {
+            console.log(chalk.bgRedBright(chalk.black('DiFF is not exists')));
+            await DiFFinit(memberId, selectedBranch);
+        }
+
         /** 코드 점수 **/
         if (options.analysis) {
             console.log(chalk.bgCyanBright(chalk.black('분석 시작')));
             const isRunning = { value: true };
             const animationPromise = runAnimation(isRunning);
 
-            const analysis = await doAnalysis(selectedBranch);
+            const analysis = await doAnalysis(selectedBranch, memberId);
 
             isRunning.value = false;
             await animationPromise;
@@ -70,16 +80,6 @@ program
             }
         } else {
             console.log(chalk.bgCyanBright(chalk.black('분석 제외 (--no-analysis)')));
-        }
-
-        /** DiFF 디렉토리 존재 여부 **/
-        const isDiFF = await existsDiFF();
-
-        if(isDiFF === 'true'){
-            console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
-        } else {
-            console.log(chalk.bgRedBright(chalk.black('DiFF is not exists')));
-            await DiFFinit(memberId, selectedBranch);
         }
 
         const draft = await mkDraft(memberId, selectedBranch);
