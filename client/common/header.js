@@ -73,12 +73,10 @@ export default function Header() {
                         <ul className="absolute hidden group-hover:block w-full top-full py-5 text-center text-lg whitespace-nowrap bg-white shadow-lg">
                             {['전체 게시판','공지사항','자유 게시판','QnA'].map((label, id) => (
                                 <li key={id}>
-                                    <Link
-                                        href={`/client/pages/DiFF/article/list?boardId=${id}`}
-                                        className="block h-full p-1 hover:underline hover:text-neutral-400"
-                                    >
+                                    <Link href={`/DiFF/article/list`} className="block h-full p-1 hover:underline hover:text-neutral-400">
                                         {label}
                                     </Link>
+
                                 </li>
                             ))}
                         </ul>
