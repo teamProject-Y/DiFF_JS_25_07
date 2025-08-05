@@ -81,6 +81,7 @@ export async function sendDiFF(memberId, repositoryId, to, diff) {
         );
 
         if (data.resultCode?.startsWith('S-')) {
+
             console.log(chalk.bgCyanBright(chalk.black("server에 diff 보내기 성공")));
 
             return true;
