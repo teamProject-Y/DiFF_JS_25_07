@@ -67,7 +67,7 @@ export default function Header() {
                         </Link>
                     </li>
                     <li className="relative group">
-                        <Link href="/DiFF/article/list" className="block px-6">
+                        <Link href="/api/DiFF/article/list" className="block px-6">
                             LIST
                         </Link>
                         <ul className="absolute hidden group-hover:block w-full top-full py-5 text-center text-lg whitespace-nowrap bg-white shadow-lg">
