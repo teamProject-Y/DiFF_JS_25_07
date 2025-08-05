@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.DiFF
+// 그럼 걍 너무많으면 안된다고 메세지 ? 그럴까 그럼 사용자가 알아서 mk조절 하지 안ㄴㅎ을까 좋다 관저동인데 2동 2동에 내가 아는거만 3개

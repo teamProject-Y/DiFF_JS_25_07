@@ -60,18 +60,18 @@ function MyInfo({ member }) {
 export async function getServerSideProps(context) {
     const session = await getSession(context)
 
-    if(!session) {
-        return (
+    if (!session) {
+        return {
             redirect: {
-                desination: "/DiFF/member/login",
+                destination: "/DiFF/member/login",
                 permanent: false,
-            }
-        )
+            },
+        }
     }
 
-    return (
-        props: { session }
-    )
+    return {
+        props: { session },
+    }
 }
 
 // Layout에서 쓸 페이지 타이틀
