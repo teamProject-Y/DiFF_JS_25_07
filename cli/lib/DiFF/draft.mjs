@@ -6,7 +6,7 @@ import fsp from 'fs/promises';
 import {DateTime} from "luxon";
 import chalk from "chalk";
 import {appendMeta} from "./init.mjs";
-
+import path from "path";
 
 export async function mkDraft(memberId, branch) {
 
@@ -21,6 +21,7 @@ export async function mkDraft(memberId, branch) {
     }
 
     const getDraft = await sendDiFF(memberId, repositoryId, to, diff);
+
     if(getDraft){
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);

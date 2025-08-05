@@ -83,8 +83,8 @@ program
         }
 
         const draft = await mkDraft(memberId, selectedBranch);
-
-        console.log(chalk.bgCyanBright(chalk.black("draft 생성 시작")));
+  
+        console.log(chalk.bgCyanBright(chalk.black("draft 생성 시작")))
 
         if(draft === null){
             console.log(chalk.bgRedBright(chalk.black('fail to make draft.')));
