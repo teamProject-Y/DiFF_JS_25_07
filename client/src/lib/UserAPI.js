@@ -13,31 +13,39 @@ UserApi.interceptors.request.use(
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
+            console.log("📦 accessToken:", ACCESS_TOKEN);
+
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
+
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+            console.log("📦 refreshToken:", REFRESH_TOKEN);
+
             if (REFRESH_TOKEN) {
                 config.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
             }
+
+            console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-// /** 2. 토큰/헤더 동적 세팅 */
-// export const setAuthHeader = () => {
-//     if (typeof window !== "undefined") {
-//         const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer ';
-//         const ACCESS_TOKEN = localStorage.getItem("accessToken");
-//         UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
-//         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-//         if (REFRESH_TOKEN) {
-//             UserApi.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
-//         }
-//     }
-// };
+
+/** 2. 토큰/헤더 동적 세팅 */
+export const setAuthHeader = () => {
+    if (typeof window !== "undefined") {
+        const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer ';
+        const ACCESS_TOKEN = localStorage.getItem("accessToken");
+        UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+        const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+        if (REFRESH_TOKEN) {
+            UserApi.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+        }
+    }
+};
 
 /** 3. 토큰 자동 재발급 (Refresh) */
 const refreshAccessToken = async () => {
@@ -118,4 +126,3 @@ export const deleteUser = async () => {
 
 // 5-7. 토큰 수동 갱신 (필요하면 직접 사용)
 // export const manualRefreshToken = refreshAccessToken;
-
