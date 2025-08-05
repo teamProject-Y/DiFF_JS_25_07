@@ -5,6 +5,8 @@ import chalk from "chalk";
 import {getResponse} from "../util/interaction.mjs";
 import {isUsableRepoName, mkRepo} from "../api/api.mjs";
 import {mkDiFFdirectory} from "../DiFF/init.mjs";
+import path from "path";
+import fs from "fs";
 
 /** git repository 여부 **/
 export async function existsGitDirectory(){
@@ -129,6 +131,20 @@ export async function sh(cmd, passthrough = false) {
     });
 }
 
+/** .gitignore 파일을 파싱해서 제외 경로 리스트를 반환 **/
+function getGitIgnoreExcludes(repoPath = process.cwd()) {
+    const ignorePath = path.join(repoPath, '.gitignore');
+    if (!fs.existsSync(ignorePath)) return [];
+
+    const lines = fs.readFileSync(ignorePath, 'utf-8')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('#'));
+
+    return lines.map(pattern => `:(exclude)${pattern}`);
+}
+
+/** 유효한 파일만 diff 추출 **/
 export function getDiFF(from, to) {
 
     console.log(chalk.bgCyanBright(chalk.black(from)));
@@ -138,11 +154,13 @@ export function getDiFF(from, to) {
     // const wow = '0ca64e180ab30fc853c887de27e72ef2595d7546';
 
     return new Promise((resolve, reject) => {
-        const extensions = ['*.mjs', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp', // '*.js',
+        const extensions = ['*.mjs', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp', '*.js',
             '*.py', '*.c', '*.cs', '*.cpp', '*.php', '*.go', '*.rs', '*.rb', '*.kt', '*.swift'];
 
-        const args = ['diff', '-W', from, to, '--', ...extensions];
-        const child = spawn('git', args, { shell: true });
+        const excludePaths = getGitIgnoreExcludes();
+
+        const args = ['diff', '-W', from, to, '--', ...extensions, ...excludePaths];
+        const child = spawn('git', args);
 
         let output = '';
 
