@@ -4,9 +4,10 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 
 import {verifyGitUser} from '../lib/api/api.mjs';
-import { existsGitDirectory, existsDiFF, DiFFinit,
-    branchExists, doAnalysis } from '../lib/git/execSync.mjs';
-import {appendLogs, mkDraft} from "../lib/DiFF/draft.mjs";
+import {
+    existsGitDirectory, existsDiFF, DiFFinit, branchExists, doAnalysis } from '../lib/git/execSync.mjs';
+import {mkDraft} from "../lib/DiFF/draft.mjs";
+import {runAnimation} from "../lib/util/interaction.mjs";
 
 const program = new Command();
 
@@ -50,10 +51,27 @@ program
         }
         console.log(chalk.bgCyanBright(chalk.black("memberId :",  memberId)));
 
+        /** DiFF 디렉토리 존재 여부 **/
+        const isDiFF = await existsDiFF();
+
+        if(isDiFF === 'true'){
+            console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
+        } else {
+            console.log(chalk.bgRedBright(chalk.black('DiFF is not exists')));
+            await DiFFinit(memberId, selectedBranch);
+        }
+
         /** 코드 점수 **/
         if (options.analysis) {
             console.log(chalk.bgCyanBright(chalk.black('분석 시작')));
-            const analysis = doAnalysis(selectedBranch);
+            const isRunning = { value: true };
+            const animationPromise = runAnimation(isRunning);
+
+            const analysis = await doAnalysis(selectedBranch, memberId);
+
+            isRunning.value = false;
+            await animationPromise;
+
             if(analysis === false){
                 console.log(chalk.bgRedBright(chalk.black("analysis error")));
                 process.exit(1);
@@ -64,22 +82,10 @@ program
             console.log(chalk.bgCyanBright(chalk.black('분석 제외 (--no-analysis)')));
         }
 
-        /** DiFF 디렉토리 존재 여부 **/
-        const isDiFF = await existsDiFF();
-
-        if(isDiFF === 'true'){
-            console.log(chalk.bgCyanBright(chalk.black("DiFF is exists")));
-            // const draft = await mkDraft(memberId, selectedBranch);
-            // if(draft === null){
-            //     console.err("mkdraft error");
-            //     process.exit(1);
-            // }
-        } else {
-            console.log(chalk.bgRedBright(chalk.black('DiFF is not exists')));
-            await DiFFinit(memberId, selectedBranch);
-        }
-
         const draft = await mkDraft(memberId, selectedBranch);
+  
+        console.log(chalk.bgCyanBright(chalk.black("draft 생성 시작")))
+
         if(draft === null){
             console.log(chalk.bgRedBright(chalk.black('fail to make draft.')));
         }

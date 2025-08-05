@@ -15,17 +15,145 @@ export async function getResponse() {
     };
 }
 
-/** 로딩 애니메이션 **/
-function startAsciiAnimation() {
-    const frames = [ `wating`, `...frame2...`, `...frame3...`, `...frame4...` ];
-    let index = 0;
+export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    console.log("start 압축")
-    const interval = setInterval(() => {
-        process.stdout.write('\x1Bc');
-        console.log(frames[index % frames.length]);
-        index++;
-    }, 2000);
+const FRAMES = [
+    `      ___                       ___           ___     
+     /\\  \\          ___        /\\  \\         /\\  \\    
+    /::\\  \\        /\\  \\      /::\\  \\       /::\\  \\   
+   /:/\\:\\  \\       \\:\\  \\    /:/\\:\\  \\     /:/\\:\\  \\  
+  /:/  \\:\\__\\      /::\\__\\  /::\\~\\:\\  \\   /::\\~\\:\\  \\ 
+ /:/__/ \\:|__|  __/:/\\/__/ /:/\\:\\ \\:\\__\\ /:/\\:\\ \\:\\__\\
+ \\:\\  \\ /:/  / /\\/:/  /    \\/__\\:\\ \\/__/ \\/__\\:\\ \\/__/
+  \\:\\  /:/  /  \\::/__/          \\:\\__\\        \\:\\__\\  
+   \\:\\/:/  /    \\:\\__\\           \\/__/         \\/__/  
+    \\::/__/      \\/__/                                
+     ~~`,
+    `                                ___           ___     
+     _____                     /\\__\\         /\\__\\    
+    /::\\  \\       ___         /:/ _/_       /:/ _/_   
+   /:/\\:\\  \\     /\\__\\       /:/ /\\__\\     /:/ /\\__\\  
+  /:/  \\:\\__\\   /:/__/      /:/ /:/  /    /:/ /:/  /  
+ /:/__/ \\:|__| /::\\  \\     /:/_/:/  /    /:/_/:/  /   
+ \\:\\  \\ /:/  / \\/\\:\\  \\__  \\:\\/:/  /     \\:\\/:/  /    
+  \\:\\  /:/  /   ~~\\:\\/\\__\\  \\::/__/       \\::/__/     
+   \\:\\/:/  /       \\::/  /   \\:\\  \\        \\:\\  \\     
+    \\::/  /        /:/  /     \\:\\__\\        \\:\\__\\    
+     \\/__/         \\/__/       \\/__/         \\/__/`,
+    `     _____                      ___         ___   
+    /  /::\\       ___          /  /\\       /  /\\  
+   /  /:/\\:\\     /  /\\        /  /:/_     /  /:/_ 
+  /  /:/  \\:\\   /  /:/       /  /:/ /\\   /  /:/ /\\
+ /__/:/ \\__\\:| /__/::\\      /  /:/ /:/  /  /:/ /:/
+ \\  \\:\\ /  /:/ \\__\\/\\:\\__  /__/:/ /:/  /__/:/ /:/ 
+  \\  \\:\\  /:/     \\  \\:\\/\\ \\  \\:\\/:/   \\  \\:\\/:/  
+   \\  \\:\\/:/       \\__\\::/  \\  \\::/     \\  \\::/   
+    \\  \\::/        /__/:/    \\  \\:\\      \\  \\:\\   
+     \\__\\/         \\__\\/      \\  \\:\\      \\  \\:\\  
+                               \\__\\/       \\__\\/`,
+    `      ___                                              
+     /  /\\           ___         ___           ___     
+    /  /::\\         /__/\\       /  /\\         /  /\\    
+   /  /:/\\:\\        \\__\\:\\     /  /::\\       /  /::\\   
+  /  /:/  \\:\\       /  /::\\   /  /:/\\:\\     /  /:/\\:\\  
+ /__/:/ \\__\\:|   __/  /:/\\/  /  /::\\ \\:\\   /  /::\\ \\:\\ 
+ \\  \\:\\ /  /:/  /__/\\/:/~~  /__/:/\\:\\ \\:\\ /__/:/\\:\\ \\:\\
+  \\  \\:\\  /:/   \\  \\::/     \\__\\/  \\:\\_\\/ \\__\\/  \\:\\_\\/
+   \\  \\:\\/:/     \\  \\:\\          \\  \\:\\        \\  \\:\\  
+    \\__\\::/       \\__\\/           \\__\\/         \\__\\/  
+        ~~`
+];
 
-    return interval;
+// export async function runAnimation(isRunningRef) {
+//     const frames = [];
+//     const lineCount = 11;
+//     let t = 0;
+//
+//     for (let i = 0; i < lineCount; i++) {
+//         console.log('');
+//     }
+//
+//     while (isRunningRef.value) {
+//         // 커서를 위로 이동해서 11줄 덮어쓰기
+//         process.stdout.write(`\x1B[${lineCount}A`);
+//
+//         for (let i = 0; i < lineCount; i++) {
+//             const frame = frames[(t + i) % frames.length];
+//             process.stdout.write(`줄 ${i + 1}: ${frame}\n`);
+//         }
+//
+//         t++;
+//         await sleep(200); // 빠르게 움직이게 하려면 100~200ms
+//     }
+//
+//     process.stdout.write(`\x1B[${lineCount}A`);
+//     for (let i = 0; i < lineCount; i++) {
+//         process.stdout.write(`줄 ${i + 1}: 완료!\n`);
+//     }
+// }
+
+// export async function runAnimation(isRunningRef) {
+//     let t = 0;
+//     const lineCount = 13;
+//
+//     process.stdout.write('\n'.repeat(13));
+//
+//     while (isRunningRef.value) {
+//         process.stdout.write(`\x1B[${lineCount}A`); // 커서 위로
+//
+//         const lines = FRAMES[t % FRAMES.length].split('\n');
+//
+//         for (let i = 0; i < lineCount; i++) {
+//             process.stdout.write('\x1B[2K');               // 현재 줄 전체 지움
+//             process.stdout.write((lines[i] || '') + '\n'); // 줄이 없으면 빈 줄
+//         }
+//
+//         t++;
+//         await sleep(300);
+//     }
+//
+//     process.stdout.write(`\x1B[${lineCount}A`);
+//     for (let i = 0; i < lineCount; i++) {
+//         process.stdout.write('\x1B[2K\n');
+//     }
+//
+//     process.stdout.write('\x1B[14A');
+//     process.stdout.write('생성 완료\n');
+// }
+
+export async function runAnimation(isRunningRef) {
+    let t = 0;
+    const maxLines = Math.max(...FRAMES.map(f => f.split('\n').length));
+
+    // 커서 숨기기
+    process.stdout.write('\x1B[?25l');
+
+    // 빈 줄로 자리 만들기
+    process.stdout.write('\n'.repeat(maxLines));
+
+    while (isRunningRef.value) {
+        process.stdout.write(`\x1B[${maxLines}A`); // 맨 위로
+
+        const frameLines = FRAMES[t % FRAMES.length].split('\n');
+        for (let i = 0; i < maxLines; i++) {
+            process.stdout.write('\x1B[2K'); // 한 줄 클리어
+            process.stdout.write((frameLines[i] || '') + '\n');
+        }
+
+        t++;
+        await sleep(300);
+    }
+
+    // 애니메이션 클리어
+    process.stdout.write(`\x1B[${maxLines}A`);
+    for (let i = 0; i < maxLines; i++) {
+        process.stdout.write('\x1B[2K\n');
+    }
+
+    process.stdout.write(`\x1B[${maxLines}A`); // 맨 위로
+    process.stdout.write('\x1B[2K');           // 줄 클리어
+    process.stdout.write('analysis success.\n');
+
+    // 커서 다시 보이기
+    process.stdout.write('\x1B[?25h');
 }

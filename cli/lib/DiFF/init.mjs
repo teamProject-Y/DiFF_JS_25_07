@@ -1,5 +1,4 @@
 import fs from 'fs';
-import fsp from 'fs/promises';
 import path from "path";
 import {getRemoteUrl} from "../git/simpleGit.mjs";
 import {DateTime} from "luxon";
