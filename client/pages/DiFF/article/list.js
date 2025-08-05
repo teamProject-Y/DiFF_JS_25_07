@@ -1,56 +1,46 @@
 // pages/DiFF/article/list.js
-'use client';
-
 import { useEffect, useState } from 'react';
-import { fetchArticles } from '../../../src/lib/ArticleAPI'; //
-
+import {fetchArticles} from "@/lib/ArticleAPI";
+ // 경로 확인!
 
 export default function ArticleListPage() {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // CSR 상태값
-    const [page, setPage] = useState(1);;
-    const [searchItem, setSearchItem] = useState(1);
+    // 상태: 검색 조건이나 페이지
+    const [page, setPage] = useState(1);
+    const [searchItem, setSearchItem] = useState(0);
     const [keyword, setKeyword] = useState('');
 
     useEffect(() => {
-        const loadArticles = async () => {
+        const load = async () => {
+            console.log("📦 fetchArticles 요청 시작:", { searchItem, keyword, page });
             try {
-                const res = await fetchArticles({
-                    searchItem,
-                    keyword,
-                    page
-                });
-
-                // ✅ 응답 구조 확인: articles, data, content, etc.
-                setArticles(res); // 예: res.articles, res.data.articles, etc.
+                const res = await fetchArticles({ searchItem, keyword, page });
+                console.log("✅ fetchArticles 응답 성공:", res);
+                setArticles(res.articles);
             } catch (err) {
-                console.error('📛 게시글 불러오기 실패:', err);
+                console.error('❌ 게시글 로딩 실패:', err);
             } finally {
                 setLoading(false);
             }
         };
-
-        loadArticles();
+        load();
     }, [searchItem, keyword, page]);
+
 
     return (
         <div>
-            <h1>게시판</h1>
+            <h1>게시글 목록</h1>
             {loading ? (
                 <p>불러오는 중...</p>
             ) : (
-                articles.length > 0 ? (
-                    articles.map(article => (
-                        <div key={article.id}>
-                            <h2>{article.title}</h2>
-                            <p>{article.body}</p>
-                        </div>
-                    ))
-                ) : (
-                    <p>게시글이 없습니다.</p>
-                )
+                articles.map(article => (
+                    <div key={article.id} style={{ marginBottom: '20px' }}>
+                        <h2>{article.title}</h2>
+                        <p>{article.body}</p>
+                    </div>
+                ))
             )}
         </div>
     );

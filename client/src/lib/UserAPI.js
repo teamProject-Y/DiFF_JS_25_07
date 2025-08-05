@@ -13,25 +13,26 @@ UserApi.interceptors.request.use(
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-
-            console.log("🔥 axios interceptor 토큰 확인");
-            console.log("accessToken:", ACCESS_TOKEN);
-            console.log("tokenType:", TOKEN_TYPE);
-            console.log("refreshToken:", REFRESH_TOKEN);
+            console.log("📦 accessToken:", ACCESS_TOKEN);
 
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
 
+            const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+            console.log("📦 refreshToken:", REFRESH_TOKEN);
+
             if (REFRESH_TOKEN) {
                 config.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
             }
+
+            console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
     (error) => Promise.reject(error)
 );
+
 
 /** 2. 토큰/헤더 동적 세팅 */
 export const setAuthHeader = () => {
