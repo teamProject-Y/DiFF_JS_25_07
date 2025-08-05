@@ -94,11 +94,9 @@ export async function sendDiFF(memberId, repositoryId, to, diff) {
         console.log(chalk.bgRedBright(chalk.white("server에 diff 전달 중 오류 발생")));
 
         if (error.response) {
-            // 서버가 에러 응답을 반환한 경우
             console.error('📡 status:', error.response.status);
             console.error('📄 data:', error.response.data);
         } else if (error.request) {
-            // 요청은 갔지만 응답을 못 받은 경우
             console.error('❓ no response received');
             console.error(error.request);
         } else {

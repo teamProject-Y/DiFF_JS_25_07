@@ -15,26 +15,10 @@ export async function getResponse() {
     };
 }
 
-/** 로딩 애니메이션 **/
-function startAsciiAnimation() {
-    const frames = [ `wating`, `...frame2...`, `...frame3...`, `...frame4...` ];
-    let index = 0;
-
-    console.log("start 압축")
-    const interval = setInterval(() => {
-        process.stdout.write('\x1Bc');
-        console.log(frames[index % frames.length]);
-        index++;
-    }, 2000);
-
-    return interval;
-}
-// utils.mjs
 export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const FRAMES = [
-    `
-      ___                       ___           ___     
+    `      ___                       ___           ___     
      /\\  \\          ___        /\\  \\         /\\  \\    
     /::\\  \\        /\\  \\      /::\\  \\       /::\\  \\   
    /:/\\:\\  \\       \\:\\  \\    /:/\\:\\  \\     /:/\\:\\  \\  
@@ -44,10 +28,8 @@ const FRAMES = [
   \\:\\  /:/  /  \\::/__/          \\:\\__\\        \\:\\__\\  
    \\:\\/:/  /    \\:\\__\\           \\/__/         \\/__/  
     \\::/__/      \\/__/                                
-     ~~                                               
-`,
-    `
-                                ___           ___     
+     ~~`,
+    `                                ___           ___     
      _____                     /\\__\\         /\\__\\    
     /::\\  \\       ___         /:/ _/_       /:/ _/_   
    /:/\\:\\  \\     /\\__\\       /:/ /\\__\\     /:/ /\\__\\  
@@ -57,10 +39,8 @@ const FRAMES = [
   \\:\\  /:/  /   ~~\\:\\/\\__\\  \\::/__/       \\::/__/     
    \\:\\/:/  /       \\::/  /   \\:\\  \\        \\:\\  \\     
     \\::/  /        /:/  /     \\:\\__\\        \\:\\__\\    
-     \\/__/         \\/__/       \\/__/         \\/__/    
-`,
-    `
-     _____                      ___         ___   
+     \\/__/         \\/__/       \\/__/         \\/__/`,
+    `     _____                      ___         ___   
     /  /::\\       ___          /  /\\       /  /\\  
    /  /:/\\:\\     /  /\\        /  /:/_     /  /:/_ 
   /  /:/  \\:\\   /  /:/       /  /:/ /\\   /  /:/ /\\
@@ -70,10 +50,8 @@ const FRAMES = [
    \\  \\:\\/:/       \\__\\::/  \\  \\::/     \\  \\::/   
     \\  \\::/        /__/:/    \\  \\:\\      \\  \\:\\   
      \\__\\/         \\__\\/      \\  \\:\\      \\  \\:\\  
-                               \\__\\/       \\__\\/  
-`,
-    `
-      ___                                              
+                               \\__\\/       \\__\\/`,
+    `      ___                                              
      /  /\\           ___         ___           ___     
     /  /::\\         /__/\\       /  /\\         /  /\\    
    /  /:/\\:\\        \\__\\:\\     /  /::\\       /  /::\\   
@@ -83,8 +61,7 @@ const FRAMES = [
   \\  \\:\\  /:/   \\  \\::/     \\__\\/  \\:\\_\\/ \\__\\/  \\:\\_\\/
    \\  \\:\\/:/     \\  \\:\\          \\  \\:\\        \\  \\:\\  
     \\__\\::/       \\__\\/           \\__\\/         \\__\\/  
-        ~~                                             
-`
+        ~~`
 ];
 
 // export async function runAnimation(isRunningRef) {
@@ -115,31 +92,68 @@ const FRAMES = [
 //     }
 // }
 
+// export async function runAnimation(isRunningRef) {
+//     let t = 0;
+//     const lineCount = 13;
+//
+//     process.stdout.write('\n'.repeat(13));
+//
+//     while (isRunningRef.value) {
+//         process.stdout.write(`\x1B[${lineCount}A`); // 커서 위로
+//
+//         const lines = FRAMES[t % FRAMES.length].split('\n');
+//
+//         for (let i = 0; i < lineCount; i++) {
+//             process.stdout.write('\x1B[2K');               // 현재 줄 전체 지움
+//             process.stdout.write((lines[i] || '') + '\n'); // 줄이 없으면 빈 줄
+//         }
+//
+//         t++;
+//         await sleep(300);
+//     }
+//
+//     process.stdout.write(`\x1B[${lineCount}A`);
+//     for (let i = 0; i < lineCount; i++) {
+//         process.stdout.write('\x1B[2K\n');
+//     }
+//
+//     process.stdout.write('\x1B[14A');
+//     process.stdout.write('생성 완료\n');
+// }
+
 export async function runAnimation(isRunningRef) {
     let t = 0;
-    const lineCount = 13;
+    const maxLines = Math.max(...FRAMES.map(f => f.split('\n').length));
 
-    process.stdout.write('\n'.repeat(13));
+    // 커서 숨기기
+    process.stdout.write('\x1B[?25l');
+
+    // 빈 줄로 자리 만들기
+    process.stdout.write('\n'.repeat(maxLines));
 
     while (isRunningRef.value) {
-        process.stdout.write(`\x1B[${lineCount}A`); // 커서 위로
+        process.stdout.write(`\x1B[${maxLines}A`); // 맨 위로
 
-        const lines = FRAMES[t % FRAMES.length].split('\n');
-
-        for (let i = 0; i < lineCount; i++) {
-            process.stdout.write('\x1B[2K');               // 현재 줄 전체 지움
-            process.stdout.write((lines[i] || '') + '\n'); // 줄이 없으면 빈 줄
+        const frameLines = FRAMES[t % FRAMES.length].split('\n');
+        for (let i = 0; i < maxLines; i++) {
+            process.stdout.write('\x1B[2K'); // 한 줄 클리어
+            process.stdout.write((frameLines[i] || '') + '\n');
         }
 
         t++;
         await sleep(300);
     }
 
-    process.stdout.write(`\x1B[${lineCount}A`);
-    for (let i = 0; i < lineCount; i++) {
+    // 애니메이션 클리어
+    process.stdout.write(`\x1B[${maxLines}A`);
+    for (let i = 0; i < maxLines; i++) {
         process.stdout.write('\x1B[2K\n');
     }
 
-    process.stdout.write('\x1B[14A');
-    process.stdout.write('생성 완료\n');
+    process.stdout.write(`\x1B[${maxLines}A`); // 맨 위로
+    process.stdout.write('\x1B[2K');           // 줄 클리어
+    process.stdout.write('analysis success.\n');
+
+    // 커서 다시 보이기
+    process.stdout.write('\x1B[?25h');
 }

@@ -6,7 +6,6 @@ import fsp from 'fs/promises';
 import {DateTime} from "luxon";
 import chalk from "chalk";
 import {appendMeta} from "./init.mjs";
-import path from "path";
 
 
 export async function mkDraft(memberId, branch) {

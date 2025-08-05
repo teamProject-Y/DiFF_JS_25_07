@@ -5,12 +5,9 @@ import chalk from 'chalk';
 
 import {verifyGitUser} from '../lib/api/api.mjs';
 import {
-    existsGitDirectory, existsDiFF, DiFFinit,
-    branchExists, doAnalysis, runMainTask
-} from '../lib/git/execSync.mjs';
-import {appendLogs, getRepositoryId, mkDraft} from "../lib/DiFF/draft.mjs";
+    existsGitDirectory, existsDiFF, DiFFinit, branchExists, doAnalysis } from '../lib/git/execSync.mjs';
+import {mkDraft} from "../lib/DiFF/draft.mjs";
 import {runAnimation} from "../lib/util/interaction.mjs";
-import path from "path";
 
 const program = new Command();
 
@@ -60,7 +57,6 @@ program
             const isRunning = { value: true };
             const animationPromise = runAnimation(isRunning);
 
-            //await runMainTask();
             const analysis = await doAnalysis(selectedBranch);
 
             isRunning.value = false;
@@ -87,6 +83,9 @@ program
         }
 
         const draft = await mkDraft(memberId, selectedBranch);
+
+        console.log(chalk.bgCyanBright(chalk.black("draft 생성 시작")));
+
         if(draft === null){
             console.log(chalk.bgRedBright(chalk.black('fail to make draft.')));
         }

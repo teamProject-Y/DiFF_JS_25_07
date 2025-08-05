@@ -72,46 +72,7 @@ export async function DiFFinit(memberId, branch) {
     return checksum;
 }
 
-
-/** zip 파일 **/
-// export async function doAnalysis(branch) {
-//     try {
-//         const hasTarget = execSync(`[ -d target ] && echo true || echo false`).toString().trim();
-//
-//         if (hasTarget === "true") {
-//             execSync(`
-//                 git archive --format=zip --output=withoutTarget.zip ${branch} &&
-//                 rm -rf tempdir && rm -rf difftest.zip &&
-//                 mkdir tempdir &&
-//                 unzip withoutTarget.zip -d tempdir &&
-//                 cp -r target tempdir/ &&
-//                 cd tempdir && zip -r ../difftest.zip . &&
-//                 cd .. &&
-//                 rm withoutTarget.zip &&
-//                 rm -rf tempdir
-//             `);
-//         } else {
-//             execSync(`git archive --format=zip --output=difftest.zip ${branch}`);
-//         }
-//
-//         console.log(chalk.bgCyanBright(chalk.black("zip success")));
-//         execSync(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
-//         execSync(`rm -f difftest.zip`);
-//         return true;
-//
-//     } catch (err) {
-//         console.error("zip error:", err.message);
-//         return false;
-//     }
-// }
-const sh = (cmd) => new Promise((resolve, reject) => {
-    const proc = spawn(cmd, { shell: true, stdio: 'ignore' });
-    proc.on('exit', code => code === 0 ? resolve() : reject(new Error(`${cmd} failed`)));
-});
-
-/**
- * 애니메이션과 병렬 실행 가능한 doAnalysis
- */
+/** 애니메이션과 병렬 실행 가능한 doAnalysis **/
 export async function doAnalysis(branch) {
     try {
         const hasTarget = await new Promise((resolve) => {
@@ -133,8 +94,9 @@ export async function doAnalysis(branch) {
             await sh(`git archive --format=zip --output=difftest.zip ${branch}`);
         }
 
-        console.log(chalk.bgCyanBright(chalk.black("zip success")));
-        await sh(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+        // console.log(chalk.bgCyanBright(chalk.black("zip success")));
+        // await sh(`curl -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
+        await sh(`curl -s -X POST -F "file=@difftest.zip" http://localhost:8080/upload`);
         await sh(`rm -f difftest.zip`);
 
         return true;
@@ -144,11 +106,27 @@ export async function doAnalysis(branch) {
     }
 }
 
-import { sleep } from '../util/interaction.mjs';
+// 비동기로 cmd
+export async function sh(cmd, passthrough = false) {
+    return new Promise((resolve, reject) => {
+        const p = spawn(cmd, {
+            stdio: passthrough ? 'inherit' : 'pipe',
+            shell: true,
+        });
 
-export async function runMainTask() {
-    console.log("작업을 시작합니다. (3분 동안)");
-    await sleep(10 * 1000); // 3분
+        let out = '';
+        let err = '';
+
+        if (!passthrough) {
+            p.stdout.on('data', d => out += d.toString());
+            p.stderr.on('data', d => err += d.toString());
+        }
+
+        p.on('close', code => {
+            if (code === 0) resolve(out.trim());
+            else reject(new Error(`command failed: ${cmd}\n${err}`));
+        });
+    });
 }
 
 export function getDiFF(from, to) {
@@ -156,13 +134,14 @@ export function getDiFF(from, to) {
     console.log(chalk.bgCyanBright(chalk.black(from)));
     console.log(chalk.bgCyanBright(chalk.black(to)));
 
-    const wow = '783b303022a0ffacc2fb2b28cc15b60bb74f3bc7';
+    // test용
+    // const wow = '0ca64e180ab30fc853c887de27e72ef2595d7546';
 
     return new Promise((resolve, reject) => {
         const extensions = ['*.mjs', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp', // '*.js',
             '*.py', '*.c', '*.cs', '*.cpp', '*.php', '*.go', '*.rs', '*.rb', '*.kt', '*.swift'];
 
-        const args = ['diff', '-W', wow, to, '--', ...extensions];
+        const args = ['diff', '-W', from, to, '--', ...extensions];
         const child = spawn('git', args, { shell: true });
 
         let output = '';
@@ -180,11 +159,11 @@ export function getDiFF(from, to) {
                 const filtered = output;
 
                 // 디버깅용
-                console.log('+++ raw diff preview:', filtered.slice(0, 100));
+                console.log(chalk.bgCyanBright(chalk.black('+++ raw diff preview:', filtered.slice(0, 100))));
                 const preview = filtered.length > 100 ? filtered.slice(0, 100) + '...' : filtered;
-                console.log('/// diff 미리보기 (앞 100자):');
+                console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 (앞 100자):')));
                 console.log(preview);
-                console.log('/// diff 미리보기 끝');
+                console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 끝')));
 
                 resolve(filtered);
             } else {
