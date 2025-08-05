@@ -13,13 +13,15 @@ export async function mkDraft(memberId, branch) {
     const from = await getLastRequestChecksum(branch);
     const to = await getLastChecksum(branch);
     const diff = await getDiFF(from, to);
+    const repositoryId = await getRepositoryId();
 
     if (!diff || diff.trim().length === 0) {
         console.log(chalk.bgRedBright(chalk.black("diff 내용이 비어있습니다.")));
         return null;
     }
 
-    const getDraft = await sendDiFF(memberId, to, diff);
+    const getDraft = await sendDiFF(memberId, repositoryId, to, diff);
+  
     if(getDraft){
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);
@@ -77,6 +79,22 @@ export async function appendLogs(branch, from, to) {
 
     // 3. 파일에 다시 쓰기
     await fsp.writeFile(logPath, JSON.stringify(logs, null, 2), { encoding: 'utf-8' });
+}
+
+export async function getRepositoryId() {
+    try {
+        const data = await fsp.readFile(".DiFF/config", 'utf-8');
+        const json = JSON.parse(data);
+
+        if (!json.repositoryId) {
+            throw new Error('repositoryId not found in config');
+        }
+
+        return json.repositoryId;
+    } catch (err) {
+        console.error('getRepositoryId 오류:', err.message);
+        return null;
+    }
 }
 
 /** .DiFF 디렉토리에서 브랜치 내용 읽기 **/
