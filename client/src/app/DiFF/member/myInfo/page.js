@@ -29,7 +29,7 @@ function Page({ member }) {
                     <strong>{member.nickName}</strong> 님 반갑습니다.
                 </div>
                 <div className="flex-grow"></div>
-                <Link href="/DiFF/member/modify/page">
+                <Link href="/DiFF/member/modify">
                     <a className="px-4 py-2 border rounded hover:bg-neutral-300">
                         회원 정보 수정
                     </a>
@@ -63,18 +63,18 @@ function Page({ member }) {
 export async function getServerSideProps(context) {
     const session = await getSession(context)
 
-    if(!session) {
-        return (
+    if (!session) {
+        return {
             redirect: {
-                desination: "/DiFF/member/login",
+                destination: "/DiFF/member/login",
                 permanent: false,
-            }
-        )
+            },
+        }
     }
 
-    return (
-        props: { session }
-    )
+    return {
+        props: { session },
+    }
 }
 
 // Layout에서 쓸 페이지 타이틀

@@ -1,5 +1,4 @@
 import fs from 'fs';
-import fsp from 'fs/promises';
 import path from "path";
 import {getRemoteUrl} from "../git/simpleGit.mjs";
 import {DateTime} from "luxon";
@@ -47,7 +46,7 @@ async function createMetaFile() {
 
 /** 브랜치 생성 순 반환 **/
 async function getBranchCreationTimes() {
-  
+
     const dir = ".git/logs/refs/heads";
     const branches = fs.readdirSync(dir);
     const result = [];

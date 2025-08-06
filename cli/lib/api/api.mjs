@@ -68,35 +68,36 @@ export async function mkRepo(memberId, repoName, commitHash){
 
 
 /** 서버에 diff 보내기 **/
-export async function sendDiFF(memberId, to, diff) {
+export async function sendDiFF(memberId, repositoryId, to, diff) {
     try {
         const { data } = await axios.post(
             'http://localhost:8080/usr/draft/mkDraft',
             {
                 memberId,
+                repositoryId,
                 lastChecksum: to,
                 diff
             }
         );
 
         if (data.resultCode?.startsWith('S-')) {
-            console.log(chalk.bgCyanBright(chalk.black("✅ server에 diff 보내기 성공")));
+
+            console.log(chalk.bgCyanBright(chalk.black("server에 diff 보내기 성공")));
+
             return true;
         } else {
-            console.log(chalk.bgRedBright(chalk.white("❌ server에 diff 보내기 실패")));
-            console.log('📦 서버 응답 데이터:', data);
+            console.log(chalk.bgRedBright(chalk.white(data.msg)));
+            console.log('서버 응답 데이터:', data);
             return false;
         }
 
     } catch (error) {
-        console.log(chalk.bgRedBright(chalk.white("🔥 서버 요청 중 오류 발생")));
+        console.log(chalk.bgRedBright(chalk.white("server에 diff 전달 중 오류 발생")));
 
         if (error.response) {
-            // 서버가 에러 응답을 반환한 경우
             console.error('📡 status:', error.response.status);
             console.error('📄 data:', error.response.data);
         } else if (error.request) {
-            // 요청은 갔지만 응답을 못 받은 경우
             console.error('❓ no response received');
             console.error(error.request);
         } else {
