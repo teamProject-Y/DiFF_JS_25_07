@@ -1,12 +1,13 @@
-// pages/DiFF/member/logout.js
+// pages/DiFF/member/page.js
 "use client";
+
 import { useEffect } from "react";
 
-export default function Logout() {
+export default function Page() {
     useEffect(() => {
         const refreshToken = localStorage.getItem("refreshToken");
         if (refreshToken) {
-            fetch('/DiFF/auth/logout', {
+            fetch('/api/DiFF/member/logout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -17,6 +18,6 @@ export default function Logout() {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("tokenType");
-        window.location.replace("/DiFF/member/login");
+        window.location.replace("/DiFF/home/main");
     }, []);
 }

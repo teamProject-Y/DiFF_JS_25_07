@@ -1,4 +1,4 @@
-// pages/usr/article/write.js
+// pages/usr/article/page.js
 import { useState, useEffect } from 'react';
 import { getSession, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';

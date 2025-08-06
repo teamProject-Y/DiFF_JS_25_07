@@ -1,13 +1,17 @@
-// pages/DiFF/member/login.js
+// pages/DiFF/member/page.js
 
+'use client';
+
+import React from "react";
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { login } from "@/lib/UserAPI";
 
-export default function LoginPage() {
+export default function LoginPage({ searchParams }) {
+    const params = React.use(searchParams);
     const router = useRouter();
-    const callbackUrl = router.query.callbackUrl || '/DiFF/home/main';
+    const callbackUrl = params?.callbackUrl || '/DiFF/home/main';
     const [values, setValues] = useState({ loginId: "", loginPw: "" });
     const [error, setError] = useState(null);
 
@@ -90,7 +94,7 @@ export default function LoginPage() {
                 </form>
 
                 <div className="sub-menu text-center my-4 flex justify-center gap-4">
-                    <a href="/DiFF/member/join" className="hover:underline">
+                    <a href="/DiFF/member/join/page" className="hover:underline">
                         Join
                     </a>
                 </div>

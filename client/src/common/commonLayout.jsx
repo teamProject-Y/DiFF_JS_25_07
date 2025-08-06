@@ -1,13 +1,12 @@
-// common/layout.js
-"use client"
+// src/common/CommonClientLayout.jsx
+'use client';
 
-import Script from 'next/script'
-import Head from 'next/head'
-import Header from '../common/header'
+import Head from 'next/head';
+import Header from '@/common/header';
 import { useEffect } from "react";
-import {useRouter} from 'next/router';
+import { useRouter } from 'next/navigation';
 
-export default function Layout({ children, pageTitle = 'DiFF' }) {
+export default function CommonClientLayout({ children, pageTitle = 'DiFF' }) {
     const router = useRouter();
 
     useEffect(() => {
@@ -18,8 +17,7 @@ export default function Layout({ children, pageTitle = 'DiFF' }) {
             if (accessToken && refreshToken) {
                 localStorage.setItem("accessToken", accessToken);
                 localStorage.setItem("refreshToken", refreshToken);
-                // 필요하다면, 토큰 파라미터를 URL에서 제거:
-                router.replace("/DiFF/home/main", undefined, { shallow: true });
+                router.replace("/DiFF/home/main");
             }
         }
     }, [router]);
@@ -30,14 +28,12 @@ export default function Layout({ children, pageTitle = 'DiFF' }) {
                 <meta charSet="UTF-8" />
                 <title>{pageTitle}</title>
                 <link rel="stylesheet" href="/resource/common.css" />
-                {/* public/resource/common.js 를 불러오려면 */}
                 <script src="/resource/common.js" defer />
             </Head>
-            {/* 이 안에서만 렌더링 */}
             <div className="text-neutral-600">
                 <Header />
                 <main>{children}</main>
             </div>
         </>
-    )
+    );
 }

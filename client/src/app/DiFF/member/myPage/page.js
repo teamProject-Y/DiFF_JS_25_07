@@ -1,6 +1,7 @@
+'use client';
+
 import Link from 'next/link'
-import { useRouter } from 'next/router'
-import Layout from '../../../common/layout'
+import { useRouter } from 'next/navigation'
 import { fetchUser } from "@/lib/UserAPI";
 import { useEffect,useState } from "react";
 
@@ -77,7 +78,7 @@ export default function MyInfoPage() {
                     </table>
                     <div className="text-center">
                         <button
-                            onClick={() => router.back()}
+                            onClick={() => router.replace('/DiFF/home/main')}
                             className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
                         >
                             뒤로가기
