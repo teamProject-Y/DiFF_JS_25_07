@@ -26,7 +26,7 @@ function MyInfo({ member }) {
                     <strong>{member.nickName}</strong> 님 반갑습니다.
                 </div>
                 <div className="flex-grow"></div>
-                <Link href="/DiFF/member/modify">
+                <Link href="/client/src/app/DiFF/member/modify">
                     <a className="px-4 py-2 border rounded hover:bg-neutral-300">
                         회원 정보 수정
                     </a>

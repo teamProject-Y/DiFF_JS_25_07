@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import Layout from '../../../common/layout'
+import Layout from '../../../../common/layout'
 import { fetchUser } from "@/lib/UserAPI";
 import { useEffect,useState } from "react";
 
@@ -66,7 +66,7 @@ export default function MyInfoPage() {
                             <th className="border p-2">회원정보 수정</th>
                             <td className="border p-2 text-center">
                                 <Link
-                                    href="/DiFF/member/modify"
+                                    href="/client/src/app/DiFF/member/modify"
                                     className="px-4 py-2 bg-blue-600 text-white rounded"
                                 >
                                     수정

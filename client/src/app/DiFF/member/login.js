@@ -90,7 +90,7 @@ export default function LoginPage() {
                 </form>
 
                 <div className="sub-menu text-center my-4 flex justify-center gap-4">
-                    <a href="/DiFF/member/join" className="hover:underline">
+                    <a href="/client/src/app/DiFF/member/join" className="hover:underline">
                         Join
                     </a>
                 </div>

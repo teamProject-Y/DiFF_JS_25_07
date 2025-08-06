@@ -57,23 +57,23 @@ export default function Header() {
             <nav className="items-center mr-6 text-4xl text-neutral-800">
                 <ul className="flex">
                     <li className="hover:underline hover:text-neutral-400">
-                        <Link href="/DiFF/home/main" className="block px-6">
+                        <Link href="/client/src/app/DiFF/home/main" className="block px-6">
                             HOME
                         </Link>
                     </li>
                     <li className="hover:underline hover:text-neutral-400">
-                        <Link href="/DiFF/home/faq" className="block px-6">
+                        <Link href="/client/src/app/DiFF/home/faq" className="block px-6">
                             FAQ
                         </Link>
                     </li>
                     <li className="relative group">
-                        <Link href="/DiFF/article/list" className="block px-6">
+                        <Link href="/client/src/app/DiFF/article/list/page.js" className="block px-6">
                             LIST
                         </Link>
                         <ul className="absolute hidden group-hover:block w-full top-full py-5 text-center text-lg whitespace-nowrap bg-white shadow-lg">
                             {['전체 게시판','공지사항','자유 게시판','QnA'].map((label, id) => (
                                 <li key={id}>
-                                    <Link href={`/DiFF/article/list`} className="block h-full p-1 hover:underline hover:text-neutral-400">
+                                    <Link href={`/client/src/app/DiFF/article/list/page.js`} className="block h-full p-1 hover:underline hover:text-neutral-400">
                                         {label}
                                     </Link>
 
@@ -84,15 +84,15 @@ export default function Header() {
 
                     {accessToken ? (
                         <>
-                        <Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link>
-                        <Link href="/DiFF/member/myPage">MYPAGE</Link>
+                        <Link href="/client/src/app/DiFF/member/logout/page.js" onClick={handleLogout}>LOGOUT</Link>
+                        <Link href="/client/src/app/DiFF/member/mypage/page.js">MYPAGE</Link>
                         </>
                     ) : (
                         <>
-                            <Link href="/DiFF/member/login">LOGIN</Link>
+                            <Link href="/client/src/app/DiFF/member/login/page.js">LOGIN</Link>
                             &nbsp;
                             &nbsp;
-                            <Link href="/DiFF/member/join">JOIN</Link>
+                            <Link href="/client/src/app/DiFF/member/join/page.js">JOIN</Link>
                         </>
                     )}
                 </ul>
