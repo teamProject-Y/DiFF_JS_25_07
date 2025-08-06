@@ -67,7 +67,7 @@ export default function MyInfoPage() {
                             <th className="border p-2">회원정보 수정</th>
                             <td className="border p-2 text-center">
                                 <Link
-                                    href="/DiFF/member/modify"
+                                    href="/DiFF/member/modify/page"
                                     className="px-4 py-2 bg-blue-600 text-white rounded"
                                 >
                                     수정
