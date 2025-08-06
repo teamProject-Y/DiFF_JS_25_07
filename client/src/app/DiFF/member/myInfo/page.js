@@ -1,9 +1,12 @@
-// pages/usr/member/myInfo.js
+// pages/usr/member/page.js
+
+'use client';
+
 import Link from 'next/link'
 import { getSession } from "next-auth/react"
 
 // 이 페이지에서 보여줄 title
-function MyInfo({ member }) {
+function Page({ member }) {
     return (
         <>
             <button
@@ -75,6 +78,10 @@ export async function getServerSideProps(context) {
 }
 
 // Layout에서 쓸 페이지 타이틀
-MyInfo.pageTitle = 'MY PAGE'
+Page.pageTitle = 'MY PAGE'
 
+<<<<<<<< HEAD:client/src/app/DiFF/member/myInfo.js
 export default MyInfo
+========
+export default Page
+>>>>>>>> main:client/src/app/DiFF/member/myInfo/page.js

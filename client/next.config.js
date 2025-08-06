@@ -50,4 +50,8 @@ module.exports = {
              { source: '/home/main', destination: '/home/main' },
         ];
     },
+
+    compiler: {
+        styledComponents: true
+    }
 };

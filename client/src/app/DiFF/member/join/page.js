@@ -52,7 +52,7 @@ export default function JoinPage() {
         }
 
     }
-    return (
+        return (
         <div className="container mx-auto mt-12 max-w-min p-4 bg-neutral-200 border border-neutral-300 rounded-lg">
             <div className="title my-3 text-center text-2xl font-semibold">Join</div>
             {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -81,7 +81,11 @@ export default function JoinPage() {
                 </button>
             </form>
             <div className="sub-menu text-center my-4">
+<<<<<<<< HEAD:client/src/app/DiFF/member/join.js
                 <Link href="/client/src/app/DiFF/member/login">Login</Link>
+========
+                <Link href="/DiFF/member/login/page">Login</Link>
+>>>>>>>> main:client/src/app/DiFF/member/join/page.js
             </div>
         </div>
     )

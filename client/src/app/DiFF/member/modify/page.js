@@ -1,6 +1,9 @@
-// pages/usr/member/modify.js
+// pages/usr/member/page.js
+
+'use client';
+
 import { useState, useEffect }  from "react"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 import { fetchUser, modifyUser } from "@/lib/UserAPI";
 
 export default function ModifyPage({ initialMember }) {

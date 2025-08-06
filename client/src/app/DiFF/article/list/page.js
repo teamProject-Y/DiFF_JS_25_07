@@ -1,165 +1,47 @@
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
+// pages/DiFF/article/list.js
+import { useEffect, useState } from 'react';
+import {fetchArticles} from "@/lib/ArticleAPI";
+ // 경로 확인!
 
-export default function ArticleDetailPage({ member, initialArticle, initialComments }) {
-    const router = useRouter()
-    const { id } = router.query
+export default function ArticleListPage() {
+    const [articles, setArticles] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const [article, setArticle] = useState(initialArticle)
-    const [comments, setComments] = useState(initialComments)
+    // 상태: 검색 조건이나 페이지
+    const [page, setPage] = useState(1);
+    const [searchItem, setSearchItem] = useState(0);
+    const [keyword, setKeyword] = useState('');
 
-    const API_BASE = process.env.BACKEND_URL || 'http://localhost:8080'
-
-    // 1) 조회수 1회만 증가
     useEffect(() => {
-        if (!id) return
-        const key = `article__${id}__viewed`
-        if (localStorage.getItem(key)) return
-        localStorage.setItem(key, '1')
+        const load = async () => {
+            console.log("📦 fetchArticles 요청 시작:", { searchItem, keyword, page });
+            try {
+                const res = await fetchArticles({ searchItem, keyword, page });
+                console.log("✅ fetchArticles 응답 성공:", res);
+                setArticles(res.articles);
+            } catch (err) {
+                console.error('❌ 게시글 로딩 실패:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, [searchItem, keyword, page]);
 
-        fetch(`${API_BASE}/DiFF/article/${id}/hit`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-        })
-            .then(r => r.json())
-            .then(rd => {
-                if (rd.resultCode.startsWith('S-')) {
-                    setArticle(a => ({ ...a, hit: rd.data1 }))
-                }
-            })
-            .catch(err => console.error('조회수 증가 API 호출 실패', err))
-    }, [id])
-
-    // 2) 좋아요 토글
-    const toggleLike = () => {
-        fetch(`${API_BASE}/DiFF/article/${id}/like`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-        })
-            .then(r => r.json())
-            .then(rd => {
-                if (rd.resultCode.startsWith('S-')) {
-                    setArticle(a => ({
-                        ...a,
-                        extra_goodReactionPoint: rd.data.likeCount,
-                        userReaction: a.userReaction === 1 ? 0 : 1,
-                    }))
-                }
-            })
-            .catch(err => console.error('좋아요 토글 API 호출 실패', err))
-    }
-
-    // 3) 댓글 작성
-    const handleCommentSubmit = e => {
-        e.preventDefault()
-        const body = e.target.body.value.trim()
-        if (!body) return
-
-        fetch(`${API_BASE}/DiFF/article/${id}/comment`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ body }),
-        })
-            .then(r => r.json())
-            .then(rd => {
-                if (rd.resultCode.startsWith('S-')) {
-                    fetch(`${API_BASE}/DiFF/article/${id}`, { credentials: 'include' })
-                        .then(r => r.json())
-                        .then(data => setComments(data.comment || []))
-                }
-                e.target.body.value = ''
-            })
-            .catch(err => console.error('댓글 작성 API 호출 실패', err))
-    }
 
     return (
-        <>
-            <button onClick={() => router.back()} className="text-4xl pl-10 cursor-pointer">
-                ←
-            </button>
-
-            <div className="container mx-auto my-6 p-6 bg-neutral-100 rounded-xl">
-                <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
-                <div className="text-sm text-neutral-600 mb-4">
-                    작성일: {article.regDate.substring(0, 10)} | 조회수: {article.hit}
-                </div>
-
-                <div className="prose mb-4">{article.body}</div>
-
-                <div className="flex items-center space-x-4 mb-6">
-                    <button
-                        onClick={toggleLike}
-                        className={`px-4 py-2 border rounded ${article.userReaction === 1 ? 'bg-neutral-300' : ''}`}
-                    >
-                        👍 {article.extra_goodReactionPoint}
-                    </button>
-                </div>
-
-                <hr />
-
-                <section className="mt-6">
-                    <h2 className="text-2xl mb-4">Comment</h2>
-
-                    {comments.map(c => (
-                        <div key={c.id} className="mb-4 p-4 border rounded">
-                            <strong>{c.extra_writer}</strong>
-                            <p>{c.body}</p>
-                        </div>
-                    ))}
-
-                    <form onSubmit={handleCommentSubmit} className="mt-6">
-                        <input
-                            name="body"
-                            type="text"
-                            placeholder="나도 한마디 하기!"
-                            className="w-full p-2 border rounded mb-2"
-                        />
-                        <button type="submit" className="px-4 py-2 bg-neutral-800 text-white rounded">
-                            게시
-                        </button>
-                    </form>
-                </section>
-            </div>
-        </>
-    )
-}
-
-ArticleDetailPage.pageTitle = 'ARTICLE DETAIL'
-
-export async function getServerSideProps({ query, req }) {
-    const { id } = query
-    const API_BASE = process.env.BACKEND_URL || 'http://localhost:8080'
-
-    // 로그인 체크
-    const meRes = await fetch(`${API_BASE}/DiFF/member/myInfo`, {
-        headers: { cookie: req.headers.cookie || '' },
-        credentials: 'include',
-        redirect: 'manual',
-    })
-    if (meRes.status !== 200) {
-        return { redirect: { destination: '/DiFF/member/login', permanent: false } }
-    }
-    const member = await meRes.json()
-
-    // 글 + 댓글
-    const detailRes = await fetch(`${API_BASE}/DiFF/article/${id}`, {
-        headers: { cookie: req.headers.cookie || '' },
-        credentials: 'include',
-    })
-    if (!detailRes.ok) {
-        return { notFound: true }
-    }
-    const data = await detailRes.json()
-
-    const initialComments = Array.isArray(data.comment) ? data.comment : []
-    return {
-        props: {
-            member,
-            initialArticle: data.article ?? null,
-            initialComments,
-        },
-    }
+        <div>
+            <h1>게시글 목록</h1>
+            {loading ? (
+                <p>불러오는 중...</p>
+            ) : (
+                articles.map(article => (
+                    <div key={article.id} style={{ marginBottom: '20px' }}>
+                        <h2>{article.title}</h2>
+                        <p>{article.body}</p>
+                    </div>
+                ))
+            )}
+        </div>
+    );
 }
