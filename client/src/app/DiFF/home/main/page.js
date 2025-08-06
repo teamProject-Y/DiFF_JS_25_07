@@ -4,7 +4,6 @@
 import { useEffect, useRef, useState } from "react";
 import HamMenu from "@/common/HamMenu";
 
-
 // 타자 효과
 function Typewriter({ text, speed = 40, onDone, className = "" }) {
     const [displayed, setDisplayed] = useState("");
@@ -178,7 +177,7 @@ export default function Page() {
                     {log.map((item, i) =>
                         item.type === "prompt" ? (
                             <div key={i} className="flex flex-wrap items-start">
-                                {/*<span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>*/}
+                                <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
                                 <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
                             </div>
                         ) : (
@@ -195,8 +194,10 @@ export default function Page() {
 
                     {/* 입력창: 프롬프트+contenteditable */}
                     {showInput &&
-                        <div className="flex items-center flex-wrap mt-3">
-                            {/*<span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>*/}
+                        <div className="flex items-center mt-3">
+                            <span className="text-green-400 font-bold"
+                                  style={{ whiteSpace: 'nowrap' }}>
+                                user@desktop ~ %&nbsp;</span>
                             <div
                                 ref={inputRef}
                                 className="prompt-input"
@@ -212,8 +213,9 @@ export default function Page() {
                                     }
                                 }}
                                 style={{
+                                    flexGrow: 1,
                                     minHeight: "2.4rem",
-                                    maxWidth: "100%",
+                                    maxWidth: "100%"
                                 }}
                             />
                         </div>
