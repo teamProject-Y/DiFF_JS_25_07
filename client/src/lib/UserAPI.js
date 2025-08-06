@@ -54,7 +54,7 @@ const refreshAccessToken = async () => {
         const response = await UserApi.get(`/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
-        const ACCESS_TOKEN = response.data;
+        const ACCESS_TOKEN = response.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType");
         localStorage.setItem('accessToken', ACCESS_TOKEN);
         UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
@@ -68,7 +68,7 @@ UserApi.interceptors.response.use(
         const originalRequest = error.config;
         if (
             error.response &&
-            error.response.status === 403 &&
+            (error.response.status === 403 || error.response.status === 401) &&
             !originalRequest._retry
         ) {
             originalRequest._retry = true;
