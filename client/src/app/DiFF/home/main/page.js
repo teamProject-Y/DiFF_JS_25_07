@@ -6,7 +6,7 @@ import HamburgerButton from "@/common/HamMenu";
 import OverlayMenu from "@/common/overlayMenu";
 import Link from "next/link";
 
-//
+
 function parseJwt(token) {
     if (!token) return {};
     try {
@@ -44,9 +44,6 @@ function Typewriter({ text, speed = 40, onDone, className = "" }) {
 
         if (text && text.length > 0) typeChar(0);
         return () => { cancelled = true; };
-        return () => {
-            cancelled = true;
-        };
     }, [text, speed, onDone]);
     return <span className={className}>{displayed}</span>;
 }
@@ -79,9 +76,7 @@ function TypewriterSplit({ text, onDone, speed = 38, className = "" }) {
             return;
         }
         typeChar(0);
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [text, dotIdx, speed, onDone]);
     return <span className={className}>{displayed}</span>;
 }
