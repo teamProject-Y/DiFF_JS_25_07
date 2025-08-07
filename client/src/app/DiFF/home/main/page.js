@@ -125,8 +125,7 @@ export default function Page() {
             }
         }
     }, []);
-
-
+    
 
     // 단계별 효과
     useEffect(() => {
