@@ -2,8 +2,29 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import HamMenu from "@/HamMenu";
 
+import HamburgerButton from "@/common/HamMenu";
+import OverlayMenu from "@/common/overlayMenu";
+import Link from "next/link";
+
+
+function parseJwt(token) {
+    if (!token) return {};
+    try {
+        // JWT payload만 추출 (header.**payload**.signature)
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return {};
+    }
+}
 
 // 타자 효과
 function Typewriter({ text, speed = 40, onDone, className = "" }) {
@@ -11,6 +32,8 @@ function Typewriter({ text, speed = 40, onDone, className = "" }) {
     useEffect(() => {
         let cancelled = false;
         setDisplayed("");
+
+
         function typeChar(i) {
             if (cancelled) return;
             setDisplayed(text.slice(0, i + 1));
@@ -20,6 +43,7 @@ function Typewriter({ text, speed = 40, onDone, className = "" }) {
                 if (onDone) onDone();
             }
         }
+      
         if (text && text.length > 0) typeChar(0);
         return () => { cancelled = true; };
     }, [text, speed, onDone]);
@@ -75,6 +99,7 @@ export default function Page() {
     const [input, setInput] = useState("");
     const [showInput, setShowInput] = useState(false);
     const inputRef = useRef(null);
+    const [user, setUser] = useState({});
     const [menuOpen, setMenuOpen] = useState(false);
 
     const LINES = [
@@ -93,6 +118,14 @@ export default function Page() {
         if (typeof window !== "undefined") {
             const token = localStorage.getItem('accessToken');
             setAccessToken(token);
+
+            if (token) {
+                const userInfo = parseJwt(token);
+                setUser({
+                    email: userInfo.memberEmail,
+                    blogName: userInfo.blogName,
+                });
+            }
         }
     }, []);
 
@@ -227,12 +260,19 @@ export default function Page() {
                     }
                 </div>
                 {accessToken && (
-                    <div className="fixed right-6 bottom-6 flex flex-col items-end gap-4 z-50">
-                        <HamMenu open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
-                        <button>
-                            <i className="fa-solid fa-user text-white text-2xl"></i>
-                        </button>
-                    </div>
+                    <>
+                        <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
+                        <div className="pointer-events-none">
+                            <div className="fixed right-6 bottom-[92px] z-50 pointer-events-auto">
+                                <Link href="/DiFF/member/myPage">
+                                    <i className="fa-solid fa-user text-white text-2xl"></i>
+                                </Link>
+                            </div>
+                            <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
+                                <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
+                            </div>
+                        </div>
+                    </>
                 )}
             </div>
         </div>
@@ -251,7 +291,7 @@ export default function Page() {
             <br/>
             <br/>
             <br/>
-    </>
+        </>
     );
 }
 
