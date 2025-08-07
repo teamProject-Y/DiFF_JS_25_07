@@ -164,7 +164,8 @@ export default function Page() {
     };
 
     return (
-        <div className="w-full min-h-screen bg-[#111] pt-32">
+        <div className="w-full min-h-screen bg-[#111]">
+            <div className="h-screen pt-32">
             <div className="bg-neutral-800 tracking-tight rounded-xl w-full max-w-5xl min-h-[60vh] mx-auto overflow-hidden"
                  style={{ fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: "break-word" }}>
                 <style jsx global>{`
@@ -189,8 +190,8 @@ export default function Page() {
                     }
                 `}</style>
 
-                <div className="h-12 w-full bg-neutral-700">
-
+                <div className="h-12 w-full bg-neutral-700 text-white text-center text-xl">
+                    Welcome to DiFF -- - bash - 45 x 7
                 </div>
 
                 <div className="p-4 text-left terminal-font text-2xl md:text-4xl break-words">
@@ -258,6 +259,11 @@ export default function Page() {
                         />
                     </div>
                 )}
+            </div>
+            </div>
+
+            <div className="w-full h-screen bg-blue-500">
+
             </div>
 
             {accessToken && (
