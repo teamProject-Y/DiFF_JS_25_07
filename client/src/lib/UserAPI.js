@@ -34,18 +34,28 @@ UserApi.interceptors.request.use(
 );
 
 
-/** 2. 토큰/헤더 동적 세팅 */
 export const setAuthHeader = () => {
     if (typeof window !== "undefined") {
-        const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer ';
+        const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer';
         const ACCESS_TOKEN = localStorage.getItem("accessToken");
-        UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+
+        // accessToken이 있을 때만 Authorization 헤더 설정
+        if (ACCESS_TOKEN) {
+            UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+        } else {
+            delete UserApi.defaults.headers['Authorization'];  // 없으면 제거
+        }
+
+        // refreshToken도 마찬가지
         if (REFRESH_TOKEN) {
             UserApi.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+        } else {
+            delete UserApi.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
         }
     }
 };
+
 
 /** 3. 토큰 자동 재발급 (Refresh) */
 const refreshAccessToken = async () => {
@@ -98,9 +108,9 @@ export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, e
     return response.data;
 };
 
-// 5-3. 회원 조회
+// 5-3. 회원 페이지
 export const fetchUser = async () => {
-    const response = await UserApi.get(`/api/DiFF/member/myInfo`);
+    const response = await UserApi.get(`/api/DiFF/member/myPage`);
     return response.data;
 };
 
