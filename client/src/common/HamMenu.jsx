@@ -6,26 +6,28 @@ export default function HamburgerButton({ open, onClick }) {
             aria-label="메뉴 열기"
             tabIndex={0}
         >
-      <span
-          className={`
-          absolute left-1/2 top-[35%] w-7 h-1 rounded bg-white transition-all duration-300
-          ${open ? "rotate-45 top-1/2" : ""}
-        `}
-          style={{
-              transform: open
-                  ? "translate(-50%, -50%) rotate(45deg)"
-                  : "translate(-50%, -50%) rotate(0)"
-          }}
-      />
+            {/* 윗줄 */}
             <span
                 className={`
-          absolute left-1/2 top-[65%] w-7 h-1 rounded bg-white transition-all duration-300
-          ${open ? "-rotate-45 top-1/2" : ""}
-        `}
+                    absolute left-1/2 top-[35%] w-7 h-1 rounded bg-white transition-all duration-300
+                `}
                 style={{
+                    transformOrigin: 'center center',
                     transform: open
-                        ? "translate(-50%, -50%) rotate(-45deg)"
-                        : "translate(-50%, -50%) rotate(0)"
+                        ? 'translate(-50%, 140%) rotate(45deg)' // ⬅️ 아래로 이동 후 회전
+                        : 'translate(-50%, -70%) rotate(0deg)'
+                }}
+            />
+            {/* 아랫줄 */}
+            <span
+                className={`
+                    absolute left-1/2 top-[65%] w-7 h-1 rounded bg-white transition-all duration-300
+                `}
+                style={{
+                    transformOrigin: 'center center',
+                    transform: open
+                        ? 'translate(-50%, -140%) rotate(-45deg)' // ⬅️ 위로 이동 후 회전
+                        : 'translate(-50%, -70%) rotate(0deg)'
                 }}
             />
         </button>
