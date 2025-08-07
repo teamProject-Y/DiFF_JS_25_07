@@ -92,7 +92,7 @@ function getLoginDate() {
     const month = now.toLocaleDateString('en-US', { month: 'short', timeZone: 'Asia/Seoul' });
     const date = now.toLocaleDateString('en-US', { day: '2-digit', timeZone: 'Asia/Seoul' });
     const time = now.toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Asia/Seoul' });
-    return `${day} ${month} ${date} ${time}`;
+    return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
 export default function Page() {
@@ -106,8 +106,8 @@ export default function Page() {
 
     const LINES = [
         {
-            text: `Last login: ${getLoginDate()} on webtty001`,
-            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl break-all"
+            text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
+            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-4 break-all"
         }
     ];
 
@@ -156,7 +156,7 @@ export default function Page() {
             const idx = step - LINES.length - 1;
             setLog(prev => [...prev, {
                 text: RESULTS[idx],
-                className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-6 break-all"
+                className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all"
             }]);
         }
         setLastDoneStep(step);
@@ -164,12 +164,12 @@ export default function Page() {
     };
 
     return (
-        <div className="w-full min-h-screen bg-[#111] pt-24">
-            <div className="bg-black rounded-lg shadow-lg px-8 py-10 w-full max-w-5xl min-h-[60vh] mx-auto"
-                 style={{ fontFamily: `'Fira Mono', 'Consolas', 'Menlo', 'monospace'`, wordBreak: "break-word" }}>
+        <div className="w-full min-h-screen bg-[#111] pt-32">
+            <div className="bg-neutral-800 tracking-tight rounded-xl w-full max-w-5xl min-h-[60vh] mx-auto overflow-hidden"
+                 style={{ fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: "break-word" }}>
                 <style jsx global>{`
                     .terminal-font {
-                        font-family: 'Fira Mono', 'Consolas', 'Menlo', 'monospace';
+                        font-family: 'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace;
                         line-height: 1.2;
                     }
                     .prompt-input {
@@ -178,6 +178,7 @@ export default function Page() {
                         color: #d1d5db;
                         font-size: 2rem;
                         font-family: inherit;
+                        font-weight: 1000;
                         width: 80%;
                         min-width: 2ch;
                         border: none;
@@ -188,10 +189,14 @@ export default function Page() {
                     }
                 `}</style>
 
-                <div className="text-left terminal-font text-2xl md:text-4xl break-words">
+                <div className="h-12 w-full bg-neutral-700">
+
+                </div>
+
+                <div className="p-4 text-left terminal-font text-2xl md:text-4xl break-words">
                     {log.map((item, i) => (
                         item.type === "prompt" ? (
-                            <div key={i} className="flex flex-wrap items-start">
+                            <div key={i} className="flex flex-wrap items-start pt-4">
                                 <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
                                 <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
                             </div>
@@ -207,14 +212,14 @@ export default function Page() {
                     )}
 
                     {showResultAnim && currentResultText && (
-                        <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-6 break-all">
+                        <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
                             <TypewriterSplit text={currentResultText} speed={32} onDone={handleAnimDone}/>
                         </div>
                     )}
                 </div>
 
                 {showInput && (
-                    <div className="text-left terminal-font text-2xl md:text-4xl break-words flex items-center max-w-5xl mx-auto">
+                    <div className="text-left terminal-font text-2xl md:text-4xl pl-4 break-words flex items-center max-w-5xl mx-auto">
                         <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
                             user@desktop ~ %&nbsp;
                         </span>
@@ -247,7 +252,7 @@ export default function Page() {
                                 width: "80%",
                                 border: "none",
                                 outline: "none",
-                                lineHeight: "1.2",
+                                lineHeight: "1",
                                 overflow: "hidden"
                             }}
                         />

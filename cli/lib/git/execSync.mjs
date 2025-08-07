@@ -274,7 +274,7 @@ export function getDiFF(from, to) {
             return resolve('');
         }
 
-        const wow = '01e4bb97c0bcbc8f884f425f5a1661108f7fc5cb';
+        const wow = 'ebc750ae157b8cf3dc50c3545a8632fb2a11f3cf';
 
         // 4. git diff 실행
         const args = ['diff', '-W', wow, to, '--', ...files];
