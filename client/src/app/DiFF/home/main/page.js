@@ -127,6 +127,7 @@ export default function Page() {
     const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [accessToken, setAccessToken] = useState(null);
+    const [user, setUser] = useState({ email: '', blogName: '' });
 
     const LINES = [
         {
@@ -320,23 +321,23 @@ export default function Page() {
                     </div>
                 </>
             )}
+
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
         </div>
-        <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-    </>
     );
 }
 
