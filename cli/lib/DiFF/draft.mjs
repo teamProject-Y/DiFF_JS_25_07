@@ -21,7 +21,7 @@ export async function mkDraft(memberId, branch) {
     }
 
     const getDraft = await sendDiFF(memberId, repositoryId, to, diff);
-  
+
     if(getDraft){
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);

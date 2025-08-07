@@ -1,4 +1,5 @@
-// pages/usr/article/modify/[id].js
+"use client";
+
 import { useState, useEffect } from 'react';
 import { getSession, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';

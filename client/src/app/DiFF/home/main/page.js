@@ -110,12 +110,11 @@ function TypewriterSplit({ text, onDone, speed = 38, className = "" }) {
 // 날짜
 function getLoginDate() {
     const now = new Date();
-    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const day = kst.toLocaleDateString('en-US', { weekday: 'short' });
-    const month = kst.toLocaleDateString('en-US', { month: 'short' });
-    const date = kst.getDate().toString().padStart(2, '0');
-    const time = kst.toTimeString().split(' ')[0];
-    return `${day} ${month} ${date} ${time}`;
+    const day = now.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Seoul' });
+    const month = now.toLocaleDateString('en-US', { month: 'short', timeZone: 'Asia/Seoul' });
+    const date = now.toLocaleDateString('en-US', { day: '2-digit', timeZone: 'Asia/Seoul' });
+    const time = now.toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Asia/Seoul' });
+    return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
 export default function Page() {
@@ -123,10 +122,10 @@ export default function Page() {
     const [step, setStep] = useState(0);
     const [input, setInput] = useState("");
     const [showInput, setShowInput] = useState(false);
-    const [user, setUser] = useState({});
+    const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [accessToken, setAccessToken] = useState(null);
-    const inputRef = useRef(null);
+    const [user, setUser] = useState({ email: '', blogName: '' });
 
     const LINES = [
         {
@@ -136,14 +135,16 @@ export default function Page() {
     ];
 
     const RESULTS = [
-        "user verifying... done.",
-        "zipping... done.",
-        "making draft... done."
+        "User verifying... done.",
+        "Analyzing... done.",
+        "Making draft... done."
     ];
 
     const [currentResultText, setCurrentResultText] = useState(null);
     const [showResultAnim, setShowResultAnim] = useState(false);
     const [lastDoneStep, setLastDoneStep] = useState(-1);
+
+
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -159,7 +160,6 @@ export default function Page() {
             }
         }
     }, []);
-    
 
     // 단계별 효과
     useEffect(() => {
@@ -167,7 +167,9 @@ export default function Page() {
         else if (step === LINES.length) {
             setShowInput(true);
             setTimeout(() => inputRef.current?.focus(), 100);
-        } else {setShowInput(false)};
+        } else {
+            setShowInput(false);
+        }
     }, [step]);
 
     // 입력 후 로그 쌓기
@@ -182,7 +184,6 @@ export default function Page() {
         }
     }, [step]);
 
-    // 타자 끝나면 다음
     const handleAnimDone = () => {
         if (step <= lastDoneStep) return;
 
@@ -201,44 +202,38 @@ export default function Page() {
 
     // 렌더
     return (
-        <>
-        <div className="w-full min-h-screen bg-[#111] pt-24">
-            <div
-                className="bg-black rounded-lg shadow-lg px-8 py-10 w-full max-w-5xl min-h-[60vh] mx-auto"
-                style={{
-                    fontFamily: `'Fira Mono', 'Consolas', 'Menlo', 'monospace'`,
-                    wordBreak: "break-word"
-                }}
-            >
+        <div className="w-full min-h-screen bg-[#111]">
+            <div className="h-screen pt-32">
+            <div className="bg-neutral-800 tracking-tight rounded-xl w-full max-w-5xl min-h-[60vh] mx-auto overflow-hidden"
+                 style={{ fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: "break-word" }}>
                 <style jsx global>{`
-                  .terminal-font {
-                    font-family: 'Fira Mono', 'Consolas', 'Menlo', 'monospace';
-                    line-height: 1.2;
-                  }
-                  .prompt-input {
-                    outline: none;
-                    background: transparent;
-                    color: #d1d5db;
-                    font-size: 2rem;
-                    font-family: inherit;
-                    width: 80%;
-                    min-width: 2ch;
-                    border: none;
-                    resize: none;
-                    line-height: 1.2;
-                    word-break: break-word;
-                    white-space: pre-wrap;
-                    overflow-wrap: break-word;
-                  }
+                    .terminal-font {
+                        font-family: 'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace;
+                        line-height: 1.2;
+                    }
+                    .prompt-input {
+                        outline: none;
+                        background: transparent;
+                        color: #d1d5db;
+                        font-size: 2rem;
+                        font-family: inherit;
+                        font-weight: 1000;
+                        width: 80%;
+                        min-width: 2ch;
+                        border: none;
+                        resize: none;
+                        line-height: 1.2;
+                        white-space: pre-wrap;
+                        overflow-wrap: break-word;
+                    }
                 `}</style>
 
                 <div className="h-12 w-full bg-neutral-700 text-white text-center text-xl">
                     Welcome to DiFF -- - bash - 45 x 7
                 </div>
 
-                {/* 로그/애니메이션 */}
                 <div className="p-4 text-left terminal-font text-2xl md:text-4xl break-words">
-                    {log.map((item, i) =>
+                    {log.map((item, i) => (
                         item.type === "prompt" ? (
                             <div key={i} className="flex flex-wrap items-start pt-4">
                                 <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
@@ -247,100 +242,100 @@ export default function Page() {
                         ) : (
                             <div key={i} className={item.className}>{item.text}</div>
                         )
-                    )}
+                    ))}
 
-                    {/* 타자효과/애니메이션 */}
-                    {step < LINES.length &&
+                    {step < LINES.length && (
                         <div className={LINES[step].className}>
-                            <Typewriter text={LINES[step].text} speed={32} onDone={handleAnimDone} />
+                            <Typewriter text={LINES[step].text} speed={32} onDone={handleAnimDone}/>
                         </div>
-                    }
+                    )}
 
                     {showResultAnim && currentResultText && (
                         <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
                             <TypewriterSplit text={currentResultText} speed={32} onDone={handleAnimDone}/>
                         </div>
                     )}
+                </div>
 
-                    {/* 입력창: 프롬프트+contenteditable */}
-                    {showInput && (
-                        <div className="text-left terminal-font text-2xl md:text-4xl pl-4 break-words flex items-center max-w-5xl mx-auto">
+                {showInput && (
+                    <div className="text-left terminal-font text-2xl md:text-4xl pl-4 break-words flex items-center max-w-5xl mx-auto">
                         <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
                             user@desktop ~ %&nbsp;
                         </span>
-                            <textarea
-                                ref={inputRef}
-                                className="prompt-input"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        const trimmed = input.trim();
-                                        if (!trimmed) return;
-                                        setLog(prev => [...prev, {
-                                            type: "prompt",
-                                            value: trimmed,
-                                            className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
-                                        }]);
-                                        setInput("");
-                                        setStep(LINES.length + 1);
-                                    }
-                                }}
-                                rows={1}
-                                style={{
-                                    resize: "none",
-                                    background: "transparent",
-                                    color: "#d1d5db",
-                                    fontSize: "2rem",
-                                    fontFamily: "inherit",
-                                    width: "80%",
-                                    border: "none",
-                                    outline: "none",
-                                    lineHeight: "1",
-                                    overflow: "hidden"
-                                }}
-                            />
-                        </div>
-                    )}
-
-                </div>
-
-                <div className="w-full h-screen bg-blue-500">
-                </div>
-                {accessToken && (
-                    <>
-                        <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
-                        <div className="pointer-events-none">
-                            <div className="fixed right-6 bottom-[92px] z-50 pointer-events-auto">
-                                <Link href="/DiFF/member/myPage">
-                                    <i className="fa-solid fa-user text-white text-2xl"></i>
-                                </Link>
-                            </div>
-                            <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
-                                <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
-                            </div>
-                        </div>
-                    </>
+                        <textarea
+                            ref={inputRef}
+                            className="prompt-input"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const trimmed = input.trim();
+                                    if (!trimmed) return;
+                                    setLog(prev => [...prev, {
+                                        type: "prompt",
+                                        value: trimmed,
+                                        className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
+                                    }]);
+                                    setInput("");
+                                    setStep(LINES.length + 1);
+                                }
+                            }}
+                            rows={1}
+                            style={{
+                                resize: "none",
+                                background: "transparent",
+                                color: "#d1d5db",
+                                fontSize: "2rem",
+                                fontFamily: "inherit",
+                                width: "80%",
+                                border: "none",
+                                outline: "none",
+                                lineHeight: "1",
+                                overflow: "hidden"
+                            }}
+                        />
+                    </div>
                 )}
             </div>
+            </div>
+
+            <div className="w-full h-screen bg-blue-500">
+
+            </div>
+
+            {accessToken && (
+                <>
+                    <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
+                    <div className="pointer-events-none">
+                        <div className="fixed right-6 bottom-[92px] z-50 pointer-events-auto">
+                            <Link href="/DiFF/member/myPage">
+                                <i className="fa-solid fa-user text-white text-2xl"></i>
+                            </Link>
+                        </div>
+                        <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
+                            <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
+                        </div>
+                    </div>
+                </>
+            )}
+
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
         </div>
-        <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-        </>
     );
 }
 
