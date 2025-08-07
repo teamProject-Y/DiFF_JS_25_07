@@ -97,7 +97,7 @@ export default function MyInfoPage() {
                                         커밋 ID: {repo.lastRqCommit || '없음'}
                                     </p>
                                     <p className="text-sm text-gray-500">
-                                        상태: {repo.delStatus ? '삭제됨' : '정상'}
+                                        이름: {repo.name || '이름 없음'}
                                     </p>
                                 </div>
                             ))
