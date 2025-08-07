@@ -6,7 +6,6 @@ import HamburgerButton from "@/common/HamMenu";
 import OverlayMenu from "@/common/overlayMenu";
 import Link from "next/link";
 
-
 function parseJwt(token) {
     if (!token) return {};
     try {
@@ -69,7 +68,6 @@ function TypewriterSplit({ text, onDone, speed = 38, className = "" }) {
                 }, 300);
             }
         }
-
         if (!base || base.length === 0) {
             setDisplayed(text);
             if (onDone) onDone();
