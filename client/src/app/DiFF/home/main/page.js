@@ -26,56 +26,84 @@ function parseJwt(token) {
 
 // 타자 효과
 function Typewriter({ text, speed = 40, onDone, className = "" }) {
-    const [displayed, setDisplayed] = useState("");
+    const [displayed, setDisplayed] = useState(null); // null일 땐 렌더 안 함
+
     useEffect(() => {
         let cancelled = false;
-        setDisplayed("");
+        let i = 0;
 
-        function typeChar(i) {
+        setDisplayed(null); // 렌더 차단
+        const timeout = setTimeout(() => {
+            if (cancelled) return;
+            setDisplayed("");
+            typeChar();
+        }, 0.1);
+
+        function typeChar() {
             if (cancelled) return;
             setDisplayed(text.slice(0, i + 1));
-            if (i < text.length - 1) {
-                setTimeout(() => typeChar(i + 1), speed);
+            i++;
+            if (i < text.length) {
+                setTimeout(typeChar, speed);
             } else {
-                if (onDone) onDone();
+                onDone?.();
             }
         }
 
-        if (text && text.length > 0) typeChar(0);
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
     }, [text, speed, onDone]);
+
+    if (displayed === null) return null; // 깜빡임 방지
     return <span className={className}>{displayed}</span>;
 }
 
 
 function TypewriterSplit({ text, onDone, speed = 38, className = "" }) {
     const [displayed, setDisplayed] = useState("");
-    const dotIdx = text.indexOf("...") !== -1 ? text.indexOf("...") + 3 : text.length;
+    const [done, setDone] = useState(false);
+
     useEffect(() => {
         let cancelled = false;
-        setDisplayed("");
+
+        const dotIdx = text.indexOf("...") !== -1 ? text.indexOf("...") + 3 : text.length;
         const base = text.slice(0, dotIdx);
 
-        function typeChar(i) {
+        if (!base || base.length === 0) {
+            setDisplayed(text);
+            setDone(true);
+            onDone?.();
+            return;
+        }
+
+        let i = 0;
+        function typeChar() {
             if (cancelled) return;
             setDisplayed(base.slice(0, i + 1));
-            if (i < base.length - 1) {
-                setTimeout(() => typeChar(i + 1), speed);
+            i++;
+            if (i < base.length) {
+                setTimeout(typeChar, speed);
             } else {
                 setTimeout(() => {
-                    setDisplayed(text);
-                    if (onDone) onDone();
+                    if (!cancelled) {
+                        setDisplayed(text);
+                        setDone(true);
+                        onDone?.();
+                    }
                 }, 300);
             }
         }
-        if (!base || base.length === 0) {
-            setDisplayed(text);
-            if (onDone) onDone();
-            return;
-        }
-        typeChar(0);
+
+        setDisplayed("");
+        setDone(false);
+        typeChar();
+
         return () => { cancelled = true; };
-    }, [text, dotIdx, speed, onDone]);
+    }, [text, speed, onDone]);
+
+    if (done) return null;
     return <span className={className}>{displayed}</span>;
 }
 
@@ -95,21 +123,27 @@ export default function Page() {
     const [step, setStep] = useState(0);
     const [input, setInput] = useState("");
     const [showInput, setShowInput] = useState(false);
-    const inputRef = useRef(null);
     const [user, setUser] = useState({});
     const [menuOpen, setMenuOpen] = useState(false);
+    const [accessToken, setAccessToken] = useState(null);
+    const inputRef = useRef(null);
 
     const LINES = [
-        { text: `Last login: ${getLoginDate()} on webtty001`, className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl break-all" },
-        { text: "user@desktop ~ %", className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl break-all" }
+        {
+            text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
+            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-4 break-all"
+        }
     ];
+
     const RESULTS = [
         "user verifying... done.",
         "zipping... done.",
         "making draft... done."
     ];
 
-    const [accessToken, setAccessToken] = useState(null);
+    const [currentResultText, setCurrentResultText] = useState(null);
+    const [showResultAnim, setShowResultAnim] = useState(false);
+    const [lastDoneStep, setLastDoneStep] = useState(-1);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -133,41 +167,36 @@ export default function Page() {
         else if (step === LINES.length) {
             setShowInput(true);
             setTimeout(() => inputRef.current?.focus(), 100);
-        } else setShowInput(false);
+        } else {setShowInput(false)};
     }, [step]);
 
     // 입력 후 로그 쌓기
     useEffect(() => {
-        if (!showInput || !input) return;
-        const timeout = setTimeout(() => {
-            setLog(prev => [
-                ...prev,
-                {
-                    type: "prompt",
-                    value: input,
-                    className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
-                }
-            ]);
-            setInput("");
-            setStep(LINES.length + 1);
-        }, 1000);
-        return () => clearTimeout(timeout);
-    }, [input, showInput]);
+        if (step > LINES.length && step <= LINES.length + RESULTS.length) {
+            const idx = step - LINES.length - 1;
+            setCurrentResultText(RESULTS[idx]);
+            setShowResultAnim(true);
+        } else {
+            setShowResultAnim(false);
+            setCurrentResultText(null);
+        }
+    }, [step]);
 
     // 타자 끝나면 다음
     const handleAnimDone = () => {
+        if (step <= lastDoneStep) return;
+
         if (step < LINES.length) {
-            setLog(prev => {
-                setStep(s => s + 1);
-                return [...prev, LINES[step]];
-            });
+            setLog(prev => [...prev, LINES[step]]);
         } else if (step > LINES.length && step <= LINES.length + RESULTS.length) {
             const idx = step - LINES.length - 1;
-            setLog(prev => {
-                setStep(s => s + 1);
-                return [...prev, { text: RESULTS[idx], className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-6 break-all" }];
-            });
+            setLog(prev => [...prev, {
+                text: RESULTS[idx],
+                className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all"
+            }]);
         }
+        setLastDoneStep(step);
+        setStep(prev => prev + 1);
     };
 
     // 렌더
@@ -202,12 +231,17 @@ export default function Page() {
                     overflow-wrap: break-word;
                   }
                 `}</style>
+
+                <div className="h-12 w-full bg-neutral-700 text-white text-center text-xl">
+                    Welcome to DiFF -- - bash - 45 x 7
+                </div>
+
                 {/* 로그/애니메이션 */}
-                <div className="text-left terminal-font text-2xl md:text-4xl break-words">
+                <div className="p-4 text-left terminal-font text-2xl md:text-4xl break-words">
                     {log.map((item, i) =>
                         item.type === "prompt" ? (
-                            <div key={i} className="flex flex-wrap items-start">
-                                {/*<span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>*/}
+                            <div key={i} className="flex flex-wrap items-start pt-4">
+                                <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
                                 <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
                             </div>
                         ) : (
@@ -222,38 +256,57 @@ export default function Page() {
                         </div>
                     }
 
+                    {showResultAnim && currentResultText && (
+                        <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
+                            <TypewriterSplit text={currentResultText} speed={32} onDone={handleAnimDone}/>
+                        </div>
+                    )}
+
                     {/* 입력창: 프롬프트+contenteditable */}
-                    {showInput &&
-                        <div className="flex items-center flex-wrap mt-3">
-                            {/*<span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>*/}
-                            <div
+                    {showInput && (
+                        <div className="text-left terminal-font text-2xl md:text-4xl pl-4 break-words flex items-center max-w-5xl mx-auto">
+                        <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
+                            user@desktop ~ %&nbsp;
+                        </span>
+                            <textarea
                                 ref={inputRef}
                                 className="prompt-input"
-                                contentEditable
-                                spellCheck={false}
-                                suppressContentEditableWarning
-                                onInput={e => setInput(e.currentTarget.textContent)}
-                                onKeyDown={e => {
-                                    // Enter 눌러도 줄바꿈이 아니라 다음 step
-                                    if (e.key === 'Enter') {
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
                                         e.preventDefault();
-                                        setInput(e.currentTarget.textContent);
+                                        const trimmed = input.trim();
+                                        if (!trimmed) return;
+                                        setLog(prev => [...prev, {
+                                            type: "prompt",
+                                            value: trimmed,
+                                            className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
+                                        }]);
+                                        setInput("");
+                                        setStep(LINES.length + 1);
                                     }
                                 }}
+                                rows={1}
                                 style={{
-                                    minHeight: "2.4rem",
-                                    maxWidth: "100%",
+                                    resize: "none",
+                                    background: "transparent",
+                                    color: "#d1d5db",
+                                    fontSize: "2rem",
+                                    fontFamily: "inherit",
+                                    width: "80%",
+                                    border: "none",
+                                    outline: "none",
+                                    lineHeight: "1",
+                                    overflow: "hidden"
                                 }}
                             />
                         </div>
-                    }
+                    )}
 
-                    {/* 결과 타자 */}
-                    {step > LINES.length && step <= LINES.length + RESULTS.length &&
-                        <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-6 break-all">
-                            <TypewriterSplit text={RESULTS[step - LINES.length - 1]} speed={32} onDone={handleAnimDone} />
-                        </div>
-                    }
+                </div>
+
+                <div className="w-full h-screen bg-blue-500">
                 </div>
                 {accessToken && (
                     <>
