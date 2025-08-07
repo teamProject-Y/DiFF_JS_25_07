@@ -1,5 +1,3 @@
-// pages/DiFF/member/page.js
-
 'use client';
 
 import React from "react";

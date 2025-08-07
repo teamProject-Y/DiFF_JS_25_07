@@ -12,3 +12,5 @@ export const fetchArticles = async ({ searchItem = 0, keyword = "", page = 1 }) 
     });
     return res.data;
 };
+
+

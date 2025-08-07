@@ -28,69 +28,95 @@ function parseJwt(token) {
 
 // 타자 효과
 function Typewriter({ text, speed = 40, onDone, className = "" }) {
-    const [displayed, setDisplayed] = useState("");
+    const [displayed, setDisplayed] = useState(null); // null일 땐 렌더 안 함
+
     useEffect(() => {
         let cancelled = false;
-        setDisplayed("");
+        let i = 0;
 
+        setDisplayed(null); // 렌더 차단
+        const timeout = setTimeout(() => {
+            if (cancelled) return;
+            setDisplayed("");
+            typeChar();
+        }, 0.1);
 
-        function typeChar(i) {
+        function typeChar() {
             if (cancelled) return;
             setDisplayed(text.slice(0, i + 1));
-            if (i < text.length - 1) {
-                setTimeout(() => typeChar(i + 1), speed);
+            i++;
+            if (i < text.length) {
+                setTimeout(typeChar, speed);
             } else {
-                if (onDone) onDone();
+                onDone?.();
             }
         }
-      
-        if (text && text.length > 0) typeChar(0);
-        return () => { cancelled = true; };
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
     }, [text, speed, onDone]);
+
+    if (displayed === null) return null; // 깜빡임 방지
     return <span className={className}>{displayed}</span>;
 }
 
 
 function TypewriterSplit({ text, onDone, speed = 38, className = "" }) {
     const [displayed, setDisplayed] = useState("");
-    const dotIdx = text.indexOf("...") !== -1 ? text.indexOf("...") + 3 : text.length;
+    const [done, setDone] = useState(false);
+
     useEffect(() => {
         let cancelled = false;
-        setDisplayed("");
+
+        const dotIdx = text.indexOf("...") !== -1 ? text.indexOf("...") + 3 : text.length;
         const base = text.slice(0, dotIdx);
 
-        function typeChar(i) {
+        if (!base || base.length === 0) {
+            setDisplayed(text);
+            setDone(true);
+            onDone?.();
+            return;
+        }
+
+        let i = 0;
+        function typeChar() {
             if (cancelled) return;
             setDisplayed(base.slice(0, i + 1));
-            if (i < base.length - 1) {
-                setTimeout(() => typeChar(i + 1), speed);
+            i++;
+            if (i < base.length) {
+                setTimeout(typeChar, speed);
             } else {
                 setTimeout(() => {
-                    setDisplayed(text);
-                    if (onDone) onDone();
+                    if (!cancelled) {
+                        setDisplayed(text);
+                        setDone(true);
+                        onDone?.();
+                    }
                 }, 300);
             }
         }
-        if (!base || base.length === 0) {
-            setDisplayed(text);
-            if (onDone) onDone();
-            return;
-        }
-        typeChar(0);
+
+        setDisplayed("");
+        setDone(false);
+        typeChar();
+
         return () => { cancelled = true; };
-    }, [text, dotIdx, speed, onDone]);
+    }, [text, speed, onDone]);
+
+    if (done) return null;
     return <span className={className}>{displayed}</span>;
 }
 
 // 날짜
 function getLoginDate() {
     const now = new Date();
-    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const day = kst.toLocaleDateString('en-US', { weekday: 'short' });
-    const month = kst.toLocaleDateString('en-US', { month: 'short' });
-    const date = kst.getDate().toString().padStart(2, '0');
-    const time = kst.toTimeString().split(' ')[0];
-    return `${day} ${month} ${date} ${time}`;
+    const day = now.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Seoul' });
+    const month = now.toLocaleDateString('en-US', { month: 'short', timeZone: 'Asia/Seoul' });
+    const date = now.toLocaleDateString('en-US', { day: '2-digit', timeZone: 'Asia/Seoul' });
+    const time = now.toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Asia/Seoul' });
+    return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
 export default function Page() {
@@ -99,20 +125,28 @@ export default function Page() {
     const [input, setInput] = useState("");
     const [showInput, setShowInput] = useState(false);
     const inputRef = useRef(null);
-    const [user, setUser] = useState({});
     const [menuOpen, setMenuOpen] = useState(false);
+    const [accessToken, setAccessToken] = useState(null);
+    const [user, setUser] = useState({ email: '', blogName: '' });
 
     const LINES = [
-        { text: `Last login: ${getLoginDate()} on webtty001`, className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl break-all" },
-        { text: "user@desktop ~ %", className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl break-all" }
-    ];
-    const RESULTS = [
-        "user verifying... done.",
-        "zipping... done.",
-        "making draft... done."
+        {
+            text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
+            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-4 break-all"
+        }
     ];
 
-    const [accessToken, setAccessToken] = useState(null);
+    const RESULTS = [
+        "User verifying... done.",
+        "Analyzing... done.",
+        "Making draft... done."
+    ];
+
+    const [currentResultText, setCurrentResultText] = useState(null);
+    const [showResultAnim, setShowResultAnim] = useState(false);
+    const [lastDoneStep, setLastDoneStep] = useState(-1);
+
+
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -129,169 +163,181 @@ export default function Page() {
         }
     }, []);
 
-
-
     // 단계별 효과
     useEffect(() => {
         if (step < LINES.length) setShowInput(false);
         else if (step === LINES.length) {
             setShowInput(true);
             setTimeout(() => inputRef.current?.focus(), 100);
-        } else setShowInput(false);
+        } else {
+            setShowInput(false);
+        }
     }, [step]);
 
     // 입력 후 로그 쌓기
     useEffect(() => {
-        if (!showInput || !input) return;
-        const timeout = setTimeout(() => {
-            setLog(prev => [
-                ...prev,
-                {
-                    type: "prompt",
-                    value: input,
-                    className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
-                }
-            ]);
-            setInput("");
-            setStep(LINES.length + 1);
-        }, 1000);
-        return () => clearTimeout(timeout);
-    }, [input, showInput]);
+        if (step > LINES.length && step <= LINES.length + RESULTS.length) {
+            const idx = step - LINES.length - 1;
+            setCurrentResultText(RESULTS[idx]);
+            setShowResultAnim(true);
+        } else {
+            setShowResultAnim(false);
+            setCurrentResultText(null);
+        }
+    }, [step]);
 
-    // 타자 끝나면 다음
     const handleAnimDone = () => {
+        if (step <= lastDoneStep) return;
+
         if (step < LINES.length) {
-            setLog(prev => {
-                setStep(s => s + 1);
-                return [...prev, LINES[step]];
-            });
+            setLog(prev => [...prev, LINES[step]]);
         } else if (step > LINES.length && step <= LINES.length + RESULTS.length) {
             const idx = step - LINES.length - 1;
-            setLog(prev => {
-                setStep(s => s + 1);
-                return [...prev, { text: RESULTS[idx], className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-6 break-all" }];
-            });
+            setLog(prev => [...prev, {
+                text: RESULTS[idx],
+                className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all"
+            }]);
         }
+        setLastDoneStep(step);
+        setStep(prev => prev + 1);
     };
 
     // 렌더
     return (
-        <>
-        <div className="w-full min-h-screen bg-[#111] pt-24">
-            <div
-                className="bg-black rounded-lg shadow-lg px-8 py-10 w-full max-w-5xl min-h-[60vh] mx-auto"
-                style={{
-                    fontFamily: `'Fira Mono', 'Consolas', 'Menlo', 'monospace'`,
-                    wordBreak: "break-word"
-                }}
-            >
+        <div className="w-full min-h-screen bg-[#111]">
+            <div className="h-screen pt-32">
+            <div className="bg-neutral-800 tracking-tight rounded-xl w-full max-w-5xl min-h-[60vh] mx-auto overflow-hidden"
+                 style={{ fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: "break-word" }}>
                 <style jsx global>{`
-                  .terminal-font {
-                    font-family: 'Fira Mono', 'Consolas', 'Menlo', 'monospace';
-                    line-height: 1.2;
-                  }
-                  .prompt-input {
-                    outline: none;
-                    background: transparent;
-                    color: #d1d5db;
-                    font-size: 2rem;
-                    font-family: inherit;
-                    width: 80%;
-                    min-width: 2ch;
-                    border: none;
-                    resize: none;
-                    line-height: 1.2;
-                    word-break: break-word;
-                    white-space: pre-wrap;
-                    overflow-wrap: break-word;
-                  }
+                    .terminal-font {
+                        font-family: 'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace;
+                        line-height: 1.2;
+                    }
+                    .prompt-input {
+                        outline: none;
+                        background: transparent;
+                        color: #d1d5db;
+                        font-size: 2rem;
+                        font-family: inherit;
+                        font-weight: 1000;
+                        width: 80%;
+                        min-width: 2ch;
+                        border: none;
+                        resize: none;
+                        line-height: 1.2;
+                        white-space: pre-wrap;
+                        overflow-wrap: break-word;
+                    }
                 `}</style>
-                {/* 로그/애니메이션 */}
-                <div className="text-left terminal-font text-2xl md:text-4xl break-words">
-                    {log.map((item, i) =>
+
+                <div className="h-12 w-full bg-neutral-700 text-white text-center text-xl">
+                    Welcome to DiFF -- - bash - 45 x 7
+                </div>
+
+                <div className="p-4 text-left terminal-font text-2xl md:text-4xl break-words">
+                    {log.map((item, i) => (
                         item.type === "prompt" ? (
-                            <div key={i} className="flex flex-wrap items-start">
-                                {/*<span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>*/}
+                            <div key={i} className="flex flex-wrap items-start pt-4">
+                                <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
                                 <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
                             </div>
                         ) : (
                             <div key={i} className={item.className}>{item.text}</div>
                         )
+                    ))}
+
+                    {step < LINES.length && (
+                        <div className={LINES[step].className}>
+                            <Typewriter text={LINES[step].text} speed={32} onDone={handleAnimDone}/>
+                        </div>
                     )}
 
-                    {/* 타자효과/애니메이션 */}
-                    {step < LINES.length &&
-                        <div className={LINES[step].className}>
-                            <Typewriter text={LINES[step].text} speed={32} onDone={handleAnimDone} />
+                    {showResultAnim && currentResultText && (
+                        <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
+                            <TypewriterSplit text={currentResultText} speed={32} onDone={handleAnimDone}/>
                         </div>
-                    }
-
-                    {/* 입력창: 프롬프트+contenteditable */}
-                    {showInput &&
-                        <div className="flex items-center flex-wrap mt-3">
-                            {/*<span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>*/}
-                            <div
-                                ref={inputRef}
-                                className="prompt-input"
-                                contentEditable
-                                spellCheck={false}
-                                suppressContentEditableWarning
-                                onInput={e => setInput(e.currentTarget.textContent)}
-                                onKeyDown={e => {
-                                    // Enter 눌러도 줄바꿈이 아니라 다음 step
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        setInput(e.currentTarget.textContent);
-                                    }
-                                }}
-                                style={{
-                                    minHeight: "2.4rem",
-                                    maxWidth: "100%",
-                                }}
-                            />
-                        </div>
-                    }
-
-                    {/* 결과 타자 */}
-                    {step > LINES.length && step <= LINES.length + RESULTS.length &&
-                        <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-6 break-all">
-                            <TypewriterSplit text={RESULTS[step - LINES.length - 1]} speed={32} onDone={handleAnimDone} />
-                        </div>
-                    }
+                    )}
                 </div>
-                {accessToken && (
-                    <>
-                        <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
-                        <div className="pointer-events-none">
-                            <div className="fixed right-6 bottom-[92px] z-50 pointer-events-auto">
-                                <Link href="/DiFF/member/myPage">
-                                    <i className="fa-solid fa-user text-white text-2xl"></i>
-                                </Link>
-                            </div>
-                            <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
-                                <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
-                            </div>
-                        </div>
-                    </>
+
+                {showInput && (
+                    <div className="text-left terminal-font text-2xl md:text-4xl pl-4 break-words flex items-center max-w-5xl mx-auto">
+                        <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
+                            user@desktop ~ %&nbsp;
+                        </span>
+                        <textarea
+                            ref={inputRef}
+                            className="prompt-input"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const trimmed = input.trim();
+                                    if (!trimmed) return;
+                                    setLog(prev => [...prev, {
+                                        type: "prompt",
+                                        value: trimmed,
+                                        className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
+                                    }]);
+                                    setInput("");
+                                    setStep(LINES.length + 1);
+                                }
+                            }}
+                            rows={1}
+                            style={{
+                                resize: "none",
+                                background: "transparent",
+                                color: "#d1d5db",
+                                fontSize: "2rem",
+                                fontFamily: "inherit",
+                                width: "80%",
+                                border: "none",
+                                outline: "none",
+                                lineHeight: "1",
+                                overflow: "hidden"
+                            }}
+                        />
+                    </div>
                 )}
             </div>
+            </div>
+
+            <div className="w-full h-screen bg-blue-500">
+
+            </div>
+
+            {accessToken && (
+                <>
+                    <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
+                    <div className="pointer-events-none">
+                        <div className="fixed right-6 bottom-[92px] z-50 pointer-events-auto">
+                            <Link href="/DiFF/member/myPage">
+                                <i className="fa-solid fa-user text-white text-2xl"></i>
+                            </Link>
+                        </div>
+                        <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
+                            <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
+                        </div>
+                    </div>
+                </>
+            )}
+
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
         </div>
-        <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-        </>
     );
 }
 
