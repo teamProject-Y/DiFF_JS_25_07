@@ -1,5 +1,5 @@
-"use client";
-
+// pages/DiFF/article/list.js
+'use client';
 import { useEffect, useState } from 'react';
 import {fetchArticles} from "@/lib/ArticleAPI";
  // 경로 확인!

@@ -65,6 +65,7 @@ export default function ModifyPage({ initialMember }) {
         // }
     }, [router]);
 
+
     // 3. 폼 변경 핸들러
     const handleChange = e => {
         setForm({ ...form, [e.target.name]: e.target.value });

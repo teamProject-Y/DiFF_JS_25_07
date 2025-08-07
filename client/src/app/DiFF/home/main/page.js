@@ -1,9 +1,32 @@
 // pages/usr/home/page.js
 'use client';
 
-import {useEffect, useRef, useState} from "react";
-import HamMenu from "@/common/HamMenu";
+import { useEffect, useRef, useState } from "react";
 
+import HamburgerButton from "@/common/HamMenu";
+import OverlayMenu from "@/common/overlayMenu";
+import Link from "next/link";
+
+
+function parseJwt(token) {
+    if (!token) return {};
+    try {
+        // JWT payload만 추출 (header.**payload**.signature)
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return {};
+    }
+}
+
+// 타자 효과
 function Typewriter({ text, speed = 40, onDone, className = "" }) {
     const [displayed, setDisplayed] = useState(null); // null일 땐 렌더 안 함
 
@@ -86,6 +109,7 @@ function TypewriterSplit({ text, onDone, speed = 38, className = "" }) {
     return <span className={className}>{displayed}</span>;
 }
 
+// 날짜
 function getLoginDate() {
     const now = new Date();
     const day = now.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Seoul' });
@@ -121,11 +145,24 @@ export default function Page() {
     const [showResultAnim, setShowResultAnim] = useState(false);
     const [lastDoneStep, setLastDoneStep] = useState(-1);
 
+
+
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        setAccessToken(token);
+        if (typeof window !== "undefined") {
+            const token = localStorage.getItem('accessToken');
+            setAccessToken(token);
+
+            if (token) {
+                const userInfo = parseJwt(token);
+                setUser({
+                    email: userInfo.memberEmail,
+                    blogName: userInfo.blogName,
+                });
+            }
+        }
     }, []);
 
+    // 단계별 효과
     useEffect(() => {
         if (step < LINES.length) setShowInput(false);
         else if (step === LINES.length) {
@@ -136,6 +173,7 @@ export default function Page() {
         }
     }, [step]);
 
+    // 입력 후 로그 쌓기
     useEffect(() => {
         if (step > LINES.length && step <= LINES.length + RESULTS.length) {
             const idx = step - LINES.length - 1;
@@ -163,6 +201,7 @@ export default function Page() {
         setStep(prev => prev + 1);
     };
 
+    // 렌더
     return (
         <div className="w-full min-h-screen bg-[#111]">
             <div className="h-screen pt-32">
@@ -267,14 +306,37 @@ export default function Page() {
             </div>
 
             {accessToken && (
-                <div className="fixed right-6 bottom-6 flex flex-col items-end gap-4 z-50">
-                    <HamMenu open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
-                    <button>
-                        <i className="fa-solid fa-user text-white text-2xl"></i>
-                    </button>
-                </div>
+                <>
+                    <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
+                    <div className="pointer-events-none">
+                        <div className="fixed right-6 bottom-[92px] z-50 pointer-events-auto">
+                            <Link href="/DiFF/member/myPage">
+                                <i className="fa-solid fa-user text-white text-2xl"></i>
+                            </Link>
+                        </div>
+                        <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
+                            <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
+                        </div>
+                    </div>
+                </>
             )}
         </div>
+        <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+    </>
     );
 }
 
