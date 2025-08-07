@@ -29,7 +29,7 @@ function Page({ member }) {
                     <strong>{member.nickName}</strong> 님 반갑습니다.
                 </div>
                 <div className="flex-grow"></div>
-                <Link href="/client/src/app/DiFF/member/modify">
+                <Link href="/DiFF/member/modify">
                     <a className="px-4 py-2 border rounded hover:bg-neutral-300">
                         회원 정보 수정
                     </a>
@@ -80,8 +80,4 @@ export async function getServerSideProps(context) {
 // Layout에서 쓸 페이지 타이틀
 Page.pageTitle = 'MY PAGE'
 
-<<<<<<<< HEAD:client/src/app/DiFF/member/myInfo.js
-export default MyInfo
-========
 export default Page
->>>>>>>> main:client/src/app/DiFF/member/myInfo/page.js

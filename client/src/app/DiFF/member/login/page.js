@@ -94,11 +94,7 @@ export default function LoginPage({ searchParams }) {
                 </form>
 
                 <div className="sub-menu text-center my-4 flex justify-center gap-4">
-<<<<<<<< HEAD:client/src/app/DiFF/member/login.js
-                    <a href="/client/src/app/DiFF/member/join" className="hover:underline">
-========
                     <a href="/DiFF/member/join/page" className="hover:underline">
->>>>>>>> main:client/src/app/DiFF/member/login/page.js
                         Join
                     </a>
                 </div>

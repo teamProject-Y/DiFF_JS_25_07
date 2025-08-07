@@ -1,5 +1,7 @@
+'use client';
+
 import { useState } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation';
 import Link from 'next/link'
 import {signUp} from "@/lib/UserAPI";
 
@@ -81,11 +83,7 @@ export default function JoinPage() {
                 </button>
             </form>
             <div className="sub-menu text-center my-4">
-<<<<<<<< HEAD:client/src/app/DiFF/member/join.js
-                <Link href="/client/src/app/DiFF/member/login">Login</Link>
-========
                 <Link href="/DiFF/member/login/page">Login</Link>
->>>>>>>> main:client/src/app/DiFF/member/join/page.js
             </div>
         </div>
     )
