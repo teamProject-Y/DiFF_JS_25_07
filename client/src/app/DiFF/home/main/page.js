@@ -2,6 +2,12 @@
 'use client';
 
 import {useEffect, useRef, useState} from "react";
+import { Navigation, Pagination, Scrollbar, A11y, Autoplay } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
 
 import HamburgerButton from "@/common/HamMenu";
 import OverlayMenu from "@/common/overlayMenu";
@@ -349,19 +355,40 @@ export default function Page() {
             </div>
 
             <div className="w-full h-screen bg-blue-500 px-36 py-10">
-                <div className="ml text-5xl text-black font-bold">Trending</div>
-                {trendingArticles.length > 0 ? (
-                    trendingArticles.map((article, index) => (
-                        <div key={index} className="mb-4 p-4 bg-white shadow-md rounded-md">
-                            <h3 className="text-xl font-semibold">{article.title}</h3>
-                            <p>{article.extra_writer}</p>
-                            <p className="text-sm text-gray-600">조회수: {article.hits}</p>
-                            <p className="text-sm text-gray-600">작성일: {article.regDate}</p>
-                        </div>
-                    ))
-                ) : (
-                    <div>트렌딩 게시물이 없습니다.</div>
-                )}
+                <div className="text-5xl text-black font-bold">Trending</div>
+                <div className="article-slider bg-blue-300 p-10">
+                    {loading ? (
+                        <div>로딩 중...</div>
+                    ) : (
+                        <Swiper
+                            modules={[Navigation, Pagination, Scrollbar, A11y, Autoplay]}
+                            spaceBetween={50}
+                            loop={true}
+                            autoplay={{ delay: 3000 }}
+                            slidesPerView={3}
+                            navigation
+                            pagination={{ clickable: true }}
+                            //scrollbar={{ draggable: true }}
+                            onSwiper={(swiper) => console.log(swiper)}
+                            onSlideChange={() => console.log('slide change')}
+                        >
+                            {trendingArticles.length > 0 ? (
+                                trendingArticles.map((article, index) => (
+                                    <SwiperSlide key={index}>
+                                        <div className="article-card min-w-1/5 p-4 bg-white shadow-md rounded-md">
+                                            <h3 className="text-xl font-semibold">{article.title}</h3>
+                                            <p>{article.extra_writer}</p>
+                                            <p className="text-sm text-gray-600">조회수: {article.hits}</p>
+                                            <p className="text-sm text-gray-600">좋아요: {article.regDate}</p>
+                                        </div>
+                                    </SwiperSlide>
+                                ))
+                            ) : (
+                                <div>트렌딩 게시물이 없습니다.</div>
+                            )}
+                        </Swiper>
+                    )}
+                </div>
             </div>
 
             {/*overlay menu*/}
