@@ -356,7 +356,7 @@ export default function Page() {
 
             <div className="w-full h-screen bg-blue-500 px-36 py-10">
                 <div className="text-5xl text-black font-bold">Trending</div>
-                <div className="article-slider bg-blue-300 p-10">
+                <div className="article-slider h-2/3 bg-blue-300 p-10 mt-12 flex">
                     {loading ? (
                         <div>로딩 중...</div>
                     ) : (
@@ -368,14 +368,11 @@ export default function Page() {
                             slidesPerView={3}
                             navigation
                             pagination={{ clickable: true }}
-                            //scrollbar={{ draggable: true }}
-                            onSwiper={(swiper) => console.log(swiper)}
-                            onSlideChange={() => console.log('slide change')}
                         >
                             {trendingArticles.length > 0 ? (
                                 trendingArticles.map((article, index) => (
                                     <SwiperSlide key={index}>
-                                        <div className="article-card min-w-1/5 p-4 bg-white shadow-md rounded-md">
+                                        <div className="article-card min-w-1/5 h-full p-4 bg-white shadow-md rounded-md">
                                             <h3 className="text-xl font-semibold">{article.title}</h3>
                                             <p>{article.extra_writer}</p>
                                             <p className="text-sm text-gray-600">조회수: {article.hits}</p>
