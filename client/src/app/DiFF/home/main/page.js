@@ -2,7 +2,7 @@
 'use client';
 
 import {useEffect, useRef, useState} from "react";
-import { Navigation, Pagination, Scrollbar, A11y, Autoplay } from 'swiper/modules';
+import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -168,18 +168,18 @@ export default function Page() {
             .catch(error => {
                 console.error('네트워크 오류:', error);
                 if (error.response) {
-                    // 서버 응답이 있지만 상태 코드가 2xx가 아닐 경우
                     console.error('응답 오류:', error.response);
+
                     if (error.response.status === 400) {
                         console.error('잘못된 요청:', error.response.data);
                     } else if (error.response.status === 500) {
                         console.error('서버 오류:', error.response.data);
                     }
+
                 } else if (error.request) {
-                    // 요청은 보냈으나 응답을 받지 못했을 때
                     console.error('요청 오류:', error.request);
+
                 } else {
-                    // 요청 설정에 문제가 있을 때
                     console.error('오류 메시지:', error.message);
                 }
                 setLoading(false);
@@ -354,14 +354,19 @@ export default function Page() {
                 </div>
             </div>
 
+            {/*trending*/}
             <div className="w-full h-screen bg-blue-500 px-36 py-10">
                 <div className="text-5xl text-black font-bold">Trending</div>
-                <div className="article-slider h-2/3 bg-blue-300 p-10 mt-12 flex">
+                <div className="article-slider h-2/3 w-full mt-16 flex bg-blue-300">
                     {loading ? (
-                        <div>로딩 중...</div>
+                        <div className="flex justify-between w-full items-start">
+                            <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
+                            <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
+                            <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
+                        </div>
                     ) : (
                         <Swiper
-                            modules={[Navigation, Pagination, Scrollbar, A11y, Autoplay]}
+                            modules={[Navigation, Pagination, A11y, Autoplay]}
                             spaceBetween={50}
                             loop={true}
                             autoplay={{ delay: 3000 }}
@@ -372,11 +377,11 @@ export default function Page() {
                             {trendingArticles.length > 0 ? (
                                 trendingArticles.map((article, index) => (
                                     <SwiperSlide key={index}>
-                                        <div className="article-card min-w-1/5 h-full p-4 bg-white shadow-md rounded-md">
+                                        <div className="article-card h-[90%] p-4 bg-white shadow-md rounded-md">
                                             <h3 className="text-xl font-semibold">{article.title}</h3>
                                             <p>{article.extra_writer}</p>
                                             <p className="text-sm text-gray-600">조회수: {article.hits}</p>
-                                            <p className="text-sm text-gray-600">좋아요: {article.regDate}</p>
+                                            <p className="text-sm text-gray-600">작성일: {article.regDate}</p>
                                         </div>
                                     </SwiperSlide>
                                 ))
