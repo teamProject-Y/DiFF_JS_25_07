@@ -6,7 +6,8 @@ import {useEffect, useRef, useState} from "react";
 import HamburgerButton from "@/common/HamMenu";
 import OverlayMenu from "@/common/overlayMenu";
 import Link from "next/link";
-import axios from "axios";
+
+import { trendingArticle } from "@/lib/ArticleAPI";
 
 
 function parseJwt(token) {
@@ -152,9 +153,9 @@ export default function Page() {
     const [lastDoneStep, setLastDoneStep] = useState(-1);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/api/DiFF/home/main")
+        trendingArticle(10, 7)
             .then(res => {
-                console.log("서버 응답:", res.data.text);
+                console.log("서버 응답:", res.data);
 
             })
             .catch(error => {
