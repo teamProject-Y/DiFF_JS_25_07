@@ -27,6 +27,7 @@ function parseJwt(token) {
 }
 
 // 타자 효과
+
 function Typewriter({ text, speed = 30, onDone, className = "" }) {
     const [displayed, setDisplayed] = useState(null); // null일 땐 렌더 안 함
 
