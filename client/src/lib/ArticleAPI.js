@@ -13,4 +13,10 @@ export const fetchArticles = async ({ searchItem = 0, keyword = "", page = 1 }) 
     return res.data;
 };
 
+export const trendingArticle = async ({ count }) => {
+    const res = await UserApi.get(`/api/DiFF/article/trending`, {
+        params: { count }
+    })
+    return res.data;
+}
 

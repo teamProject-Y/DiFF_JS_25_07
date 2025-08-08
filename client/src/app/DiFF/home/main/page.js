@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import HamburgerButton from "@/common/HamMenu";
 import OverlayMenu from "@/common/overlayMenu";
 import Link from "next/link";
+import axios from "axios";
 
 
 function parseJwt(token) {
@@ -146,7 +147,12 @@ export default function Page() {
     const [showResultAnim, setShowResultAnim] = useState(false);
     const [lastDoneStep, setLastDoneStep] = useState(-1);
 
-
+    useEffect(() => {
+        axios.get("http://localhost:8080/api/DiFF/home/main")
+            .then(res => {
+                console.log("서버 응답:", res.data.text);
+            });
+    }, []);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -239,6 +245,7 @@ export default function Page() {
                     Welcome to DiFF -- - bash - 45 x 7
                 </div>
 
+                {/*입력 후*/}
                 <div className="pt-6 pl-6 pb-4 text-left terminal-font text-2xl md:text-4xl break-words">
                     {log.map((item, i) => (
                         item.type === "prompt" ? (
@@ -264,6 +271,7 @@ export default function Page() {
                     )}
                 </div>
 
+                {/*입력 전*/}
                 {showInput && (
                     <div className="text-left terminal-font text-2xl md:text-4xl pl-6 break-words flex items-center">
                         <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
@@ -298,7 +306,7 @@ export default function Page() {
                                 width: "80%",
                                 border: "none",
                                 outline: "none",
-                                lineHeight: "1",
+                                lineHeight: "1.2",
                                 overflow: "hidden"
                             }}
                         />
@@ -307,17 +315,20 @@ export default function Page() {
             </div>
             </div>
 
-            <div className="w-full h-screen bg-blue-500">
+            <div className="w-full h-screen bg-blue-500 px-36 py-10">
+                <div className="ml text-5xl text-black font-bold">Trending</div>
+                <div>
 
+                </div>
             </div>
 
             {accessToken && (
                 <>
                     <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
                     <div className="pointer-events-none">
-                        <div className="fixed right-6 bottom-[92px] z-50 pointer-events-auto">
+                        <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
                             <Link href="/DiFF/member/myPage">
-                                <i className="fa-solid fa-user text-white text-2xl"></i>
+                                <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
                             </Link>
                         </div>
                         <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
@@ -326,7 +337,6 @@ export default function Page() {
                     </div>
                 </>
             )}
-
             <br/>
             <br/>
             <br/>
