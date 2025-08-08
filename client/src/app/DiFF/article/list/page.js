@@ -1,24 +1,22 @@
-// pages/DiFF/article/list.js
 'use client';
 import { useEffect, useState } from 'react';
-import {fetchArticles} from "@/lib/ArticleAPI";
- // 경로 확인!
+import { useSearchParams } from 'next/navigation';
+import { fetchArticles } from '@/lib/ArticleAPI';
 
 export default function ArticleListPage() {
+    const searchParams = useSearchParams();
+    const repositoryId = searchParams.get('repositoryId'); // ← 여기서 추출
+
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    // 상태: 검색 조건이나 페이지
     const [page, setPage] = useState(1);
     const [searchItem, setSearchItem] = useState(0);
     const [keyword, setKeyword] = useState('');
 
     useEffect(() => {
         const load = async () => {
-            console.log("📦 fetchArticles 요청 시작:", { searchItem, keyword, page });
             try {
-                const res = await fetchArticles({ searchItem, keyword, page });
-                console.log("✅ fetchArticles 응답 성공:", res);
+                const res = await fetchArticles({repositoryId, searchItem, keyword, page}); // ← 넘겨줌
                 setArticles(res.articles);
             } catch (err) {
                 console.error('❌ 게시글 로딩 실패:', err);
@@ -27,19 +25,21 @@ export default function ArticleListPage() {
             }
         };
         load();
-    }, [searchItem, keyword, page]);
+    }, [repositoryId, searchItem, keyword, page]);
 
 
     return (
-        <div>
-            <h1>게시글 목록</h1>
+        <div className="p-6 max-w-3xl mx-auto">
+            <h1 className="text-2xl font-bold mb-4">게시글 목록</h1>
             {loading ? (
-                <p>불러오는 중...</p>
+                <p className="text-gray-500">불러오는 중...</p>
+            ) : articles.length === 0 ? (
+                <p className="text-gray-500">게시글이 없습니다.</p>
             ) : (
                 articles.map(article => (
-                    <div key={article.id} style={{ marginBottom: '20px' }}>
-                        <h2>{article.title}</h2>
-                        <p>{article.body}</p>
+                    <div key={article.id} className="mb-6 p-4 border border-gray-300 rounded-lg shadow-sm">
+                        <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
+                        <p className="text-gray-700">{article.body}</p>
                     </div>
                 ))
             )}
