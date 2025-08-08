@@ -85,10 +85,11 @@ export default function MyInfoPage() {
                             repositories.map((repo, idx) => (
                                 <div
                                     key={repo.id}
-                                    className="border border-gray-300 p-4 rounded-lg bg-white shadow-md"
+                                    className="border border-gray-300 p-4 rounded-lg bg-white shadow-md cursor-pointer hover:bg-gray-100 transition"
+                                    onClick={() => router.push(`/DiFF/article/list?repositoryId=${repo.id}`)}
                                 >
                                     <h3 className="font-bold text-lg mb-2">
-                                        {repo.title || `Repository ${idx + 1}`}
+                                        {repo.name || `Repository ${idx + 1}`}
                                     </h3>
                                     <p className="text-sm text-gray-500 mb-1">
                                         생성일: {repo.regDate?.split('T')[0]}
