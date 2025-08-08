@@ -7,7 +7,7 @@ import HamburgerButton from "@/common/HamMenu";
 import OverlayMenu from "@/common/overlayMenu";
 import Link from "next/link";
 
-import { trendingArticle } from "@/lib/ArticleAPI";
+import {trendingArticle} from "@/lib/ArticleAPI";
 
 
 function parseJwt(token) {
@@ -29,7 +29,6 @@ function parseJwt(token) {
 }
 
 // 타자 효과
-
 function Typewriter({text, speed = 30, onDone, className = ""}) {
     const [displayed, setDisplayed] = useState(null); // null일 땐 렌더 안 함
 
@@ -134,6 +133,11 @@ export default function Page() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [accessToken, setAccessToken] = useState(null);
     const [user, setUser] = useState({email: '', blogName: ''});
+    const [currentResultText, setCurrentResultText] = useState(null);
+    const [showResultAnim, setShowResultAnim] = useState(false);
+    const [lastDoneStep, setLastDoneStep] = useState(-1);
+    const [trendingArticles, setTrendingArticles] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const LINES = [
         {
@@ -148,28 +152,31 @@ export default function Page() {
         "Making draft... done."
     ];
 
-    const [currentResultText, setCurrentResultText] = useState(null);
-    const [showResultAnim, setShowResultAnim] = useState(false);
-    const [lastDoneStep, setLastDoneStep] = useState(-1);
-
     useEffect(() => {
         trendingArticle(10, 7)
             .then(res => {
-                console.log("서버 응답:", res.data);
-
+                console.log("서버 응답:", res);
+                setTrendingArticles(res.articles);
+                setLoading(false);
             })
             .catch(error => {
                 console.error('네트워크 오류:', error);
                 if (error.response) {
-                    // 서버가 응답했으나 상태 코드가 2xx 범위 밖일 때
+                    // 서버 응답이 있지만 상태 코드가 2xx가 아닐 경우
                     console.error('응답 오류:', error.response);
+                    if (error.response.status === 400) {
+                        console.error('잘못된 요청:', error.response.data);
+                    } else if (error.response.status === 500) {
+                        console.error('서버 오류:', error.response.data);
+                    }
                 } else if (error.request) {
-                    // 요청은 보내졌으나 응답을 받지 못했을 때
+                    // 요청은 보냈으나 응답을 받지 못했을 때
                     console.error('요청 오류:', error.request);
                 } else {
-                    // 요청 설정에서 오류가 발생했을 때
+                    // 요청 설정에 문제가 있을 때
                     console.error('오류 메시지:', error.message);
                 }
+                setLoading(false);
             });
     }, []);
 
@@ -343,27 +350,34 @@ export default function Page() {
 
             <div className="w-full h-screen bg-blue-500 px-36 py-10">
                 <div className="ml text-5xl text-black font-bold">Trending</div>
-                <div>
+                {trendingArticles.length > 0 ? (
+                    trendingArticles.map((article, index) => (
+                        <div key={index} className="mb-4 p-4 bg-white shadow-md rounded-md">
+                            <h3 className="text-xl font-semibold">{article.title}</h3>
+                            <p>{article.extra_writer}</p>
+                            <p className="text-sm text-gray-600">조회수: {article.hits}</p>
+                            <p className="text-sm text-gray-600">작성일: {article.regDate}</p>
+                        </div>
+                    ))
+                ) : (
+                    <div>트렌딩 게시물이 없습니다.</div>
+                )}
+            </div>
 
+            {/*overlay menu*/}
+            <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
+                         blogName={user.blogName}/>
+            <div className="pointer-events-none">
+                <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
+                    <Link href="/DiFF/member/myPage">
+                        <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
+                    </Link>
+                </div>
+                <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
+                    <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
                 </div>
             </div>
 
-            {accessToken && (
-                <>
-                    <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
-                                 blogName={user.blogName}/>
-                    <div className="pointer-events-none">
-                        <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
-                            <Link href="/DiFF/member/myPage">
-                                <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
-                            </Link>
-                        </div>
-                        <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
-                            <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
-                        </div>
-                    </div>
-                </>
-            )}
             <br/>
             <br/>
             <br/>

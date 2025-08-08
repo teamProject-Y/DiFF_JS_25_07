@@ -12,16 +12,16 @@ export const ArticleApi = axios.create({
 });
 
 export const fetchArticles = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
-    const res = await UserApi.get('/api/DiFF/article/list', {
+    const res = await ArticleApi.get('/api/DiFF/article/list', {
         params: { repositoryId, searchItem, keyword, page }
     });
     return res.data;
 };
 
-export const trendingArticle = async ({ count, days }) => {
-    const response = await ArticleApi.get(`/api/DiFF/article/trending`, {
+export const trendingArticle = async (count, days) => {
+    const res = await ArticleApi.get(`/api/DiFF/article/trending`, {
             params: { count, days }
         });
-    return response.data;
+    return res.data;
 }
 
