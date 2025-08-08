@@ -27,6 +27,7 @@ function parseJwt(token) {
 }
 
 // 타자 효과
+
 function Typewriter({ text, speed = 30, onDone, className = "" }) {
     const [displayed, setDisplayed] = useState(null); // null일 땐 렌더 안 함
 
@@ -206,105 +207,105 @@ export default function Page() {
     return (
         <div className="w-full min-h-screen bg-[#111]">
             <div className="h-screen pt-32">
-                <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
-                     style={{ fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: "break-word" }}>
-                    <style jsx global>{`
-                        .terminal-font {
-                            font-family: 'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace;
-                            line-height: 1.2;
-                        }
-                        .prompt-input {
-                            outline: none;
-                            background: transparent;
-                            color: #d1d5db;
-                            font-size: 2rem;
-                            font-family: inherit;
-                            font-weight: 1000;
-                            width: 80%;
-                            min-width: 2ch;
-                            border: none;
-                            resize: none;
-                            line-height: 1.2;
-                            white-space: pre-wrap;
-                            overflow-wrap: break-word;
-                        }
-                    `}</style>
+            <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
+                 style={{ fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: "break-word" }}>
+                <style jsx global>{`
+                    .terminal-font {
+                        font-family: 'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace;
+                        line-height: 1.2;
+                    }
+                    .prompt-input {
+                        outline: none;
+                        background: transparent;
+                        color: #d1d5db;
+                        font-size: 2rem;
+                        font-family: inherit;
+                        font-weight: 1000;
+                        width: 80%;
+                        min-width: 2ch;
+                        border: none;
+                        resize: none;
+                        line-height: 1.2;
+                        white-space: pre-wrap;
+                        overflow-wrap: break-word;
+                    }
+                `}</style>
 
-                    <div className="flex items-center justify-center h-12 w-full bg-neutral-700 text-white text-center text-xl relative">
-                        <div className="absolute flex justify-start w-full ml-3">
-                            <div className="w-5 h-5 bg-red-500 rounded-xl m-2"></div>
-                            <div className="w-5 h-5 bg-yellow-500 rounded-xl m-2"></div>
-                            <div className="w-5 h-5 bg-green-500 rounded-xl m-2"></div>
+                <div className="flex items-center justify-center h-12 w-full bg-neutral-700 text-white text-center text-xl relative">
+                    <div className="absolute flex justify-start w-full ml-3">
+                        <div className="w-5 h-5 bg-red-500 rounded-xl m-2"></div>
+                        <div className="w-5 h-5 bg-yellow-500 rounded-xl m-2"></div>
+                        <div className="w-5 h-5 bg-green-500 rounded-xl m-2"></div>
+                    </div>
+                    Welcome to DiFF -- - bash - 45 x 7
+                </div>
+
+                <div className="pt-6 pl-6 pb-4 text-left terminal-font text-2xl md:text-4xl break-words">
+                    {log.map((item, i) => (
+                        item.type === "prompt" ? (
+                            <div key={i} className="flex flex-wrap items-start pt-4">
+                                <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
+                                <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
+                            </div>
+                        ) : (
+                            <div key={i} className={item.className}>{item.text}</div>
+                        )
+                    ))}
+
+                    {step < LINES.length && (
+                        <div className={LINES[step].className}>
+                            <Typewriter text={LINES[step].text} speed={30} onDone={handleAnimDone}/>
                         </div>
-                        Welcome to DiFF -- - bash - 45 x 7
-                    </div>
+                    )}
 
-                    <div className="pt-6 pl-6 pb-4 text-left terminal-font text-2xl md:text-4xl break-words">
-                        {log.map((item, i) => (
-                            item.type === "prompt" ? (
-                                <div key={i} className="flex flex-wrap items-start pt-4">
-                                    <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
-                                    <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
-                                </div>
-                            ) : (
-                                <div key={i} className={item.className}>{item.text}</div>
-                            )
-                        ))}
-
-                        {step < LINES.length && (
-                            <div className={LINES[step].className}>
-                                <Typewriter text={LINES[step].text} speed={30} onDone={handleAnimDone}/>
-                            </div>
-                        )}
-
-                        {showResultAnim && currentResultText && (
-                            <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
-                                <TypewriterSplit text={currentResultText} speed={30} onDone={handleAnimDone}/>
-                            </div>
-                        )}
-                    </div>
-
-                    {showInput && (
-                        <div className="text-left terminal-font text-2xl md:text-4xl pl-6 break-words flex items-center">
-                        <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
-                            user@desktop ~ %&nbsp;
-                        </span>
-                            <textarea
-                                ref={inputRef}
-                                className="prompt-input"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        const trimmed = input.trim();
-                                        if (!trimmed) return;
-                                        setLog(prev => [...prev, {
-                                            type: "prompt",
-                                            value: trimmed,
-                                            className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
-                                        }]);
-                                        setInput("");
-                                        setStep(LINES.length + 1);
-                                    }
-                                }}
-                                rows={1}
-                                style={{
-                                    resize: "none",
-                                    background: "transparent",
-                                    color: "#d1d5db",
-                                    fontSize: "2rem",
-                                    fontFamily: "inherit",
-                                    width: "80%",
-                                    border: "none",
-                                    outline: "none",
-                                    lineHeight: "1",
-                                    overflow: "hidden"
-                                }}
-                            />
+                    {showResultAnim && currentResultText && (
+                        <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
+                            <TypewriterSplit text={currentResultText} speed={30} onDone={handleAnimDone}/>
                         </div>
                     )}
                 </div>
+
+                {showInput && (
+                    <div className="text-left terminal-font text-2xl md:text-4xl pl-6 break-words flex items-center">
+                        <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
+                            user@desktop ~ %&nbsp;
+                        </span>
+                        <textarea
+                            ref={inputRef}
+                            className="prompt-input"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const trimmed = input.trim();
+                                    if (!trimmed) return;
+                                    setLog(prev => [...prev, {
+                                        type: "prompt",
+                                        value: trimmed,
+                                        className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
+                                    }]);
+                                    setInput("");
+                                    setStep(LINES.length + 1);
+                                }
+                            }}
+                            rows={1}
+                            style={{
+                                resize: "none",
+                                background: "transparent",
+                                color: "#d1d5db",
+                                fontSize: "2rem",
+                                fontFamily: "inherit",
+                                width: "80%",
+                                border: "none",
+                                outline: "none",
+                                lineHeight: "1",
+                                overflow: "hidden"
+                            }}
+                        />
+                    </div>
+                )}
+            </div>
             </div>
 
             <div className="w-full h-screen bg-blue-500">
