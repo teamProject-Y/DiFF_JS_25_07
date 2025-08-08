@@ -102,6 +102,7 @@ export const login = async ({ loginId, loginPw }) => {
 // 5-2. 회원가입
 export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, email }) => {
     const data = { loginId, loginPw, checkLoginPw, name, nickName, email };
+
     console.log("📤 회원가입 요청:", data);
     const response = await UserApi.post('http://localhost:8080/api/DiFF/member/doJoin', data);
     console.log("📥 서버 응답:", response.data);

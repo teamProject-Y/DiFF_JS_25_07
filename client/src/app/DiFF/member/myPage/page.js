@@ -35,7 +35,7 @@ export default function MyInfoPage() {
 
 
     if (loading) return <div>로딩...</div>;
-    if (!member) return null; // 데이터 없을 때(비정상)
+    if (!member) return null;
 
     return (
         <section className="mt-24 text-xl px-4">
@@ -85,10 +85,11 @@ export default function MyInfoPage() {
                             repositories.map((repo, idx) => (
                                 <div
                                     key={repo.id}
-                                    className="border border-gray-300 p-4 rounded-lg bg-white shadow-md"
+                                    className="border border-gray-300 p-4 rounded-lg bg-white shadow-md cursor-pointer hover:bg-gray-100 transition"
+                                    onClick={() => router.push(`/DiFF/article/list?repositoryId=${repo.id}`)}
                                 >
                                     <h3 className="font-bold text-lg mb-2">
-                                        {repo.title || `Repository ${idx + 1}`}
+                                        {repo.name || `Repository ${idx + 1}`}
                                     </h3>
                                     <p className="text-sm text-gray-500 mb-1">
                                         생성일: {repo.regDate?.split('T')[0]}
@@ -105,6 +106,26 @@ export default function MyInfoPage() {
                             <p>등록된 레포지토리가 없습니다.</p>
                         )}
                     </div>
+                </div>
+
+                {/* 🔹 글 작성 버튼 */}
+                <div className="text-center mb-6">
+                    <button
+                        onClick={() => router.push('/DiFF/article/write')}
+                        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                    >
+                        글 작성
+                    </button>
+                </div>
+
+                {/* 🔹 임시 drafts 버튼 */}
+                <div className="text-center mb-6">
+                    <button
+                        onClick={() => router.push('/DiFF/article/drafts')}
+                        className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
+                    >
+                        임시저장
+                    </button>
                 </div>
 
                 {/* 🔹 뒤로가기 */}

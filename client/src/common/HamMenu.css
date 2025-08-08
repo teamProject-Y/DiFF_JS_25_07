@@ -19,15 +19,14 @@
     position: absolute;
     left: 8px;
     right: 8px;
-    height: 5px;
+    height: 4px;
     border-radius: 3px;
     background: #fff;
     transition: 0.5s cubic-bezier(.55,0,.1,1);
 }
 
-.hamburger-btn .bar:nth-child(1) { top: 12px; }
-.hamburger-btn .bar:nth-child(2) { top: 20px; }
-.hamburger-btn .bar:nth-child(3) { top: 28px; }
+.hamburger-btn .bar:nth-child(1) { top: 15px; }
+.hamburger-btn .bar:nth-child(2) { top: 28px; }
 
 .hamburger-btn.open {
     background: #fff;
@@ -39,9 +38,8 @@
     transform: rotate(45deg);
 }
 .hamburger-btn.open .bar:nth-child(2) {
-    opacity: 0;
-    left: 50%;
-    width: 0;
+    top: 20px;
+    transform: rotate(-45deg);
 }
 .hamburger-btn.open .bar:nth-child(3) {
     top: 20px;
