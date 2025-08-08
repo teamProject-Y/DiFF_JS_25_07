@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import axios from "axios";
 
 export default function WriteArticle() {
     const router = useRouter();
@@ -11,7 +12,6 @@ export default function WriteArticle() {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
 
-    // ✅ JWT 토큰으로 접근 제어
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!token) {
@@ -24,29 +24,37 @@ export default function WriteArticle() {
         const token = localStorage.getItem('accessToken');
 
         try {
-            const res = await fetch('http://localhost:8088/api/DiFF/article/doWrite', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // ✅ 백엔드가 토큰 검증한다면 넣어주기
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ repositoryId, title, body }),
-            });
-
-            if (!res.ok) throw new Error('작성 실패');
-
-            router.back(); // 또는 router.push(`/DiFF/article/list?repositoryId=${repositoryId}`)
+            const res = await axios.post(
+                'http://localhost:8080/api/DiFF/article/doWrite',
+                { title, body, repositoryId },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: token ? `Bearer ${token}` : ''
+                    }
+                }
+            );
+            console.log('✅ 작성 성공:', res.data);
+            // 글 작성 후 페이지 이동
+            router.push(`/DiFF/article/list?repositoryId=${repositoryId}`);
         } catch (err) {
-            console.error(err);
-            alert('작성에 실패했습니다.');
+            console.error('❌ 작성 실패');
+            console.log('status:', err.response?.status);
+            console.log('data:', err.response?.data);
+            console.log('message:', err.message);
+
+            // 토큰 만료 시 로그인으로
+            if (err.response?.status === 401) {
+                router.replace('/DiFF/member/login');
+            }
         }
     };
+
 
     return (
         <div className="container mx-auto mt-8 p-6 w-4/5 border border-neutral-300 rounded-xl">
             <button onClick={() => router.back()} className="text-xl mb-4">← 뒤로</button>
-            <h1 className="text-3xl font-bold mb-6">글 작성</h1>
+            <h1 className="text-3xl font-bold mb-6">Article Write</h1>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
@@ -67,7 +75,7 @@ export default function WriteArticle() {
                     type="submit"
                     className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500"
                 >
-                    등록
+                    바른치킨 고고
                 </button>
             </form>
         </div>
