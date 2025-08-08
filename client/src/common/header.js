@@ -13,11 +13,10 @@ const HeaderWrap = styled.div`
     width: 100%;
     height: 80px;
     transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
-    background-color: black;
+    background-color: #111;
     display: flex;
     align-items: center;
-    /* 추가: 그림자 효과 */
-    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.2);
+    border: grey 1px solid;
 
     &.hide {
         transform: translateY(-100%);
