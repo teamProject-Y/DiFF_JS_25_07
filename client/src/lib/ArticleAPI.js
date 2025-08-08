@@ -18,10 +18,27 @@ export const fetchArticles = async ({ repositoryId, searchItem = 0, keyword = ""
     return res.data;
 };
 
-export const trendingArticle = async (count, days) => {
-    const res = await ArticleApi.get(`/api/DiFF/article/trending`, {
-            params: { count, days }
-        });
-    return res.data;
+export const trendingArticle = async ({ count, days }) => {
+    const response = await ArticleApi.get(`/api/DiFF/article/trending`, {
+        params: { count, days }
+    });
+    return response.data;
 }
 
+export const DraftsArticle = async ({ count, days }) => {
+    const response = await ArticleApi.get(`/api/DiFF/article/drafts`, {
+        params: { count, days }
+    });
+    return response.data;
+}
+
+
+export const dd = async (repositoryId, title, body) => {
+    const data = { repositoryId, title, body};
+    const response = await ArticleApi.post('http://localhost:8080/api/DiFF/article/doWrite', data)
+        // {
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         Authorization: token ? `Bearer ${token}` : ''
+    return response.data;
+}

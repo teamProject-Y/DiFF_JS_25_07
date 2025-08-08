@@ -35,7 +35,7 @@ export default function MyInfoPage() {
 
 
     if (loading) return <div>로딩...</div>;
-    if (!member) return null; // 데이터 없을 때(비정상)
+    if (!member) return null;
 
     return (
         <section className="mt-24 text-xl px-4">
@@ -106,6 +106,26 @@ export default function MyInfoPage() {
                             <p>등록된 레포지토리가 없습니다.</p>
                         )}
                     </div>
+                </div>
+
+                {/* 🔹 글 작성 버튼 */}
+                <div className="text-center mb-6">
+                    <button
+                        onClick={() => router.push('/DiFF/article/write')}
+                        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                    >
+                        글 작성
+                    </button>
+                </div>
+
+                {/* 🔹 임시 drafts 버튼 */}
+                <div className="text-center mb-6">
+                    <button
+                        onClick={() => router.push('/DiFF/article/drafts')}
+                        className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
+                    >
+                        임시저장
+                    </button>
                 </div>
 
                 {/* 🔹 뒤로가기 */}
