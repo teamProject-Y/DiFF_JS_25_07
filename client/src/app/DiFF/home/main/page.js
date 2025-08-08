@@ -25,7 +25,8 @@ function parseJwt(token) {
 }
 
 // 타자 효과
-function Typewriter({ text, speed = 40, onDone, className = "" }) {
+
+function Typewriter({ text, speed = 30, onDone, className = "" }) {
     const [displayed, setDisplayed] = useState(null); // null일 땐 렌더 안 함
 
     useEffect(() => {
@@ -61,7 +62,7 @@ function Typewriter({ text, speed = 40, onDone, className = "" }) {
 }
 
 
-function TypewriterSplit({ text, onDone, speed = 38, className = "" }) {
+function TypewriterSplit({ text, onDone, speed = 30, className = "" }) {
     const [displayed, setDisplayed] = useState("");
     const [done, setDone] = useState(false);
 
@@ -130,7 +131,7 @@ export default function Page() {
     const LINES = [
         {
             text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
-            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-4 break-all"
+            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-2 break-all"
         }
     ];
 
@@ -204,7 +205,7 @@ export default function Page() {
     return (
         <div className="w-full min-h-screen bg-[#111]">
             <div className="h-screen pt-32">
-            <div className="bg-neutral-800 tracking-tight rounded-xl w-full max-w-5xl min-h-[60vh] mx-auto overflow-hidden"
+            <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
                  style={{ fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: "break-word" }}>
                 <style jsx global>{`
                     .terminal-font {
@@ -228,11 +229,16 @@ export default function Page() {
                     }
                 `}</style>
 
-                <div className="h-12 w-full bg-neutral-700 text-white text-center text-xl">
+                <div className="flex items-center justify-center h-12 w-full bg-neutral-700 text-white text-center text-xl relative">
+                    <div className="absolute flex justify-start w-full ml-3">
+                        <div className="w-5 h-5 bg-red-500 rounded-xl m-2"></div>
+                        <div className="w-5 h-5 bg-yellow-500 rounded-xl m-2"></div>
+                        <div className="w-5 h-5 bg-green-500 rounded-xl m-2"></div>
+                    </div>
                     Welcome to DiFF -- - bash - 45 x 7
                 </div>
 
-                <div className="p-4 text-left terminal-font text-2xl md:text-4xl break-words">
+                <div className="pt-6 pl-6 pb-4 text-left terminal-font text-2xl md:text-4xl break-words">
                     {log.map((item, i) => (
                         item.type === "prompt" ? (
                             <div key={i} className="flex flex-wrap items-start pt-4">
@@ -246,19 +252,19 @@ export default function Page() {
 
                     {step < LINES.length && (
                         <div className={LINES[step].className}>
-                            <Typewriter text={LINES[step].text} speed={32} onDone={handleAnimDone}/>
+                            <Typewriter text={LINES[step].text} speed={30} onDone={handleAnimDone}/>
                         </div>
                     )}
 
                     {showResultAnim && currentResultText && (
                         <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
-                            <TypewriterSplit text={currentResultText} speed={32} onDone={handleAnimDone}/>
+                            <TypewriterSplit text={currentResultText} speed={30} onDone={handleAnimDone}/>
                         </div>
                     )}
                 </div>
 
                 {showInput && (
-                    <div className="text-left terminal-font text-2xl md:text-4xl pl-4 break-words flex items-center max-w-5xl mx-auto">
+                    <div className="text-left terminal-font text-2xl md:text-4xl pl-6 break-words flex items-center">
                         <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
                             user@desktop ~ %&nbsp;
                         </span>
