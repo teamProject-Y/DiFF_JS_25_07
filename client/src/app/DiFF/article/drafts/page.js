@@ -1,56 +1,58 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+// ArticleApi 인스턴스에서 토큰 자동 붙는 구조라면 이걸 쓰세요
+import { DraftsArticle } from '@/lib/ArticleAPI';
 
-export default function DraftsArticle() {
+export default function DraftsPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const repositoryId = searchParams.get('repositoryId');
-    const checksum = searchParams.get('checksum');
-    const body = searchParams.get('body');
-    const regDate = searchParams.get('regDate');// 필요하면 같이 넘겨 글을 특정 레포에 작
-
     const [drafts, setDrafts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // ✅ JWT 토큰으로 접근 제어
+    // 로그인 체크
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
-        if (!token) {
-            router.replace('/DiFF/member/login'); // 미인증 → 로그인으로
-        }
+        if (!token) router.replace('/DiFF/member/login');
     }, [router]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('accessToken');
+    // 목록 로딩
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const data = await DraftsArticle();
+                setDrafts(data.drafts ?? []);
+            } catch (e) {
+                console.error(e);
+                alert('임시저장 목록을 불러오지 못했습니다.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
 
-        try {
-            const res = await fetch('http://localhost:8088/api/DiFF/article/drafts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // ✅ 백엔드가 토큰 검증한다면 넣어주기
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({repositoryId, checksum, body, regDate}),
-            });
+    if (loading) return <div className="p-6">로딩중...</div>;
 
-            if (!res.ok) throw new Error('작성 실패');
+    return (
+        <div className="p-6">
+            <h1 className="text-xl font-semibold mb-4">임시저장 목록</h1>
 
-            router.back();
-        } catch (err) {
-            console.error(err);
-            alert('작성에 실패했습니다.');
-        }
-    };
+            {drafts.length === 0 ? (
+                <div>임시저장 글이 없습니다.</div>
+            ) : (
+                <ul className="space-y-3">
+                    {drafts.map(drafts => (
+                        <li key={drafts.id} className="border rounded p-3">
+                            <div className="font-medium">{drafts.title ?? 'drafts'}</div>
+                            <div className="text-sm text-gray-600">checksum: {drafts.checksum}</div>
+                            <div className="text-sm text-gray-600">regDate: {drafts.regDate}</div>
+                            <div className="text-sm text-gray-600">repositoryId: {drafts.repositoryId}</div>
 
-
-return (
-    <div className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">임시저장 목록</h1>
-        임시저장 목록
-
-    </div>
-);
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
 }
