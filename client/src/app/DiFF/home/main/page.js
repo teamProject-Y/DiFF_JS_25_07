@@ -169,7 +169,6 @@ export default function Page() {
                 console.error('네트워크 오류:', error);
                 if (error.response) {
                     console.error('응답 오류:', error.response);
-
                     if (error.response.status === 400) {
                         console.error('잘못된 요청:', error.response.data);
                     } else if (error.response.status === 500) {
