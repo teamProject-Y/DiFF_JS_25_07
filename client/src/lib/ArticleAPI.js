@@ -25,10 +25,6 @@ ArticleApi.interceptors.request.use(
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
             console.log("📦 refreshToken:", REFRESH_TOKEN);
 
-            if (REFRESH_TOKEN) {
-                config.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
-            }
-
             console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
@@ -64,7 +60,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await ArticleApi.get(`/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;
