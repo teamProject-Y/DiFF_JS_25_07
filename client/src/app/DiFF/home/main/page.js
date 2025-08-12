@@ -2,18 +2,28 @@
 'use client';
 
 import {useEffect, useRef, useState} from "react";
+import dynamic from 'next/dynamic';
 import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import Link from "next/link";
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/scrollbar';
-
-import HamburgerButton from "@/common/HamMenu";
-import OverlayMenu from "@/common/overlayMenu";
-import Link from "next/link";
 
 import {trendingArticle} from "@/lib/ArticleAPI";
+
+// 동적 import
+const SwiperWrapper = dynamic(() => import("swiper/react").then(mod => mod.Swiper), { ssr: false });
+const SwiperSlide = dynamic(() => import('swiper/react').then(m => m.SwiperSlide), { ssr: false });
+
+SwiperWrapper.displayName = "SwiperWrapper";
+SwiperSlide.displayName = "SwiperSlide";
+
+console.log(SwiperWrapper.displayName);
+
+const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), { ssr: false });
+const HamburgerButton = dynamic(() => import('@/common/HamMenu'), { ssr: false });
+
 
 
 function parseJwt(token) {
@@ -130,6 +140,19 @@ function getLoginDate() {
     return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
+const LINES = [
+    {
+        text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
+        className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-2 break-all"
+    }
+];
+
+const RESULTS = [
+    "User verifying... done.",
+    "Analyzing... done.",
+    "Making draft... done."
+];
+
 export default function Page() {
     const [log, setLog] = useState([]);
     const [step, setStep] = useState(0);
@@ -145,18 +168,9 @@ export default function Page() {
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const LINES = [
-        {
-            text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
-            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-2 break-all"
-        }
-    ];
+    const [isClient, setIsClient] = useState(false);
 
-    const RESULTS = [
-        "User verifying... done.",
-        "Analyzing... done.",
-        "Making draft... done."
-    ];
+    useEffect(() => setIsClient(true), []);
 
     useEffect(() => {
         trendingArticle(10, 7)
@@ -269,6 +283,7 @@ export default function Page() {
                             white-space: pre-wrap;
                             overflow-wrap: break-word;
                         }
+                        
                     `}</style>
 
                     <div
@@ -364,7 +379,9 @@ export default function Page() {
                             <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
                         </div>
                     ) : (
-                        <Swiper
+                        isClient && (
+
+                        <SwiperWrapper
                             modules={[Navigation, Pagination, A11y, Autoplay]}
                             spaceBetween={50}
                             loop={true}
@@ -372,6 +389,10 @@ export default function Page() {
                             slidesPerView={3}
                             navigation
                             pagination={{ clickable: true }}
+                            allowTouchMove={true}
+                            observer={true}
+                            observeParents={true}
+                            resizeObserver={true}
                         >
                             {trendingArticles.length > 0 ? (
                                 trendingArticles.map((article, index) => (
@@ -387,7 +408,8 @@ export default function Page() {
                             ) : (
                                 <div>트렌딩 게시물이 없습니다.</div>
                             )}
-                        </Swiper>
+                        </SwiperWrapper>
+                        )
                     )}
                 </div>
             </div>

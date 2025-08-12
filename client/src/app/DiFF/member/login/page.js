@@ -1,7 +1,7 @@
 'use client';
 
 import React from "react";
-import Head from 'next/head';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { login } from "@/lib/UserAPI";
@@ -38,7 +38,8 @@ export default function LoginPage({ searchParams }) {
             localStorage.setItem('tokenType', result.dataName || 'Bearer');
             localStorage.setItem('accessToken', result.data1);
             localStorage.setItem('refreshToken', result.data2 || '');
-            window.location.href = `/DiFF/home/main`;
+
+            router.replace(callbackUrl);
         } catch (error) {
             console.log("로그인 axios error", error, error.response);
             setError('로그인 실패: 아이디/비밀번호를 확인하세요.');
@@ -48,15 +49,11 @@ export default function LoginPage({ searchParams }) {
 
     return (
         <>
-            <Head>
-                <title>MEMBER LOGIN</title>
-                <meta charSet="UTF-8" />
-            </Head>
-
             <div className="container mx-auto mt-32 max-w-min p-4 bg-neutral-200 border border-neutral-300 rounded-lg">
                 <div className="title mt-4 mb-8 text-center text-2xl font-semibold">
                     Login
                 </div>
+
                 {error && (
                     <div className="text-red-500 text-center mb-4">
                         {error}
@@ -92,7 +89,7 @@ export default function LoginPage({ searchParams }) {
                 </form>
 
                 <div className="sub-menu text-center my-4 flex justify-center gap-4">
-                    <a href="/DiFF/member/join/page" className="hover:underline">
+                    <a href="/DiFF/member/join" className="hover:underline">
                         Join
                     </a>
                 </div>
@@ -103,11 +100,15 @@ export default function LoginPage({ searchParams }) {
                         href="/login/github"
                         className="flex items-center justify-center gap-3 bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition"
                     >
-                        <img
-                            src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-                            alt="GitHub Logo"
-                            className="w-6 h-6"
-                        />
+                        <svg viewBox="0 0 16 16" aria-hidden="true" className="w-6 h-6 fill-current">
+                            <path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.6 2.29 6.65 5.47 7.73.4.08.55-.18.55-.39
+            0-.19-.01-.82-.01-1.49-2.01.37-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.16-.28-.15-.68-.52
+            -.01-.53.63-.01 1.08.58 1.23.82.72 1.22 1.87.87 2.33.66.07-.53.28-.87.51-1.07-1.78-.21
+            -3.64-.91-3.64-4.04 0-.89.31-1.62.82-2.19-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.84A7.5
+            7.5 0 0 1 8 3.88c.68 0 1.36.09 2 .26 1.53-1.06 2.2-.84 2.2-.84.44 1.1.16 1.92.08 2.12.51.57.82
+            1.3.82 2.19 0 3.14-1.87 3.83-3.65 4.04.29.25.54.74.54 1.5 0 1.08-.01 1.95-.01 2.22 0 .21.15.47.55.39A8.14
+            8.14 0 0 0 16 8.13C16 3.64 12.42 0 8 0z"/>
+                        </svg>
                         <span>GitHub로 로그인</span>
                     </a>
 
