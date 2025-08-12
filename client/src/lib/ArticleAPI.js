@@ -114,7 +114,10 @@ export const DraftsArticle = async () => {
     const response = await ArticleApi.get('/api/DiFF/article/drafts');
     return response.data;
 };
-
+export const WriteArticle = async () => {
+    const response = await ArticleApi.get('/api/DiFF/article/doWrite');
+    return response.data;
+};
 
 
 export const dd = async (repositoryId, title, body) => {

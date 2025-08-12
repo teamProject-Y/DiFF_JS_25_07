@@ -147,7 +147,7 @@ export default function Page() {
 
     const LINES = [
         {
-            text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
+            text: `> Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
             className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-2 break-all"
         }
     ];
@@ -243,7 +243,7 @@ export default function Page() {
     return (
         <div className="w-full min-h-screen bg-[#111]">
             <div className="h-screen pt-32">
-                <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
+                <div className="tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
                      style={{
                          fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
                          wordBreak: "break-word"
@@ -272,13 +272,9 @@ export default function Page() {
                     `}</style>
 
                     <div
-                        className="flex items-center justify-center h-12 w-full bg-neutral-700 text-white text-center text-xl relative">
+                        className="flex items-center justify-center h-12 w-full text-white text-center text-xl relative">
                         <div className="absolute flex justify-start w-full ml-3">
-                            <div className="w-5 h-5 bg-red-500 rounded-xl m-2"></div>
-                            <div className="w-5 h-5 bg-yellow-500 rounded-xl m-2"></div>
-                            <div className="w-5 h-5 bg-green-500 rounded-xl m-2"></div>
                         </div>
-                        Welcome to DiFF -- - bash - 45 x 7
                     </div>
 
                     {/*입력 후*/}
@@ -286,7 +282,7 @@ export default function Page() {
                         {log.map((item, i) => (
                             item.type === "prompt" ? (
                                 <div key={i} className="flex flex-wrap items-start pt-4">
-                                    <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
+                                    <span className="text-mint-400 font-bold">user@desktop ~ %&nbsp;</span>
                                     <span className={item.className}
                                           style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
                                 </div>
@@ -392,7 +388,7 @@ export default function Page() {
                 </div>
             </div>
 
-            {/*overlay menu*/}
+            overlay menu
             <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
                          blogName={user.blogName}/>
             <div className="pointer-events-none">

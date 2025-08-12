@@ -69,7 +69,7 @@ export default function WriteArticle() {
                     required
                 />
                 <textarea
-                    className="w-full border p-2 rounded h-48"
+                    className="w-full border p-2 rounded h-96"
                     placeholder="내용"
                     value={draftBody}
                     onChange={(e) => setDraftBody(e.target.value)}
