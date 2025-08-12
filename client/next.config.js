@@ -35,7 +35,7 @@ module.exports = {
     async rewrites() {
         return [
              // 1) NextAuth 엔드포인트는 Next.js가 처리
-             { source: '/DiFF/:path*', destination: 'http://local:8080/api/DiFF/:path*' },
+             { source: '/DiFF/:path*', destination: 'http://localhost:8080/api/DiFF/:path*' },
 
             // // 2) OAuth2 콜백은 백엔드로
              { source: '/login/oauth2/code/:provider', destination: `${BACKEND}/login/oauth2/code/:provider` },

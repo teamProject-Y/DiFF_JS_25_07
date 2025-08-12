@@ -1,10 +1,22 @@
+// src/app/DiFF/article/write/page.js
 'use client';
 
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 
-export default function WriteArticle() {
+// 바깥: Suspense 래퍼
+export default function Page() {
+    return (
+        <Suspense fallback={<div className="p-4">Loading…</div>}>
+            <WriteArticleInner />
+        </Suspense>
+    );
+}
+
+// 안쪽: 실제 로직
+function WriteArticleInner() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -14,14 +26,15 @@ export default function WriteArticle() {
     const [title, setTitle] = useState('');
     const [draftBody, setDraftBody] = useState(initialDraftBody);
 
-    // 주소창 쿼리(body)가 바뀌면 draftBody 동기화
+    // 주소창 쿼리(body) 변하면 동기화
     useEffect(() => {
         setDraftBody(initialDraftBody);
     }, [initialDraftBody]);
 
     // 로그인 체크
     useEffect(() => {
-        const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
+        const token =
+            typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!token) router.replace('/DiFF/member/login');
     }, [router]);
 
@@ -69,14 +82,16 @@ export default function WriteArticle() {
                     required
                 />
                 <textarea
-                    className="w-full border p-2 rounded h-96"
+                    className="w-full border p-2 rounded h-48"
                     placeholder="내용"
                     value={draftBody}
                     onChange={(e) => setDraftBody(e.target.value)}
                     required
                 />
                 {repositoryId && (
-                    <div className="text-sm text-gray-600">repositoryId: {repositoryId}</div>
+                    <div className="text-sm text-gray-600">
+                        repositoryId: {repositoryId}
+                    </div>
                 )}
                 <button
                     type="submit"

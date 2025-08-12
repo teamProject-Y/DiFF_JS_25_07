@@ -24,12 +24,12 @@ export default function CommonClientLayout({ children, pageTitle = 'DiFF' }) {
 
     return (
         <>
-            <Head>
-                <meta charSet="UTF-8" />
-                <title>{pageTitle}</title>
-                <link rel="stylesheet" href="/resource/common.css" />
-                <script src="/resource/common.js" defer />
-            </Head>
+            {/*<Head>*/}
+            {/*    <meta charSet="UTF-8" />*/}
+            {/*    <title>{pageTitle}</title>*/}
+            {/*    <link rel="stylesheet" href="/resource/common.css" />*/}
+            {/*    <script src="/resource/common.js" defer />*/}
+            {/*</Head>*/}
             <div className="text-neutral-600">
                 <Header />
                 <main>{children}</main>
