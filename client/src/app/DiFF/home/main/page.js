@@ -148,7 +148,7 @@ export default function Page() {
     const LINES = [
         {
             text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
-            className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-2 break-all"
+            className: "text-green-400 font-bold terminal-font pt-2 break-all"
         }
     ];
 
@@ -233,7 +233,7 @@ export default function Page() {
             const idx = step - LINES.length - 1;
             setLog(prev => [...prev, {
                 text: RESULTS[idx],
-                className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all"
+                className: "text-white font-bold terminal-font mt-4 break-all"
             }]);
         }
         setLastDoneStep(step);
@@ -243,10 +243,11 @@ export default function Page() {
     // 렌더
     return (
         <div className="w-full min-h-screen bg-[#111]">
+
             <div className="h-screen pt-32">
-                <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
+                <div className="bg-neutral-800 tracking-tight rounded-xl w-2/3 h-2/3 mx-auto overflow-hidden text-3xl"
                      style={{
-                         fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
+                         fontFamily: `'Pretendard-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
                          wordBreak: "break-word"
                      }}>
                     <style jsx global>{`
@@ -259,7 +260,7 @@ export default function Page() {
                             outline: none;
                             background: transparent;
                             color: #d1d5db;
-                            font-size: 2rem;
+                            //font-size: 2rem;
                             font-family: inherit;
                             font-weight: 1000;
                             width: 80%;
@@ -283,7 +284,7 @@ export default function Page() {
                     </div>
 
                     {/*입력 후*/}
-                    <div className="pt-6 pl-6 pb-4 text-left terminal-font text-2xl md:text-4xl break-words">
+                    <div className="pt-6 pl-6 pb-4 text-left terminal-font break-words">
                         {log.map((item, i) => (
                             item.type === "prompt" ? (
                                 <div key={i} className="flex flex-wrap items-start pt-4">
@@ -303,7 +304,7 @@ export default function Page() {
                         )}
 
                         {showResultAnim && currentResultText && (
-                            <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
+                            <div className="text-white font-bold terminal-font mt-4 break-all">
                                 <TypewriterSplit text={currentResultText} speed={30} onDone={handleAnimDone}/>
                             </div>
                         )}
@@ -312,7 +313,7 @@ export default function Page() {
                     {/*입력 전*/}
                     {showInput && (
                         <div
-                            className="text-left terminal-font text-2xl md:text-4xl pl-6 break-words flex items-center">
+                            className="text-left terminal-font pl-6 break-words flex items-center">
                         <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
                             user@desktop ~ %&nbsp;
                         </span>
@@ -329,7 +330,7 @@ export default function Page() {
                                         setLog(prev => [...prev, {
                                             type: "prompt",
                                             value: trimmed,
-                                            className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
+                                            className: "text-gray-200 terminal-font break-words"
                                         }]);
                                         setInput("");
                                         setStep(LINES.length + 1);
@@ -340,7 +341,7 @@ export default function Page() {
                                     resize: "none",
                                     background: "transparent",
                                     color: "#d1d5db",
-                                    fontSize: "2rem",
+                                    // fontSize: "2rem",
                                     fontFamily: "inherit",
                                     width: "80%",
                                     border: "none",
@@ -397,9 +398,14 @@ export default function Page() {
             <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
                          blogName={user.blogName}/>
             <div className="pointer-events-none">
+                <div className="fixed right-8 bottom-32 z-50 pointer-events-auto">
+                    <Link href="/DiFF/member/login">
+                <i className="fa-solid fa-arrow-right-to-bracket text-white text-2xl hover:text-green-500"></i>
+                    </Link>
+                </div>
                 <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
                     <Link href="/DiFF/member/myPage">
-                        <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
+                        <i className="fa-solid fa-power-off text-white text-2xl hover:text-red-500"></i>
                     </Link>
                 </div>
                 <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
@@ -407,22 +413,9 @@ export default function Page() {
                 </div>
             </div>
 
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
+            <div className="w-full h-96">
 
+            </div>
         </div>
     );
 }

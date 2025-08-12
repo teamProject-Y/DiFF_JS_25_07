@@ -16,7 +16,7 @@ const HeaderWrap = styled.div`
     background-color: #111;
     display: flex;
     align-items: center;
-    border: grey 1px solid;
+    //border: grey 1px solid;
 
     &.hide {
         transform: translateY(-100%);
@@ -78,7 +78,7 @@ export default function Header() {
     return (
         <HeaderWrap className={hide ? 'hide' : ''}>
             <div className="logo pl-4">
-                <Link href="/DiFF/home/main" className="block text-5xl p-4 text-white font-bold">
+                <Link href="/DiFF/home/main" className="block text-3xl p-4 text-white font-bold">
                     DiFF
                 </Link>
             </div>
@@ -95,9 +95,6 @@ export default function Header() {
                     </>
                 ) : (
                     <>
-                        <li>
-                            <Link href="/DiFF/member/login">List</Link>
-                        </li>
                         <li>
                             <Link href="/DiFF/member/login">LOGIN</Link>
                         </li>
