@@ -2,18 +2,28 @@
 'use client';
 
 import {useEffect, useRef, useState} from "react";
+import dynamic from 'next/dynamic';
 import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import Link from "next/link";
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/scrollbar';
-
-import HamburgerButton from "@/common/HamMenu";
-import OverlayMenu from "@/common/overlayMenu";
-import Link from "next/link";
 
 import {trendingArticle} from "@/lib/ArticleAPI";
+
+// 동적 import
+const SwiperWrapper = dynamic(() => import("swiper/react").then(mod => mod.Swiper), { ssr: false });
+const SwiperSlide = dynamic(() => import('swiper/react').then(m => m.SwiperSlide), { ssr: false });
+
+SwiperWrapper.displayName = "SwiperWrapper";
+SwiperSlide.displayName = "SwiperSlide";
+
+console.log(SwiperWrapper.displayName);
+
+const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), { ssr: false });
+const HamburgerButton = dynamic(() => import('@/common/HamMenu'), { ssr: false });
+
 
 
 function parseJwt(token) {
@@ -130,6 +140,19 @@ function getLoginDate() {
     return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
+const LINES = [
+    {
+        text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
+        className: "text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-2 break-all"
+    }
+];
+
+const RESULTS = [
+    "User verifying... done.",
+    "Analyzing... done.",
+    "Making draft... done."
+];
+
 export default function Page() {
     const [log, setLog] = useState([]);
     const [step, setStep] = useState(0);
@@ -145,18 +168,9 @@ export default function Page() {
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const LINES = [
-        {
-            text: `Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`,
-            className: "text-green-400 font-bold terminal-font pt-2 break-all"
-        }
-    ];
+    const [isClient, setIsClient] = useState(false);
 
-    const RESULTS = [
-        "User verifying... done.",
-        "Analyzing... done.",
-        "Making draft... done."
-    ];
+    useEffect(() => setIsClient(true), []);
 
     useEffect(() => {
         trendingArticle(10, 7)
@@ -169,7 +183,6 @@ export default function Page() {
                 console.error('네트워크 오류:', error);
                 if (error.response) {
                     console.error('응답 오류:', error.response);
-
                     if (error.response.status === 400) {
                         console.error('잘못된 요청:', error.response.data);
                     } else if (error.response.status === 500) {
@@ -233,7 +246,7 @@ export default function Page() {
             const idx = step - LINES.length - 1;
             setLog(prev => [...prev, {
                 text: RESULTS[idx],
-                className: "text-white font-bold terminal-font mt-4 break-all"
+                className: "text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all"
             }]);
         }
         setLastDoneStep(step);
@@ -243,11 +256,10 @@ export default function Page() {
     // 렌더
     return (
         <div className="w-full min-h-screen bg-[#111]">
-
             <div className="h-screen pt-32">
-                <div className="bg-neutral-800 tracking-tight rounded-xl w-2/3 h-2/3 mx-auto overflow-hidden text-3xl"
+                <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
                      style={{
-                         fontFamily: `'Pretendard-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
+                         fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
                          wordBreak: "break-word"
                      }}>
                     <style jsx global>{`
@@ -260,7 +272,7 @@ export default function Page() {
                             outline: none;
                             background: transparent;
                             color: #d1d5db;
-                            //font-size: 2rem;
+                            font-size: 2rem;
                             font-family: inherit;
                             font-weight: 1000;
                             width: 80%;
@@ -271,6 +283,7 @@ export default function Page() {
                             white-space: pre-wrap;
                             overflow-wrap: break-word;
                         }
+                        
                     `}</style>
 
                     <div
@@ -284,7 +297,7 @@ export default function Page() {
                     </div>
 
                     {/*입력 후*/}
-                    <div className="pt-6 pl-6 pb-4 text-left terminal-font break-words">
+                    <div className="pt-6 pl-6 pb-4 text-left terminal-font text-2xl md:text-4xl break-words">
                         {log.map((item, i) => (
                             item.type === "prompt" ? (
                                 <div key={i} className="flex flex-wrap items-start pt-4">
@@ -304,7 +317,7 @@ export default function Page() {
                         )}
 
                         {showResultAnim && currentResultText && (
-                            <div className="text-white font-bold terminal-font mt-4 break-all">
+                            <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
                                 <TypewriterSplit text={currentResultText} speed={30} onDone={handleAnimDone}/>
                             </div>
                         )}
@@ -313,7 +326,7 @@ export default function Page() {
                     {/*입력 전*/}
                     {showInput && (
                         <div
-                            className="text-left terminal-font pl-6 break-words flex items-center">
+                            className="text-left terminal-font text-2xl md:text-4xl pl-6 break-words flex items-center">
                         <span className="text-green-400 font-bold" style={{whiteSpace: 'nowrap'}}>
                             user@desktop ~ %&nbsp;
                         </span>
@@ -330,7 +343,7 @@ export default function Page() {
                                         setLog(prev => [...prev, {
                                             type: "prompt",
                                             value: trimmed,
-                                            className: "text-gray-200 terminal-font break-words"
+                                            className: "text-gray-200 terminal-font text-2xl md:text-4xl break-words"
                                         }]);
                                         setInput("");
                                         setStep(LINES.length + 1);
@@ -341,7 +354,7 @@ export default function Page() {
                                     resize: "none",
                                     background: "transparent",
                                     color: "#d1d5db",
-                                    // fontSize: "2rem",
+                                    fontSize: "2rem",
                                     fontFamily: "inherit",
                                     width: "80%",
                                     border: "none",
@@ -366,7 +379,9 @@ export default function Page() {
                             <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
                         </div>
                     ) : (
-                        <Swiper
+                        isClient && (
+
+                        <SwiperWrapper
                             modules={[Navigation, Pagination, A11y, Autoplay]}
                             spaceBetween={50}
                             loop={true}
@@ -374,6 +389,10 @@ export default function Page() {
                             slidesPerView={3}
                             navigation
                             pagination={{ clickable: true }}
+                            allowTouchMove={true}
+                            observer={true}
+                            observeParents={true}
+                            resizeObserver={true}
                         >
                             {trendingArticles.length > 0 ? (
                                 trendingArticles.map((article, index) => (
@@ -389,7 +408,8 @@ export default function Page() {
                             ) : (
                                 <div>트렌딩 게시물이 없습니다.</div>
                             )}
-                        </Swiper>
+                        </SwiperWrapper>
+                        )
                     )}
                 </div>
             </div>
@@ -398,14 +418,9 @@ export default function Page() {
             <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
                          blogName={user.blogName}/>
             <div className="pointer-events-none">
-                <div className="fixed right-8 bottom-32 z-50 pointer-events-auto">
-                    <Link href="/DiFF/member/login">
-                <i className="fa-solid fa-arrow-right-to-bracket text-white text-2xl hover:text-green-500"></i>
-                    </Link>
-                </div>
                 <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
                     <Link href="/DiFF/member/myPage">
-                        <i className="fa-solid fa-power-off text-white text-2xl hover:text-red-500"></i>
+                        <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
                     </Link>
                 </div>
                 <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
@@ -413,9 +428,22 @@ export default function Page() {
                 </div>
             </div>
 
-            <div className="w-full h-96">
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
 
-            </div>
         </div>
     );
 }
