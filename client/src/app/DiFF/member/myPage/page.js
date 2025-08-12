@@ -31,7 +31,7 @@ export default function MyInfoPage() {
                 setLoading(false);
                 router.replace('/DiFF/home/main');
             });
-    }, []);
+    }, [router]);
 
 
     if (loading) return <div>로딩...</div>;
