@@ -110,11 +110,48 @@ export const DraftsArticle = async () => {
     const response = await ArticleApi.get('/api/DiFF/article/drafts');
     return response.data;
 };
-export const WriteArticle = async () => {
-    const response = await ArticleApi.get('/api/DiFF/article/doWrite');
-    return response.data;
+// lib/ArticleAPI.js
+export const writeArticle = async (data) => {
+    // data.repositoryId 는 숫자여야 하면 여기서 캐스팅
+    if (data?.repositoryId != null) {
+        data = { ...data, repositoryId: Number(data.repositoryId) };
+    }
+
+    const res = await ArticleApi.post('/api/DiFF/article/doWrite', data);
+    const result = res.data;
+
+    // (원하면) 여기서 로그
+    console.log('📦 doWrite 응답:', result);
+    console.log('📦 repository:', result?.data?.repository);
+    console.log('📦 draft:', result?.data?.draft);
+    console.log('📦 articleId:', result?.data?.articleId);
+
+    return result; // ResultData
 };
 
+// 작성 폼용 리포 로드: GET /api/DiFF/article/write?repositoryId=...
+export const showRepo = async (repositoryId) => {
+    const res = await ArticleApi.get('/api/DiFF/article/write', {
+        params: { repositoryId: Number(repositoryId) },
+    });
+    return res.data; // { resultCode, msg, data: { repository } }
+};
+
+export const getMyRepositories = async () => {
+    const res = await ArticleApi.get('/api/DiFF/repository/my');
+
+    // 백엔드에서 이런 구조로 올 가능성들 모두 안전하게 언래핑
+    // { resultCode, msg, data: { repositories: [...] } }
+    // { resultCode, msg, repositories: [...] }
+    // { repositories: [...] }
+    const repos =
+        res.data?.data?.repositories ??
+        res.data?.repositories ??
+        [];
+
+    // 타입 보정
+    return Array.isArray(repos) ? repos : [];
+};
 
 export const dd = async (repositoryId, title, body) => {
     const data = { repositoryId, title, body};
