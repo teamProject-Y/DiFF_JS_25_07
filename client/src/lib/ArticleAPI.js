@@ -110,15 +110,40 @@ export const DraftsArticle = async () => {
     const response = await ArticleApi.get('/api/DiFF/article/drafts');
     return response.data;
 };
+// lib/ArticleAPI.js
+export const writeArticle = async (data) => {
+    // data.repositoryId 는 숫자여야 하면 여기서 캐스팅
+    if (data?.repositoryId != null) {
+        data = { ...data, repositoryId: Number(data.repositoryId) };
+    }
 
+    const res = await ArticleApi.post('/api/DiFF/article/doWrite', data);
+    const result = res.data;
 
+    // (원하면) 여기서 로그
+    console.log('📦 doWrite 응답:', result);
+    console.log('📦 repository:', result?.data?.repository);
+    console.log('📦 draft:', result?.data?.draft);
+    console.log('📦 articleId:', result?.data?.articleId);
 
-export const dd = async (repositoryId, title, body) => {
-    const data = { repositoryId, title, body};
-    const response = await ArticleApi.post('http://localhost:8080/api/DiFF/article/doWrite', data)
-        // {
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         Authorization: token ? `Bearer ${token}` : ''
-    return response.data;
-}
+    return result; // ResultData
+};
+
+export const getMyRepositories = async () => {
+    const res = await ArticleApi.get('/api/DiFF/repository/my');
+    const repos =
+        res.data?.data?.repositories ??
+        res.data?.repositories ??
+        [];
+
+    // 타입 보정
+    return Array.isArray(repos) ? repos : [];
+};
+
+export const deleteDraft = async (id) => {
+    const res = await ArticleApi.delete('/api/DiFF/article/doDelete', {
+        params: { id },
+    });
+    return res.data;
+};
+
