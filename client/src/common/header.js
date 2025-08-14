@@ -16,7 +16,7 @@ const HeaderWrap = styled.div`
     background-color: #111;
     display: flex;
     align-items: center;
-    border: grey 1px solid;
+    //border: grey 1px solid;
 
     &.hide {
         transform: translateY(-100%);

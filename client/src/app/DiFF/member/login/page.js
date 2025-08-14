@@ -40,7 +40,6 @@ export default function LoginPage({ searchParams }) {
             localStorage.setItem('refreshToken', result.data2 || '');
 
             router.replace(callbackUrl);
-
         } catch (error) {
             console.log("로그인 axios error", error, error.response);
             setError('로그인 실패: 아이디/비밀번호를 확인하세요.');

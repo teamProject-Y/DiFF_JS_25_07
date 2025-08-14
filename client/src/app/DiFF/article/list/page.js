@@ -29,7 +29,7 @@ function ArticleListInner() {
                 if (!alive) return;
                 setArticles(res.articles || []);
             } catch (err) {
-                console.error('❌ 게시글 로딩 실패:', err);
+                console.error(' 게시글 로딩 실패:', err);
                 if (!alive) return;
                 setArticles([]);
             } finally {
