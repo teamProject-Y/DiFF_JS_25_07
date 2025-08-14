@@ -129,21 +129,8 @@ export const writeArticle = async (data) => {
     return result; // ResultData
 };
 
-// 작성 폼용 리포 로드: GET /api/DiFF/article/write?repositoryId=...
-export const showRepo = async (repositoryId) => {
-    const res = await ArticleApi.get('/api/DiFF/article/write', {
-        params: { repositoryId: Number(repositoryId) },
-    });
-    return res.data; // { resultCode, msg, data: { repository } }
-};
-
 export const getMyRepositories = async () => {
     const res = await ArticleApi.get('/api/DiFF/repository/my');
-
-    // 백엔드에서 이런 구조로 올 가능성들 모두 안전하게 언래핑
-    // { resultCode, msg, data: { repositories: [...] } }
-    // { resultCode, msg, repositories: [...] }
-    // { repositories: [...] }
     const repos =
         res.data?.data?.repositories ??
         res.data?.repositories ??
@@ -153,12 +140,10 @@ export const getMyRepositories = async () => {
     return Array.isArray(repos) ? repos : [];
 };
 
-export const dd = async (repositoryId, title, body) => {
-    const data = { repositoryId, title, body};
-    const response = await ArticleApi.post('http://localhost:8080/api/DiFF/article/doWrite', data)
-        // {
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         Authorization: token ? `Bearer ${token}` : ''
-    return response.data;
-}
+export const deleteDraft = async (id) => {
+    const res = await ArticleApi.delete('/api/DiFF/article/doDelete', {
+        params: { id },
+    });
+    return res.data;
+};
+
