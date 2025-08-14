@@ -277,7 +277,7 @@ export function getDiFF(from, to) {
         const wow = '089caa6263b2ed01c77c4bdaee584e02f1564119';
 
         // 4. git diff 실행
-        const args = ['diff', '-W', wow, to, '--', ...files];
+        const args = ['diff', '-W', from, to, '--', ...files];
         const child = spawn('git', args, { shell: false });
 
         let output = '';
