@@ -141,9 +141,25 @@ export const getMyRepositories = async () => {
 };
 
 export const deleteDraft = async (id) => {
-    const res = await ArticleApi.delete('/api/DiFF/article/doDelete', {
-        params: { id },
-    });
-    return res.data;
+    console.log('[CALL][deleteDraft] start', { id });
+    try {
+        const res = await ArticleApi.delete(`/api/DiFF/draft/draft/${id}`);
+        console.log('[CALL][deleteDraft] success', res.status, res.data);
+        return res.data;
+    } catch (err) {
+        console.log('[CALL][deleteDraft] fail', {
+            status: err.response?.status,
+            data: err.response?.data,
+        });
+        throw err;
+    }
 };
+
+// export const deleteDraft = async (id) => {
+//     console.log('[CALL][deleteDraft] start', { id });
+//     const res = await ArticleApi.delete(`/api/DiFF/article/draft/${id}`);
+//     return res.data;
+// };
+
+
 

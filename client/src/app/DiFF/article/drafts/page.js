@@ -16,7 +16,10 @@ export default function DraftsPage() {
     useEffect(() => {
         const token =
             typeof window !== 'undefined' && localStorage.getItem('accessToken');
+        console.log('[DraftsPage] mount. accessToken exist?', Boolean(token));
+
         if (!token) {
+            console.log('[DraftsPage] no token -> redirect to login');
             router.replace('/DiFF/member/login');
             return;
         }
@@ -25,51 +28,74 @@ export default function DraftsPage() {
             try {
                 setLoading(true);
                 setError('');
+                console.log('[DraftsPage] calling DraftsArticle()');
                 const data = await DraftsArticle();
+                console.log('[DraftsPage] DraftsArticle() response:', data);
+
                 // 백엔드 응답 형태에 맞춰서 안전하게 파싱
                 const list = data?.drafts ?? data?.data?.drafts ?? data ?? [];
+                console.log('[DraftsPage] parsed drafts length:', Array.isArray(list) ? list.length : 'not array');
+
                 setDrafts(Array.isArray(list) ? list : []);
             } catch (e) {
-                console.error(e);
+                console.error('[DraftsPage] load drafts error:', e);
                 setError('임시저장 목록을 불러오지 못했습니다.');
             } finally {
                 setLoading(false);
+                console.log('[DraftsPage] loading finished');
             }
         })();
     }, [router]);
 
     const handleOpen = (draft) => {
+        console.log('[DraftsPage] open clicked. draft:', draft);
         // 작성 페이지로 이동할 때 repositoryId와 body를 함께 전달
         const qs = new URLSearchParams({
             repositoryId: String(draft.repositoryId ?? ''),
             body: draft.body ?? '',
         }).toString();
+        console.log('[DraftsPage] push to /DiFF/article/write with qs:', qs);
         router.push(`/DiFF/article/write?${qs}`);
     };
 
     const handleDelete = async (id) => {
         if (!id) return;
+        console.log('[DraftsPage] delete clicked. id:', id);
+
         const ok = window.confirm('이 초안을 삭제할까요?');
-        if (!ok) return;
+        if (!ok) {
+            console.log('[DraftsPage] delete canceled by user');
+            return;
+        }
 
         try {
             setDeletingId(id);
+            console.log('[DraftsPage] calling deleteDraft()', id);
             const res = await deleteDraft(id);
+            console.log('[DraftsPage] deleteDraft() response:', res);
 
             const resultCode =
                 res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
+            console.log('[DraftsPage] parsed resultCode:', resultCode);
+
             if (String(resultCode).startsWith('S-')) {
                 // 낙관적 UI: 목록에서 제거
-                setDrafts((prev) => prev.filter((d) => d.id !== id));
+                setDrafts((prev) => {
+                    const next = prev.filter((d) => d.id !== id);
+                    console.log('[DraftsPage] remove from list. before:', prev.length, 'after:', next.length);
+                    return next;
+                });
             } else {
                 const msg = res?.msg || '삭제에 실패했습니다.';
+                console.warn('[DraftsPage] delete failed. server msg:', msg);
                 alert(msg);
             }
         } catch (e) {
-            console.error(e);
-            alert('삭제 요청에 실패했습니다.');
+            console.error('[DraftsPage] delete request error:', e);
+            alert(e?.response?.data?.msg || '삭제 요청에 실패했습니다.');
         } finally {
             setDeletingId(null);
+            console.log('[DraftsPage] delete finished for id:', id);
         }
     };
 
