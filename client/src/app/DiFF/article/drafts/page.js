@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { DraftsArticle, deleteDraft } from '@/lib/ArticleAPI';
+import { DraftsArticle, deleteDraft } from '@/lib/DraftAPI';
 
 export default function DraftsPage() {
     const router = useRouter();

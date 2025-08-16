@@ -106,10 +106,7 @@ export const trendingArticle = async ({ count, days }) => {
     return response.data;
 }
 
-export const DraftsArticle = async () => {
-    const response = await ArticleApi.get('/api/DiFF/article/drafts');
-    return response.data;
-};
+
 // lib/ArticleAPI.js
 export const writeArticle = async (data) => {
     // data.repositoryId 는 숫자여야 하면 여기서 캐스팅
@@ -140,20 +137,6 @@ export const getMyRepositories = async () => {
     return Array.isArray(repos) ? repos : [];
 };
 
-export const deleteDraft = async (id) => {
-    console.log('[CALL][deleteDraft] start', { id });
-    try {
-        const res = await ArticleApi.delete(`/api/DiFF/draft/draft/${id}`);
-        console.log('[CALL][deleteDraft] success', res.status, res.data);
-        return res.data;
-    } catch (err) {
-        console.log('[CALL][deleteDraft] fail', {
-            status: err.response?.status,
-            data: err.response?.data,
-        });
-        throw err;
-    }
-};
 
 // export const deleteDraft = async (id) => {
 //     console.log('[CALL][deleteDraft] start', { id });
