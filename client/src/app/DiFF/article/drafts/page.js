@@ -71,20 +71,30 @@ export default function DraftsPage() {
         try {
             setDeletingId(id);
             console.log('[DraftsPage] calling deleteDraft()', id);
+
             const res = await deleteDraft(id);
             console.log('[DraftsPage] deleteDraft() response:', res);
 
-            const resultCode =
-                res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
-            console.log('[DraftsPage] parsed resultCode:', resultCode);
+            const resultCode = res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
+            const isSuccess =
+                res?.status === 200 || // ✅ HTTP status 200이면 성공
+                (typeof resultCode === 'string' && resultCode.startsWith('S-')) ||
+                res?.success === true ||
+                (typeof res?.msg === 'string' && res.msg.includes('성공'));
 
-            if (String(resultCode).startsWith('S-')) {
+            if (isSuccess) {
                 // 낙관적 UI: 목록에서 제거
                 setDrafts((prev) => {
                     const next = prev.filter((d) => d.id !== id);
-                    console.log('[DraftsPage] remove from list. before:', prev.length, 'after:', next.length);
+                    console.log(
+                        '[DraftsPage] remove from list. before:',
+                        prev.length,
+                        'after:',
+                        next.length
+                    );
                     return next;
                 });
+                console.log('[DraftsPage] delete success for id:', id);
             } else {
                 const msg = res?.msg || '삭제에 실패했습니다.';
                 console.warn('[DraftsPage] delete failed. server msg:', msg);

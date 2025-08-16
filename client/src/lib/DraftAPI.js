@@ -73,11 +73,13 @@ DraftApi.interceptors.response.use(
 
 /** 4) Draft 관련 API */
 export const deleteDraft = async (id) => {
-    const url = `/draft/${id}`;
-    console.log("[CALL][deleteDraft] url:", url, "baseURL:", DraftApi.defaults.baseURL);
+    const url = `/draft/${id}`; // 최종 URL: http://localhost:8080/api/DiFF/draft/{id}
     const res = await DraftApi.delete(url);
-    return res.data;
+    console.log('[API][deleteDraft] status:', res.status, 'data:', res.data);
+    // 상태/바디 둘 다 넘겨서 상위에서 정확히 판단
+    return { status: res.status, data: res.data };
 };
+
 
 export const DraftsArticle = async () => {
     const response = await DraftApi.get('/draft/drafts');
