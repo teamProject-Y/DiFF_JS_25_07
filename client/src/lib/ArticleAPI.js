@@ -1,7 +1,6 @@
 // lib/ArticleAPI.js
-
-import { UserApi } from './UserAPI';
 import axios from "axios";
+
 
 /** 커스텀 Axios 인스턴스 */
 export const ArticleApi = axios.create({
@@ -132,17 +131,25 @@ export const getMyRepositories = async () => {
         res.data?.data?.repositories ??
         res.data?.repositories ??
         [];
-
     // 타입 보정
     return Array.isArray(repos) ? repos : [];
 };
 
+// ArticleAPI.js
+export async function getArticle(id) {
+    const res = await ArticleApi.get(`/api/DiFF/article/detail`, {
+        params: { id }
+    });
+    return res.data.data;
+};
 
-// export const deleteDraft = async (id) => {
-//     console.log('[CALL][deleteDraft] start', { id });
-//     const res = await ArticleApi.delete(`/api/DiFF/article/draft/${id}`);
-//     return res.data;
-// };
+// 게시글 수정
+export const modifyArticle = async (id, data) => {
+    const res = await ArticleApi.put(`/api/DiFF/article/modify`, data, {
+        params: { id },
+    });
+    return res.data;
+};
 
 
 

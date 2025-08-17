@@ -34,20 +34,21 @@ module.exports = {
     // 2) API 호출처럼 내부 경로만 프록시하고 싶을 때 rewrites 사용
     async rewrites() {
         return [
-             // 1) NextAuth 엔드포인트는 Next.js가 처리
-             { source: '/DiFF/:path*', destination: 'http://localhost:8080/api/DiFF/:path*' },
+            // 1) NextAuth 엔드포인트는 Next.js가 처리
+            { source: '/DiFF/:path*', destination: 'http://localhost:8080/api/DiFF/:path*' },
 
             // // 2) OAuth2 콜백은 백엔드로
-             { source: '/login/oauth2/code/:provider', destination: `${BACKEND}/login/oauth2/code/:provider` },
+            { source: '/login/oauth2/code/:provider', destination: `${BACKEND}/login/oauth2/code/:provider` },
 
             // // 3) 회원 관련 API는 백엔드로
-             { source: '/DIFF/member/:path*', destination: `${BACKEND}/api/v1/DiFF/member/:path*` },
+            { source: '/DIFF/member/:path*', destination: `${BACKEND}/api/v1/DiFF/member/:path*` },
 
             // // 4) 정적 리소스
-             { source: '/resource/:path*', destination: '/resource/:path*' },
+            { source: '/resource/:path*', destination: '/resource/:path*' },
 
             // // 5) 프론트 라우팅 (직접 렌더링할 페이지)
-             { source: '/home/main', destination: '/home/main' },
+            { source: '/home/main', destination: '/home/main' },
+
         ];
     },
 
