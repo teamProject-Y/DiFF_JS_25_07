@@ -80,7 +80,6 @@ export const deleteDraft = async (id) => {
     return { status: res.status, data: res.data };
 };
 
-
 export const DraftsArticle = async () => {
     const response = await DraftApi.get('/draft/drafts');
     return response.data;

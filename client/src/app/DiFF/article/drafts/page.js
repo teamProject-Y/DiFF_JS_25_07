@@ -83,7 +83,6 @@ export default function DraftsPage() {
                 (typeof res?.msg === 'string' && res.msg.includes('성공'));
 
             if (isSuccess) {
-                // 낙관적 UI: 목록에서 제거
                 setDrafts((prev) => {
                     const next = prev.filter((d) => d.id !== id);
                     console.log(

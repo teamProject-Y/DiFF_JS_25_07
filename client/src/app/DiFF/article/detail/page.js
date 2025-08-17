@@ -61,7 +61,6 @@ function ArticleDetailInner() {
         };
     }, [id]);
 
-    // ✅ 삭제 핸들러 (DraftsPage 참고)
     const handleDelete = async (id) => {
         if (!id) return;
         const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
@@ -121,7 +120,7 @@ function ArticleDetailInner() {
             {/* 하단 버튼 영역 */}
             <div className="mt-8 flex gap-4">
                 <Link
-                    href="/DiFF/article/list"
+                    href={`/DiFF/article/list?repositoryId=${article.repositoryId}`}
                     className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
                 >
                     목록으로
