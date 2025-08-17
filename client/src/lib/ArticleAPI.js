@@ -1,5 +1,6 @@
 // lib/ArticleAPI.js
 import axios from "axios";
+import {DraftApi} from "@/lib/DraftAPI";
 
 
 /** 커스텀 Axios 인스턴스 */
@@ -144,12 +145,23 @@ export async function getArticle(id) {
 };
 
 // 게시글 수정
-export const modifyArticle = async (id, data) => {
-    const res = await ArticleApi.put(`/api/DiFF/article/modify`, data, {
-        params: { id },
+export async function modifyArticle(article, token) {
+    const res = await axios.post(`/api/DiFF/article/modify`, article, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // 🔑 토큰 추가
+        }
     });
     return res.data;
+}
+
+export const deleteArticle = async (id) => {
+    const url = `/article/${id}`;
+    const res = await DraftApi.delete(url);
+    console.log('[API][deleteArticle] status:', res.status, 'data:', res.data);
+    return { status: res.status, data: res.data };
 };
+
 
 
 

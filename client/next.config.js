@@ -34,6 +34,8 @@ module.exports = {
     // 2) API 호출처럼 내부 경로만 프록시하고 싶을 때 rewrites 사용
     async rewrites() {
         return [
+            { source: '/api/DiFF/:path*', destination: 'http://localhost:8080/api/DiFF/:path*' },
+
             // 1) NextAuth 엔드포인트는 Next.js가 처리
             { source: '/DiFF/:path*', destination: 'http://localhost:8080/api/DiFF/:path*' },
 

@@ -1,19 +1,21 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation'; // ✅ 쿼리스트링용
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getArticle } from '@/lib/ArticleAPI';
+import { getArticle, deleteArticle } from '@/lib/ArticleAPI';
 
 function ArticleDetailInner() {
     console.log("✅ ArticleDetailInner 렌더됨");
 
     const searchParams = useSearchParams();
+    const router = useRouter();
     const id = searchParams.get('id'); // ✅ ?id=25 읽어옴
 
     const [article, setArticle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         if (!id) {
@@ -59,6 +61,39 @@ function ArticleDetailInner() {
         };
     }, [id]);
 
+    // ✅ 삭제 핸들러 (DraftsPage 참고)
+    const handleDelete = async (id) => {
+        if (!id) return;
+        const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
+        if (!ok) return;
+
+        try {
+            setDeleting(true);
+            const res = await deleteArticle(id);
+            console.log("[ArticleDetail] deleteArticle() response:", res);
+
+            const resultCode = res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
+            const isSuccess =
+                res?.status === 200 ||
+                (typeof resultCode === 'string' && resultCode.startsWith('S-')) ||
+                res?.success === true ||
+                (typeof res?.msg === 'string' && res.msg.includes('성공'));
+
+            if (isSuccess) {
+                alert("삭제 완료!");
+                router.push("/DiFF/article/list?repositoryId=" + article.repositoryId);
+            } else {
+                const msg = res?.msg || "삭제에 실패했습니다.";
+                alert(msg);
+            }
+        } catch (e) {
+            console.error("[ArticleDetail] delete request error:", e);
+            alert(e?.response?.data?.msg || "삭제 요청에 실패했습니다.");
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (loading) return <p className="text-gray-500">불러오는 중...</p>;
     if (errMsg) return <p className="text-red-500">{errMsg}</p>;
@@ -97,6 +132,17 @@ function ArticleDetailInner() {
                 >
                     수정하기
                 </Link>
+                <button
+                    onClick={() => handleDelete(article.id)}
+                    disabled={deleting}
+                    className={`px-4 py-2 rounded transition ${
+                        deleting
+                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                            : "bg-red-500 text-white hover:bg-red-600"
+                    }`}
+                >
+                    {deleting ? "삭제중…" : "삭제하기"}
+                </button>
             </div>
         </div>
     );

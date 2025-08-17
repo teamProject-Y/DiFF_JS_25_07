@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { fetchArticles } from '@/lib/ArticleAPI';
+import { fetchArticles, deleteArticle } from '@/lib/ArticleAPI';
 
 function truncate(text = '', max = 100) {
     const t = String(text ?? '');
