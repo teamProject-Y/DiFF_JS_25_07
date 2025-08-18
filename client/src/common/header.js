@@ -7,36 +7,23 @@ import styled from 'styled-components';
 
 const HeaderWrap = styled.div`
     position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
-    width: 100%;
-    height: 80px;
+    top: 0; left: 0; z-index: 100;
+    width: 100%; height: 80px;
+    display: flex; align-items: center;
 
-    /* 부드러운 전환 */
-    transition:
-            transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 0.3s,
-            background-color 0.3s,
-            backdrop-filter 0.3s;
-
-    /* ✨ 반투명 + 유리 효과 */
-    background: rgba(255, 255, 255, 0.35);      /* #111 에서 55% 불투명 */
+    /* 반투명 배경 유지 */
+    background: rgba(255,255,254,0.55);
     backdrop-filter: blur(8px) saturate(140%);
     -webkit-backdrop-filter: blur(8px) saturate(140%);
 
-    /* 살짝 경계감 주고 그림자 */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    /* 트랜지션 */
+    transition: transform .5s cubic-bezier(0.4,0,0.2,1), opacity .3s, background .3s, backdrop-filter .3s;
 
-    display: flex;
-    align-items: center;
+    /* ✅ 그림자 제거 + 반투명 선만 */
+    box-shadow: none;
+    border-bottom: 1px solid rgba(0,0,0,0.5); /* 톤만 원하면 수치 조절 */
 
-    &.hide {
-        transform: translateY(-100%);
-        opacity: 0;
-        pointer-events: none;
-    }
+    &.hide { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 `;
 
 export default function Header() {
