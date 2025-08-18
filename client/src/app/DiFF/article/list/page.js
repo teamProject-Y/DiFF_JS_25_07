@@ -2,7 +2,13 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { fetchArticles } from '@/lib/ArticleAPI';
+import Link from 'next/link';
+import { fetchArticles, deleteArticle } from '@/lib/ArticleAPI';
+
+function truncate(text = '', max = 100) {
+    const t = String(text ?? '');
+    return t.length > max ? `${t.slice(0, max)}…` : t;
+}
 
 function ArticleListInner() {
     const searchParams = useSearchParams();
@@ -43,24 +49,31 @@ function ArticleListInner() {
     return (
         <div className="p-6 max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold mb-4">게시글 목록</h1>
-            {loading ? (
-                <p className="text-gray-500">불러오는 중...</p>
-            ) : articles.length === 0 ? (
-                <p className="text-gray-500">게시글이 없습니다.</p>
-            ) : (
-                articles.map(article => (
-                    <div key={article.id} className="mb-6 p-4 border border-gray-300 rounded-lg shadow-sm">
-                        <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
-                        <p className="text-gray-700">{article.body}</p>
-                    </div>
-                ))
-            )}
+            <ul className="space-y-4">
+                {articles.map((article) => (
+                    <li key={article.id} className="border-b pb-4">
+                        <Link
+                            href={`/DiFF/article/detail?id=${article.id}`}
+                            className="block group"
+                        >
+                            <h2 className="text-xl font-semibold text-blue-600 group-hover:underline">
+                                {article.title}
+                            </h2>
+                            <p className="text-gray-700 mt-1 line-clamp-2">
+                                {article.body}
+                            </p>
+                            <div className="text-sm text-gray-500 mt-2">
+                                ✍ {article.writer ?? '익명'} | 📅 {article.regDate}
+                            </div>
+                        </Link>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }
 
 export default function Page() {
-    // 여기서는 hook 안 쓰고, 아래를 Suspense로 감싸기만 함
     return (
         <Suspense fallback={<p>불러오는 중...</p>}>
             <ArticleListInner />

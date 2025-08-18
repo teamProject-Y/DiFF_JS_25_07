@@ -1,118 +1,156 @@
-"use client";
+'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { getArticle, deleteArticle } from '@/lib/ArticleAPI';
 
-async function fetchArticle(id) {
-    const API_BASE = process.env.BACKEND_URL || 'http://localhost:8080';
-    const res = await fetch(`${API_BASE}/DiFF/article/${id}`);
-    if (!res.ok) throw new Error('Failed to fetch article');
-    return await res.json();
-}
+function ArticleDetailInner() {
+    console.log("✅ ArticleDetailInner 렌더됨");
 
-async function fetchComments(id) {
-    const API_BASE = process.env.BACKEND_URL || 'http://localhost:8080';
-    const res = await fetch(`${API_BASE}/DiFF/article/${id}/comments`);
-    if (!res.ok) throw new Error('Failed to fetch comments');
-    return await res.json();
-}
-
-export default function ArticleDetailPage({ params }) {
-    const { id } = params; // `params`에서 id 추출
+    const searchParams = useSearchParams();
     const router = useRouter();
+    const id = searchParams.get('id'); // ✅ ?id=25 읽어옴
+
     const [article, setArticle] = useState(null);
-    const [comments, setComments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [errMsg, setErrMsg] = useState('');
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
-        if (!id) return;
-        fetchArticle(id)
-            .then(data => setArticle(data.article))
-            .catch(error => console.error(error));
+        if (!id) {
+            console.warn("⚠️ [DetailPage] id 없음 (쿼리스트링 미포함)");
+            return;
+        }
 
-        fetchComments(id)
-            .then(data => setComments(data.comment))
-            .catch(error => console.error(error));
+        let alive = true;
+
+        (async () => {
+            setLoading(true);
+            setErrMsg('');
+
+            console.log("🛰️ [DetailPage] useEffect 시작됨, id =", id);
+
+            try {
+                const art = await getArticle(id); // ArticleAPI.js 호출
+                console.log("📡 [DetailPage] getArticle 응답:", art);
+
+                if (!alive) return;
+                if (!art) {
+                    setErrMsg('게시글을 불러오지 못했습니다.');
+                    setArticle(null);
+                } else {
+                    setArticle(art);
+                }
+            } catch (e) {
+                if (!alive) return;
+                console.error('❌ [DetailPage] fetch error:', e);
+                setErrMsg('에러가 발생했습니다.');
+                setArticle(null);
+            } finally {
+                if (alive) {
+                    console.log("✅ [DetailPage] 로딩 종료");
+                    setLoading(false);
+                }
+            }
+        })();
+
+        return () => {
+            alive = false;
+            console.log("🛑 [DetailPage] useEffect cleanup 실행됨");
+        };
     }, [id]);
 
-    const handleCommentSubmit = async (e) => {
-        e.preventDefault();
-        const body = e.target.body.value.trim();
-        if (!body) return;
+    const handleDelete = async (id) => {
+        if (!id) return;
+        const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
+        if (!ok) return;
 
-        const res = await fetch('/DiFF/article/comment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ body, articleId: id }),
-        });
+        try {
+            setDeleting(true);
+            const res = await deleteArticle(id);
+            console.log("[ArticleDetail] deleteArticle() response:", res);
 
-        const result = await res.json();
-        if (result.resultCode.startsWith('S-')) {
-            setComments([...comments, result.data]);
-            e.target.body.value = ''; // 댓글 입력 필드 초기화
+            const resultCode = res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
+            const isSuccess =
+                res?.status === 200 ||
+                (typeof resultCode === 'string' && resultCode.startsWith('S-')) ||
+                res?.success === true ||
+                (typeof res?.msg === 'string' && res.msg.includes('성공'));
+
+            if (isSuccess) {
+                alert("삭제 완료!");
+                router.push("/DiFF/article/list?repositoryId=" + article.repositoryId);
+            } else {
+                const msg = res?.msg || "삭제에 실패했습니다.";
+                alert(msg);
+            }
+        } catch (e) {
+            console.error("[ArticleDetail] delete request error:", e);
+            alert(e?.response?.data?.msg || "삭제 요청에 실패했습니다.");
+        } finally {
+            setDeleting(false);
         }
     };
 
-    if (!article) return <p>Loading article...</p>;
+    if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
+    if (loading) return <p className="text-gray-500">불러오는 중...</p>;
+    if (errMsg) return <p className="text-red-500">{errMsg}</p>;
+    if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
     return (
-        <>
-            <button onClick={() => router.back()} className="text-4xl pl-10 cursor-pointer">
-                ←
-            </button>
+        <div className="p-6 max-w-3xl mx-auto">
+            {/* 제목 */}
+            <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
-            <div className="container mx-auto my-6 p-6 bg-neutral-100 rounded-xl">
-                <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
-                <div className="text-sm text-neutral-600 mb-4">
-                    작성일: {article.regDate.substring(0, 10)} | 조회수: {article.hit}
-                </div>
-
-                <div className="prose mb-4">{article.body}</div>
-
-                <div className="flex items-center space-x-4 mb-6">
-                    <button
-                        onClick={toggleLike}
-                        className={`px-4 py-2 border rounded ${article.userReaction === 1 ? 'bg-neutral-300' : ''}`}
-                    >
-                        👍 {article.extra_goodReactionPoint}
-                    </button>
-                </div>
-
-                <hr />
-
-                <section className="mt-6">
-                    <h2 className="text-2xl mb-4">Comment</h2>
-
-                    {comments.map(c => (
-                        <div key={c.id} className="mb-4 p-4 border rounded">
-                            <strong>{c.extra_writer}</strong>
-                            <p>{c.body}</p>
-                        </div>
-                    ))}
-
-                    <form onSubmit={handleCommentSubmit} className="mt-6">
-                        <input
-                            name="body"
-                            type="text"
-                            placeholder="나도 한마디 하기!"
-                            className="w-full p-2 border rounded mb-2"
-                        />
-                        <button type="submit" className="px-4 py-2 bg-neutral-800 text-white rounded">
-                            게시
-                        </button>
-                    </form>
-                </section>
+            {/* 작성자 + 날짜 */}
+            <div className="text-sm text-gray-600 mb-6 flex gap-4">
+                <span>✍ 작성자: {article.writer ?? '익명'}</span>
+                <span>📅 작성일: {article.regDate}</span>
+                {article.updateDate && (
+                    <span>📝 수정일: {article.updateDate}</span>
+                )}
             </div>
-        </>
+
+            {/* 본문 */}
+            <div className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
+                {article.body}
+            </div>
+
+            {/* 하단 버튼 영역 */}
+            <div className="mt-8 flex gap-4">
+                <Link
+                    href={`/DiFF/article/list?repositoryId=${article.repositoryId}`}
+                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+                >
+                    목록으로
+                </Link>
+                <Link
+                    href={`/DiFF/article/modify?id=${article.id}`}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                >
+                    수정하기
+                </Link>
+                <button
+                    onClick={() => handleDelete(article.id)}
+                    disabled={deleting}
+                    className={`px-4 py-2 rounded transition ${
+                        deleting
+                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                            : "bg-red-500 text-white hover:bg-red-600"
+                    }`}
+                >
+                    {deleting ? "삭제중…" : "삭제하기"}
+                </button>
+            </div>
+        </div>
     );
 }
 
-// app/DiFF/article/detail/[id]/page.js
-export default function ArticleDetailPage({ params }) {
-    const { id } = params; // 동적 라우팅을 통해 article의 ID를 가져옵니다.
-
+export default function Page() {
     return (
-        <Suspense fallback={<p>Loading...</p>}>
-            <ArticleDetail id={id} />
+        <Suspense fallback={<p>불러오는 중...</p>}>
+            <ArticleDetailInner />
         </Suspense>
     );
 }
