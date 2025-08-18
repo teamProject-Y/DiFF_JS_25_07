@@ -14,8 +14,8 @@
     "framer-motion": "^12.23.12",
     "next": "15.4.1",
     "next-auth": "^4.24.11",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "react-simple-typewriter": "^5.0.1",
     "styled-components": "^6.1.19",
     "swiper": "^11.2.10"
