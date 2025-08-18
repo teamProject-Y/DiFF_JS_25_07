@@ -1,3 +1,4 @@
+// pages/usr/home/page.js
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -110,7 +111,9 @@ export default function Page() {
     const [lastDoneStep, setLastDoneStep] = useState(-1);
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const { mounted, loggedIn } = useMountedLogin();
+
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => setIsClient(true), []);
