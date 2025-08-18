@@ -8,7 +8,6 @@ import { useEffect,useState } from "react";
 export default function MyInfoPage() {
     const router = useRouter();
     const [member, setMember] = useState(null);
-    const [repositories, setRepositories] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -20,10 +19,7 @@ export default function MyInfoPage() {
 
         fetchUser()
             .then(res => {
-                console.log("마이페이지 응답:", res);
-                // 백엔드 응답 구조에 맞춰서 분해
-                setMember(res.member); // ← member만 따로 저장
-                setRepositories(res.repositories); // ← 레포지토리도 따로
+                setMember(res.member);
                 setLoading(false);
             })
             .catch(err => {
@@ -32,7 +28,6 @@ export default function MyInfoPage() {
                 router.replace('/DiFF/home/main');
             });
     }, [router]);
-
 
     if (loading) return <div>로딩...</div>;
     if (!member) return null;
@@ -77,54 +72,13 @@ export default function MyInfoPage() {
                     </tbody>
                 </table>
 
-                {/* 🔹 레포지토리 카드 */}
-                <div className="mb-10">
-                    <h2 className="text-2xl font-semibold mb-4">내 레포지토리</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {repositories?.length > 0 ? (
-                            repositories.map((repo, idx) => (
-                                <div
-                                    key={repo.id}
-                                    className="border border-gray-300 p-4 rounded-lg bg-white shadow-md cursor-pointer hover:bg-gray-100 transition"
-                                    onClick={() => router.push(`/DiFF/article/list?repositoryId=${repo.id}`)}
-                                >
-                                    <h3 className="font-bold text-lg mb-2">
-                                        {repo.name || `Repository ${idx + 1}`}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 mb-1">
-                                        생성일: {repo.regDate?.split('T')[0]}
-                                    </p>
-                                    <p className="text-sm text-gray-500 mb-1">
-                                        커밋 ID: {repo.lastRqCommit || '없음'}
-                                    </p>
-                                    <p className="text-sm text-gray-500">
-                                        이름: {repo.name || '이름 없음'}
-                                    </p>
-                                </div>
-                            ))
-                        ) : (
-                            <p>등록된 레포지토리가 없습니다.</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* 🔹 글 작성 버튼 */}
+                {/* 🔹 레포지토리 페이지 이동 버튼 */}
                 <div className="text-center mb-6">
                     <button
-                        onClick={() => router.push('/DiFF/article/write')}
+                        onClick={() => router.push('/DiFF/member/repositories')}
                         className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
                     >
-                        글 작성
-                    </button>
-                </div>
-
-                {/* 🔹 임시 drafts 버튼 */}
-                <div className="text-center mb-6">
-                    <button
-                        onClick={() => router.push('/DiFF/article/drafts')}
-                        className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
-                    >
-                        임시저장
+                        내 레포지토리 보기
                     </button>
                 </div>
 
