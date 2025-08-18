@@ -75,7 +75,7 @@ export default function MyInfoPage() {
                 {/* 🔹 레포지토리 페이지 이동 버튼 */}
                 <div className="text-center mb-6">
                     <button
-                        onClick={() => router.push('/DiFF/member/repositories')}
+                        onClick={() => router.push('/DiFF/member/repository')}
                         className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
                     >
                         내 레포지토리 보기

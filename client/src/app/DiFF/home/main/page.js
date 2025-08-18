@@ -5,7 +5,6 @@ import {useEffect, useRef, useState} from "react";
 import dynamic from 'next/dynamic';
 import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
 import Link from "next/link";
-
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -231,9 +230,15 @@ function LoginMainPage({ me, trendingArticles }) {
                     {/* 왼쪽 */}
                     <aside className="space-y-6">
                         <nav className="space-y-3 text-gray-700">
-                            <a className="block hover:underline">Home</a>
-                            <a className="block hover:underline">Profile</a>
-                            <a className="block hover:underline">Repositories</a>
+                            <Link href="/DiFF/home/main" className="block hover:underline">
+                                Home
+                            </Link>
+                            <Link href="/DiFF/member/myPage" className="block hover:underline">
+                                Profile
+                            </Link>
+                            <Link href="/DiFF/member/repository" className="block hover:underline">
+                                Repositories
+                            </Link>
                         </nav>
                         <div className="pt-4 text-sm text-gray-500">
                             <div className="font-semibold mb-2">Following</div>
