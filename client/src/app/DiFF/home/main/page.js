@@ -140,9 +140,9 @@ export default function Page() {
 
     if (!mounted) return null; // 마운트 전 렌더 방지
 
-    // ───────────────── 분기: JWT 토큰만 보고 결정 ─────────────────
+    /* ───────────────── 분기: JWT 토큰만 보고 결정 ───────────────── */
     if (loggedIn) {
-        return <AfterMainPage me={user} />;
+        return <AfterMainPage me={user} trendingArticles={trendingArticles} />;
     }
 
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
