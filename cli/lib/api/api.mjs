@@ -70,6 +70,7 @@ export async function mkRepo(memberId, repoName, commitHash){
 /** 서버에 diff 보내기 **/
 export async function sendDiFF(memberId, repositoryId, to, diff) {
     try {
+        console.log(chalk.bgCyanBright("sendDiFF"));
         const { data } = await axios.post(
             'http://localhost:8080/usr/draft/mkDraft',
             {
