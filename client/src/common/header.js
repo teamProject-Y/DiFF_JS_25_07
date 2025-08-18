@@ -12,11 +12,25 @@ const HeaderWrap = styled.div`
     z-index: 100;
     width: 100%;
     height: 80px;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
-    background-color: #111;
+
+    /* 부드러운 전환 */
+    transition:
+            transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.3s,
+            background-color 0.3s,
+            backdrop-filter 0.3s;
+
+    /* ✨ 반투명 + 유리 효과 */
+    background: rgba(255, 255, 255, 0.35);      /* #111 에서 55% 불투명 */
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+
+    /* 살짝 경계감 주고 그림자 */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+
     display: flex;
     align-items: center;
-    //border: grey 1px solid;
 
     &.hide {
         transform: translateY(-100%);
@@ -78,7 +92,7 @@ export default function Header() {
     return (
         <HeaderWrap className={hide ? 'hide' : ''}>
             <div className="logo pl-4">
-                <Link href="/DiFF/home/main" className="block text-5xl p-4 text-white font-bold">
+                <Link href="/DiFF/home/main" className="block text-5xl p-4 text-black font-bold">
                     DiFF
                 </Link>
             </div>
