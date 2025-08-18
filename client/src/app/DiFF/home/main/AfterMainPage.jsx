@@ -16,12 +16,12 @@ export default function AfterMainPage({ me, trendingArticles }) {
 
     return (
         <div className="w-full min-h-screen bg-white text-black">
-            <div className="h-screen pt-28">
+            <div className="h-screen pt-20">
                 {/* 3열 */}
-                <div className="mx-auto max-w-6xl px-6 py-8 grid grid-cols-[220px_1fr_300px] gap-8">
+                <div className="mx-auto max-w-7xl px-6 py-8 flex justify-around">
                     {/* 왼쪽 */}
-                    <aside className="space-y-6">
-                        <nav className="space-y-3 text-gray-700">
+                    <aside className="mr-10">
+                        <nav className="space-y-3 text-gray-700 mb-6">
                             <Link href="/DiFF/home/main" className="block hover:underline">
                                 Home
                             </Link>
@@ -31,6 +31,9 @@ export default function AfterMainPage({ me, trendingArticles }) {
                             <Link href="/DiFF/member/repository" className="block hover:underline">
                                 Repositories
                             </Link>
+                            <Link href="/DiFF/docs/intro" className="block hover:underline">
+                                Docs
+                            </Link>
                         </nav>
                         <div className="pt-4 text-sm text-gray-500">
                             <div className="font-semibold mb-2">Following</div>
@@ -39,7 +42,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                     </aside>
 
                     {/* 센터 피드 */}
-                    <main className="space-y-8">
+                    <main className="flex-grow-1 mr-20">
                         <div className="flex items-center gap-6 border-b">
                             {['Trending','Following'].map((t,i)=>(
                                 <button key={t} className={`py-4 -mb-px ${i===0?'border-b-2 border-black font-semibold':'text-gray-500'}`}>{t}</button>
@@ -69,23 +72,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
                         )}
                     </main>
 
-                    {/* 오른쪽 */}
-                    <aside className="space-y-6">
-                        <section className="border rounded-xl p-4">
-                            <h3 className="font-semibold mb-3">Staff Picks</h3>
-                            <ul className="space-y-3 text-sm text-gray-700">
-                                <li>Pick 1</li><li>Pick 2</li><li>Pick 3</li>
-                            </ul>
-                        </section>
-                        <section className="border rounded-xl p-4">
-                            <h3 className="font-semibold mb-3">Hashtag</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {['Data Science','Self Improvement','Writing','Relationships','Politics','Productivity'].map(t=>(
-                                    <span key={t} className="px-3 py-1 rounded-full border text-sm">{t}</span>
-                                ))}
-                            </div>
-                        </section>
-                    </aside>
                 </div>
             </div>
         </div>

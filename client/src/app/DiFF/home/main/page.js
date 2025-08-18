@@ -209,9 +209,6 @@ export default function Page() {
                     <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
                 </div>
             </div>
-
-            {/* 기존 여백 유지 */}
-            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         </div>
     );
 }
