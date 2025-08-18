@@ -55,16 +55,35 @@ export const setAuthHeader = () => {
 
 /** 3. 토큰 자동 재발급 (Refresh) */
 const refreshAccessToken = async () => {
-    if (typeof window !== "undefined") {
-        const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+    if (typeof window === "undefined") return;
+
+    const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+    if (!REFRESH_TOKEN) {
+        console.warn("refreshToken이 없습니다. 재로그인이 필요합니다.");
+        return;
+    }
+
+    try {
         const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
+
         const ACCESS_TOKEN = response.data.accessToken;
-        const TOKEN_TYPE = localStorage.getItem("tokenType");
+        const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
+
         localStorage.setItem('accessToken', ACCESS_TOKEN);
         window.dispatchEvent(new Event('auth-changed'));
         UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+
+        console.log("액세스 토큰 갱신 성공:", ACCESS_TOKEN);
+        return ACCESS_TOKEN; // 필요하면 반환
+    } catch (error) {
+        if (error.response) {
+            console.error("토큰 갱신 실패:", error.response.status, error.response.data);
+        } else {
+            console.error("토큰 갱신 요청 자체 실패:", error.message);
+        }
+        return null;
     }
 };
 

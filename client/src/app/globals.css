@@ -23,21 +23,21 @@
 
 @font-face {
     font-family: 'SF-Regular';
-    src: url('/fonts/SF-Mono-Regular.otf') format('opentype');
+    src: url('../common/fonts/SF-Mono-Regular.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'SF-Bold';
-    src: url('/fonts/SF-Mono-Bold.otf') format('opentype');
+    src: url('../common/fonts/SF-Mono-Bold.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'SF-light';
-    src: url('/fonts/SF-Mono-Light.otf') format('opentype');
+    src: url('../common/fonts/SF-Mono-Light.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
 }
@@ -172,3 +172,43 @@ li {
     opacity: 8%;
 }
 
+
+
+/** docs **/
+.title1 {
+    font-size: 25px;
+    font-weight: 700;
+    margin: 1rem;
+    line-height: 2;
+}
+
+.title2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 3rem 1rem 1rem 1rem;
+    line-height: 2;
+}
+
+.list_item {
+    list-style-type: disc;
+    font-weight: 600;
+    margin: 1rem 0;
+}
+
+.list_content {
+    list-style-type: none;
+    font-weight: 400;
+    margin: 1rem 1rem 2rem 0;
+}
+
+.content1{
+    font-size: 1.1rem;
+    margin: 2rem 2rem 4rem 2rem;
+    font-weight: 400;
+}
+
+.docsNavi {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
