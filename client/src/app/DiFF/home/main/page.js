@@ -242,11 +242,11 @@ function LoginMainPage ({ me }) {
                 {/* 왼쪽 */}
                 <aside className="space-y-6">
                     <nav className="space-y-3 text-gray-700">
-                        <a className="block">Home</a>
-                        <a className="block">Library</a>
-                        <a className="block">Profile</a>
-                        <a className="block">Stories</a>
-                        <a className="block">Stats</a>
+                        <a className="block hover:underline">Home</a>
+                        <a className="block hover:underline">Profile</a>
+                        <a className="block hover:underline">Repositories</a>
+                        <a className="block hover:underline">Stories</a>
+                        <a className="block hover:underline">Stats</a>
                     </nav>
                     <div className="pt-4 text-sm text-gray-500">
                         <div className="font-semibold mb-2">Following</div>
