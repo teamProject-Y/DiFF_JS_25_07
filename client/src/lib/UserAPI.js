@@ -63,6 +63,7 @@ const refreshAccessToken = async () => {
         const ACCESS_TOKEN = response.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType");
         localStorage.setItem('accessToken', ACCESS_TOKEN);
+        window.dispatchEvent(new Event('auth-changed'));
         UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
     }
 };

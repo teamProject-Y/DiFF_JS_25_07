@@ -43,6 +43,40 @@ function parseJwt(token) {
     }
 }
 
+// JWT exp 만료 확인(시계오차 30초 허용)
+function isExpired(token, skewMs = 30000) {
+    try {
+        const payload = JSON.parse(atob((token?.split?.('.')[1] || '')));
+        if (!payload?.exp) return false; // exp 없으면 만료 체크 패스(원하면 true로 바꿔도 OK)
+        return payload.exp * 1000 <= Date.now() - skewMs;
+    } catch {
+        return true;
+    }
+}
+
+// access 만료/부재 시 refresh 시도 (성공 시 localStorage 갱신)
+async function tryRefresh() {
+    if (typeof window === 'undefined') return false;
+    const rt = localStorage.getItem('refreshToken');
+    if (!rt) return false;
+    try {
+        const res = await fetch('http://localhost:8080/api/DiFF/auth/refresh', {
+            method: 'GET',
+            headers: { 'REFRESH_TOKEN': rt }
+        });
+        if (!res.ok) return false;
+        const data = await res.json().catch(() => ({}));
+        const newAccess = data.accessToken || data.data1; // 백엔드 응답 키에 맞춰 사용
+        if (!newAccess) return false;
+        localStorage.setItem('accessToken', newAccess);
+        // 헤더/다른 컴포넌트에 로그인 상태 변경 알림
+        window.dispatchEvent(new Event('auth-changed'));
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 /** 마운트 후 localStorage의 accessToken만 확인해서 로그인 여부 결정 (JWT만 사용) */
 function useMountedLogin() {
     const [mounted, setMounted] = useState(false);
@@ -50,16 +84,28 @@ function useMountedLogin() {
 
     useEffect(() => {
         setMounted(true);
-        try {
+
+        const compute = async () => {
             const t = localStorage.getItem('accessToken');
-            if (!t) return setLoggedIn(false);
-            // (선택) exp 만료 검사: exp가 있고 만료면 비로그인 취급
-            const payload = JSON.parse(atob((t.split('.')[1] || '')));
-            if (payload?.exp && payload.exp * 1000 < Date.now()) setLoggedIn(false);
-            else setLoggedIn(true);
-        } catch {
-            setLoggedIn(false);
-        }
+            if (t && !isExpired(t)) {
+                setLoggedIn(true);
+                return;
+            }
+            // 만료/부재 → refresh 시도
+            const ok = await tryRefresh();
+            setLoggedIn(ok);
+    };
+
+        compute();
+
+        // 로그인/로그아웃/리프레시 동기화
+        const onChange = () => compute();
+        window.addEventListener('auth-changed', onChange);
+        window.addEventListener('storage', onChange); // 다른 탭과도 동기화
+        return () => {
+            window.removeEventListener('auth-changed', onChange);
+            window.removeEventListener('storage', onChange);
+        };
     }, []);
 
     return { mounted, loggedIn };
