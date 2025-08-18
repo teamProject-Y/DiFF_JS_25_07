@@ -39,7 +39,10 @@ export default function LoginPage({ searchParams }) {
             localStorage.setItem('accessToken', result.data1);
             localStorage.setItem('refreshToken', result.data2 || '');
 
-            router.replace(callbackUrl);
+            // 상태 동기화 알림(헤더/메인 훅들이 즉시 재평가)
+            window.dispatchEvent(new Event('auth-changed'));
+            // 강제 리로드해서 메인에서 분기 재평가
+            window.location.replace(callbackUrl);
         } catch (error) {
             console.log("로그인 axios error", error, error.response);
             setError('로그인 실패: 아이디/비밀번호를 확인하세요.');
