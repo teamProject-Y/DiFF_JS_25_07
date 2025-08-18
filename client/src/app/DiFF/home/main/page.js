@@ -25,7 +25,6 @@ const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), { ssr: false }
 const HamburgerButton = dynamic(() => import('@/common/HamMenu'), { ssr: false });
 
 
-
 function parseJwt(token) {
     if (!token) return {};
     try {
@@ -42,6 +41,74 @@ function parseJwt(token) {
     } catch (e) {
         return {};
     }
+}
+
+// JWT exp 만료 확인(시계오차 30초 허용)
+function isExpired(token, skewMs = 30000) {
+    try {
+        const payload = JSON.parse(atob((token?.split?.('.')[1] || '')));
+        if (!payload?.exp) return false; // exp 없으면 만료 체크 패스(원하면 true로 바꿔도 OK)
+        return payload.exp * 1000 <= Date.now() - skewMs;
+    } catch {
+        return true;
+    }
+}
+
+// access 만료/부재 시 refresh 시도 (성공 시 localStorage 갱신)
+async function tryRefresh() {
+    if (typeof window === 'undefined') return false;
+    const rt = localStorage.getItem('refreshToken');
+    if (!rt) return false;
+    try {
+        const res = await fetch('http://localhost:8080/api/DiFF/auth/refresh', {
+            method: 'GET',
+            headers: { 'REFRESH_TOKEN': rt }
+        });
+        if (!res.ok) return false;
+        const data = await res.json().catch(() => ({}));
+        const newAccess = data.accessToken || data.data1; // 백엔드 응답 키에 맞춰 사용
+        if (!newAccess) return false;
+        localStorage.setItem('accessToken', newAccess);
+        // 헤더/다른 컴포넌트에 로그인 상태 변경 알림
+        window.dispatchEvent(new Event('auth-changed'));
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** 마운트 후 localStorage의 accessToken만 확인해서 로그인 여부 결정 (JWT만 사용) */
+function useMountedLogin() {
+    const [mounted, setMounted] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+
+        const compute = async () => {
+            const t = localStorage.getItem('accessToken');
+            if (t && !isExpired(t)) {
+                setLoggedIn(true);
+                return;
+            }
+            // 만료/부재 → refresh 시도
+            const ok = await tryRefresh();
+            setLoggedIn(ok);
+    };
+
+        compute();
+
+        // 로그인/로그아웃/리프레시 동기화
+        const onChange = () => compute();
+        window.addEventListener('auth-changed', onChange);
+        window.addEventListener('storage', onChange); // 다른 탭과도 동기화
+        return () => {
+            window.removeEventListener('auth-changed', onChange);
+            window.removeEventListener('storage', onChange);
+        };
+    }, []);
+
+    return { mounted, loggedIn };
 }
 
 // 타자 효과
@@ -153,6 +220,89 @@ const RESULTS = [
     "Making draft... done."
 ];
 
+/* ───────────────── 로그인 후: Medium 3열 뼈대 ───────────────── */
+function LoginMainPage ({ me }) {
+    const posts = Array.from({ length: 6 }).map((_, i) => ({
+        id: i + 1,
+        title: `Sample Title ${i + 1}`,
+        preview: "Preview text only for layout. Replace with your data.",
+        channelName: "Channel",
+        authorName: "Author",
+        date: "Jul 22",
+        views: 1234,
+        comments: 12,
+    }));
+
+    return (
+        <div className="w-full min-h-screen bg-white text-black">
+            <div className="h-screen pt-32">
+
+            {/* 3열 */}
+            <div className="mx-auto max-w-6xl px-6 py-8 grid grid-cols-[220px_1fr_300px] gap-8">
+                {/* 왼쪽 */}
+                <aside className="space-y-6">
+                    <nav className="space-y-3 text-gray-700">
+                        <a className="block">Home</a>
+                        <a className="block">Library</a>
+                        <a className="block">Profile</a>
+                        <a className="block">Stories</a>
+                        <a className="block">Stats</a>
+                    </nav>
+                    <div className="pt-4 text-sm text-gray-500">
+                        <div className="font-semibold mb-2">Following</div>
+                        <p>Find more writers and publications to follow.</p>
+                    </div>
+                </aside>
+
+                {/* 센터 피드 */}
+                <main className="space-y-8">
+                    <div className="flex items-center gap-6 border-b">
+                        {['For you','Featured','Coding','Education','Technology','Programming'].map((t,i)=>(
+                            <button key={t} className={`py-4 -mb-px ${i===0?'border-b-2 border-black font-semibold':'text-gray-500'}`}>{t}</button>
+                        ))}
+                    </div>
+
+                    {posts.map(p => (
+                        <article key={p.id} className="flex gap-6 border-b pb-8">
+                            <div className="flex-1 space-y-2">
+                                <div className="text-sm text-gray-500">in {p.channelName} · by {p.authorName}</div>
+                                <h2 className="text-2xl font-extrabold">{p.title}</h2>
+                                <p className="text-gray-600">{p.preview}</p>
+                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                    <span>{p.date}</span>
+                                    <span>👀 {p.views}</span>
+                                    <span>💬 {p.comments}</span>
+                                    <button className="ml-auto px-3 py-1 rounded-full border">Save</button>
+                                </div>
+                            </div>
+                            <div className="w-[220px] h-[150px] bg-gray-200 rounded-xl" />
+                        </article>
+                    ))}
+                </main>
+
+                {/* 오른쪽 */}
+                <aside className="space-y-6">
+                    <section className="border rounded-xl p-4">
+                        <h3 className="font-semibold mb-3">Staff Picks</h3>
+                        <ul className="space-y-3 text-sm text-gray-700">
+                            <li>Pick 1</li><li>Pick 2</li><li>Pick 3</li>
+                        </ul>
+                    </section>
+                    <section className="border rounded-xl p-4">
+                        <h3 className="font-semibold mb-3">Hashtag</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {['Data Science','Self Improvement','Writing','Relationships','Politics','Productivity'].map(t=>(
+                                <span key={t} className="px-3 py-1 rounded-full border text-sm">{t}</span>
+                            ))}
+                        </div>
+                    </section>
+                </aside>
+            </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Page() {
     const [log, setLog] = useState([]);
     const [step, setStep] = useState(0);
@@ -167,6 +317,8 @@ export default function Page() {
     const [lastDoneStep, setLastDoneStep] = useState(-1);
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const { mounted, loggedIn } = useMountedLogin();
 
     const [isClient, setIsClient] = useState(false);
 
@@ -252,6 +404,14 @@ export default function Page() {
         setLastDoneStep(step);
         setStep(prev => prev + 1);
     };
+
+    // 마운트 전에는 렌더 안 함(깜빡임 방지)
+    if (!mounted) return null;
+
+    /* ───────────────── 분기: JWT 토큰만 보고 결정 ───────────────── */
+    if (loggedIn) {
+        return <LoginMainPage me={user} />;
+    }
 
     // 렌더
     return (
