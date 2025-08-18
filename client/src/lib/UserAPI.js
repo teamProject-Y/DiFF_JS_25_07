@@ -72,6 +72,7 @@ const refreshAccessToken = async () => {
         const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
 
         localStorage.setItem('accessToken', ACCESS_TOKEN);
+        window.dispatchEvent(new Event('auth-changed'));
         UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 
         console.log("액세스 토큰 갱신 성공:", ACCESS_TOKEN);
