@@ -1,18 +1,31 @@
 'use client';
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { followingArticleList } from "@/lib/ArticleAPI";
 
 export default function AfterMainPage({ me, trendingArticles }) {
-    const posts = Array.from({ length: 6 }).map((_, i) => ({
-        id: i + 1,
-        title: `Sample Title ${i + 1}`,
-        preview: 'Preview text only for layout. Replace with your data.',
-        channelName: 'Channel',
-        authorName: 'Author',
-        date: 'Jul 22',
-        views: 1234,
-        comments: 12,
-    }));
+    const [activeTab, setActiveTab] = useState("Trending");
+    const [followingArticles, setFollowingArticles] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // 🔹 Following 탭 눌렀을 때 데이터 불러오기
+    useEffect(() => {
+        if (activeTab === "Following") {
+            setLoading(true);
+            followingArticleList({ page: 1, repositoryId: 0, searchItem: 0, keyword: "" })
+                .then((res) => {
+                    setFollowingArticles(res.followingArticles || []);
+                })
+                .catch((err) => {
+                    console.error("팔로잉 로딩 오류:", err);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }
+    }, [activeTab]);
+
 
     return (
         <div className="w-full min-h-screen bg-white text-black">
@@ -43,35 +56,84 @@ export default function AfterMainPage({ me, trendingArticles }) {
 
                     {/* 센터 피드 */}
                     <main className="flex-grow-1 mr-20">
+                        {/* 탭 버튼 */}
                         <div className="flex items-center gap-6 border-b">
-                            {['Trending','Following'].map((t,i)=>(
-                                <button key={t} className={`py-4 -mb-px ${i===0?'border-b-2 border-black font-semibold':'text-gray-500'}`}>{t}</button>
+                            {["Trending", "Following"].map((t) => (
+                                <button
+                                    key={t}
+                                    onClick={() => setActiveTab(t)}
+                                    className={`py-4 -mb-px ${
+                                        activeTab === t
+                                            ? "border-b-2 border-black font-semibold"
+                                            : "text-gray-500"
+                                    }`}
+                                >
+                                    {t}
+                                </button>
                             ))}
                         </div>
 
-                        {trendingArticles && trendingArticles.length > 0 ? (
-                            trendingArticles.map((article, idx) => (
-                                <article key={idx} className="flex gap-6 border-b pb-8">
-                                    <div className="flex-1 space-y-2">
-                                        <div className="text-sm text-gray-500">
-                                            in Trending · by {article.extra_writer || "Unknown"}
+                        {/* 로딩 상태 */}
+                        {loading && <div className="py-6">로딩 중...</div>}
+
+                        {/* 🔹 Trending */}
+                        {activeTab === "Trending" && !loading && (
+                            trendingArticles && trendingArticles.length > 0 ? (
+                                trendingArticles.map((article, idx) => (
+                                    <article key={idx} className="flex gap-6 border-b pb-8">
+                                        <div className="flex-1 space-y-2">
+                                            <div className="text-sm text-gray-500">
+                                                in Trending · by {article.extra_writer || "Unknown"}
+                                            </div>
+                                            <h2 className="text-2xl font-extrabold">{article.title}</h2>
+                                            <p className="text-gray-600">
+                                                {article.body?.slice(0, 100) || "내용 미리보기 없음"}
+                                            </p>
+                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                <span>{article.regDate}</span>
+                                                <span>👀 {article.hits}</span>
+                                                <button className="ml-auto px-3 py-1 rounded-full border">
+                                                    Save
+                                                </button>
+                                            </div>
                                         </div>
-                                        <h2 className="text-2xl font-extrabold">{article.title}</h2>
-                                        <p className="text-gray-600">{article.body?.slice(0, 100) || "내용 미리보기 없음"}</p>
-                                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                                            <span>{article.regDate}</span>
-                                            <span>👀 {article.hits}</span>
-                                            <button className="ml-auto px-3 py-1 rounded-full border">Save</button>
+                                        <div className="w-[220px] h-[150px] bg-gray-200 rounded-xl" />
+                                    </article>
+                                ))
+                            ) : (
+                                <div>트렌딩 게시물이 없습니다.</div>
+                            )
+                        )}
+
+                        {/* 🔹 Following */}
+                        {activeTab === "Following" && !loading && (
+                            followingArticles && followingArticles.length > 0 ? (
+                                followingArticles.map((article, idx) => (
+                                    <article key={idx} className="flex gap-6 border-b pb-8">
+                                        <div className="flex-1 space-y-2">
+                                            <div className="text-sm text-gray-500">
+                                                in Following · by {article.extra_writer || "Unknown"}
+                                            </div>
+                                            <h2 className="text-2xl font-extrabold">{article.title}</h2>
+                                            <p className="text-gray-600">
+                                                {article.body?.slice(0, 100) || "내용 미리보기 없음"}
+                                            </p>
+                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                <span>{article.regDate}</span>
+                                                <span>👀 {article.hits}</span>
+                                                <button className="ml-auto px-3 py-1 rounded-full border">
+                                                    Save
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="w-[220px] h-[150px] bg-gray-200 rounded-xl" />
-                                </article>
-                            ))
-                        ) : (
-                            <div>트렌딩 게시물이 없습니다.</div>
+                                        <div className="w-[220px] h-[150px] bg-gray-200 rounded-xl" />
+                                    </article>
+                                ))
+                            ) : (
+                                <div>팔로잉한 사람이 작성한 게시물이 없습니다.</div>
+                            )
                         )}
                     </main>
-
                 </div>
             </div>
         </div>
