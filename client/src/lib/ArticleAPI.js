@@ -1,7 +1,7 @@
 // lib/ArticleAPI.js
-
-import { UserApi } from './UserAPI';
 import axios from "axios";
+import {DraftApi} from "@/lib/DraftAPI";
+
 
 /** 커스텀 Axios 인스턴스 */
 export const ArticleApi = axios.create({
@@ -106,10 +106,7 @@ export const trendingArticle = async ({ count, days }) => {
     return response.data;
 }
 
-export const DraftsArticle = async () => {
-    const response = await ArticleApi.get('/api/DiFF/article/drafts');
-    return response.data;
-};
+
 // lib/ArticleAPI.js
 export const writeArticle = async (data) => {
     // data.repositoryId 는 숫자여야 하면 여기서 캐스팅
@@ -135,15 +132,36 @@ export const getMyRepositories = async () => {
         res.data?.data?.repositories ??
         res.data?.repositories ??
         [];
-
     // 타입 보정
     return Array.isArray(repos) ? repos : [];
 };
 
-export const deleteDraft = async (id) => {
-    const res = await ArticleApi.delete('/api/DiFF/article/doDelete', {
-        params: { id },
+// ArticleAPI.js
+export async function getArticle(id) {
+    const res = await ArticleApi.get(`/api/DiFF/article/detail`, {
+        params: { id }
+    });
+    return res.data.data;
+};
+
+// 게시글 수정
+export async function modifyArticle(article, token) {
+    const res = await axios.post(`/api/DiFF/article/modify`, article, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // 🔑 토큰 추가
+        }
     });
     return res.data;
+}
+
+export const deleteArticle = async (id) => {
+    const url = `/article/${id}`;
+    const res = await DraftApi.delete(url);
+    console.log('[API][deleteArticle] status:', res.status, 'data:', res.data);
+    return { status: res.status, data: res.data };
 };
+
+
+
 
