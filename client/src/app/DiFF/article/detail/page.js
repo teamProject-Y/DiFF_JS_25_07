@@ -234,10 +234,20 @@ function ArticleDetailInner() {
                         ) : (
                             replies.map((r, idx) => (
                                 <div key={idx} className="p-3 border rounded bg-gray-50">
-                                    <p className="text-sm text-gray-700 p-2">{r.body}</p>
                                     <div className="text-xs text-gray-500 mt-1">
-                                        작성자: {r.extra__writer ?? '익명'} · {r.regDate}
+                                        {r.extra__writer ?? '익명'} · {r.regDate}
+                                        {r.userCanModify && (
+                                                <button className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                                    수정
+                                                </button>
+                                        )}
+                                        {r.userCanDelete && (
+                                            <button className="mx-2 p-2 bg-red-500 text-white rounded hover:bg-blue-600 transition">
+                                                삭제
+                                            </button>
+                                        )}
                                     </div>
+                                    <p className="text-sm text-gray-700 p-2">{r.body}</p>
                                 </div>
                             ))
                         )}
