@@ -7,7 +7,7 @@ export default function IntroPage() {
         <div className="min-h-screen">
             <div className="max-w-7xl mt-20 px-4 py-8 flex justify-around">
                 <div className="w-1/5">
-                <DocsSidebar />
+                    <DocsSidebar />
                 </div>
                 <main className="prose prose-invert w-3/5">
                     <div className="title1">1. 소개</div>
