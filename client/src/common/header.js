@@ -11,7 +11,7 @@ const HeaderWrap = styled.div`
     left: 0;
     z-index: 100;
     width: 100%;
-    height: 80px;
+    height: 55px;
 
     /* 부드러운 전환 */
     transition:
@@ -20,14 +20,13 @@ const HeaderWrap = styled.div`
             background-color 0.3s,
             backdrop-filter 0.3s;
 
-    /* ✨ 반투명 + 유리 효과 */
-    background: rgba(255, 255, 255, 0.35);      /* #111 에서 55% 불투명 */
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    /* 반투명 + 유리 효과 */
+    //background: rgba(255, 255, 255, 0.35);      /* #111 에서 55% 불투명 */
+    //backdrop-filter: blur(8px) saturate(140%);
+    //-webkit-backdrop-filter: blur(8px) saturate(140%);
 
     /* 살짝 경계감 주고 그림자 */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid #c1c1c1;
 
     display: flex;
     align-items: center;
@@ -92,12 +91,12 @@ export default function Header() {
     return (
         <HeaderWrap className={hide ? 'hide' : ''}>
             <div className="logo pl-4">
-                <Link href="/DiFF/home/main" className="block text-4xl p-4 text-black font-bold">
+                <Link href="/DiFF/home/main" className="block text-2xl p-2 text-black font-bold">
                     DiFF
                 </Link>
             </div>
             <div className="flex-grow" />
-            <ul className="flex gap-8 text-xl font-bold pr-8">
+            <ul className="flex gap-8 text-lg font-bold pr-8">
                 {accessToken ? (
                     <>
                         <li>

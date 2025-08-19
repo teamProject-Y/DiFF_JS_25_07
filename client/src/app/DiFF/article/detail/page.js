@@ -99,17 +99,14 @@ function ArticleDetailInner() {
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
     return (
-        <div className="p-6 max-w-3xl mx-auto">
-            {/* 제목 */}
+        <div className="pt-20 max-w-3xl mx-auto">
+            {/* title */}
             <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
-            {/* 작성자 + 날짜 */}
+            {/* article info */}
             <div className="text-sm text-gray-600 mb-6 flex gap-4">
-                <span>✍ 작성자: {article.writer ?? '익명'}</span>
-                <span>📅 작성일: {article.regDate}</span>
-                {article.updateDate && (
-                    <span>📝 수정일: {article.updateDate}</span>
-                )}
+                <span>작성자: {article.extra__writer ?? '익명'}</span>
+                <span>작성일: {article.regDate}</span>
             </div>
 
             {/* 본문 */}

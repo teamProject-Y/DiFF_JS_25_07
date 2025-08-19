@@ -41,8 +41,8 @@ export default function DocsSidebar({ className = '', activeKey }) {
                                     href={item.href}
                                     aria-current={isActive ? 'page' : undefined}
                                     className={
-                                        'block p-3 hover:bg-black/10 ' +
-                                        (isActive ? 'bg-black text-white font-bold' : '')
+                                        'block p-3 ' +
+                                        (isActive ? 'bg-black text-white font-bold' : 'hover:bg-black/10')
                                     }
                                 >
                                     {item.label}
