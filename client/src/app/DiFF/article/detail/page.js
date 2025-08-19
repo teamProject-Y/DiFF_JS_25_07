@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getArticle, deleteArticle } from '@/lib/ArticleAPI';
+import LoadingOverlay from "@/common/LoadingOverlay";
 
 function ArticleDetailInner() {
     console.log("✅ ArticleDetailInner 렌더됨");
@@ -16,15 +17,7 @@ function ArticleDetailInner() {
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
     const [deleting, setDeleting] = useState(false);
-    const [me, setMe] = useState(null);
 
-    useEffect(() => {
-        // 예시: localStorage 또는 API 통해 로그인 유저 정보 가져오기
-        const stored = localStorage.getItem("loginedMemberId");
-        if (stored) {
-            setMe(Number(stored));
-        }
-    }, []);
 
     useEffect(() => {
         if (!id) {
@@ -71,9 +64,14 @@ function ArticleDetailInner() {
     }, [id]);
 
     const handleDelete = async (id) => {
+
         if (!id) return;
+
         const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
         if (!ok) return;
+
+        const auth = article.userCanDelete;
+        if(!auth) return;
 
         try {
             setDeleting(true);
@@ -103,22 +101,25 @@ function ArticleDetailInner() {
     };
 
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
-    if (loading) return <p className="text-gray-500">불러오는 중...</p>;
-    if (errMsg) return <p className="text-red-500">{errMsg}</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
     return (
-        <div className="p-6 max-w-3xl mx-auto">
-            {/* 제목 */}
+        <>
+            <LoadingOverlay show={loading} />
+
+            {errMsg ? (
+                <div className="p-6 max-w-3xl mx-auto">
+                    <p className="text-red-500">{errMsg}</p>
+                </div>
+            ) : (
+        <div className="pt-20 max-w-3xl mx-auto">
+            {/* title */}
             <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
-            {/* 작성자 + 날짜 */}
+            {/* article info */}
             <div className="text-sm text-gray-600 mb-6 flex gap-4">
-                <span>✍ 작성자: {article.writer ?? '익명'}</span>
-                <span>📅 작성일: {article.regDate}</span>
-                {article.updateDate && (
-                    <span>📝 수정일: {article.updateDate}</span>
-                )}
+                <span>작성자: {article.extra__writer ?? '익명'}</span>
+                <span>작성일: {article.regDate}</span>
             </div>
 
             {/* 본문 */}
@@ -126,6 +127,7 @@ function ArticleDetailInner() {
                 {article.body}
             </div>
 
+            {/* 하단 버튼 영역 */}
             <div className="mt-8 flex gap-4">
                 <Link
                     href={`/DiFF/article/list?repositoryId=${article.repositoryId}`}
@@ -134,32 +136,35 @@ function ArticleDetailInner() {
                     목록으로
                 </Link>
 
-                {/* 로그인 사용자와 작성자가 동일할 때만 수정/삭제 버튼 노출 */}
-                {me === article.memberId && (
-                    <>
-                        <Link
-                            href={`/DiFF/article/modify?id=${article.id}`}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                        >
-                            수정하기
-                        </Link>
-                        <button
-                            onClick={() => handleDelete(article.id)}
-                            disabled={deleting}
-                            className={`px-4 py-2 rounded transition ${
-                                deleting
-                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                    : "bg-red-500 text-white hover:bg-red-600"
-                            }`}
-                        >
-                            {deleting ? "삭제중…" : "삭제하기"}
-                        </button>
-                    </>
+                {article.userCanModify && (
+                    <Link
+                        href={`/DiFF/article/modify?id=${article.id}`}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    >
+                        수정하기
+                    </Link>
+                )}
+
+                {article.userCanDelete && (
+                    <button
+                        onClick={() => handleDelete(article.id)}
+                        disabled={deleting}
+                        className={`px-4 py-2 rounded transition ${
+                            deleting
+                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                : "bg-red-500 text-white hover:bg-red-600"
+                        }`}
+                    >
+                        {deleting ? "삭제중…" : "삭제하기"}
+                    </button>
                 )}
             </div>
         </div>
-    );
-}
+    )}
+</>
+);
+};
+
 
 export default function Page() {
     return (
