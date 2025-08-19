@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchArticles, deleteArticle } from '@/lib/ArticleAPI';
+import LoadingOverlay from "@/common/LoadingOverlay";
 
 function truncate(text = '', max = 100) {
     const t = String(text ?? '');
@@ -48,6 +49,9 @@ function ArticleListInner() {
     }, [repositoryId, searchItem, keyword, page]);
 
     return (
+        <>
+        <LoadingOverlay show={loading} />
+
         <div className="mt-20 p-6 max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold mb-4">게시글 목록</h1>
             <ul className="space-y-4">
@@ -71,8 +75,10 @@ function ArticleListInner() {
                 ))}
             </ul>
         </div>
+        </>
     );
 }
+
 
 export default function Page() {
     return (

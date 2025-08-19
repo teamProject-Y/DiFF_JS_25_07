@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getArticle, deleteArticle } from '@/lib/ArticleAPI';
+import LoadingOverlay from "@/common/LoadingOverlay";
 
 function ArticleDetailInner() {
     console.log("✅ ArticleDetailInner 렌더됨");
@@ -100,11 +101,17 @@ function ArticleDetailInner() {
     };
 
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
-    if (loading) return <p className="text-gray-500">불러오는 중...</p>;
-    if (errMsg) return <p className="text-red-500">{errMsg}</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
     return (
+        <>
+            <LoadingOverlay show={loading} />
+
+            {errMsg ? (
+                <div className="p-6 max-w-3xl mx-auto">
+                    <p className="text-red-500">{errMsg}</p>
+                </div>
+            ) : (
         <div className="pt-20 max-w-3xl mx-auto">
             {/* title */}
             <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
@@ -153,8 +160,11 @@ function ArticleDetailInner() {
                 )}
             </div>
         </div>
-    );
-}
+    )}
+</>
+);
+};
+
 
 export default function Page() {
     return (

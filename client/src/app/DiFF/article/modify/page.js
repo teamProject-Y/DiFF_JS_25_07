@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
+import LoadingOverlay from '@/common/LoadingOverlay';
 
 export default function ModifyArticlePage() {
 
@@ -81,43 +82,48 @@ export default function ModifyArticlePage() {
         }
     };
 
-    if (loading) return <p>불러오는 중...</p>;
-    if (errMsg) return <p className="text-red-500">{errMsg}</p>;
-
     return (
-        <div>
-        <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6">게시글 수정 (Modify)</h1>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="제목을 작성하세요"
-                    className="border p-2 rounded"
-                />
-                <textarea
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    placeholder="내용을 작성하세요"
-                    className="border p-2 rounded min-h-[200px]"
-                />
-                <div className="flex gap-4 mt-4">
-                    <Link
-                        href={`/DiFF/article/detail?id=${id}`}
-                        className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
-                    >
-                        취소
-                    </Link>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                    >
-                        수정하기
-                    </button>
+        <>
+            <LoadingOverlay show={loading} />
+
+            {errMsg ? (
+                <div className="p-6 max-w-3xl mx-auto">
+                    <p className="text-red-500">{errMsg}</p>
                 </div>
-            </form>
-        </div>
-        </div>
+            ) : (
+            <div className="max-w-3xl mx-auto">
+                <h1 className="text-2xl font-bold mb-6">게시글 수정 (Modify)</h1>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="제목을 작성하세요"
+                        className="border p-2 rounded"
+                    />
+                    <textarea
+                        value={body}
+                        onChange={(e) => setBody(e.target.value)}
+                        placeholder="내용을 작성하세요"
+                        className="border p-2 rounded min-h-[200px]"
+                    />
+                    <div className="flex gap-4 mt-4">
+                        <Link
+                            href={`/DiFF/article/detail?id=${id}`}
+                            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+                        >
+                            취소
+                        </Link>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        >
+                            수정하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+            )}
+        </>
     );
-}
+};
