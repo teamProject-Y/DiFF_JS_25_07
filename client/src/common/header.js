@@ -120,9 +120,6 @@ export default function Header() {
                 ) : (
                     <>
                         <li>
-                            <Link href="/DiFF/member/login">List</Link>
-                        </li>
-                        <li>
                             <Link href="/DiFF/member/login">LOGIN</Link>
                         </li>
                         <li>
