@@ -48,7 +48,7 @@ function ArticleListInner() {
     }, [repositoryId, searchItem, keyword, page]);
 
     return (
-        <div className="p-6 max-w-3xl mx-auto">
+        <div className="mt-20 p-6 max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold mb-4">게시글 목록</h1>
             <ul className="space-y-4">
                 {articles.map((article) => (
@@ -57,14 +57,14 @@ function ArticleListInner() {
                             href={`/DiFF/article/detail?id=${article.id}`}
                             className="block group"
                         >
-                            <h2 className="text-xl font-semibold text-blue-600 group-hover:underline">
+                            <h2 className="text-xl font-semibold group-hover:underline">
                                 {article.title}
                             </h2>
                             <p className="text-gray-700 mt-1 line-clamp-2">
                                 {article.body}
                             </p>
                             <div className="text-sm text-gray-500 mt-2">
-                                ✍ {article.writer ?? '익명'} | 📅 {article.regDate}
+                                작성자: {article.extra__writer ?? '익명'} | 작성일: {article.regDate}
                             </div>
                         </Link>
                     </li>

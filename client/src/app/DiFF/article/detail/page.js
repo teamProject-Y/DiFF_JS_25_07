@@ -122,23 +122,29 @@ function ArticleDetailInner() {
                 >
                     목록으로
                 </Link>
-                <Link
-                    href={`/DiFF/article/modify?id=${article.id}`}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                >
-                    수정하기
-                </Link>
-                <button
-                    onClick={() => handleDelete(article.id)}
-                    disabled={deleting}
-                    className={`px-4 py-2 rounded transition ${
-                        deleting
-                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                            : "bg-red-500 text-white hover:bg-red-600"
-                    }`}
-                >
-                    {deleting ? "삭제중…" : "삭제하기"}
-                </button>
+
+                {article.userCanModify && (
+                    <Link
+                        href={`/DiFF/article/modify?id=${article.id}`}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    >
+                        수정하기
+                    </Link>
+                )}
+
+                {article.userCanDelete && (
+                    <button
+                        onClick={() => handleDelete(article.id)}
+                        disabled={deleting}
+                        className={`px-4 py-2 rounded transition ${
+                            deleting
+                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                : "bg-red-500 text-white hover:bg-red-600"
+                        }`}
+                    >
+                        {deleting ? "삭제중…" : "삭제하기"}
+                    </button>
+                )}
             </div>
         </div>
     );
