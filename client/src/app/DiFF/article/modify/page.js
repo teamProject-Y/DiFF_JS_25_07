@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
 
 export default function ModifyArticlePage() {
-    
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
@@ -17,6 +17,7 @@ export default function ModifyArticlePage() {
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
 
+    // 권한 확인, 게시물 불러오기
     useEffect(() => {
         if (!id) return;
         (async () => {
@@ -48,33 +49,7 @@ export default function ModifyArticlePage() {
         })();
     }, [id, router]);
 
-    // 📌 로그인 체크 (없으면 로그인 페이지로 리다이렉트)
-    useEffect(() => {
-        const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
-        if (!token) {
-            router.replace('/DiFF/member/login');
-        }
-    }, [router]);
-
-    // 📌 기존 게시글 불러오기
-    useEffect(() => {
-        if (!id) return;
-        (async () => {
-            try {
-                const art = await getArticle(id);
-                setArticle(art);
-                setTitle(art.title || '');
-                setBody(art.body || '');
-            } catch (e) {
-                console.error('[ModifyArticle] 불러오기 오류:', e);
-                setErrMsg('게시글을 불러오지 못했습니다.');
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, [id]);
-
-    // 📌 수정 처리
+    // 수정 처리
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -98,11 +73,11 @@ export default function ModifyArticlePage() {
             };
 
             await modifyArticle(modifiedArticle, token); // 토큰 포함해서 API 호출
-            alert('수정 완료!');
+            alert('수정이 완료되었습니다.');
             router.push(`/DiFF/article/detail?id=${id}`);
         } catch (e) {
             console.error('❌ 수정 실패:', e);
-            alert('수정 실패');
+            alert('수정에 실패했습니다. 다시 시도해주세요.');
         }
     };
 
@@ -110,20 +85,21 @@ export default function ModifyArticlePage() {
     if (errMsg) return <p className="text-red-500">{errMsg}</p>;
 
     return (
-        <div className="p-6 max-w-3xl mx-auto">
+        <div>
+        <div className="max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">게시글 수정 (Modify)</h1>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="제목"
+                    placeholder="제목을 작성하세요"
                     className="border p-2 rounded"
                 />
                 <textarea
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    placeholder="내용"
+                    placeholder="내용을 작성하세요"
                     className="border p-2 rounded min-h-[200px]"
                 />
                 <div className="flex gap-4 mt-4">
@@ -137,10 +113,11 @@ export default function ModifyArticlePage() {
                         type="submit"
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     >
-                        수정 완료
+                        수정하기
                     </button>
                 </div>
             </form>
+        </div>
         </div>
     );
 }
