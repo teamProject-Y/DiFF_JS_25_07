@@ -2,35 +2,39 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { fetchUser } from '@/lib/UserAPI';
 import styled from 'styled-components';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { fetchUser } from '@/lib/UserAPI';
 
 const HeaderWrap = styled.div`
+    width: 100%;
     position: fixed;
     top: 0;
+    right: 0;
     left: 0;
     z-index: 100;
-    width: 100%;
-    height: 80px;
 
-    /* 부드러운 전환 */
-    transition:
-            transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 0.3s,
-            background-color 0.3s,
-            backdrop-filter 0.3s;
-
-    /* ✨ 반투명 + 유리 효과 */
-    background: rgba(255, 255, 255, 0.35);      /* #111 에서 55% 불투명 */
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-
-    /* 살짝 경계감 주고 그림자 */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-
+    /* 높이/배경은 motion.style에서 제어 */
     display: flex;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-around;
+
+    padding: 0 24px;
+
+    color: rgba(255, 255, 255, 1);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02rem;
+
+    /* 글래스 느낌 (원하면 유지/삭제) */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+    will-change: transform, height, background-color;
 
     &.hide {
         transform: translateY(-100%);
@@ -45,19 +49,25 @@ export default function Header() {
     const [hide, setHide] = useState(false);
     const lastScrollY = useRef(0);
 
+    /** 스크롤에 따른 배경/높이 보간 (SCSS의 rgba(0,183,255,0) → 1) */
+    const { scrollY } = useScroll();
+    const background = useTransform(
+        scrollY,
+        [0, 100],
+        ['rgba(0, 183, 255, 0)', 'rgba(0, 183, 255, 1)']
+    );
+    const height = useTransform(scrollY, [0, 100], [120, 60]);
+
+    /** 아래로 스크롤 시 숨김 */
     useEffect(() => {
-        const handleScroll = () => {
-            const currentScroll = window.scrollY;
-            // 아래로 내릴 때만 hide
-            if (currentScroll > lastScrollY.current && currentScroll > 60) {
-                setHide(true);
-            } else {
-                setHide(false);
-            }
-            lastScrollY.current = currentScroll;
+        const onScroll = () => {
+            const cur = window.scrollY;
+            if (cur > lastScrollY.current && cur > 60) setHide(true);
+            else setHide(false);
+            lastScrollY.current = cur;
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
     // 토큰 관련
@@ -92,12 +102,12 @@ export default function Header() {
     return (
         <HeaderWrap className={hide ? 'hide' : ''}>
             <div className="logo pl-4">
-                <Link href="/DiFF/home/main" className="block text-5xl p-4 text-black font-bold">
+                <Link href="/DiFF/home/main" className="block text-4xl p-4 text-red-400 font-bold">
                     DiFF
                 </Link>
             </div>
             <div className="flex-grow" />
-            <ul className="flex gap-8 text-2xl font-bold pr-8">
+            <ul className="flex gap-8 text-xl font-bold pr-8">
                 {accessToken ? (
                     <>
                         <li>

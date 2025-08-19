@@ -16,6 +16,15 @@ function ArticleDetailInner() {
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
     const [deleting, setDeleting] = useState(false);
+    const [me, setMe] = useState(null);
+
+    useEffect(() => {
+        // 예시: localStorage 또는 API 통해 로그인 유저 정보 가져오기
+        const stored = localStorage.getItem("loginedMemberId");
+        if (stored) {
+            setMe(Number(stored));
+        }
+    }, []);
 
     useEffect(() => {
         if (!id) {
@@ -117,7 +126,6 @@ function ArticleDetailInner() {
                 {article.body}
             </div>
 
-            {/* 하단 버튼 영역 */}
             <div className="mt-8 flex gap-4">
                 <Link
                     href={`/DiFF/article/list?repositoryId=${article.repositoryId}`}
@@ -125,23 +133,29 @@ function ArticleDetailInner() {
                 >
                     목록으로
                 </Link>
-                <Link
-                    href={`/DiFF/article/modify?id=${article.id}`}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                >
-                    수정하기
-                </Link>
-                <button
-                    onClick={() => handleDelete(article.id)}
-                    disabled={deleting}
-                    className={`px-4 py-2 rounded transition ${
-                        deleting
-                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                            : "bg-red-500 text-white hover:bg-red-600"
-                    }`}
-                >
-                    {deleting ? "삭제중…" : "삭제하기"}
-                </button>
+
+                {/* 로그인 사용자와 작성자가 동일할 때만 수정/삭제 버튼 노출 */}
+                {me === article.memberId && (
+                    <>
+                        <Link
+                            href={`/DiFF/article/modify?id=${article.id}`}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        >
+                            수정하기
+                        </Link>
+                        <button
+                            onClick={() => handleDelete(article.id)}
+                            disabled={deleting}
+                            className={`px-4 py-2 rounded transition ${
+                                deleting
+                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
+                        >
+                            {deleting ? "삭제중…" : "삭제하기"}
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );
