@@ -126,9 +126,11 @@ export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, e
 };
 
 // 5-3. 회원 페이지
-export const fetchUser = async () => {
-    const response = await UserApi.get(`/api/DiFF/member/myPage`);
-    return response.data;
+export const fetchUser = async (nickName) => {
+    const res = await UserApi.get("/api/DiFF/member/profile", {
+        params: { nickName },
+    });
+    return res.data;
 };
 
 // 5-4. 회원 수정

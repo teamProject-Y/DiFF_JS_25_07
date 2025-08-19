@@ -10,6 +10,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
     const [followingArticles, setFollowingArticles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [following, setFollowing] = useState([]);
+    const [member, setMember] = useState([]);
 
 
         useEffect(() => {
@@ -74,7 +75,10 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                             return (
                                                 <li key={idx}>
                                                     <Link
-                                                        href={`/DiFF/member/profile?id=${f.id}`}
+                                                        href={{
+                                                            pathname: "/DiFF/member/profile",
+                                                            query: { nickName: f.nickName },
+                                                        }}
                                                         className="hover:underline text-gray-700"
                                                     >
                                                         {f.nickName}
@@ -87,6 +91,8 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                     <p>팔로잉한 사용자가 없습니다.</p>
                                 )}
                             </div>
+
+
 
 
                         </aside>

@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { fetchUser } from "@/lib/UserAPI";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function MyInfoPage() {
     const router = useRouter();
+    const searchParams = useSearchParams(); // ✅ 쿼리스트링 읽기
     const [member, setMember] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -17,7 +18,9 @@ export default function MyInfoPage() {
             return;
         }
 
-        fetchUser()
+        const nickName = searchParams.get("nickName"); // ✅ URL에서 nickName 추출
+
+        fetchUser(nickName)  // ✅ UserAPI에 nickName 넘겨주기
             .then(res => {
                 setMember(res.member);
                 setLoading(false);
@@ -27,7 +30,7 @@ export default function MyInfoPage() {
                 setLoading(false);
                 router.replace('/DiFF/home/main');
             });
-    }, [router]);
+    }, [router, searchParams]);
 
     if (loading) return <div>로딩...</div>;
     if (!member) return null;
