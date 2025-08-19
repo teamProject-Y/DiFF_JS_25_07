@@ -161,3 +161,20 @@ export const getFollowingList = async () => {
 // 5-7. 토큰 수동 갱신 (필요하면 직접 사용)
 // export const manualRefreshToken = refreshAccessToken;
 
+export const uploadProfileImg = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        const res = await axios.post(`/api/DiFF/member/uploadProfileImg`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+        });
+        return res.data; // 🔹 서버에서 반환한 이미지 URL
+    } catch (err) {
+        console.error("업로드 실패:", err);
+        throw err;
+    }
+};
