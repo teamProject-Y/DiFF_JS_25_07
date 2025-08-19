@@ -148,8 +148,14 @@ export const deleteUser = async () => {
     await UserApi.delete(`/DiFF/member`);
 };
 
+export const getFollowingList = async () => {
+    const response = await UserApi.get(`/api/DiFF/member/followingList`);
+    return response.data;
+}
+
 // 5-6. 로그아웃 (필요하면 추가 구현)
 // export const logout = async () => { ... };
 
 // 5-7. 토큰 수동 갱신 (필요하면 직접 사용)
 // export const manualRefreshToken = refreshAccessToken;
+
