@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
 
 export default function ModifyArticlePage() {
+    
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
@@ -15,6 +16,37 @@ export default function ModifyArticlePage() {
     const [body, setBody] = useState('');
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
+
+    useEffect(() => {
+        if (!id) return;
+        (async () => {
+            try {
+                const art = await getArticle(id); // 토큰 자동 첨부됨
+                if (!art?.userCanModify) {
+                    alert('수정 권한이 없습니다.');
+                    router.replace(`/DiFF/article/detail?id=${id}`);
+                    return;
+                }
+                setArticle(art);
+                setTitle(art.title ?? '');
+                setBody(art.body ?? '');
+            } catch (e) {
+                const status = e?.response?.status;
+                if (status === 401) {
+                    alert('로그인이 필요합니다.');
+                    router.replace('/DiFF/member/login');
+                } else if (status === 403) {
+                    alert('수정 권한이 없습니다.');
+                    router.replace(`/DiFF/article/detail?id=${id}`);
+                } else {
+                    console.error('[ModifyArticle] 불러오기 오류:', e);
+                    setErrMsg('게시글을 불러오지 못했습니다.');
+                }
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [id, router]);
 
     // 📌 로그인 체크 (없으면 로그인 페이지로 리다이렉트)
     useEffect(() => {

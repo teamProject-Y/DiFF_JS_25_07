@@ -17,6 +17,7 @@ function ArticleDetailInner() {
     const [errMsg, setErrMsg] = useState('');
     const [deleting, setDeleting] = useState(false);
 
+
     useEffect(() => {
         if (!id) {
             console.warn("⚠️ [DetailPage] id 없음 (쿼리스트링 미포함)");
@@ -62,9 +63,14 @@ function ArticleDetailInner() {
     }, [id]);
 
     const handleDelete = async (id) => {
+
         if (!id) return;
+
         const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
         if (!ok) return;
+
+        const auth = article.userCanDelete;
+        if(!auth) return;
 
         try {
             setDeleting(true);
