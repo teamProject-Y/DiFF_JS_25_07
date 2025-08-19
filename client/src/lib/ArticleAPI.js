@@ -160,6 +160,12 @@ export const deleteArticle = async (id) => {
     return { status: res.status, data: res.data };
 };
 
+export const followingArticleList = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
+    const res = await ArticleApi.get('/api/DiFF/article/followingArticleList', {
+        params: { repositoryId, searchItem, keyword, page }
+    });
+    return res.data;
+};
 
 
 
