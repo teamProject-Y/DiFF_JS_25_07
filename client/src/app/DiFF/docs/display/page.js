@@ -5,11 +5,11 @@ export const metadata = { title: 'DiFF Docs — 5. 화면 상세' };
 export default function StartPage() {
     return (
         <div className="min-h-screen">
-            <div className="max-w-7xl mt-20 px-4 py-8 flex justify-around">
+            <div className="max-w-7xl p-8 flex">
                 <div className="w-1/5">
                     <DocsSidebar />
                 </div>
-                <main className="prose prose-invert w-3/5">
+                <main className="prose prose-invert w-2/3 p-10">
                     <div className="title1">5. 화면 상세</div>
                     <hr/>
                     <div className="content1">DiFF를 사용하기 위한 방법을 소개합니다. DiFF 사용을 위해 초기 세팅이 필요합니다.</div>
