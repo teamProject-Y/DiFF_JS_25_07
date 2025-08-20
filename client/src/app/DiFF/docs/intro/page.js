@@ -5,11 +5,11 @@ export const metadata = { title: 'DiFF Docs — 1. 소개' };
 export default function IntroPage() {
     return (
         <div className="min-h-screen">
-            <div className="max-w-7xl mt-20 px-4 py-8 flex justify-around">
+            <div className="max-w-7xl p-8 flex">
                 <div className="w-1/5">
                     <DocsSidebar />
                 </div>
-                <main className="prose prose-invert w-3/5">
+                <main className="prose prose-invert w-2/3 p-10">
                     <div className="title1">1. 소개</div>
                     <hr/>
                     <div className="content1">
