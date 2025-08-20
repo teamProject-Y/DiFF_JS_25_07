@@ -10,7 +10,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
     const [followingArticles, setFollowingArticles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [following, setFollowing] = useState([]);
-
+    const [member, setMember] = useState([]);
 
         useEffect(() => {
             getFollowingList()
@@ -22,7 +22,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
                     console.error("팔로잉 목록 로딩 오류:", err);
                 });
         }, []);
-
 
         // 🔹 Following 탭 눌렀을 때 데이터 불러오기
         useEffect(() => {
@@ -41,7 +40,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
             }
         }, [activeTab]);
 
-
         return (
             <div className="w-full min-h-screen bg-white text-black">
                 <div className="h-screen pt-20">
@@ -53,7 +51,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                 <Link href="/DiFF/home/main" className="block hover:underline">
                                     Home
                                 </Link>
-                                <Link href="/DiFF/member/myPage" className="block hover:underline">
+                                <Link href="/DiFF/member/profile" className="block hover:underline">
                                     Profile
                                 </Link>
                                 <Link href="/DiFF/member/repository" className="block hover:underline">
@@ -74,7 +72,10 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                             return (
                                                 <li key={idx}>
                                                     <Link
-                                                        href={`/DiFF/member/profile?id=${f.id}`}
+                                                        href={{
+                                                            pathname: "/DiFF/member/profile",
+                                                            query: { nickName: f.nickName },
+                                                        }}
                                                         className="hover:underline text-gray-700"
                                                     >
                                                         {f.nickName}
@@ -87,8 +88,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                     <p>팔로잉한 사용자가 없습니다.</p>
                                 )}
                             </div>
-
-
                         </aside>
                         {/* 센터 피드 */}
                         <main className="flex-grow-1 mr-20">
@@ -157,7 +156,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                             <div className="flex gap-6 border-b pb-8 p-2 hover:bg-gray-50 rounded-lg transition">
                                                 <div className="flex-1 space-y-2">
                                                     <div className="text-sm text-gray-500">
-                                                        in Following · by {article.extra_writer || "Unknown"}
+                                                        in Following · by {article.extra__writer || "Unknown"}
                                                     </div>
                                                     <h2 className="text-2xl font-extrabold">{article.title}</h2>
                                                     <p className="text-gray-600">
@@ -166,15 +165,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     <div className="flex items-center gap-4 text-sm text-gray-500">
                                                         <span>{article.regDate}</span>
                                                         <span>👀 {article.hits}</span>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.preventDefault(); // ✅ 상세 이동 막지 않고 저장 기능만 동작
-                                                                console.log("Save clicked for article:", article.id);
-                                                            }}
-                                                            className="ml-auto px-3 py-1 rounded-full border"
-                                                        >
-                                                            Save
-                                                        </button>
                                                     </div>
                                                 </div>
                                                 <div className="w-[220px] h-[150px] bg-gray-200 rounded-xl"/>
@@ -185,7 +175,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                     <div>팔로잉한 사람이 작성한 게시물이 없습니다.</div>
                                 )
                             )}
-
                         </main>
                     </div>
                 </div>
