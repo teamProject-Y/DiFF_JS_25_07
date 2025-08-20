@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import {Suspense, useEffect, useState} from 'react';
+import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
-import { getArticle, deleteArticle, postReply, fetchReplies } from '@/lib/ArticleAPI';
+import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
 import LoadingOverlay from "@/common/LoadingOverlay";
+import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
 
 function ArticleDetailInner() {
 
@@ -137,7 +138,7 @@ function ArticleDetailInner() {
 
     return (
         <>
-            <LoadingOverlay show={loading} />
+            <LoadingOverlay show={loading}/>
 
             {errMsg ? (
                 <div className="p-6 max-w-3xl mx-auto">
@@ -155,7 +156,8 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* 본문 */}
-                    <div className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
+                    <div
+                        className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
                         {article.body}
                     </div>
 
@@ -219,7 +221,8 @@ function ArticleDetailInner() {
                                         fill="currentColor"
                                         viewBox="0 0 18 20"
                                     >
-                                        <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
+                                        <path
+                                            d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
                                     </svg>
                                     <span className="sr-only">댓글 전송</span>
                                 </button>
@@ -234,14 +237,103 @@ function ArticleDetailInner() {
                         ) : replies.length === 0 ? (
                             <p className="text-gray-500">아직 댓글이 없습니다.</p>
                         ) : (
-                            replies.map((r, idx) => (
-                                <div key={idx} className="p-3 border rounded bg-gray-50">
-                                    <p className="text-sm text-gray-700 p-2">{r.body}</p>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                        작성자: {r.extra__writer ?? '익명'} · {r.regDate}
-                                    </div>
+                            replies.map((r) => (
+                                <div key={r.id} className="mb-2 border-b pb-2">
+                                    {r.isEditing ? (
+                                        <div>
+                                            <textarea
+                                                className="border w-full p-2 rounded"
+                                                value={r.body}
+                                                onChange={(e) =>
+                                                    setReplies((prev) =>
+                                                        prev.map((item) =>
+                                                            item.id === r.id ? {...item, body: e.target.value} : item
+                                                        )
+                                                    )
+                                                }
+                                            />
+                                            <div className="mt-1 flex gap-2">
+                                                <button
+                                                    onClick={async () => {
+                                                        const res = await modifyReply(r.id, r.body);
+                                                        alert(res.msg);
+                                                        if (res.resultCode.startsWith("S-")) {
+                                                            setReplies((prev) =>
+                                                                prev.map((item) =>
+                                                                    item.id === r.id ? {
+                                                                        ...item,
+                                                                        isEditing: false
+                                                                    } : item
+                                                                )
+                                                            );
+                                                        }
+                                                    }}
+                                                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                                                >
+                                                    저장
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        setReplies((prev) =>
+                                                            prev.map((item) =>
+                                                                item.id === r.id ? {...item, isEditing: false} : item
+                                                            )
+                                                        )
+                                                    }
+                                                    className="px-2 py-1 bg-gray-400 text-white rounded text-xs"
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                           <div className="text-sm text-gray-400 mb-4">
+                                               {r.extra__writer} | {r.regDate}
+                                           </div>
+
+                                        <div className="flex justify-between">
+                                            <p>{r.body}</p>
+                                            <div className="flex gap-1">
+                                                {r.userCanModify && (
+                                                    <button
+                                                        onClick={() =>
+                                                            setReplies((prev) =>
+                                                                prev.map((item) =>
+                                                                    item.id === r.id ? {...item, isEditing: true} : item
+                                                                )
+                                                            )
+                                                        }
+                                                        className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
+                                                    >
+                                                        수정
+                                                    </button>
+                                                )}
+                                                {r.userCanDelete && (
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm("정말 삭제하시겠습니까?")) {
+                                                                const res = await deleteReply(r.id);
+                                                                alert(res.msg);
+                                                                if (res.resultCode.startsWith("S-")) {
+                                                                    setReplies((prev) =>
+                                                                        prev.filter((item) => item.id !== r.id)
+                                                                    );
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                                                    >
+                                                        삭제
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))
+
                         )}
                     </div>
                 </div>
@@ -253,7 +345,7 @@ function ArticleDetailInner() {
 export default function Page() {
     return (
         <Suspense fallback={<p>불러오는 중...</p>}>
-            <ArticleDetailInner />
+            <ArticleDetailInner/>
         </Suspense>
     );
 }

@@ -1,14 +1,14 @@
 import axios from "axios";
 
 /** 1. 커스텀 Axios 인스턴스 */
-export const UserApi = axios.create({
+export const UserAPI = axios.create({
     baseURL: "http://localhost:8080",
     headers: {
         "Content-Type": "application/json"
     }
 });
 
-UserApi.interceptors.request.use(
+UserAPI.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
@@ -38,16 +38,16 @@ export const setAuthHeader = () => {
 
         // accessToken이 있을 때만 Authorization 헤더 설정
         if (ACCESS_TOKEN) {
-            UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+            UserAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         } else {
-            delete UserApi.defaults.headers['Authorization'];  // 없으면 제거
+            delete UserAPI.defaults.headers['Authorization'];  // 없으면 제거
         }
 
         // refreshToken도 마찬가지
         if (REFRESH_TOKEN) {
-            UserApi.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+            UserAPI.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         } else {
-            delete UserApi.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
+            delete UserAPI.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
         }
     }
 };
@@ -73,7 +73,7 @@ const refreshAccessToken = async () => {
 
         localStorage.setItem('accessToken', ACCESS_TOKEN);
         window.dispatchEvent(new Event('auth-changed'));
-        UserApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+        UserAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 
         console.log("액세스 토큰 갱신 성공:", ACCESS_TOKEN);
         return ACCESS_TOKEN; // 필요하면 반환
@@ -88,7 +88,7 @@ const refreshAccessToken = async () => {
 };
 
 /** 4. 인터셉터로 토큰 만료 자동 처리 */
-UserApi.interceptors.response.use(
+UserAPI.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
@@ -100,7 +100,7 @@ UserApi.interceptors.response.use(
             originalRequest._retry = true;
             await refreshAccessToken();
             setAuthHeader();
-            return UserApi(originalRequest);
+            return UserAPI(originalRequest);
         }
         return Promise.reject(error);
     }
@@ -111,7 +111,7 @@ UserApi.interceptors.response.use(
 // 5-1. 로그인
 export const login = async ({ loginId, loginPw }) => {
     const data = { loginId, loginPw };
-    const response = await UserApi.post(`http://localhost:8080/api/DiFF/member/login`, data);
+    const response = await UserAPI.post(`http://localhost:8080/api/DiFF/member/login`, data);
     return response.data;
 };
 
@@ -120,36 +120,36 @@ export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, e
     const data = { loginId, loginPw, checkLoginPw, name, nickName, email };
 
     console.log("📤 회원가입 요청:", data);
-    const response = await UserApi.post('http://localhost:8080/api/DiFF/member/doJoin', data);
+    const response = await UserAPI.post('http://localhost:8080/api/DiFF/member/doJoin', data);
     console.log("📥 서버 응답:", response.data);
     return response.data;
 };
 
 // 5-3. 회원 페이지
 export const fetchUser = async () => {
-    const response = await UserApi.get(`/api/DiFF/member/myPage`);
+    const response = await UserAPI.get(`/api/DiFF/member/myPage`);
     return response.data;
 };
 
 // 5-4. 회원 수정
 export const modifyUser = async ({ id, loginId, name, nickName, email }) => {
     const data = { id, loginId, name, nickName, email };
-    const response = await UserApi.put(`api/DiFF/member/modify`, data);
+    const response = await UserAPI.put(`api/DiFF/member/modify`, data);
     return response.data;
 };
 
 export const checkPwUser = async (data) => {
-    const response = await UserApi.put(`/api/DiFF/member/checkPw`, data);
+    const response = await UserAPI.put(`/api/DiFF/member/checkPw`, data);
     return response.data;
 }
 
 // 5-5. 회원 탈퇴
 export const deleteUser = async () => {
-    await UserApi.delete(`/DiFF/member`);
+    await UserAPI.delete(`/DiFF/member`);
 };
 
 export const getFollowingList = async () => {
-    const response = await UserApi.get(`/api/DiFF/member/followingList`);
+    const response = await UserAPI.get(`/api/DiFF/member/followingList`);
     return response.data;
 }
 
