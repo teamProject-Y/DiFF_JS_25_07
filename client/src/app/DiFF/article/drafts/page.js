@@ -162,7 +162,7 @@ export default function DraftsPage() {
     }, [loading, error, drafts, deletingId]);
 
     return (
-        <div className="p-6">
+        <div className="p-6 mt-20">
             <h1 className="text-xl font-semibold mb-4">임시저장 목록</h1>
             {content}
         </div>
