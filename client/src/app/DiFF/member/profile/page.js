@@ -1,40 +1,46 @@
 'use client';
 
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchUser, uploadProfileImg } from "@/lib/UserAPI";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
+/** ✅ 바깥 컴포넌트는 Suspense 래퍼만 담당 (CSR bail-out 해결) */
 export default function MyInfoPage() {
+    return (
+        <Suspense fallback={<div>로딩...</div>}>
+            <MyInfoInner />
+        </Suspense>
+    );
+}
+
+/** ✅ 진짜 내용: 여기서만 useSearchParams 사용 */
+function MyInfoInner() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [member, setMember] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedFile, setSelectedFile] = useState(null);
     const [profileUrl, setProfileUrl] = useState("");
-    const [isMyProfile, setIsMyProfile] = useState(false); // ✅ 본인 여부 체크
+    const [isMyProfile, setIsMyProfile] = useState(false);
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
-        const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName'); // ✅ 로그인한 내 닉네임
+        const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
 
         if (!accessToken) {
             router.replace('/DiFF/member/login');
             return;
         }
 
-        const nickName = searchParams.get("nickName"); // URL 쿼리
+        const nickName = searchParams.get("nickName");
 
         fetchUser(nickName)
             .then(res => {
                 setMember(res.member);
-                setProfileUrl(res.member.profileUrl || "");
+                setProfileUrl(res.member?.profileUrl || "");
                 setLoading(false);
-
-
-                if (!nickName || nickName === myNickName) {
-                    setIsMyProfile(true);
-                }
+                if (!nickName || nickName === myNickName) setIsMyProfile(true);
             })
             .catch(err => {
                 console.error("마이페이지 오류:", err);
@@ -43,21 +49,15 @@ export default function MyInfoPage() {
             });
     }, [router, searchParams]);
 
-    const handleFileChange = (e) => {
-        setSelectedFile(e.target.files[0]);
-    };
+    const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
     const handleUpload = async () => {
-        if (!selectedFile) {
-            alert("파일을 선택하세요!");
-            return;
-        }
-
+        if (!selectedFile) return alert("파일을 선택하세요!");
         try {
-            const profileUrl = await uploadProfileImg(selectedFile);
-            setProfileUrl(profileUrl);
-            console.log("업로드 성공:", profileUrl);
-        } catch (err) {
+            const url = await uploadProfileImg(selectedFile);
+            setProfileUrl(url);
+            console.log("업로드 성공:", url);
+        } catch {
             alert("업로드 실패");
         }
     };
@@ -69,7 +69,7 @@ export default function MyInfoPage() {
         <section className="mt-24 text-xl px-4">
             <div className="mx-auto max-w-4xl">
 
-                {/* 🔹 프로필 이미지 */}
+                {/* 프로필 이미지 */}
                 <div className="text-center mb-8">
                     <div className="flex flex-col items-center">
                         {profileUrl ? (
@@ -98,7 +98,7 @@ export default function MyInfoPage() {
                     </div>
                 </div>
 
-                {/* 🔹 사용자 정보 테이블 */}
+                {/* 사용자 정보 */}
                 <table className="w-full border-collapse border border-neutral-300 mb-12">
                     <tbody>
                     <tr>
@@ -137,7 +137,7 @@ export default function MyInfoPage() {
                     </tbody>
                 </table>
 
-                {/* 🔹 레포지토리 페이지 이동 버튼 */}
+                {/* 레포 이동 */}
                 <div className="text-center mb-6">
                     <button
                         onClick={() => router.push('/DiFF/member/repository')}

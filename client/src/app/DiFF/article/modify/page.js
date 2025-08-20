@@ -1,12 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
 import LoadingOverlay from '@/common/LoadingOverlay';
 
+/** ✅ 바깥 컴포넌트는 Suspense 래퍼만 담당 (CSR bail-out 해결) */
 export default function ModifyArticlePage() {
+    return (
+        <Suspense fallback={<div>로딩...</div>}>
+            <ModifyArticlePageInner />
+        </Suspense>
+    );
+}
+
+function ModifyArticlePageInner() {
 
     const router = useRouter();
     const searchParams = useSearchParams();

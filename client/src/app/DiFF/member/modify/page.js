@@ -95,25 +95,25 @@ export default function ModifyPage({ initialMember }) {
             </button>
 
 
-                <div className="mx-auto max-w-min p-8 bg-neutral-200 border border-neutral-300 rounded-lg">
-                    <h2 className="text-2xl font-semibold text-center mb-6">회원 정보 수정</h2>
-                    {error && <p className="text-red-500 mb-4">{error}</p>}
-                    <form onSubmit={handleSubmit} className="flex flex-col items-center">
-                        <input name="id" value={form.id ?? ""} disabled
-                               className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100"
-                               placeholder="번호"/>
-                        <input name="loginId" value={form.loginId ?? ""} disabled
-                               className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100"
-                               placeholder="아이디"/>
-                        <input name="email" value={form.email ?? ""} disabled className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="이메일" />
-                        <input name="name" value={form.name ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="이름" />
-                        <input name="nickName" value={form.nickName ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="닉네임" />
-                        <button type="submit"
-                                className="py-2.5 px-5 w-96 bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700">
-                            UPDATE
-                        </button>
-                    </form>
-                </div>
+            <div className="mx-auto max-w-min p-8 bg-neutral-200 border border-neutral-300 rounded-lg">
+                <h2 className="text-2xl font-semibold text-center mb-6">회원 정보 수정</h2>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                <form onSubmit={handleSubmit} className="flex flex-col items-center">
+                    <input name="id" value={form.id ?? ""} disabled
+                           className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100"
+                           placeholder="번호"/>
+                    <input name="loginId" value={form.loginId ?? ""} disabled
+                           className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100"
+                           placeholder="아이디"/>
+                    <input name="email" value={form.email ?? ""} disabled className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="이메일" />
+                    <input name="name" value={form.name ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="이름" />
+                    <input name="nickName" value={form.nickName ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="닉네임" />
+                    <button type="submit"
+                            className="py-2.5 px-5 w-96 bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700">
+                        UPDATE
+                    </button>
+                </form>
+            </div>
         </div>
     )
 }
