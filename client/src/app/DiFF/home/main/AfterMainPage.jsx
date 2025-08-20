@@ -10,7 +10,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
     const [followingArticles, setFollowingArticles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [following, setFollowing] = useState([]);
-
+    const [member, setMember] = useState([]);
 
     useEffect(() => {
         getFollowingList()
@@ -40,6 +40,22 @@ export default function AfterMainPage({ me, trendingArticles }) {
                 });
         }
     }, [activeTab]);
+        // 🔹 Following 탭 눌렀을 때 데이터 불러오기
+        useEffect(() => {
+            if (activeTab === "Following") {
+                setLoading(true);
+                followingArticleList({page: 1, repositoryId: 0, searchItem: 0, keyword: ""})
+                    .then((res) => {
+                        setFollowingArticles(res.followingArticles || []);
+                    })
+                    .catch((err) => {
+                        console.error("팔로잉 로딩 오류:", err);
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                    });
+            }
+        }, [activeTab]);
 
 
     return (
