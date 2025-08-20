@@ -28,7 +28,7 @@ ReactionAPI.interceptors.request.use((config) => {
 
 /** 좋아요 ON */
 export async function likeArticle(articleId) {
-    const res = await ReactionAPI.put(`/article/like/${articleId}`);
+    const res = await ReactionAPI.post(`/article/like/${articleId}`);
     // { relType, relId, liked: true, count }
     return res.data;
 }
@@ -40,9 +40,8 @@ export async function unlikeArticle(articleId) {
     return res.data;
 }
 
-/** 좋아요 상태/개수 조회 (비로그인 허용) */
+/** 좋아요 상태/개수 조회 */
 export async function fetchArticleLikes(articleId) {
-    const res = await ReactionPublic.get(`/article/like/${articleId}`);
-    // { relType, relId, liked, count }
+    const res = await ReactionAPI.get(`/article/like/${articleId}`);
     return res.data;
 }
