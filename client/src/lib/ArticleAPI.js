@@ -1,7 +1,7 @@
 // lib/ArticleAPI.js
 import axios from "axios";
 import {DraftApi} from "@/lib/DraftAPI";
-import { UserAPI } from "@/lib/UserAPI";
+import { UserApi } from "@/lib/UserAPI";
 
 /** 커스텀 Axios 인스턴스 */
 export const ArticleApi = axios.create({
@@ -169,7 +169,7 @@ export const followingArticleList = async ({ repositoryId, searchItem = 0, keywo
 
 // 댓글 작성
 export const postReply = async (articleId, comment) => {
-    const response = await UserAPI.post(`/api/DiFF/reply/doWrite`, {
+    const response = await UserApi.post(`/api/DiFF/reply/doWrite`, {
         articleId: articleId,
         body: comment
     });
@@ -178,7 +178,7 @@ export const postReply = async (articleId, comment) => {
 
 // 댓글 목록 불러오기
 export const fetchReplies = async (articleId) => {
-    const response = await UserAPI.get(`/api/DiFF/reply/list`, {
+    const response = await UserApi.get(`/api/DiFF/reply/list`, {
         params: { articleId },
     });
     console.log(response.data.replies);
