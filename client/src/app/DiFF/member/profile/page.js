@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchUser, uploadProfileImg } from "@/lib/UserAPI";
 import { useEffect, useState, Suspense } from "react";
 
-/** ✅ 바깥 컴포넌트는 Suspense 래퍼만 담당 (CSR bail-out 해결) */
 export default function MyInfoPage() {
     return (
         <Suspense fallback={<div>로딩...</div>}>
@@ -14,7 +13,6 @@ export default function MyInfoPage() {
     );
 }
 
-/** ✅ 진짜 내용: 여기서만 useSearchParams 사용 */
 function MyInfoInner() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -40,7 +38,11 @@ function MyInfoInner() {
                 setMember(res.member);
                 setProfileUrl(res.member?.profileUrl || "");
                 setLoading(false);
-                if (!nickName || nickName === myNickName) setIsMyProfile(true);
+                if (!nickName || nickName === myNickName) {
+                    setIsMyProfile(true);  // ✅ 내 프로필
+                } else {
+                    setIsMyProfile(false); // ✅ 다른 사람 프로필
+                }
             })
             .catch(err => {
                 console.error("마이페이지 오류:", err);
@@ -84,6 +86,7 @@ function MyInfoInner() {
                             </div>
                         )}
 
+                        {/* ✅ 나의 프로필일 때만 업로드 가능 */}
                         {isMyProfile && (
                             <>
                                 <input type="file" onChange={handleFileChange} className="mb-2" />
@@ -137,26 +140,30 @@ function MyInfoInner() {
                     </tbody>
                 </table>
 
-                {/* 레포 이동 */}
-                <div className="text-center mb-6">
-                    <button
-                        onClick={() => router.push('/DiFF/member/repository')}
-                        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                    >
-                        내 레포지토리 보기
-                    </button>
-                </div>
+                {/* ✅ 나의 프로필일 때만 보이는 버튼 */}
+                {isMyProfile && (
+                    <>
+                        <div className="text-center mb-6">
+                            <button
+                                onClick={() => router.push('/DiFF/member/repository')}
+                                className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                            >
+                                내 레포지토리 보기
+                            </button>
+                        </div>
 
-                <div className="text-center mb-6">
-                    <button
-                        onClick={() => router.push('/DiFF/article/drafts')}
-                        className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
-                    >
-                        임시저장
-                    </button>
-                </div>
+                        <div className="text-center mb-6">
+                            <button
+                                onClick={() => router.push('/DiFF/article/drafts')}
+                                className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
+                            >
+                                임시저장
+                            </button>
+                        </div>
+                    </>
+                )}
 
-                {/* 🔹 뒤로가기 */}
+                {/* 🔹 뒤로가기 (누구 프로필이든 항상 보임) */}
                 <div className="text-center">
                     <button
                         onClick={() => router.replace('/DiFF/home/main')}
