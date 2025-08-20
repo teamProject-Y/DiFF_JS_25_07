@@ -22,7 +22,7 @@ const HeaderWrap = styled.div`
 
     padding: 0 24px;
 
-    color: rgba(255, 255, 255, 1);
+    color: rgba(25, 25, 200, 1);
     font-weight: 700;
     font-size: 13px;
     letter-spacing: 0.02rem;
@@ -119,9 +119,6 @@ export default function Header() {
                     </>
                 ) : (
                     <>
-                        <li>
-                            <Link href="/DiFF/member/login">List</Link>
-                        </li>
                         <li>
                             <Link href="/DiFF/member/login">LOGIN</Link>
                         </li>
