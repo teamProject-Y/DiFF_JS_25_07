@@ -201,7 +201,7 @@ export default function Page() {
             <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
             <div className="pointer-events-none">
                 <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
-                    <Link href="/DiFF/member/myPage">
+                    <Link href="/DiFF/member/profile">
                         <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
                     </Link>
                 </div>
