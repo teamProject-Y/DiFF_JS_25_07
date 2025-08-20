@@ -111,6 +111,9 @@ export default function Header() {
                 {accessToken ? (
                     <>
                         <li>
+                            <i className="fa-solid fa-bell"></i>
+                        </li>
+                        <li>
                             <Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link>
                         </li>
                         <li>

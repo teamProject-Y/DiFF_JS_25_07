@@ -60,9 +60,9 @@ export default function AfterMainPage({ me, trendingArticles }) {
 
     return (
         <div className="w-full min-h-screen bg-white text-black">
-            <div className="h-screen pt-20">
+            <div className="h-screen">
                 {/* 3열 */}
-                <div className="mx-auto max-w-7xl px-6 py-8 flex justify-around">
+                <div className="mx-auto w-4/5 px-6 pb-8 flex justify-around">
                     {/*</aside>*/}
                     {/* 센터 피드 */}
                     <main className="flex-grow-1 mr-20">
@@ -96,7 +96,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         className="block"
                                     >
                                         <div
-                                            className="flex gap-6 border-b pb-8 p-2 hover:bg-gray-50 rounded-lg transition">
+                                            className="h-[50%] flex gap-6 border-b p-2 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1 space-y-2">
                                                 <div className="text-sm text-gray-500">
                                                     in Trending · by {article.extra__writer || "Unknown"}
@@ -110,7 +110,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     <span>👀 {article.hits}</span>
                                                 </div>
                                             </div>
-                                            <div className="w-[220px] h-[150px] bg-gray-200 rounded-xl"/>
+                                            <div className="w-1/6 h-[100px] bg-gray-200 rounded-xl"/>
                                         </div>
                                     </Link>
                                 ))
