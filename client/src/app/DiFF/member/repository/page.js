@@ -51,16 +51,7 @@ export default function RepositoriesPage() {
                     <h2 className="text-2xl font-semibold mb-6">내 레포지토리</h2>
 
                     <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
-                        {/* 사이드바: 선택 시만 표시 */}
-                        <AnimatePresence>
-                            {selectedRepo && (
-                                <RepoFolderbar
-                                    repositories={repositories}
-                                    selectedRepoId={selectedRepoId}
-                                    onSelect={setSelectedRepoId}
-                                />
-                            )}
-                        </AnimatePresence>
+
 
                         {/* 메인 영역 */}
                         <div className="flex-1 relative">
@@ -100,8 +91,8 @@ export default function RepositoriesPage() {
     );
 }
 
-
-
+//
+//
 // 'use client';
 //
 // import { useRouter } from 'next/navigation'

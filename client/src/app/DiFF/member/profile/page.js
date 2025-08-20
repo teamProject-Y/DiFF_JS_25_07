@@ -147,6 +147,15 @@ export default function MyInfoPage() {
                     </button>
                 </div>
 
+                <div className="text-center mb-6">
+                    <button
+                        onClick={() => router.push('/DiFF/article/drafts')}
+                        className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
+                    >
+                        임시저장
+                    </button>
+                </div>
+
                 {/* 🔹 뒤로가기 */}
                 <div className="text-center">
                     <button
