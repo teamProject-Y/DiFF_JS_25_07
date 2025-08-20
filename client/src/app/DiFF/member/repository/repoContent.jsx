@@ -1,9 +1,66 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { fetchUser } from '@/lib/UserAPI';
+import { fetchArticles } from '@/lib/ArticleAPI';
 
-export default function RepoContent({ repo, onClose }) {
-    if (!repo) return null;
+export default function RepoContent() {
+    const router = useRouter();
+    const [repositories, setRepositories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedRepo, setSelectedRepo] = useState(null);
+    const [articles, setArticles] = useState([]);
+    const [articleLoading, setArticleLoading] = useState(false);
+
+    useEffect(() => {
+        const accessToken =
+            typeof window !== 'undefined' && localStorage.getItem('accessToken');
+        if (!accessToken) {
+            router.replace('/DiFF/member/login');
+            return;
+        }
+
+        fetchUser()
+            .then(async (res) => {
+                const repos = res.repositories || [];
+                setRepositories(repos);
+                setLoading(false);
+
+                // 첫 로딩 시 첫 번째 레포 자동 선택
+                if (repos.length > 0) {
+                    await handleRepoClick(repos[0]);
+                }
+            })
+            .catch((err) => {
+                console.error('레포지토리 오류:', err);
+                setLoading(false);
+                router.replace('/DiFF/home/main');
+            });
+    }, [router]);
+
+    // 레포 클릭 시 게시글 불러오기
+    const handleRepoClick = async (repo) => {
+        setSelectedRepo(repo);
+        setArticleLoading(true);
+        try {
+            const res = await fetchArticles({
+                repositoryId: repo.id,
+                page: 1,
+                searchItem: 0,
+                keyword: '',
+            });
+            setArticles(res.articles || []);
+        } catch (err) {
+            console.error('게시글 로딩 오류:', err);
+            setArticles([]);
+        } finally {
+            setArticleLoading(false);
+        }
+    };
+
+    if (loading) return <div>로딩중...</div>;
 
     return (
         <motion.div
@@ -11,53 +68,77 @@ export default function RepoContent({ repo, onClose }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 grid grid-cols-[1fr_300px] gap-0"
+            className="absolute inset-0 grid grid-cols-[220px_1fr_300px] gap-0 bg-gray-100"
         >
-            {/* 가운데 본문 */}
+            {/* 🔹 왼쪽: Repositories (단 하나만) */}
+            <aside className="border-r bg-gray-50 p-4">
+                <ul className="space-y-2">
+                    {repositories.map((repo) => (
+                        <li
+                            key={repo.id}
+                            className={`px-3 py-2 rounded cursor-pointer flex items-center gap-2 hover:bg-gray-200 transition ${
+                                selectedRepo?.id === repo.id
+                                    ? 'bg-gray-200 font-semibold'
+                                    : ''
+                            }`}
+                            onClick={() => handleRepoClick(repo)}
+                        >
+                            <span>📁</span>
+                            {repo.name}
+                        </li>
+                    ))}
+                </ul>
+            </aside>
+
+            {/* 🔹 가운데: 선택된 레포의 게시물만 출력 */}
             <div className="p-6 overflow-y-auto">
-                {/* 상단 헤더 카드: Sidebar/Folder와 연결되는 애니메이션 래핑 */}
-                <motion.div layoutId={`repo-${repo.id}`} className="border rounded p-4 mb-4 bg-white">
-                    <h2 className="text-xl font-semibold">{repo.name}</h2>
-                    <p className="text-sm text-gray-600">
-                        owner: {repo.owner || 'me'}
-                    </p>
-                </motion.div>
+                <h2 className="text-2xl font-semibold mb-6">
+                    {selectedRepo ? `${selectedRepo.name} 게시물` : '게시물'}
+                </h2>
 
-                <div className="border rounded p-4 mb-4 bg-white">
-                    <strong>README / About</strong>
-                    <p className="text-gray-600 mt-2">
-                        레포지토리 설명 또는 최근 커밋 정보가 들어갈 자리.
-                    </p>
-                </div>
-
-                <div className="border rounded p-4 bg-white">
-                    <strong>Activity</strong>
-                    <p className="text-gray-600 mt-2">커밋/이슈/PR 그래프 등을 표시.</p>
-                </div>
-            </div>
-
-            {/* 오른쪽 패널 */}
-            <div className="p-6 border-l bg-gray-50">
-                <div className="border rounded p-4 mb-4 bg-white">
-                    <strong>메타 정보</strong>
-                    <div className="text-sm text-gray-600 mt-2 space-y-1">
-                        <div>생성일: {repo.regDate?.split('T')[0]}</div>
-                        <div>커밋 ID: {repo.lastRqCommit || '없음'}</div>
+                {articleLoading ? (
+                    <p>게시글 불러오는 중...</p>
+                ) : articles.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {articles.map((article, idx) => (
+                            <motion.div
+                                key={article.id}
+                                whileHover={{ scale: 1.02 }}
+                                className="border border-gray-200 p-4 rounded-xl bg-white shadow-md hover:shadow-lg transition h-44 flex flex-col justify-between"
+                                onClick={() =>
+                                    router.push(`/DiFF/article/detail?id=${article.id}`)
+                                }
+                            >
+                                <h3 className="font-bold text-lg line-clamp-2">
+                                    {article.title || `게시물 ${idx + 1}`}
+                                </h3>
+                                <div className="text-sm text-gray-500 mt-2">
+                                    <p> 작성자: {article.extra__writer || '익명'}</p>
+                                    <p> 작성일: {article.regDate?.split('T')[0]}</p>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
-                </div>
-
-                <div className="border rounded p-4 mb-4 bg-white">
-                    <strong>Stats</strong>
-                    <p className="text-gray-600 mt-2">원형 차트 자리</p>
-                </div>
-
-                <button
-                    onClick={onClose}
-                    className="w-full py-2 bg-neutral-800 text-white rounded hover:bg-neutral-700"
-                >
-                    닫기
-                </button>
+                ) : (
+                    <p>등록된 게시물이 없습니다.</p>
+                )}
             </div>
+
+            {/* 🔹 오른쪽: 메타 정보 */}
+            <aside className="p-6 border-l bg-gray-50">
+                {selectedRepo ? (
+                    <div className="border rounded-xl p-6 bg-white shadow-lg">
+                        <strong className="block text-lg"> 메타 정보</strong>
+                        <div className="text-sm text-gray-600 mt-3 space-y-2">
+                            <div> 생성일: {selectedRepo.regDate?.split('T')[0]}</div>
+                            <div> 커밋 ID: {selectedRepo.lastRqCommit || '없음'}</div>
+                            <div> 언어: {selectedRepo.language || 'N/A'}</div>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-gray-500">레포지토리를 선택하세요.</p>
+                )}
+            </aside>
         </motion.div>
     );
 }

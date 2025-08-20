@@ -1,13 +1,13 @@
 // src/lib/DraftAPI.js
 import axios from "axios";
 
-export const DraftApi = axios.create({
+export const DraftAPI = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080/api/DiFF",
     headers: { "Content-Type": "application/json" },
     timeout: 15000,
 });
 
-DraftApi.interceptors.request.use(
+DraftAPI.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
@@ -40,17 +40,17 @@ DraftApi.interceptors.request.use(
 const refreshAccessToken = async () => {
     if (typeof window === "undefined") return;
     const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-    const res = await DraftApi.get("/auth/refresh", {
+    const res = await DraftAPI.get("/auth/refresh", {
         headers: { REFRESH_TOKEN }, // 필요 시 유지
     });
     const ACCESS_TOKEN = res.data.accessToken;
     const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
     localStorage.setItem("accessToken", ACCESS_TOKEN);
-    DraftApi.defaults.headers["Authorization"] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+    DraftAPI.defaults.headers["Authorization"] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 };
 
 /** 3) 401/403 자동 재시도 */
-DraftApi.interceptors.response.use(
+DraftAPI.interceptors.response.use(
     (response) => response,
     async (error) => {
         const original = error.config || {};
@@ -62,7 +62,7 @@ DraftApi.interceptors.response.use(
             original._retry = true;
             try {
                 await refreshAccessToken();
-                return DraftApi(original);
+                return DraftAPI(original);
             } catch (e) {
                 // 재발급 실패 시 그대로 에러
             }
@@ -74,13 +74,13 @@ DraftApi.interceptors.response.use(
 /** 4) Draft 관련 API */
 export const deleteDraft = async (id) => {
     const url = `/draft/${id}`; // 최종 URL: http://localhost:8080/api/DiFF/draft/{id}
-    const res = await DraftApi.delete(url);
+    const res = await DraftAPI.delete(url);
     console.log('[API][deleteDraft] status:', res.status, 'data:', res.data);
     // 상태/바디 둘 다 넘겨서 상위에서 정확히 판단
     return { status: res.status, data: res.data };
 };
 
 export const DraftsArticle = async () => {
-    const response = await DraftApi.get('/draft/drafts');
+    const response = await DraftAPI.get('/draft/drafts');
     return response.data;
 };
