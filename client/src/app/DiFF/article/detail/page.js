@@ -231,7 +231,7 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* 댓글 목록 */}
-                    <div className="mt-6 space-y-4">
+                    <div className="my-6 space-y-4">
                         {replyLoading ? (
                             <p className="text-gray-500">댓글 불러오는 중...</p>
                         ) : replies.length === 0 ? (
@@ -335,6 +335,9 @@ function ArticleDetailInner() {
                             ))
 
                         )}
+                    </div>
+                    <div className="h-32 w-full">
+
                     </div>
                 </div>
             )}
