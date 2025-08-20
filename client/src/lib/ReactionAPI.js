@@ -1,18 +1,9 @@
 // src/lib/reactionAPI.js
 import axios from "axios";
 
-const BASE = "http://localhost:8080/api/DiFF";
-
-/** 공개 GET (비로그인 허용) */
-export const ReactionPublic = axios.create({
-    baseURL: BASE,
-    headers: { "Content-Type": "application/json" },
-    withCredentials: false,
-});
-
-/** 인증 필요 (좋아요/취소) */
+/** axios custom **/
 export const ReactionAPI = axios.create({
-    baseURL: BASE,
+    baseURL: "http://localhost:8080/api/DiFF",
     headers: { "Content-Type": "application/json" },
 });
 
@@ -43,5 +34,25 @@ export async function unlikeArticle(articleId) {
 /** 좋아요 상태/개수 조회 */
 export async function fetchArticleLikes(articleId) {
     const res = await ReactionAPI.get(`/article/like/${articleId}`);
+    return res.data;
+}
+
+/** 좋아요 ON */
+export async function likeReply(replyId) {
+    const res = await ReactionAPI.post(`/reply/like/${replyId}`);
+    // { relType, relId, liked: true, count }
+    return res.data;
+}
+
+/** 좋아요 OFF */
+export async function unlikeReply(replyId) {
+    const res = await ReactionAPI.delete(`/reply/like/${replyId}`);
+    // { relType, relId, liked: false, count }
+    return res.data;
+}
+
+/** 좋아요 상태/개수 조회 */
+export async function fetchReplyLikes(replyId) {
+    const res = await ReactionAPI.get(`/reply/like/${replyId}`);
     return res.data;
 }

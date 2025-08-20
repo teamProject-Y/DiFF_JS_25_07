@@ -5,7 +5,8 @@ import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
 import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
-import {likeArticle, unlikeArticle, fetchArticleLikes} from "@/lib/reactionAPI";
+import {likeArticle, unlikeArticle, fetchArticleLikes,
+    likeReply, unlikeReply, fetchReplyLikes} from "@/lib/reactionAPI";
 import LoadingOverlay from "@/common/LoadingOverlay";
 
 function ArticleDetailInner() {
@@ -19,14 +20,16 @@ function ArticleDetailInner() {
     const [errMsg, setErrMsg] = useState('');
     const [deleting, setDeleting] = useState(false);
 
+    // 좋아요
+    const [liked, setLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+
     // 댓글 상태
     const [replies, setReplies] = useState([]);
     const [reply, setReply] = useState('');
     const [replyLoading, setReplyLoading] = useState(false);
 
-    // 좋아요
-    const [liked, setLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
+    //const [replies, setReplies] = useState([]);
 
     // 게시글 불러오기
     useEffect(() => {
@@ -87,15 +90,25 @@ function ArticleDetailInner() {
     useEffect(() => {
         if (!id) return;
 
-        console.log("댓글 불러온느 중");
-
         (async () => {
             try {
                 setReplyLoading(true);
-                const res = await fetchReplies(id);
+                const res = await fetchReplies(id); // 서버에서 댓글 리스트 가져오기
 
-                console.log("📌 서버 응답:", res);
-                setReplies(res.replies || []);
+                // 댓글별 좋아요 정보도 같이 불러오기
+                const withLikes = await Promise.all(
+                    (res.replies || []).map(async (r) => {
+                        try {
+                            const likeRes = await fetchReplyLikes(r.id); // { liked, count }
+                            return { ...r, liked: likeRes.liked, likeCount: likeRes.count };
+                        } catch (e) {
+                            console.error("❌ 댓글 좋아요 상태 불러오기 실패:", e);
+                            return { ...r, liked: false, likeCount: 0 };
+                        }
+                    })
+                );
+
+                setReplies(withLikes);
             } catch (e) {
                 console.error("❌ 댓글 불러오기 실패:", e);
             } finally {
@@ -125,7 +138,7 @@ function ArticleDetailInner() {
                 (typeof res?.msg === 'string' && res.msg.includes('성공'));
 
             if (isSuccess) {
-                alert("삭제 완료!");
+                alert("게시물이 삭제되었습니다.");
                 router.push("/api/DiFF/article/list?repositoryId=" + article.repositoryId);
             } else {
                 const msg = res?.msg || "삭제에 실패했습니다.";
@@ -164,13 +177,43 @@ function ArticleDetailInner() {
 
         try {
             await postReply(id, reply);
-            setReply(''); // 입력창 비우기
+            setReply('');
             // 다시 목록 불러오기
             const res = await fetchReplies(id);
-            setReplies(res.replies || []);
+            const withLikes = await Promise.all(
+                (res.replies || []).map(async (r) => {
+                    const likeRes = await fetchReplyLikes(r.id);
+                    return { ...r, liked: likeRes.liked, likeCount: likeRes.count };
+                })
+            );
+            setReplies(withLikes);
         } catch (e) {
             console.error("❌ 댓글 작성 실패:", e);
             alert(e?.response?.data?.msg || "댓글 작성에 실패했습니다.");
+        }
+    };
+
+    // 댓글 좋아요 토글
+    const handleReplyLikeToggle = async (replyId, liked) => {
+        try {
+            if (liked) {
+                await unlikeReply(replyId);
+                setReplies((prev) =>
+                    prev.map((item) =>
+                        item.id === replyId ? { ...item, liked: false, likeCount: item.likeCount - 1 } : item
+                    )
+                );
+            } else {
+                await likeReply(replyId);
+                setReplies((prev) =>
+                    prev.map((item) =>
+                        item.id === replyId ? { ...item, liked: true, likeCount: item.likeCount + 1 } : item
+                    )
+                );
+            }
+        } catch (e) {
+            console.error("❌ 댓글 좋아요 토글 실패:", e);
+            alert("댓글 좋아요 처리 중 오류가 발생했습니다.");
         }
     };
 
@@ -224,7 +267,7 @@ function ArticleDetailInner() {
                                 href={`/DiFF/article/modify?id=${article.id}`}
                                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                             >
-                                수정하기
+                                수정
                             </Link>
                         )}
 
@@ -280,6 +323,7 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* 댓글 목록 */}
+                    {/* 댓글 목록 */}
                     <div className="my-6 space-y-4">
                         {replyLoading ? (
                             <p className="text-gray-500">댓글 불러오는 중...</p>
@@ -289,30 +333,27 @@ function ArticleDetailInner() {
                             replies.map((r) => (
                                 <div key={r.id} className="mb-2 border-b pb-2">
                                     {r.isEditing ? (
+                                        // ✏️ 댓글 수정 모드
                                         <div>
-                                            <textarea
-                                                className="border w-full p-2 rounded"
-                                                value={r.body}
-                                                onChange={(e) =>
-                                                    setReplies((prev) =>
-                                                        prev.map((item) =>
-                                                            item.id === r.id ? {...item, body: e.target.value} : item
-                                                        )
-                                                    )
-                                                }
-                                            />
+                        <textarea
+                            className="border w-full p-2 rounded"
+                            value={r.body}
+                            onChange={(e) =>
+                                setReplies((prev) =>
+                                    prev.map((item) =>
+                                        item.id === r.id ? { ...item, body: e.target.value } : item
+                                    )
+                                )
+                            }
+                        />
                                             <div className="mt-1 flex gap-2">
                                                 <button
                                                     onClick={async () => {
                                                         const res = await modifyReply(r.id, r.body);
-                                                        alert(res.msg);
                                                         if (res.resultCode.startsWith("S-")) {
                                                             setReplies((prev) =>
                                                                 prev.map((item) =>
-                                                                    item.id === r.id ? {
-                                                                        ...item,
-                                                                        isEditing: false
-                                                                    } : item
+                                                                    item.id === r.id ? { ...item, isEditing: false } : item
                                                                 )
                                                             );
                                                         }
@@ -325,7 +366,7 @@ function ArticleDetailInner() {
                                                     onClick={() =>
                                                         setReplies((prev) =>
                                                             prev.map((item) =>
-                                                                item.id === r.id ? {...item, isEditing: false} : item
+                                                                item.id === r.id ? { ...item, isEditing: false } : item
                                                             )
                                                         )
                                                     }
@@ -336,23 +377,36 @@ function ArticleDetailInner() {
                                             </div>
                                         </div>
                                     ) : (
+                                        // ✅ 일반 댓글 표시
                                         <div>
                                             <div className="text-sm text-gray-400 mb-4">
                                                 {r.extra__writer} | {r.regDate}
                                             </div>
 
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between items-center">
                                                 <p>{r.body}</p>
-                                                <div className="flex gap-1">
+
+                                                <div className="flex gap-2 items-center">
+                                                    {/* 댓글 좋아요 버튼 */}
+                                                    <button
+                                                        onClick={() => handleReplyLikeToggle(r.id, r.liked)}
+                                                        className="flex items-center gap-1 text-sm"
+                                                    >
+                                                        <i
+                                                            className={`${
+                                                                r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"
+                                                            } fa-heart`}
+                                                        />
+                                                        <span>{r.likeCount ?? 0}</span>
+                                                    </button>
+
+                                                    {/* 수정/삭제 버튼 */}
                                                     {r.userCanModify && (
                                                         <button
                                                             onClick={() =>
                                                                 setReplies((prev) =>
                                                                     prev.map((item) =>
-                                                                        item.id === r.id ? {
-                                                                            ...item,
-                                                                            isEditing: true
-                                                                        } : item
+                                                                        item.id === r.id ? { ...item, isEditing: true } : item
                                                                     )
                                                                 )
                                                             }
@@ -366,11 +420,9 @@ function ArticleDetailInner() {
                                                             onClick={async () => {
                                                                 if (confirm("정말 삭제하시겠습니까?")) {
                                                                     const res = await deleteReply(r.id);
-                                                                    alert(res.msg);
                                                                     if (res.resultCode.startsWith("S-")) {
-                                                                        setReplies((prev) =>
-                                                                            prev.filter((item) => item.id !== r.id)
-                                                                        );
+                                                                        setReplies((prev) => prev.filter((item) => item.id !== r.id));
+                                                                        alert("댓글이 삭제 되었습니다.");
                                                                     }
                                                                 }
                                                             }}
@@ -385,9 +437,9 @@ function ArticleDetailInner() {
                                     )}
                                 </div>
                             ))
-
                         )}
                     </div>
+
                     <div className="h-32 w-full">
 
                     </div>
