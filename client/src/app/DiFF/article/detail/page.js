@@ -83,7 +83,9 @@ function ArticleDetailInner() {
 
     // 게시글 삭제
     const handleDelete = async (id) => {
+
         if (!id) return;
+
         const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
         if (!ok) return;
 
