@@ -42,11 +42,11 @@ export default function RepositoriesPage() {
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
 
-    if (loading) return <div className="mt-24 text-center">로딩...</div>;
+    if (loading) return <div className="text-center">로딩...</div>;
 
     return (
         <LayoutGroup>
-            <section className="mt-24 px-4">
+            <section className="px-4">
                 <div className="mx-auto max-w-6xl">
                     <h2 className="text-2xl font-semibold mb-6">내 레포지토리</h2>
 

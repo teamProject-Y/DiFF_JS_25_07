@@ -73,20 +73,25 @@ export default function RepoContent() {
             {/* 🔹 왼쪽: Repositories (단 하나만) */}
             <aside className="border-r bg-gray-50 p-4">
                 <ul className="space-y-2">
-                    {repositories.map((repo) => (
-                        <li
-                            key={repo.id}
-                            className={`px-3 py-2 rounded cursor-pointer flex items-center gap-2 hover:bg-gray-200 transition ${
-                                selectedRepo?.id === repo.id
-                                    ? 'bg-gray-200 font-semibold'
-                                    : ''
-                            }`}
-                            onClick={() => handleRepoClick(repo)}
-                        >
-                            <span>📁</span>
-                            {repo.name}
-                        </li>
-                    ))}
+                    {repositories.map((repo) => {
+                        const isSelected = selectedRepo?.id === repo.id;
+                        return (
+                            <li
+                                key={repo.id}
+                                className={`px-3 py-1 rounded cursor-pointer flex items-center gap-2 text-sm hover:bg-gray-200 transition ${
+                                    isSelected ? "bg-gray-200 font-semibold" : ""
+                                }`}
+                                onClick={() => handleRepoClick(repo)}
+                            >
+                                <i
+                                    className={`text-xl fa-solid ${
+                                        isSelected ? "fa-folder-open text-blue-400" : "fa-folder text-blue-300"
+                                    }`}
+                                ></i>
+                                {repo.name}
+                            </li>
+                        );
+                    })}
                 </ul>
             </aside>
 
