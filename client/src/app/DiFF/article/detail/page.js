@@ -4,8 +4,9 @@ import {Suspense, useEffect, useState} from 'react';
 import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
-import LoadingOverlay from "@/common/LoadingOverlay";
 import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
+import {likeArticle, unlikeArticle, fetchArticleLikes} from "@/lib/reactionAPI";
+import LoadingOverlay from "@/common/LoadingOverlay";
 
 function ArticleDetailInner() {
 
@@ -22,6 +23,10 @@ function ArticleDetailInner() {
     const [replies, setReplies] = useState([]);
     const [reply, setReply] = useState('');
     const [replyLoading, setReplyLoading] = useState(false);
+
+    // 좋아요
+    const [liked, setLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
 
     // 게시글 불러오기
     useEffect(() => {
@@ -58,6 +63,24 @@ function ArticleDetailInner() {
         return () => {
             alive = false;
         };
+    }, [id]);
+
+    // 좋아요 불러오기
+    useEffect(() => {
+        if (!id) return;
+
+        (async () => {
+            try {
+                const like = await fetchArticleLikes(id); // { liked: true/false, count: number }
+                console.log("like 불러오기 응답", like);
+
+                // 🔑 이전 상태와 비교 후 다를 때만 업데이트
+                setLiked((prev) => (prev !== like.liked ? like.liked : prev));
+                setLikeCount((prev) => (prev !== like.count ? like.count : prev));
+            } catch (e) {
+                console.error("❌ 좋아요 상태 불러오기 실패:", e);
+            }
+        })();
     }, [id]);
 
     // 댓글 목록 불러오기
@@ -116,6 +139,24 @@ function ArticleDetailInner() {
         }
     };
 
+    // 좋아요 토글
+    const handleLikeToggle = async () => {
+        try {
+            if (liked) {
+                await unlikeArticle(id);
+                setLiked(false);
+                setLikeCount((c) => c - 1);
+            } else {
+                await likeArticle(id);
+                setLiked(true);
+                setLikeCount((c) => c + 1);
+            }
+        } catch (e) {
+            console.error("좋아요 토글 실패:", e);
+            alert("좋아요 처리 중 문제가 발생했습니다.");
+        }
+    };
+
     // 댓글 작성
     const handleSubmitreply = async (e) => {
         e.preventDefault();
@@ -150,9 +191,17 @@ function ArticleDetailInner() {
                     <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
                     {/* article info */}
-                    <div className="text-sm text-gray-600 mb-6 flex gap-4">
-                        <span>작성자: {article.extra__writer ?? '익명'}</span>
-                        <span>작성일: {article.regDate}</span>
+                    <div className="text-sm text-gray-600 mb-6 flex justify-between">
+                        <div>
+                            <span>작성자: {article.extra__writer ?? '익명'}</span>
+                            <span>작성일: {article.regDate}</span>
+                        </div>
+                        <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
+                            <i
+                                className={`${liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"} fa-heart text-xl`}
+                            ></i>
+                            <span className="text-sm text-gray-700">{likeCount}</span>
+                        </div>
                     </div>
 
                     {/* 본문 */}
@@ -288,47 +337,50 @@ function ArticleDetailInner() {
                                         </div>
                                     ) : (
                                         <div>
-                                           <div className="text-sm text-gray-400 mb-4">
-                                               {r.extra__writer} | {r.regDate}
-                                           </div>
-
-                                        <div className="flex justify-between">
-                                            <p>{r.body}</p>
-                                            <div className="flex gap-1">
-                                                {r.userCanModify && (
-                                                    <button
-                                                        onClick={() =>
-                                                            setReplies((prev) =>
-                                                                prev.map((item) =>
-                                                                    item.id === r.id ? {...item, isEditing: true} : item
-                                                                )
-                                                            )
-                                                        }
-                                                        className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
-                                                    >
-                                                        수정
-                                                    </button>
-                                                )}
-                                                {r.userCanDelete && (
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (confirm("정말 삭제하시겠습니까?")) {
-                                                                const res = await deleteReply(r.id);
-                                                                alert(res.msg);
-                                                                if (res.resultCode.startsWith("S-")) {
-                                                                    setReplies((prev) =>
-                                                                        prev.filter((item) => item.id !== r.id)
-                                                                    );
-                                                                }
-                                                            }
-                                                        }}
-                                                        className="px-2 py-1 bg-red-500 text-white rounded text-xs"
-                                                    >
-                                                        삭제
-                                                    </button>
-                                                )}
+                                            <div className="text-sm text-gray-400 mb-4">
+                                                {r.extra__writer} | {r.regDate}
                                             </div>
-                                        </div>
+
+                                            <div className="flex justify-between">
+                                                <p>{r.body}</p>
+                                                <div className="flex gap-1">
+                                                    {r.userCanModify && (
+                                                        <button
+                                                            onClick={() =>
+                                                                setReplies((prev) =>
+                                                                    prev.map((item) =>
+                                                                        item.id === r.id ? {
+                                                                            ...item,
+                                                                            isEditing: true
+                                                                        } : item
+                                                                    )
+                                                                )
+                                                            }
+                                                            className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
+                                                        >
+                                                            수정
+                                                        </button>
+                                                    )}
+                                                    {r.userCanDelete && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (confirm("정말 삭제하시겠습니까?")) {
+                                                                    const res = await deleteReply(r.id);
+                                                                    alert(res.msg);
+                                                                    if (res.resultCode.startsWith("S-")) {
+                                                                        setReplies((prev) =>
+                                                                            prev.filter((item) => item.id !== r.id)
+                                                                        );
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                                                        >
+                                                            삭제
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
