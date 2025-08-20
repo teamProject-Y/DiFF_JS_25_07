@@ -114,7 +114,7 @@ export default function Header() {
                             <Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link>
                         </li>
                         <li>
-                            <Link href="/DiFF/member/myPage">MYPAGE</Link>
+                            <Link href="/DiFF/member/profile">MYPAGE</Link>
                         </li>
                     </>
                 ) : (
