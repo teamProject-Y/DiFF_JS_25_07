@@ -96,7 +96,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         className="block"
                                     >
                                         <div
-                                            className="h-[50%] flex gap-6 border-b p-2 justify-center items-center hover:bg-gray-50 transition">
+                                            className="flex gap-6 border-b px-4 py-8 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1 space-y-2">
                                                 <div className="text-sm text-gray-500">
                                                     in Trending · by {article.extra__writer || "Unknown"}
@@ -128,10 +128,11 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         href={`/DiFF/article/detail?id=${article.id}`} // ✅ 상세 페이지 이동
                                         className="block"
                                     >
-                                        <div className="flex gap-6 border-b pb-8 p-2 hover:bg-gray-50 rounded-lg transition">
+                                        <div
+                                            className="flex gap-6 border-b px-4 py-8 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1 space-y-2">
                                                 <div className="text-sm text-gray-500">
-                                                    in Following · by {article.extra_writer || "Unknown"}
+                                                    in Following · by {article.extra__writer || "Unknown"}
                                                 </div>
                                                 <h2 className="text-2xl font-extrabold">{article.title}</h2>
                                                 <p className="text-gray-600">

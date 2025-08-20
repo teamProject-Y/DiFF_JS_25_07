@@ -22,7 +22,7 @@ export default function DocsSidebar({ className = '', activeKey }) {
     return (
         <aside
             className={
-                'hidden lg:block sticky top-[4.5rem] self-start h-[calc(100vh-5rem)] overflow-auto pr-3 border-r border-white/10 ' +
+                'hidden lg:block sticky self-start overflow-auto ' +
                 className
             }
         >
