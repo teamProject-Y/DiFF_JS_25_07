@@ -126,8 +126,10 @@ export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, e
 };
 
 // 5-3. 회원 페이지
-export const fetchUser = async () => {
-    const response = await UserAPI.get(`/api/DiFF/member/profile`);
+export const fetchUser = async (nickName) => {
+    const response = await UserAPI.get(`/api/DiFF/member/profile`, {
+        params: nickName ? { nickName } : {}
+    });
     return response.data;
 };
 
@@ -170,7 +172,7 @@ export const uploadProfileImg = async (file) => {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
         });
-        return res.data; // 🔹 서버에서 반환한 이미지 URL
+        return res.data;
     } catch (err) {
         console.error("업로드 실패:", err);
         throw err;
