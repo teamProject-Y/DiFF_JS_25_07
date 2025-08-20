@@ -36,7 +36,7 @@ export default function LayMenu() {
                     <Link href="/DiFF/home/main" className="block hover:underline">
                         Home
                     </Link>
-                    <Link href="/DiFF/member/myPage" className="block hover:underline">
+                    <Link href="/DiFF/member/profile" className="block hover:underline">
                         Profile
                     </Link>
                     <Link href="/DiFF/member/repository" className="block hover:underline">

@@ -127,14 +127,14 @@ export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, e
 
 // 5-3. 회원 페이지
 export const fetchUser = async () => {
-    const response = await UserApi.get(`/api/DiFF/member/myPage`);
+    const response = await UserApi.get(`/api/DiFF/member/profile`);
     return response.data;
 };
 
 // 5-4. 회원 수정
 export const modifyUser = async ({ id, loginId, name, nickName, email }) => {
     const data = { id, loginId, name, nickName, email };
-    const response = await UserApi.put(`api/DiFF/member/modify`, data);
+    const response = await UserApi.put(`/api/DiFF/member/modify`, data);
     return response.data;
 };
 
