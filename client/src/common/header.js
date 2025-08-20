@@ -107,7 +107,7 @@ export default function Header() {
                 </Link>
             </div>
             <div className="flex-grow" />
-            <ul className="flex gap-8 text-xl font-bold pr-8">
+            <ul className="flex gap-8 text-xl font-bold pr-8 text-red-400">
                 {accessToken ? (
                     <>
                         <li>
