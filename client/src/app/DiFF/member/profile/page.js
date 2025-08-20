@@ -73,7 +73,6 @@ function MyInfoInner() {
                 <div className="text-center mb-8">
                     <div className="flex flex-col items-center">
                         {profileUrl ? (
-                            // ⚠️ 경고만: 나중에 next/image로 교체 권장
                             <img
                                 src={profileUrl}
                                 alt="프로필"
@@ -102,16 +101,34 @@ function MyInfoInner() {
                 {/* 사용자 정보 */}
                 <table className="w-full border-collapse border border-neutral-300 mb-12">
                     <tbody>
-                    <tr><th className="border p-2">가입일</th><td className="border p-2 text-center">{member.regDate}</td></tr>
-                    <tr><th className="border p-2">아이디</th><td className="border p-2 text-center">{member.loginId}</td></tr>
-                    <tr><th className="border p-2">이름</th><td className="border p-2 text-center">{member.name}</td></tr>
-                    <tr><th className="border p-2">닉네임</th><td className="border p-2 text-center">{member.nickName}</td></tr>
-                    <tr><th className="border p-2">이메일</th><td className="border p-2 text-center">{member.email}</td></tr>
+                    <tr>
+                        <th className="border p-2">가입일</th>
+                        <td className="border p-2 text-center">{member.regDate}</td>
+                    </tr>
+                    <tr>
+                        <th className="border p-2">아이디</th>
+                        <td className="border p-2 text-center">{member.loginId}</td>
+                    </tr>
+                    <tr>
+                        <th className="border p-2">이름</th>
+                        <td className="border p-2 text-center">{member.name}</td>
+                    </tr>
+                    <tr>
+                        <th className="border p-2">닉네임</th>
+                        <td className="border p-2 text-center">{member.nickName}</td>
+                    </tr>
+                    <tr>
+                        <th className="border p-2">이메일</th>
+                        <td className="border p-2 text-center">{member.email}</td>
+                    </tr>
                     {isMyProfile && (
                         <tr>
                             <th className="border p-2">회원정보 수정</th>
                             <td className="border p-2 text-center">
-                                <Link href="/DiFF/member/modify" className="px-4 py-2 bg-blue-600 text-white rounded">
+                                <Link
+                                    href="/DiFF/member/modify"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded"
+                                >
                                     수정
                                 </Link>
                             </td>
@@ -130,7 +147,16 @@ function MyInfoInner() {
                     </button>
                 </div>
 
-                {/* 뒤로가기 */}
+                <div className="text-center mb-6">
+                    <button
+                        onClick={() => router.push('/DiFF/article/drafts')}
+                        className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
+                    >
+                        임시저장
+                    </button>
+                </div>
+
+                {/* 🔹 뒤로가기 */}
                 <div className="text-center">
                     <button
                         onClick={() => router.replace('/DiFF/home/main')}

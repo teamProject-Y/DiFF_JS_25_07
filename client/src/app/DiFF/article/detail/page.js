@@ -1,9 +1,12 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import {Suspense, useEffect, useState} from 'react';
+import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
-import { getArticle, deleteArticle, postReply, fetchReplies } from '@/lib/ArticleAPI';
+import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
+import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
+import {likeArticle, unlikeArticle, fetchArticleLikes,
+    likeReply, unlikeReply, fetchReplyLikes} from "@/lib/reactionAPI";
 import LoadingOverlay from "@/common/LoadingOverlay";
 
 function ArticleDetailInner() {
@@ -17,10 +20,16 @@ function ArticleDetailInner() {
     const [errMsg, setErrMsg] = useState('');
     const [deleting, setDeleting] = useState(false);
 
+    // 좋아요
+    const [liked, setLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+
     // 댓글 상태
     const [replies, setReplies] = useState([]);
     const [reply, setReply] = useState('');
     const [replyLoading, setReplyLoading] = useState(false);
+
+    //const [replies, setReplies] = useState([]);
 
     // 게시글 불러오기
     useEffect(() => {
@@ -59,19 +68,47 @@ function ArticleDetailInner() {
         };
     }, [id]);
 
+    // 좋아요 불러오기
+    useEffect(() => {
+        if (!id) return;
+
+        (async () => {
+            try {
+                const like = await fetchArticleLikes(id); // { liked: true/false, count: number }
+                console.log("like 불러오기 응답", like);
+
+                // 🔑 이전 상태와 비교 후 다를 때만 업데이트
+                setLiked((prev) => (prev !== like.liked ? like.liked : prev));
+                setLikeCount((prev) => (prev !== like.count ? like.count : prev));
+            } catch (e) {
+                console.error("❌ 좋아요 상태 불러오기 실패:", e);
+            }
+        })();
+    }, [id]);
+
     // 댓글 목록 불러오기
     useEffect(() => {
         if (!id) return;
 
-        console.log("댓글 불러온느 중");
-
         (async () => {
             try {
                 setReplyLoading(true);
-                const res = await fetchReplies(id);
+                const res = await fetchReplies(id); // 서버에서 댓글 리스트 가져오기
 
-                console.log("📌 서버 응답:", res);
-                setReplies(res.replies || []);
+                // 댓글별 좋아요 정보도 같이 불러오기
+                const withLikes = await Promise.all(
+                    (res.replies || []).map(async (r) => {
+                        try {
+                            const likeRes = await fetchReplyLikes(r.id); // { liked, count }
+                            return { ...r, liked: likeRes.liked, likeCount: likeRes.count };
+                        } catch (e) {
+                            console.error("❌ 댓글 좋아요 상태 불러오기 실패:", e);
+                            return { ...r, liked: false, likeCount: 0 };
+                        }
+                    })
+                );
+
+                setReplies(withLikes);
             } catch (e) {
                 console.error("❌ 댓글 불러오기 실패:", e);
             } finally {
@@ -101,7 +138,7 @@ function ArticleDetailInner() {
                 (typeof res?.msg === 'string' && res.msg.includes('성공'));
 
             if (isSuccess) {
-                alert("삭제 완료!");
+                alert("게시물이 삭제되었습니다.");
                 router.push("/api/DiFF/article/list?repositoryId=" + article.repositoryId);
             } else {
                 const msg = res?.msg || "삭제에 실패했습니다.";
@@ -115,6 +152,24 @@ function ArticleDetailInner() {
         }
     };
 
+    // 좋아요 토글
+    const handleLikeToggle = async () => {
+        try {
+            if (liked) {
+                await unlikeArticle(id);
+                setLiked(false);
+                setLikeCount((c) => c - 1);
+            } else {
+                await likeArticle(id);
+                setLiked(true);
+                setLikeCount((c) => c + 1);
+            }
+        } catch (e) {
+            console.error("좋아요 토글 실패:", e);
+            alert("좋아요 처리 중 문제가 발생했습니다.");
+        }
+    };
+
     // 댓글 작성
     const handleSubmitreply = async (e) => {
         e.preventDefault();
@@ -122,13 +177,43 @@ function ArticleDetailInner() {
 
         try {
             await postReply(id, reply);
-            setReply(''); // 입력창 비우기
+            setReply('');
             // 다시 목록 불러오기
             const res = await fetchReplies(id);
-            setReplies(res.replies || []);
+            const withLikes = await Promise.all(
+                (res.replies || []).map(async (r) => {
+                    const likeRes = await fetchReplyLikes(r.id);
+                    return { ...r, liked: likeRes.liked, likeCount: likeRes.count };
+                })
+            );
+            setReplies(withLikes);
         } catch (e) {
             console.error("❌ 댓글 작성 실패:", e);
             alert(e?.response?.data?.msg || "댓글 작성에 실패했습니다.");
+        }
+    };
+
+    // 댓글 좋아요 토글
+    const handleReplyLikeToggle = async (replyId, liked) => {
+        try {
+            if (liked) {
+                await unlikeReply(replyId);
+                setReplies((prev) =>
+                    prev.map((item) =>
+                        item.id === replyId ? { ...item, liked: false, likeCount: item.likeCount - 1 } : item
+                    )
+                );
+            } else {
+                await likeReply(replyId);
+                setReplies((prev) =>
+                    prev.map((item) =>
+                        item.id === replyId ? { ...item, liked: true, likeCount: item.likeCount + 1 } : item
+                    )
+                );
+            }
+        } catch (e) {
+            console.error("❌ 댓글 좋아요 토글 실패:", e);
+            alert("댓글 좋아요 처리 중 오류가 발생했습니다.");
         }
     };
 
@@ -137,7 +222,7 @@ function ArticleDetailInner() {
 
     return (
         <>
-            <LoadingOverlay show={loading} />
+            <LoadingOverlay show={loading}/>
 
             {errMsg ? (
                 <div className="p-6 max-w-3xl mx-auto">
@@ -149,13 +234,22 @@ function ArticleDetailInner() {
                     <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
                     {/* article info */}
-                    <div className="text-sm text-gray-600 mb-6 flex gap-4">
-                        <span>작성자: {article.extra__writer ?? '익명'}</span>
-                        <span>작성일: {article.regDate}</span>
+                    <div className="text-sm text-gray-600 mb-6 flex justify-between">
+                        <div>
+                            <span>작성자: {article.extra__writer ?? '익명'}</span>
+                            <span>작성일: {article.regDate}</span>
+                        </div>
+                        <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
+                            <i
+                                className={`${liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"} fa-heart text-xl`}
+                            ></i>
+                            <span className="text-sm text-gray-700">{likeCount}</span>
+                        </div>
                     </div>
 
                     {/* 본문 */}
-                    <div className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
+                    <div
+                        className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
                         {article.body}
                     </div>
 
@@ -173,7 +267,7 @@ function ArticleDetailInner() {
                                 href={`/DiFF/article/modify?id=${article.id}`}
                                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                             >
-                                수정하기
+                                수정
                             </Link>
                         )}
 
@@ -219,7 +313,8 @@ function ArticleDetailInner() {
                                         fill="currentColor"
                                         viewBox="0 0 18 20"
                                     >
-                                        <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
+                                        <path
+                                            d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
                                     </svg>
                                     <span className="sr-only">댓글 전송</span>
                                 </button>
@@ -228,21 +323,125 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* 댓글 목록 */}
-                    <div className="mt-6 space-y-4">
+                    {/* 댓글 목록 */}
+                    <div className="my-6 space-y-4">
                         {replyLoading ? (
                             <p className="text-gray-500">댓글 불러오는 중...</p>
                         ) : replies.length === 0 ? (
                             <p className="text-gray-500">아직 댓글이 없습니다.</p>
                         ) : (
-                            replies.map((r, idx) => (
-                                <div key={idx} className="p-3 border rounded bg-gray-50">
-                                    <p className="text-sm text-gray-700 p-2">{r.body}</p>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                        작성자: {r.extra__writer ?? '익명'} · {r.regDate}
-                                    </div>
+                            replies.map((r) => (
+                                <div key={r.id} className="mb-2 border-b pb-2">
+                                    {r.isEditing ? (
+                                        // ✏️ 댓글 수정 모드
+                                        <div>
+                        <textarea
+                            className="border w-full p-2 rounded"
+                            value={r.body}
+                            onChange={(e) =>
+                                setReplies((prev) =>
+                                    prev.map((item) =>
+                                        item.id === r.id ? { ...item, body: e.target.value } : item
+                                    )
+                                )
+                            }
+                        />
+                                            <div className="mt-1 flex gap-2">
+                                                <button
+                                                    onClick={async () => {
+                                                        const res = await modifyReply(r.id, r.body);
+                                                        if (res.resultCode.startsWith("S-")) {
+                                                            setReplies((prev) =>
+                                                                prev.map((item) =>
+                                                                    item.id === r.id ? { ...item, isEditing: false } : item
+                                                                )
+                                                            );
+                                                        }
+                                                    }}
+                                                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                                                >
+                                                    저장
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        setReplies((prev) =>
+                                                            prev.map((item) =>
+                                                                item.id === r.id ? { ...item, isEditing: false } : item
+                                                            )
+                                                        )
+                                                    }
+                                                    className="px-2 py-1 bg-gray-400 text-white rounded text-xs"
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        // ✅ 일반 댓글 표시
+                                        <div>
+                                            <div className="text-sm text-gray-400 mb-4">
+                                                {r.extra__writer} | {r.regDate}
+                                            </div>
+
+                                            <div className="flex justify-between items-center">
+                                                <p>{r.body}</p>
+
+                                                <div className="flex gap-2 items-center">
+                                                    {/* 댓글 좋아요 버튼 */}
+                                                    <button
+                                                        onClick={() => handleReplyLikeToggle(r.id, r.liked)}
+                                                        className="flex items-center gap-1 text-sm"
+                                                    >
+                                                        <i
+                                                            className={`${
+                                                                r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"
+                                                            } fa-heart`}
+                                                        />
+                                                        <span>{r.likeCount ?? 0}</span>
+                                                    </button>
+
+                                                    {/* 수정/삭제 버튼 */}
+                                                    {r.userCanModify && (
+                                                        <button
+                                                            onClick={() =>
+                                                                setReplies((prev) =>
+                                                                    prev.map((item) =>
+                                                                        item.id === r.id ? { ...item, isEditing: true } : item
+                                                                    )
+                                                                )
+                                                            }
+                                                            className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
+                                                        >
+                                                            수정
+                                                        </button>
+                                                    )}
+                                                    {r.userCanDelete && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (confirm("정말 삭제하시겠습니까?")) {
+                                                                    const res = await deleteReply(r.id);
+                                                                    if (res.resultCode.startsWith("S-")) {
+                                                                        setReplies((prev) => prev.filter((item) => item.id !== r.id));
+                                                                        alert("댓글이 삭제 되었습니다.");
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                                                        >
+                                                            삭제
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         )}
+                    </div>
+
+                    <div className="h-32 w-full">
+
                     </div>
                 </div>
             )}
@@ -253,7 +452,7 @@ function ArticleDetailInner() {
 export default function Page() {
     return (
         <Suspense fallback={<p>불러오는 중...</p>}>
-            <ArticleDetailInner />
+            <ArticleDetailInner/>
         </Suspense>
     );
 }

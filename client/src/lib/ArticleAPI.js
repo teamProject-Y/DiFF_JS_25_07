@@ -1,17 +1,17 @@
 // lib/ArticleAPI.js
 import axios from "axios";
-import {DraftApi} from "@/lib/DraftAPI";
+import {DraftAPI} from "@/lib/DraftAPI";
 import { UserAPI } from "@/lib/UserAPI";
 
 /** 커스텀 Axios 인스턴스 */
-export const ArticleApi = axios.create({
+export const ArticleAPI = axios.create({
     baseURL: "http://localhost:8080",
     headers: {
         "Content-Type": "application/json"
     }
 });
 
-ArticleApi.interceptors.request.use(
+ArticleAPI.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
@@ -41,16 +41,16 @@ export const setAuthHeader = () => {
 
         // accessToken이 있을 때만 Authorization 헤더 설정
         if (ACCESS_TOKEN) {
-            ArticleApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+            ArticleAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         } else {
-            delete ArticleApi.defaults.headers['Authorization'];  // 없으면 제거
+            delete ArticleAPI.defaults.headers['Authorization'];  // 없으면 제거
         }
 
         // refreshToken도 마찬가지
         if (REFRESH_TOKEN) {
-            ArticleApi.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+            ArticleAPI.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         } else {
-            delete ArticleApi.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
+            delete ArticleAPI.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
         }
     }
 };
@@ -66,12 +66,12 @@ const refreshAccessToken = async () => {
         const ACCESS_TOKEN = response.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType");
         localStorage.setItem('accessToken', ACCESS_TOKEN);
-        ArticleApi.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+        ArticleAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
     }
 };
 
 /** 4. 인터셉터로 토큰 만료 자동 처리 */
-ArticleApi.interceptors.response.use(
+ArticleAPI.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
@@ -83,7 +83,7 @@ ArticleApi.interceptors.response.use(
             originalRequest._retry = true;
             await refreshAccessToken();
             setAuthHeader();
-            return ArticleApi(originalRequest);
+            return ArticleAPI(originalRequest);
         }
         return Promise.reject(error);
     }
@@ -91,14 +91,14 @@ ArticleApi.interceptors.response.use(
 
 /** 5. Auth/회원 관련 API들 */
 export const fetchArticles = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
-    const res = await ArticleApi.get('/api/DiFF/article/list', {
+    const res = await ArticleAPI.get('/api/DiFF/article/list', {
         params: { repositoryId, searchItem, keyword, page }
     });
     return res.data;
 };
 
 export const trendingArticle = async ({ count, days }) => {
-    const response = await ArticleApi.get(`/api/DiFF/article/trending`, {
+    const response = await ArticleAPI.get(`/api/DiFF/article/trending`, {
         params: { count, days }
     });
     return response.data;
@@ -112,7 +112,7 @@ export const writeArticle = async (data) => {
         data = { ...data, repositoryId: Number(data.repositoryId) };
     }
 
-    const res = await ArticleApi.post('/api/DiFF/article/doWrite', data);
+    const res = await ArticleAPI.post('/api/DiFF/article/doWrite', data);
     const result = res.data;
 
     // (원하면) 여기서 로그
@@ -125,7 +125,7 @@ export const writeArticle = async (data) => {
 };
 
 export const getMyRepositories = async () => {
-    const res = await ArticleApi.get('/api/DiFF/repository/my');
+    const res = await ArticleAPI.get('/api/DiFF/repository/my');
     const repos =
         res.data?.data?.repositories ??
         res.data?.repositories ??
@@ -136,7 +136,7 @@ export const getMyRepositories = async () => {
 
 // ArticleAPI.js
 export async function getArticle(id) {
-    const res = await ArticleApi.get(`/api/DiFF/article/detail`, {
+    const res = await ArticleAPI.get(`/api/DiFF/article/detail`, {
         params: { id }
     });
     return res.data.data;
@@ -155,13 +155,13 @@ export async function modifyArticle(article, token) {
 
 export const deleteArticle = async (id) => {
     const url = `/article/${id}`;
-    const res = await DraftApi.delete(url);
+    const res = await DraftAPI.delete(url);
     console.log('[API][deleteArticle] status:', res.status, 'data:', res.data);
     return { status: res.status, data: res.data };
 };
 
 export const followingArticleList = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
-    const res = await ArticleApi.get('/api/DiFF/article/followingArticleList', {
+    const res = await ArticleAPI.get('/api/DiFF/article/followingArticleList', {
         params: { repositoryId, searchItem, keyword, page }
     });
     return res.data;
