@@ -9,7 +9,7 @@ export const metadata = {
     description: "DiFF",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children, modal }) {
     return (
         <html lang="ko" data-theme="light">
         <head>
@@ -25,6 +25,7 @@ export default function RootLayout({ children }) {
 
         <CommonLayout>
             {children}
+            {modal}
         </CommonLayout>
         </body>
         </html>

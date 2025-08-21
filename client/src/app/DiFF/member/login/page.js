@@ -1,33 +1,13 @@
+// src/app/DiFF/member/login/page.js
 'use client';
+import LoginForm from '@/common/loginModal';
 
-import { useMemo } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import LoginModal from './LoginModal';
-
-export default function LoginPage() {
-    const searchParams = useSearchParams();
-    const router = useRouter();
-
-    const callbackUrl = searchParams?.get('callbackUrl') || '/DiFF/home/main';
-    const afterLoginUri = useMemo(() => {
-        const p = searchParams?.get('afterLoginUri');
-        if (p) return p;
-        if (typeof window !== 'undefined') return window.location.pathname + window.location.search;
-        return callbackUrl;
-    }, [searchParams, callbackUrl]);
-
+export default function LoginFullPage() {
     return (
-        <>
-            {/* 페이지 배경(원하면 제거 가능) */}
-            <div className="min-h-screen bg-gradient-to-b from-neutral-300 to-neutral-400" />
-
-            {/* 모달 팝업 */}
-            <LoginModal
-                open={true}
-                onClose={() => router.back?.() ?? router.push('/')}
-                callbackUrl={callbackUrl}
-                afterLoginUriFromPage={afterLoginUri}
-            />
-        </>
+        <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
+            <div className="w-[min(980px,92vw)] rounded-3xl bg-white shadow-[0_40px_120px_rgba(0,0,0,0.35)]">
+                <LoginForm />
+            </div>
+        </div>
     );
 }

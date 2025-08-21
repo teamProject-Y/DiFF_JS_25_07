@@ -19,7 +19,7 @@ function isExpired(token, skewMs = 30_000) {
     }
 }
 
-export default function CommonLayout({ children, pageTitle = 'DiFF' }) {
+export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
     const router = useRouter();
     const pathname = usePathname();
     const [accessToken, setAccessToken] = useState(null);
@@ -75,6 +75,7 @@ export default function CommonLayout({ children, pageTitle = 'DiFF' }) {
                         {/* 메인 컨텐츠 영역 */}
                         <main className="flex-1 min-w-0">
                             {children}
+                            {modal}
                         </main>
                     </div>
                 </div>
