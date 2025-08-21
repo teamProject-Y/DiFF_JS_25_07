@@ -96,9 +96,9 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         className="block"
                                     >
                                         <div
-                                            className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition"
+                                            className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition"
                                         >
-                                            <div className="flex-1 space-y-2">
+                                            <div className="flex-1">
                                                 <div className="text-sm text-gray-500">
                                                     in Trending · by{" "}
                                                     {article.extra__writer ? (
@@ -119,10 +119,12 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     )}
                                                 </div>
 
-                                                <h2 className="text-2xl font-extrabold">{article.title}</h2>
-                                                <p className="text-gray-600">
-                                                    {article.body?.slice(0, 100) || "내용 미리보기 없음"}
-                                                </p>
+                                                <div className="my-2">
+                                                    <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
+                                                    <p className="h-12 text-gray-600">
+                                                        {article.body?.slice(0, 100) || "내용 미리보기 없음"}
+                                                    </p>
+                                                </div>
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                                     <span>{article.regDate}</span>
                                                     <span>👀 {article.hits}</span>
@@ -149,15 +151,17 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         className="block cursor-pointer"
                                         onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
                                     >
-                                        <div className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition">
-                                            <div className="flex-1 space-y-2">
+                                        <div
+                                            className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition"
+                                        >
+                                            <div className="flex-1">
                                                 <div className="text-sm text-gray-500">
                                                     in Following · by{" "}
                                                     {article.extra__writer ? (
                                                         <Link
                                                             href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
                                                             className="hover:underline hover:text-black cursor-pointer"
-                                                            onClick={(e) => e.stopPropagation()} // ✅ 카드 클릭 이벤트 막기
+                                                            onClick={(e) => e.stopPropagation()}
                                                         >
                                                             {article.extra__writer}
                                                         </Link>
@@ -166,10 +170,12 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     )}
                                                 </div>
 
-                                                <h2 className="text-2xl font-extrabold">{article.title}</h2>
-                                                <p className="text-gray-600">
-                                                    {article.body?.slice(0, 100) || "내용 미리보기 없음"}
-                                                </p>
+                                                <div className="my-2">
+                                                    <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
+                                                    <p className="h-12 text-gray-600">
+                                                        {article.body?.slice(0, 100) || "내용 미리보기 없음"}
+                                                    </p>
+                                                </div>
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                                     <span>{article.regDate}</span>
                                                     <span>👀 {article.hits}</span>
