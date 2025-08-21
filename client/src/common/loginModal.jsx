@@ -6,7 +6,7 @@ import { login } from '@/lib/UserAPI';
 
 export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/main', afterLoginUriFromPage }) {
     // ===== 폼 상태 =====
-    const [values, setValues] = useState({ email: '', loginPw: '' });
+    const [values, setValues] = useState({ loginId: '', loginPw: '' });
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -21,7 +21,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        if (!values.email || !values.loginPw) {
+        if (!values.loginId || !values.loginPw) {
             setError('아이디와 비밀번호를 입력하세요.');
             return;
         }
@@ -189,9 +189,9 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
                                             <form name="login" className="flex flex-col items-center" onSubmit={handleSubmit}>
                                                 <input
                                                     type="text"
-                                                    name="email"
-                                                    id="email"
-                                                    value={values.email}
+                                                    name="loginId"
+                                                    id="loginId"
+                                                    value={values.loginId}
                                                     onChange={handleChange}
                                                     placeholder="ID"
                                                     className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-[min(420px,90%)] p-3"
@@ -222,7 +222,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
 
                                             <div className="text-center my-6 flex justify-center gap-6 text-black">
                                                 <a href="/DiFF/member/join" className="hover:underline">Join</a>
-                                                {/*<a href="/DiFF/member/findLoginId" className="hover:underline">Find ID</a>*/}
+                                                <a href="/DiFF/member/findLoginId" className="hover:underline">Find ID</a>
                                                 <a href="/DiFF/member/findLoginPw" className="hover:underline">Find PW</a>
                                             </div>
 
