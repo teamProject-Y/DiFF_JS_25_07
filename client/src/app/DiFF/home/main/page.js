@@ -147,8 +147,8 @@ export default function Page() {
 
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
-        <div className="w-full min-h-screen bg-[#111]">
-            <div className="h-screen pt-32">
+        <div className="w-full min-h-screen bg-[#161616]">
+            <div className="h-screen">
                 <BeforeMainPage />
             </div>
 

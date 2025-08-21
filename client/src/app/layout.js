@@ -23,7 +23,9 @@ export default function RootLayout({ children }) {
         {/* <Script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" strategy="afterInteractive" /> */}
         {/* <Script src="/resource/common.js" strategy="afterInteractive" /> */}
 
-        <CommonLayout>{children}</CommonLayout>
+        <CommonLayout>
+            {children}
+        </CommonLayout>
         </body>
         </html>
     );

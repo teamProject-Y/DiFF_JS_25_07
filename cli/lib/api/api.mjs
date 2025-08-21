@@ -17,10 +17,10 @@ export async function verifyGitUser() {
 
     try {
         const { data } = await axios.post(
-            'http://localhost:8080/usr/draft/verifyGitUser', {
+            'http://localhost:8080/api/DiFF/draft/verifyGitUser', {
                 email
             });
-        console.log(chalk.bgCyanBright(chalk.black(data)));
+        console.log(chalk.bgCyanBright(chalk.black(data.data1)));
 
         if (data.resultCode.startsWith('S-')) { // 인증 성공
             return data.data1; // memberId 리턴
@@ -39,7 +39,7 @@ export async function verifyGitUser() {
 export async function isUsableRepoName(memberId, repoName){
 
     const { data } = await axios.post(
-        'http://localhost:8080/usr/draft/isUsableRepoName', {
+        'http://localhost:8080/api/DiFF/draft/isUsableRepoName', {
             memberId: memberId,
             repoName: repoName
         });
@@ -51,7 +51,7 @@ export async function isUsableRepoName(memberId, repoName){
 export async function mkRepo(memberId, repoName, commitHash){
 
     const { data } = await axios.post(
-        'http://localhost:8080/usr/draft/mkRepo', {
+        'http://localhost:8080/api/DiFF/draft/mkRepo', {
             memberId: memberId,
             repoName: repoName,
             firstCommit: commitHash
@@ -72,7 +72,7 @@ export async function sendDiFF(memberId, repositoryId, to, diff) {
     try {
         console.log(chalk.bgCyanBright("sendDiFF"));
         const { data } = await axios.post(
-            'http://localhost:8080/usr/draft/mkDraft',
+            'http://localhost:8080/api/DiFF/draft/mkDraft',
             {
                 memberId,
                 repositoryId,

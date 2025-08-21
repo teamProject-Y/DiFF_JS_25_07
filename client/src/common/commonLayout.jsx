@@ -34,7 +34,7 @@ export default function CommonLayout({ children, pageTitle = 'DiFF' }) {
             <div className="text-neutral-600 min-h-screen">
                 <Header />
                 <div className="h-20 bg-inherit">
-                    <div className="flex gap-0">
+                    <div className="flex gap-0 pt-20">
                         {/* 로그인 상태일 때만 항상 보이는 전역 메뉴 */}
                         <SidebarLayout>
                             <LayMenu />

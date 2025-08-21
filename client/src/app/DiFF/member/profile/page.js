@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchUser, uploadProfileImg } from "@/lib/UserAPI";
 import { useEffect, useState, Suspense } from "react";
+import ThemeToggle from "@/common/thema";
 
 /** ✅ 바깥 컴포넌트는 Suspense 래퍼만 담당 (CSR bail-out 해결) */
 export default function MyInfoPage() {
@@ -66,7 +67,7 @@ function MyInfoInner() {
     if (!member) return null;
 
     return (
-        <section className="mt-24 text-xl px-4">
+        <section className="pt-24 text-xl px-4 dark:bg-gray-900">
             <div className="mx-auto max-w-4xl">
 
                 {/* 프로필 이미지 */}
@@ -85,15 +86,41 @@ function MyInfoInner() {
                         )}
 
                         {isMyProfile && (
-                            <>
-                                <input type="file" onChange={handleFileChange} className="mb-2" />
+                            <div className="flex items-center gap-3">
+                                {/* 숨겨진 파일 input */}
+                                <input
+                                    id="profileUpload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+                                        setSelectedFile(file);
+
+                                        try {
+                                            const url = await uploadProfileImg(file);
+                                            setProfileUrl(url);
+                                            console.log("업로드 성공:", url);
+                                        } catch (err) {
+                                            console.error("업로드 실패:", err);
+                                            alert("업로드 실패");
+                                        }
+                                    }}
+                                    className="hidden"
+                                />
+
+                                {/* 버튼 하나 */}
                                 <button
-                                    onClick={handleUpload}
+                                    type="button"
+                                    onClick={() => document.getElementById("profileUpload").click()}
                                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
                                 >
                                     프로필 업로드
                                 </button>
-                            </>
+
+                                {/* 다크 모드 토글 */}
+                                <ThemeToggle />
+                            </div>
                         )}
                     </div>
                 </div>
