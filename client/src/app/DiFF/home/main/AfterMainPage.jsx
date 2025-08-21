@@ -178,7 +178,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                 </div>
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                                     <span>{article.regDate}</span>
-                                                    <span>👀 {article.hits}</span>
+                                                    <span>view: {article.hits}</span>
                                                     <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
                                                     <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
                                                 </div>
