@@ -87,7 +87,7 @@ export default function JoinPage() {
                 </button>
             </form>
             <div className="sub-menu text-center my-4">
-                <Link href="/DiFF/member/login/page">Login</Link>
+                <Link href="/@modal/(..)DiFF/member/login/page">Login</Link>
             </div>
         </div>
     )

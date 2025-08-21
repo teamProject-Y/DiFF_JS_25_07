@@ -1,9 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { fetchUser } from "@/lib/UserAPI";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { LayoutGroup, AnimatePresence } from "framer-motion";
+import {useRouter} from 'next/navigation';
+import {fetchUser} from "@/lib/UserAPI";
+import {useEffect, useMemo, useState, useCallback} from "react";
+import {LayoutGroup, AnimatePresence} from "framer-motion";
 
 import RepoFolder from './repoFolder';
 import RepoFolderbar from './repoFolderbar';
@@ -50,7 +50,8 @@ export default function RepositoriesPage() {
                 <div className="mx-auto max-w-6xl">
                     <h2 className="text-2xl font-semibold mb-6">내 레포지토리</h2>
 
-                    <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
+                    <div
+                        className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
 
 
                         {/* 메인 영역 */}
@@ -75,6 +76,16 @@ export default function RepositoriesPage() {
                                 )}
                             </AnimatePresence>
                         </div>
+                    </div>
+                    <br/>
+                    {/* 레포 이동 */}
+                    <div className="text-center mb-6">
+                        <button
+                            onClick={() => router.push('/DiFF/member/profile')}
+                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                        >
+                            내 프로필 보기
+                        </button>
                     </div>
 
                     <div className="text-center mt-6">
