@@ -62,17 +62,17 @@ export default function AfterMainPage({ me, trendingArticles }) {
         <div className="w-full min-h-screen bg-white text-black">
             <div className="h-screen">
                 {/* 3열 */}
-                <div className="mx-auto w-4/5 px-6 pb-8 flex justify-around">
+                <div className="mx-auto px-6 py-10 flex justify-around">
                     {/*</aside>*/}
                     {/* 센터 피드 */}
-                    <main className="flex-grow-1 mr-20">
+                    <main className="flex-grow-1 mr-10">
                         {/* 탭 버튼 */}
-                        <div className="flex items-center gap-6 border-b">
+                        <div className="flex items-center border-b">
                             {["Trending", "Following"].map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setActiveTab(t)}
-                                    className={`py-4 -mb-px ${
+                                    className={`p-4 -mb-px ${
                                         activeTab === t
                                             ? "border-b-2 border-black font-semibold"
                                             : "text-gray-500"
@@ -96,11 +96,22 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         className="block"
                                     >
                                         <div
-                                            className="flex gap-6 border-b px-4 py-8 justify-center items-center hover:bg-gray-50 transition">
+                                            className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1 space-y-2">
                                                 <div className="text-sm text-gray-500">
-                                                    in Trending · by {article.extra__writer || "Unknown"}
+                                                    in Trending · by{" "}
+                                                    {article.extra__writer ? (
+                                                        <Link
+                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                            className="hover:underline"
+                                                        >
+                                                            {article.extra__writer}
+                                                        </Link>
+                                                    ) : (
+                                                        "Unknown"
+                                                    )}
                                                 </div>
+
                                                 <h2 className="text-2xl font-extrabold">{article.title}</h2>
                                                 <p className="text-gray-600">
                                                     {article.body?.slice(0, 100) || "내용 미리보기 없음"}
@@ -110,7 +121,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     <span>👀 {article.hits}</span>
                                                 </div>
                                             </div>
-                                            <div className="w-1/6 h-[100px] bg-gray-200 rounded-xl"/>
+                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl"/>
                                         </div>
                                     </Link>
                                 ))
@@ -129,11 +140,22 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         className="block"
                                     >
                                         <div
-                                            className="flex gap-6 border-b px-4 py-8 justify-center items-center hover:bg-gray-50 transition">
+                                            className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1 space-y-2">
                                                 <div className="text-sm text-gray-500">
-                                                    in Following · by {article.extra__writer || "Unknown"}
+                                                    in Following · by{" "}
+                                                    {article.extra__writer ? (
+                                                        <Link
+                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                            className="hover:underline"
+                                                        >
+                                                            {article.extra__writer}
+                                                        </Link>
+                                                    ) : (
+                                                        "Unknown"
+                                                    )}
                                                 </div>
+
                                                 <h2 className="text-2xl font-extrabold">{article.title}</h2>
                                                 <p className="text-gray-600">
                                                     {article.body?.slice(0, 100) || "내용 미리보기 없음"}
@@ -141,18 +163,9 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                                     <span>{article.regDate}</span>
                                                     <span>👀 {article.hits}</span>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.preventDefault(); // ✅ 상세 이동 막지 않고 저장 기능만 동작
-                                                            console.log("Save clicked for article:", article.id);
-                                                        }}
-                                                        className="ml-auto px-3 py-1 rounded-full border"
-                                                    >
-                                                        Save
-                                                    </button>
                                                 </div>
                                             </div>
-                                            <div className="w-[220px] h-[150px] bg-gray-200 rounded-xl"/>
+                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl"/>
                                         </div>
                                     </Link>
                                 ))
