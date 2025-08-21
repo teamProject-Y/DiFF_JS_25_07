@@ -24,6 +24,7 @@ export default function LayMenu() {
         { href: "/DiFF/member/profile", label: "Profile" },
         { href: "/DiFF/member/repository", label: "Repositories" },
         { href: "/DiFF/docs/intro", label: "Docs" },
+        { href: "/DiFF/member/inquiry", label: "Contact" },
     ];
 
     return (
