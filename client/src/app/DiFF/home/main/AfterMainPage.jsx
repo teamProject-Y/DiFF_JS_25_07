@@ -96,17 +96,24 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         className="block"
                                     >
                                         <div
-                                            className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition">
+                                            className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition"
+                                        >
                                             <div className="flex-1 space-y-2">
                                                 <div className="text-sm text-gray-500">
                                                     in Trending · by{" "}
                                                     {article.extra__writer ? (
-                                                        <Link
-                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                            className="hover:underline"
+                                                        <span
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // 부모 Link 클릭 막기
+                                                                e.preventDefault();
+                                                                window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(
+                                                                    article.extra__writer
+                                                                )}`;
+                                                            }}
+                                                            className="hover:underline hover:text-black cursor-pointer "
                                                         >
                                                             {article.extra__writer}
-                                                        </Link>
+                                                        </span>
                                                     ) : (
                                                         "Unknown"
                                                     )}
@@ -119,11 +126,14 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                                     <span>{article.regDate}</span>
                                                     <span>👀 {article.hits}</span>
+                                                    <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
+                                                    <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
                                                 </div>
                                             </div>
                                             <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl"/>
                                         </div>
                                     </Link>
+
                                 ))
                             ) : (
                                 <div>트렌딩 게시물이 없습니다.</div>
@@ -134,20 +144,20 @@ export default function AfterMainPage({ me, trendingArticles }) {
                         {activeTab === "Following" && !loading && (
                             followingArticles && followingArticles.length > 0 ? (
                                 followingArticles.map((article, idx) => (
-                                    <Link
+                                    <div
                                         key={idx}
-                                        href={`/DiFF/article/detail?id=${article.id}`} // ✅ 상세 페이지 이동
-                                        className="block"
+                                        className="block cursor-pointer"
+                                        onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
                                     >
-                                        <div
-                                            className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition">
+                                        <div className="flex h-52 gap-6 border-b py-6 px-10 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1 space-y-2">
                                                 <div className="text-sm text-gray-500">
                                                     in Following · by{" "}
                                                     {article.extra__writer ? (
                                                         <Link
                                                             href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                            className="hover:underline"
+                                                            className="hover:underline hover:text-black cursor-pointer"
+                                                            onClick={(e) => e.stopPropagation()} // ✅ 카드 클릭 이벤트 막기
                                                         >
                                                             {article.extra__writer}
                                                         </Link>
@@ -163,11 +173,13 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                                     <span>{article.regDate}</span>
                                                     <span>👀 {article.hits}</span>
+                                                    <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
+                                                    <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
                                                 </div>
                                             </div>
-                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl"/>
+                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl" />
                                         </div>
-                                    </Link>
+                                    </div>
                                 ))
                             ) : (
                                 <div>팔로잉한 사람이 작성한 게시물이 없습니다.</div>
