@@ -10,7 +10,7 @@ export default function LoginPage({ searchParams }) {
     const params = React.use(searchParams);
     const router = useRouter();
     const callbackUrl = params?.callbackUrl || '/DiFF/home/main';
-    const [values, setValues] = useState({ loginId: "", loginPw: "" });
+    const [values, setValues] = useState({ email: "", loginPw: "" });
     const [error, setError] = useState(null);
 
     // input 값 변경시 상태 업데이트
@@ -21,8 +21,8 @@ export default function LoginPage({ searchParams }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        if (!values.loginId || !values.loginPw) {
-            setError('아이디와 비밀번호를 입력하세요.');
+        if (!values.email || !values.loginPw) {
+            setError('이메일과 비밀번호를 입력하세요.');
             return;
         }
         try {
@@ -45,7 +45,7 @@ export default function LoginPage({ searchParams }) {
             window.location.replace(callbackUrl);
         } catch (error) {
             console.log("로그인 axios error", error, error.response);
-            setError('로그인 실패: 아이디/비밀번호를 확인하세요.');
+            setError('로그인 실패: 이메일/비밀번호를 확인하세요.');
         }
     };
 
@@ -65,12 +65,12 @@ export default function LoginPage({ searchParams }) {
 
                 <form name="login" className="flex flex-col items-center" onSubmit={handleSubmit}>
                     <input
-                        type="text"
-                        name="loginId"
-                        id="loginId"
-                        value={values.loginId}
+                        type="email"
+                        name="email"
+                        id="email"
+                        value={values.email}
                         onChange={handleChange}
-                        placeholder="ID"
+                        placeholder="e-mail"
                         className="mb-6 bg-neutral-50 border border-neutral-300 text-neutral-800 text-sm rounded-lg w-96 p-2.5"
                     />
                     <input

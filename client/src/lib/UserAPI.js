@@ -109,15 +109,15 @@ UserAPI.interceptors.response.use(
 /** 5. Auth/회원 관련 API들 */
 
 // 5-1. 로그인
-export const login = async ({ loginId, loginPw }) => {
-    const data = { loginId, loginPw };
+export const login = async ({ email, loginPw }) => {
+    const data = { email, loginPw };
     const response = await UserAPI.post(`http://localhost:8080/api/DiFF/member/login`, data);
     return response.data;
 };
 
 // 5-2. 회원가입
-export const signUp = async ({ loginId, loginPw, checkLoginPw, name, nickName, email }) => {
-    const data = { loginId, loginPw, checkLoginPw, name, nickName, email };
+export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
+    const data = { loginPw, checkLoginPw, nickName, email };
 
     console.log("📤 회원가입 요청:", data);
     const response = await UserAPI.post('http://localhost:8080/api/DiFF/member/doJoin', data);
