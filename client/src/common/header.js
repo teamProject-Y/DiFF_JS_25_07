@@ -102,12 +102,12 @@ export default function Header() {
     return (
         <HeaderWrap className={hide ? 'hide' : ''}>
             <div className="logo pl-4">
-                <Link href="/DiFF/home/main" className="block text-4xl p-4 text-red-400 font-bold">
+                <Link href="/DiFF/home/main" className="block text-3xl p-4 text-red-400 font-semibold">
                     DiFF
                 </Link>
             </div>
             <div className="flex-grow" />
-            <ul className="flex gap-8 text-xl font-bold pr-8 text-red-400">
+            <ul className="flex gap-8 text-xl font-semibold pr-8 text-red-400">
                 {accessToken ? (
                     <>
                         <li>
