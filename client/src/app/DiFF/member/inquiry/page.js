@@ -1,24 +1,37 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { saveInquiry } from "@/lib/NotionAPI";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function InquiryForm() {
+    const router = useRouter();  // ✅ useRouter 훅 사용
     const [inquiry, setInquiry] = useState({
         title: "",
-        nickName: "",
+        nickName: "",   // 로그인한 닉네임
         email: "",
         body: "",
         regDate: new Date().toISOString().split("T")[0]  // yyyy-MM-dd
     });
 
+    useEffect(() => {
+        const storedNickName = localStorage.getItem("nickName");
+        if (storedNickName) {
+            setInquiry(prev => ({ ...prev, nickName: storedNickName }));
+        }
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const res = await saveInquiry(inquiry);
-            alert(res); // "문의사항 저장 완료" 라는 응답
+            alert(res.message);
+
+            setInquiry(prev => ({ ...prev, nickName: res.nickName }));
+
+            router.push("/DiFF/home/main");
         } catch (err) {
-            console.error(" 문의 저장 실패:", err);
+            console.error("문의 저장 실패:", err);
         }
     };
 
@@ -36,17 +49,6 @@ export default function InquiryForm() {
                     placeholder="제목을 입력하세요"
                     value={inquiry.title}
                     onChange={e => setInquiry({ ...inquiry, title: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">닉네임</label>
-                <input
-                    type="text"
-                    placeholder="닉네임"
-                    value={inquiry.nickName}
-                    onChange={e => setInquiry({ ...inquiry, nickName: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
             </div>
@@ -80,6 +82,5 @@ export default function InquiryForm() {
                 문의하기
             </button>
         </form>
-
     );
 }
