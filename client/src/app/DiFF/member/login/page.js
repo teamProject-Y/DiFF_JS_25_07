@@ -13,7 +13,7 @@ export default function LoginPage({ searchParams }) {
     const [values, setValues] = useState({ loginId: "", loginPw: "" });
     const [error, setError] = useState(null);
 
-    // 🎯 input 값 변경시 상태 업데이트
+    // input 값 변경시 상태 업데이트
     const handleChange = (e) => {
         setValues({...values, [e.target.name]: e.target.value });
     }

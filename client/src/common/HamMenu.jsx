@@ -11,7 +11,6 @@ export default function HamburgerMenu({ open, onClick }) {
             type="button"
         >
             <span className="bar"></span>
-            {/*<span className="bar"></span>*/}
             <span className="bar"></span>
         </button>
     );
