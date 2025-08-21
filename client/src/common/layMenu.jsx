@@ -24,13 +24,14 @@ export default function LayMenu() {
         { href: "/DiFF/member/profile", label: "Profile" },
         { href: "/DiFF/member/repository", label: "Repositories" },
         { href: "/DiFF/docs/intro", label: "Docs" },
+        { href: "/DiFF/member/inquiry", label: "Contact" },
     ];
 
     return (
         <nav className="top-20 h-[calc(100vh-80px)] mx-auto max-w-7xl flex justify-around">
             {/* 왼쪽 메뉴 */}
-            <aside className="py-3 w-full">
-                <nav className="space-y-2 text-gray-700 font-bold mb-6">
+            <aside className="py-3 w-64">
+                <nav className="space-y-2 text-gray-600 mb-6">
                     {menuItems.map(({ href, label }) => {
                         const isActive =
                             pathname === href || pathname?.startsWith(href + "/");
@@ -40,10 +41,10 @@ export default function LayMenu() {
                                 key={href}
                                 href={href}
                                 className={[
-                                    "block px-8 py-2 transition-colors",
+                                    "block px-8 py-2 transition-colors hover:bg-gray-100",
                                     isActive
-                                        ? "border-l font-semibold text-black"
-                                        : "hover:bg-gray-100 hover:text-black"
+                                        ? "text-black font-semibold"
+                                        : ""
                                 ].join(" ")}
                             >
                                 {label}
