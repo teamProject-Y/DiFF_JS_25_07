@@ -33,7 +33,7 @@ function OverlayMenu({open, onClose, userEmail, blogName}) {
                         <AnimatedMenuItem num="0001" label="DOCS"/></Link>
                     <Link href="/DiFF/docs/intro">
                         <AnimatedMenuItem num="0010" label="CONTACT"/></Link>
-                    <Link href="/DiFF/member/login">
+                    <Link href="/@modal/(..)DiFF/member/login">
                         <AnimatedMenuItem num="0011" label="START"/></Link>
                     <Link href="/DiFF/member/profile">
                         <AnimatedMenuItem num="0100" label="MYPAGE"/>
