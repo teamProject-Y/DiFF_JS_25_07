@@ -91,7 +91,11 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    <span>{article.regDate}</span>
+                                                    <span>{new Date(article.regDate).toLocaleDateString("en-US", {
+                                                        year: "numeric",
+                                                        month: "short",
+                                                        day: "numeric"
+                                                    })}</span>
                                                     <span>👀 {article.hits}</span>
                                                     <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
                                                     <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
@@ -141,7 +145,11 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    <span>{article.regDate}</span>
+                                                    <span>{new Date(article.regDate).toLocaleDateString("en-US", {
+                                                        year: "numeric",
+                                                        month: "short",
+                                                        day: "numeric"
+                                                    })}</span>
                                                     <span>view: {article.hits}</span>
                                                     <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
                                                     <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>

@@ -1,9 +1,12 @@
 // src/app/DiFF/article/write/page.js
 'use client';
 
-import { Suspense, useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { writeArticle, showRepo, getMyRepositories } from '@/lib/ArticleAPI';
+import { writeArticle, getMyRepositories } from '@/lib/ArticleAPI';
+import dynamic from 'next/dynamic';
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
+
 
 export default function Page() {
     return (
@@ -29,6 +32,10 @@ function WriteArticlePage() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [repoError, setRepoError] = useState('');
+
+    // editor
+    const editorRef = useRef(null);
+    const editorInstance = useRef(null);
 
     // 로그인 체크
     useEffect(() => {
@@ -70,6 +77,7 @@ function WriteArticlePage() {
         return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }, []);
 
+    // 게시물 작성
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -108,8 +116,6 @@ function WriteArticlePage() {
 
     return (
         <div className="container mx-auto mt-8 p-6 w-4/5 border border-neutral-300 rounded-xl">
-            <button onClick={() => router.back()} className="text-xl mb-4">← 뒤로</button>
-            <h1 className="text-3xl font-bold mb-6">Article Write</h1>
 
             {/* 리포지토리 선택 */}
             <div className="mb-4">
@@ -145,13 +151,8 @@ function WriteArticlePage() {
                     onChange={(e) => setTitle(e.target.value)}
                     required
                 />
-                <textarea
-                    className="w-full border p-2 rounded h-48"
-                    placeholder="내용"
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    required
-                />
+
+                <ToastEditor initialValue={body} onChange={setBody} />
 
                 {repositoryId && <div className="text-sm text-gray-600">repositoryId: {repositoryId}</div>}
                 {error && <div className="text-sm text-red-600">{error}</div>}

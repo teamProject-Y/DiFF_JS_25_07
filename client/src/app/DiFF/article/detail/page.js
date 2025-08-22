@@ -8,6 +8,9 @@ import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
 import {likeArticle, unlikeArticle, fetchArticleLikes,
     likeReply, unlikeReply, fetchReplyLikes} from "@/lib/reactionAPI";
 import LoadingOverlay from "@/common/LoadingOverlay";
+import dynamic from "next/dynamic";
+import ToastViewer from "@/common/toastViewer";
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
 
 function ArticleDetailInner() {
 
@@ -234,9 +237,9 @@ function ArticleDetailInner() {
                     <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
                     {/* article info */}
-                    <div className="text-sm text-gray-600 mb-6 flex justify-between">
-                        <div>
-                            <span
+                    <div className="text-gray-600 mb-6 flex justify-between">
+                        <div className="flex justify-start">
+                            <div
                                 onClick={(e) => {
                                     e.stopPropagation(); // 부모 Link 클릭 막기
                                     e.preventDefault();
@@ -244,11 +247,15 @@ function ArticleDetailInner() {
                                         article.extra__writer
                                     )}`;
                                 }}
-                                className="hover:underline hover:text-black cursor-pointer "
+                                className="mx-2 hover:underline hover:text-black cursor-pointer text-md font-semibold"
                             >
-                                                            {article.extra__writer}
-                                                        </span>
-                            <span>작성일: {article.regDate}</span>
+                                {article.extra__writer}
+                            </div>
+                            <div className="mx-2 text-gray-500">{new Date(article.regDate).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                            })}</div>
                         </div>
                         <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
                             <i
@@ -261,7 +268,7 @@ function ArticleDetailInner() {
                     {/* 본문 */}
                     <div
                         className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
-                        {article.body}
+                        <ToastViewer content={article.body} />
                     </div>
 
                     {/* 하단 버튼 영역 */}
@@ -391,7 +398,12 @@ function ArticleDetailInner() {
                                         // ✅ 일반 댓글 표시
                                         <div>
                                             <div className="text-sm text-gray-400 mb-4">
-                                                {r.extra__writer} | {r.regDate}
+                                                {r.extra__writer} |
+                                                {new Date(r.regDate).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "short",
+                                                day: "numeric"
+                                            })}
                                             </div>
 
                                             <div className="flex justify-between items-center">

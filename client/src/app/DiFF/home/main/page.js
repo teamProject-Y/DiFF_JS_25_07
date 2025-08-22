@@ -185,7 +185,11 @@ export default function Page() {
                                                     <h3 className="text-xl font-semibold">{article.title}</h3>
                                                     <p>{article.extra_writer}</p>
                                                     <p className="text-sm text-gray-600">조회수: {article.hits}</p>
-                                                    <p className="text-sm text-gray-600">작성일: {article.regDate}</p>
+                                                    <p className="text-sm text-gray-600">{new Date(article.regDate).toLocaleDateString("en-US", {
+                                                        year: "numeric",
+                                                        month: "short",
+                                                        day: "numeric"
+                                                    })}</p>
                                                 </div>
                                             </Link>
                                         </SwiperSlide>

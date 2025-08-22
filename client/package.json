@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@toast-ui/editor": "^3.2.2",
     "@types/styled-components": "^5.1.34",
     "axios": "^1.10.0",
     "framer-motion": "^12.23.12",
