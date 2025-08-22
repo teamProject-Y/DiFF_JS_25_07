@@ -14,6 +14,7 @@ export default function MyInfoPage() {
     );
 }
 
+
 function MyInfoInner() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -40,9 +41,9 @@ function MyInfoInner() {
                 setProfileUrl(res.member?.profileUrl || "");
                 setLoading(false);
                 if (!nickName || nickName === myNickName) {
-                    setIsMyProfile(true);  // ✅ 내 프로필
+                    setIsMyProfile(true);
                 } else {
-                    setIsMyProfile(false); // ✅ 다른 사람 프로필
+                    setIsMyProfile(false);
                 }
             })
             .catch(err => {
@@ -63,6 +64,15 @@ function MyInfoInner() {
         } catch {
             alert("업로드 실패");
         }
+    };
+
+    // JS: 타입 표기 제거
+    const startLink = (provider) => {
+        if (provider !== 'google' && provider !== 'github') return; // 가드
+
+        // 같은 도메인에서 프록시한다면 base는 빈 문자열("")이면 됩니다.
+        const url = `/api/DiFF/auth/link/${provider}?mode=link`;
+        window.location.href = url; // 풀 리로드로 OAuth 시작
     };
 
     if (loading) return <div>로딩...</div>;
@@ -87,7 +97,7 @@ function MyInfoInner() {
                             </div>
                         )}
 
-                        {/* ✅ 나의 프로필일 때만 업로드 가능 */}
+                        {/* 본인 프로필만 출력 */}
                         {isMyProfile && (
                             <div className="flex items-center gap-3">
                                 {/* 숨겨진 파일 input */}
@@ -112,7 +122,6 @@ function MyInfoInner() {
                                     className="hidden"
                                 />
 
-                                {/* 버튼 하나 */}
                                 <button
                                     type="button"
                                     onClick={() => document.getElementById("profileUpload").click()}
@@ -123,6 +132,28 @@ function MyInfoInner() {
 
                                 {/* 다크 모드 토글 */}
                                 <ThemeToggle />
+
+                                {/* 소셜 연동 버튼 */}
+                                <div className="flex items-center gap-3 mt-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => startLink('google')}
+                                        id="connect-google"
+                                        className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-400"
+                                    >
+                                        구글 연동
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => startLink('github')}
+                                        id="connect-github"
+                                        className="px-4 py-2 rounded bg-gray-800 text-white hover:bg-gray-700"
+                                    >
+                                        깃허브 연동
+                                    </button>
+                                </div>
+
                             </div>
                         )}
                     </div>
@@ -134,14 +165,6 @@ function MyInfoInner() {
                     <tr>
                         <th className="border p-2">가입일</th>
                         <td className="border p-2 text-center">{member.regDate}</td>
-                    </tr>
-                    <tr>
-                        <th className="border p-2">아이디</th>
-                        <td className="border p-2 text-center">{member.loginId}</td>
-                    </tr>
-                    <tr>
-                        <th className="border p-2">이름</th>
-                        <td className="border p-2 text-center">{member.name}</td>
                     </tr>
                     <tr>
                         <th className="border p-2">닉네임</th>
@@ -167,7 +190,7 @@ function MyInfoInner() {
                     </tbody>
                 </table>
 
-                {/* ✅ 나의 프로필일 때만 보이는 버튼 */}
+                {/* 본인 프로필만 */}
                 {isMyProfile && (
                     <>
                         <div className="text-center mb-6">
@@ -190,7 +213,7 @@ function MyInfoInner() {
                     </>
                 )}
 
-                {/* 🔹 뒤로가기 (누구 프로필이든 항상 보임) */}
+                {/* 뒤로가기 (누구 프로필이든 항상 보임) */}
                 <div className="text-center">
                     <button
                         onClick={() => router.replace('/DiFF/home/main')}
