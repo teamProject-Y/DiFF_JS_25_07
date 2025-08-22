@@ -2,69 +2,42 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { followingArticleList} from "@/lib/ArticleAPI";
+import { followingArticleList } from "@/lib/ArticleAPI";
 import { getFollowingList } from "@/lib/UserAPI";
 
 export default function AfterMainPage({ me, trendingArticles }) {
     const [activeTab, setActiveTab] = useState("Trending");
-    const [followingArticles, setFollowingArticles] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [followingArticles, setFollowingArticles] = useState(null); // ✅ 초기 null
     const [following, setFollowing] = useState([]);
     const [member, setMember] = useState([]);
 
+    // 팔로잉 유저 목록 불러오기 (최초 1번)
     useEffect(() => {
         getFollowingList()
             .then((res) => {
                 console.log("팔로잉 API 응답:", res);
-                setFollowing(res.data1 || []);   // 여기 수정
+                setFollowing(res.data1 || []);
             })
             .catch((err) => {
                 console.error("팔로잉 목록 로딩 오류:", err);
             });
     }, []);
 
-
-    // 🔹 Following 탭 눌렀을 때 데이터 불러오기
+    // Following 게시글 목록 불러오기 (최초 1번만)
     useEffect(() => {
-        if (activeTab === "Following") {
-            setLoading(true);
-            followingArticleList({page: 1, repositoryId: 0, searchItem: 0, keyword: ""})
-                .then((res) => {
-                    setFollowingArticles(res.followingArticles || []);
-                })
-                .catch((err) => {
-                    console.error("팔로잉 로딩 오류:", err);
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        }
-    }, [activeTab]);
-    // 🔹 Following 탭 눌렀을 때 데이터 불러오기
-    useEffect(() => {
-        if (activeTab === "Following") {
-            setLoading(true);
-            followingArticleList({page: 1, repositoryId: 0, searchItem: 0, keyword: ""})
-                .then((res) => {
-                    setFollowingArticles(res.followingArticles || []);
-                })
-                .catch((err) => {
-                    console.error("팔로잉 로딩 오류:", err);
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        }
-    }, [activeTab]);
-
+        followingArticleList({ page: 1, repositoryId: 0, searchItem: 0, keyword: "" })
+            .then((res) => {
+                setFollowingArticles(res.followingArticles || []);
+            })
+            .catch((err) => {
+                console.error("팔로잉 로딩 오류:", err);
+            });
+    }, []); // ✅ activeTab 의존성 제거
 
     return (
         <div className="w-full min-h-screen bg-white text-black">
             <div className="h-screen">
-                {/* 3열 */}
                 <div className="mx-auto px-6 py-10 flex justify-around">
-                    {/*</aside>*/}
-                    {/* 센터 피드 */}
                     <main className="flex-grow-1 mr-10">
                         {/* 탭 버튼 */}
                         <div className="flex items-center border-b">
@@ -83,11 +56,8 @@ export default function AfterMainPage({ me, trendingArticles }) {
                             ))}
                         </div>
 
-                        {/* 로딩 상태 */}
-                        {loading && <div className="py-6">로딩 중...</div>}
-
                         {/* 🔹 Trending */}
-                        {activeTab === "Trending" && !loading && (
+                        {activeTab === "Trending" && (
                             trendingArticles && trendingArticles.length > 0 ? (
                                 trendingArticles.map((article, idx) => (
                                     <Link
@@ -95,22 +65,18 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                         href={`/DiFF/article/detail?id=${article.id}`}
                                         className="block"
                                     >
-                                        <div
-                                            className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition"
-                                        >
+                                        <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1">
                                                 <div className="text-sm text-gray-500">
                                                     in Trending · by{" "}
                                                     {article.extra__writer ? (
                                                         <span
                                                             onClick={(e) => {
-                                                                e.stopPropagation(); // 부모 Link 클릭 막기
+                                                                e.stopPropagation();
                                                                 e.preventDefault();
-                                                                window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(
-                                                                    article.extra__writer
-                                                                )}`;
+                                                                window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`;
                                                             }}
-                                                            className="hover:underline hover:text-black cursor-pointer "
+                                                            className="hover:underline hover:text-black cursor-pointer"
                                                         >
                                                             {article.extra__writer}
                                                         </span>
@@ -118,7 +84,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                         "Unknown"
                                                     )}
                                                 </div>
-
                                                 <div className="my-2">
                                                     <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
                                                     <p className="h-12 text-gray-600">
@@ -132,10 +97,9 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
                                                 </div>
                                             </div>
-                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl"/>
+                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl" />
                                         </div>
                                     </Link>
-
                                 ))
                             ) : (
                                 <div>트렌딩 게시물이 없습니다.</div>
@@ -143,17 +107,17 @@ export default function AfterMainPage({ me, trendingArticles }) {
                         )}
 
                         {/* 🔹 Following */}
-                        {activeTab === "Following" && !loading && (
-                            followingArticles && followingArticles.length > 0 ? (
+                        {activeTab === "Following" && (
+                            followingArticles === null ? ( // 아직 API 응답 전
+                                <></>
+                            ) : followingArticles.length > 0 ? (
                                 followingArticles.map((article, idx) => (
                                     <div
                                         key={idx}
                                         className="block cursor-pointer"
                                         onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
                                     >
-                                        <div
-                                            className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition"
-                                        >
+                                        <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
                                             <div className="flex-1">
                                                 <div className="text-sm text-gray-500">
                                                     in Following · by{" "}
@@ -191,7 +155,6 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                 <div>팔로잉한 사람이 작성한 게시물이 없습니다.</div>
                             )
                         )}
-
                     </main>
                 </div>
             </div>

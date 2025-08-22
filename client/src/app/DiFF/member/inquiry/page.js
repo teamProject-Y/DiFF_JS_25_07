@@ -38,48 +38,49 @@ export default function InquiryForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="max-w-md mx-auto bg-white shadow-lg rounded-2xl p-6 space-y-4"
+            className="max-w-md mx-auto bg-amber-100 mt-20 p-6 space-y-4"
         >
-            <h2 className="text-xl font-semibold text-gray-800 text-center">문의하기</h2>
+
+            <h2 className="text-3xl font-semiboltext-gray-800 text-center">Please contact us</h2>
 
             <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">제목</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Title</label>
                 <input
                     type="text"
-                    placeholder="제목을 입력하세요"
+                    placeholder="Please enter a title"
                     value={inquiry.title}
                     onChange={e => setInquiry({ ...inquiry, title: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">이메일</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
                 <input
                     type="email"
-                    placeholder="이메일 주소"
+                    placeholder="Email address"
                     value={inquiry.email}
                     onChange={e => setInquiry({ ...inquiry, email: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">문의 내용</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Inquiry details</label>
                 <textarea
-                    placeholder="문의 내용을 입력하세요"
+                    placeholder="Please write your inquiry"
                     value={inquiry.body}
                     onChange={e => setInquiry({ ...inquiry, body: e.target.value })}
                     rows="5"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none resize-none"
                 />
             </div>
 
             <button
                 type="submit"
-                className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+                className="w-full bg-black text-white font-semibold py-2 rounded-lg shadow-md hover:bg-gray-800 transition-colors"
             >
-                문의하기
+                Submit
             </button>
         </form>
     );
