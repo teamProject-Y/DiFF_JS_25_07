@@ -268,7 +268,7 @@ function ArticleDetailInner() {
                     {/* 본문 */}
                     <div
                         className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
-                        <ToastViewer content={article.body} />
+                        <ToastViewer content={article.body} showImages={true} />
                     </div>
 
                     {/* 하단 버튼 영역 */}

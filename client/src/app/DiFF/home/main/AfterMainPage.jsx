@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { followingArticleList } from "@/lib/ArticleAPI";
 import { getFollowingList } from "@/lib/UserAPI";
+import ToastViewer from "@/common/toastViewer";
 
 // 게시물에 이미지 있는지 확인
 function extractFirstImage(body) {
@@ -50,7 +51,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
         <div className="w-full min-h-screen bg-white text-black">
             <div className="h-screen">
                 <div className="mx-auto px-6 py-10 flex justify-around">
-                    <main className="flex-grow-1 mr-10">
+                    <main className="flex-grow mx-28">
                         {/* 탭 버튼 */}
                         <div className="flex items-center border-b">
                             {["Trending", "Following"].map((t) => (
@@ -74,60 +75,60 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                     trendingArticles.map((article, idx) => {
                                         const imgSrc = extractFirstImage(article.body);
                                         return (
-                                    <Link
-                                        key={idx}
-                                        href={`/DiFF/article/detail?id=${article.id}`}
-                                        className="block"
-                                    >
-                                        <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                            <div className="flex-1">
-                                                <div className="text-sm text-gray-500">
+                                            <div
+                                                key={idx}
+                                                className="block cursor-pointer"
+                                                onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                            >
+                                                <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
+                                                    <div className="flex flex-col flex-grow">
+                                                        <div className="text-sm text-gray-500">
                                                     in Trending · by{" "}
-                                                    {article.extra__writer ? (
-                                                        <span
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                e.preventDefault();
-                                                                window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`;
-                                                            }}
-                                                            className="hover:underline hover:text-black cursor-pointer"
-                                                        >
-                                                            {article.extra__writer}
-                                                        </span>
-                                                    ) : (
-                                                        "Unknown"
-                                                    )}
-                                                </div>
-                                                <div className="my-2">
-                                                    <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
-                                                    <p className="h-12 text-gray-600">
-                                                        {article.body?.slice(0, 100) || "내용 미리보기 없음"}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    <span>{new Date(article.regDate).toLocaleDateString("en-US", {
-                                                        year: "numeric",
-                                                        month: "short",
-                                                        day: "numeric"
-                                                    })}</span>
-                                                    <span>👀 {article.hits}</span>
-                                                    <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                    <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                            {article.extra__writer ? (
+                                                                <Link
+                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                    className="hover:underline hover:text-black cursor-pointer"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    {article.extra__writer}
+                                                                </Link>
+                                                            ) : (
+                                                                "Unknown"
+                                                            )}
+                                                        </div>
+
+                                                        <div className="my-2">
+                                                            <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
+                                                            <div className="h-12 text-gray-600">
+                                                                <div className="h-12 text-gray-600">
+                                                                    <ToastViewer showImages={false} content={article.body?.slice(0, 100) || "내용 미리보기 없음"} />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                        <span>{new Date(article.regDate).toLocaleDateString("en-US", {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric"
+                                                        })}</span>
+                                                            <span>view: {article.hits}</span>
+                                                            <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
+                                                            <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                        {imgSrc ? (
+                                                            <img
+                                                                src={imgSrc}
+                                                                alt="thumbnail"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-gray-400">No Image</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
-                                                {imgSrc ? (
-                                                    <img
-                                                        src={imgSrc}
-                                                        alt="thumbnail"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <span className="text-gray-400">No Image</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </Link>
                                         );
                                     })
                             ) : (
@@ -149,7 +150,7 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                             onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
                                         >
                                             <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                                <div className="flex-1">
+                                                <div className="flex flex-col flex-grow">
                                                     <div className="text-sm text-gray-500">
                                                         in Following · by{" "}
                                                         {article.extra__writer ? (
@@ -167,9 +168,11 @@ export default function AfterMainPage({ me, trendingArticles }) {
 
                                                     <div className="my-2">
                                                         <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
-                                                        <p className="h-12 text-gray-600">
-                                                            {article.body?.slice(0, 100) || "내용 미리보기 없음"}
-                                                        </p>
+                                                        <div className="h-12 text-gray-600">
+                                                            <div className="h-12 text-gray-600">
+                                                                <ToastViewer showImages={false} content={article.body?.slice(0, 100) || "내용 미리보기 없음"} />
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div className="flex items-center gap-4 text-sm text-gray-500">
                                                         <span>{new Date(article.regDate).toLocaleDateString("en-US", {

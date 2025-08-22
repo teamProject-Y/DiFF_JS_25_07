@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import "@toast-ui/editor/dist/toastui-editor-viewer.css";
 
-export default function ToastViewer({ content }) {
+export default function ToastViewer({ content, showImages = true }) {
     const viewerRef = useRef(null);
     const instanceRef = useRef(null);
 
@@ -17,7 +17,14 @@ export default function ToastViewer({ content }) {
                 viewerInstance = new Viewer({
                     el: viewerRef.current,
                     initialValue: content || "",
-                    customHTMLSanitizer: (html) => html,
+                    // 이미지 제거 여부 제어
+                    customHTMLSanitizer: (html) => {
+                        if (!showImages) {
+                            // <img> 태그를 전부 제거
+                            return html.replace(/<img[^>]*>/g, "");
+                        }
+                        return html;
+                    },
                 });
                 instanceRef.current = viewerInstance;
             }
@@ -31,7 +38,7 @@ export default function ToastViewer({ content }) {
                 instanceRef.current = null;
             }
         };
-    }, [content]);
+    }, [content, showImages]);
 
     return <div ref={viewerRef}></div>;
 }
