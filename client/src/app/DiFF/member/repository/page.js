@@ -1,5 +1,3 @@
-// src/app/DiFF/member/repository/page.jsx (혹은 해당 파일)
-
 'use client';
 
 import {useRouter} from 'next/navigation';
@@ -80,6 +78,25 @@ export default function RepositoriesPage() {
                                 )}
                             </AnimatePresence>
                         </div>
+                    </div>
+                    <br/>
+                    {/* 레포 이동 */}
+                    <div className="text-center mb-6">
+                        <button
+                            onClick={() => router.push('/DiFF/member/profile')}
+                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                        >
+                            내 프로필 보기
+                        </button>
+                    </div>
+
+                    <div className="text-center mt-6">
+                        <button
+                            onClick={() => router.replace('/DiFF/home/main')}
+                            className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
+                        >
+                            메인으로 가기
+                        </button>
                     </div>
                 </div>
             </section>

@@ -6,7 +6,7 @@ import { login } from '@/lib/UserAPI';
 
 export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/main', afterLoginUriFromPage }) {
     // ===== 폼 상태 =====
-    const [values, setValues] = useState({ loginId: '', loginPw: '' });
+    const [values, setValues] = useState({ email: '', loginPw: '' });
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -21,8 +21,8 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        if (!values.loginId || !values.loginPw) {
-            setError('아이디와 비밀번호를 입력하세요.');
+        if (!values.email || !values.loginPw) {
+            setError('이메일와 비밀번호를 입력하세요.');
             return;
         }
         try {
@@ -70,7 +70,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
         hidden:{ opacity: 0, transition: { duration: 0.35, ease: 'easeOut' } },
     };
 
-    // ✅ 라운드 유지: translate 대신 clip-path로 왼→오 열기
+    // 라운드 유지: translate 대신 clip-path로 왼→오 열기
     const coverVariants = {
         initial: { clipPath: 'inset(0% 0% 0% 0% round 24px)' },          // 전부 덮힘
         slide:   {
@@ -124,6 +124,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
         show:   { opacity: 1, transition: { duration: 0.25 } },
         exit:   { opacity: 0, transition: { duration: 0.2 } },
     };
+
     const modal = {
         hidden: { opacity: 0, scale: 0.98, y: 10, filter: 'blur(6px)' },
         show:   { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
@@ -189,11 +190,11 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
                                             <form name="login" className="flex flex-col items-center" onSubmit={handleSubmit}>
                                                 <input
                                                     type="text"
-                                                    name="loginId"
-                                                    id="loginId"
-                                                    value={values.loginId}
+                                                    name="email"
+                                                    id="email"
+                                                    value={values.email}
                                                     onChange={handleChange}
-                                                    placeholder="ID"
+                                                    placeholder="email"
                                                     className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-[min(420px,90%)] p-3"
                                                     autoComplete="username"
                                                     required
@@ -234,7 +235,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
                                                     <svg viewBox="0 0 16 16" aria-hidden="true" className="w-5 h-5 fill-current">
                                                         <path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.6 2.29 6.65 5.47 7.73.4.08.55-.18.55-.39 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.16-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.22 1.87.87 2.33.66.07-.53.28-.87.51-1.07-1.78-.21-3.64-.91-3.64-4.04 0-.89.31-1.62.82-2.19-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.84A7.5 7.5 0 0 1 8 3.88c.68 0 1.36.09 2 .26 1.53-1.06 2.2-.84 2.2-.84.44 1.1.16 1.92.08 2.12.51.57.82 1.3.82 2.19 0 3.14-1.87 3.83-3.65 4.04.29.25.54.74.54 1.5 0 1.08-.01 1.95-.01 2.22 0 .21.15.47.55.39A8.14 8.14 0 0 0 16 8.13C16 3.64 12.42 0 8 0z"/>
                                                     </svg>
-                                                    <span>GitHub로 로그인</span>
+                                                    <span>Sign in with GitHub</span>
                                                 </a>
 
                                                 <a
