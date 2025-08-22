@@ -21,7 +21,7 @@ SwiperSlide.displayName   = 'SwiperSlide';
 const OverlayMenu     = dynamic(() => import('@/common/overlayMenu'), { ssr: false });
 const HamburgerButton = dynamic(() => import('@/common/HamMenu'), { ssr: false });
 
-// 로그인 분기용: 만료/리프레시 (페이지 내부 간단 버전)
+// 로그인 분기용: 만료/리프레시
 function isExpired(token, skewMs = 30000) {
     try {
         const payload = JSON.parse(atob((token?.split?.('.')[1] || '')));
@@ -98,17 +98,17 @@ import BeforeMainPage from './BeforeMainPage';
 import AfterMainPage   from './AfterMainPage';
 
 export default function Page() {
-    const [log, setLog] = useState([]);               // (PreLoginTerminal 내부로 이동됨 — 여기선 유지해도 무해)
-    const [step, setStep] = useState(0);              // ↑ 같은 이유로 그대로 둬도 동작에는 영향 없음
-    const [input, setInput] = useState('');           // (필요시 제거 가능)
-    const [showInput, setShowInput] = useState(false);
+    // const [log, setLog] = useState([]);               // (PreLoginTerminal 내부로 이동됨 — 여기선 유지해도 무해)
+    // const [step, setStep] = useState(0);              // ↑ 같은 이유로 그대로 둬도 동작에는 영향 없음
+    // const [input, setInput] = useState('');           // (필요시 제거 가능)
+    // const [showInput, setShowInput] = useState(false);
     const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [accessToken, setAccessToken] = useState(null);
     const [user, setUser] = useState({ email: '', blogName: '' });
-    const [currentResultText, setCurrentResultText] = useState(null);
-    const [showResultAnim, setShowResultAnim] = useState(false);
-    const [lastDoneStep, setLastDoneStep] = useState(-1);
+    // const [currentResultText, setCurrentResultText] = useState(null);
+    // const [showResultAnim, setShowResultAnim] = useState(false);
+    // const [lastDoneStep, setLastDoneStep] = useState(-1);
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -196,6 +196,13 @@ export default function Page() {
                     )}
                 </div>
             </div>
+
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+
 
             {/* overlay menu */}
             <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />

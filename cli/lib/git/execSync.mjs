@@ -244,7 +244,7 @@ export function getDiFF(from, to) {
 
     return new Promise((resolve, reject) => {
         const extensions = ['.mjs', '.jsx', '.java', '.ts', '.tsx', '.jsp', '.js',
-            '.py', '.c', '.cs', '.cpp', '.php', '.go', '.rs', '.rb', '.kt', '.swift'];
+            '.py', '.c', '.cs', '.cpp', '.php', '.go', '.rs', '.rb', '.kt', '.swift', '.xml'];
 
         const gitignoreFilter = getGitIgnoreFilter();
 
