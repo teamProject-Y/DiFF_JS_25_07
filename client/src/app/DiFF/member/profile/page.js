@@ -14,7 +14,6 @@ export default function MyInfoPage() {
     );
 }
 
-
 function MyInfoInner() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -23,6 +22,39 @@ function MyInfoInner() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [profileUrl, setProfileUrl] = useState("");
     const [isMyProfile, setIsMyProfile] = useState(false);
+    const [linked, setLinked] = useState({ google: false, github: false });
+
+    useEffect(() => {
+        const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
+        if (!accessToken) return;
+
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        fetch(`${base}/api/DiFF/auth/linked`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            credentials: 'include',
+        })
+            .then(res => res.ok ? res.json() : Promise.reject(res))
+            .then(data => {
+                // data = { google: bool, github: bool }
+                setLinked({
+                    google: !!data.google,
+                    github: !!data.github,
+                });
+            })
+            .catch(() => {
+                // 필요 시 무시 또는 알림
+            });
+    }, []);
+
+    // 방금 연동해서 SuccessHandler가 ?linked=google 로 돌려보냈을 때 즉시 반영
+    useEffect(() => {
+        const justLinked = searchParams.get('linked'); // google | github
+        if (justLinked === 'google' || justLinked === 'github') {
+            setLinked(prev => ({ ...prev, [justLinked]: true }));
+            // 필요하면 쿼리스트링 정리
+            // router.replace('/DiFF/home/main');
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -66,13 +98,12 @@ function MyInfoInner() {
         }
     };
 
-    // JS: 타입 표기 제거
+    // 소셜 로그인 통합, 연동
     const startLink = (provider) => {
-        if (provider !== 'google' && provider !== 'github') return; // 가드
+        if (provider !== 'google' && provider !== 'github') return;
 
-        // 같은 도메인에서 프록시한다면 base는 빈 문자열("")이면 됩니다.
         const url = `/api/DiFF/auth/link/${provider}?mode=link`;
-        window.location.href = url; // 풀 리로드로 OAuth 시작
+        window.location.href = url;
     };
 
     if (loading) return <div>로딩...</div>;
@@ -134,25 +165,45 @@ function MyInfoInner() {
                                 <ThemeToggle />
 
                                 {/* 소셜 연동 버튼 */}
+                                {/* 소셜 연동 버튼 */}
                                 <div className="flex items-center gap-3 mt-3">
+                                    {/* 구글 */}
                                     <button
                                         type="button"
-                                        onClick={() => startLink('google')}
+                                        onClick={() => !linked.google && startLink('google')}
                                         id="connect-google"
-                                        className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-400"
+                                        disabled={linked.google}
+                                        aria-disabled={linked.google}
+                                        className={
+                                            `px-4 py-2 rounded text-white ` +
+                                            (linked.google
+                                                ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                                                : 'bg-red-500 hover:bg-red-400')
+                                        }
+                                        title={linked.google ? '이미 연동됨' : '구글 계정 연동'}
                                     >
-                                        구글 연동
+                                        {linked.google ? '구 연동 완료' : '구글 연동'}
                                     </button>
 
+                                    {/* 깃허브 */}
                                     <button
                                         type="button"
-                                        onClick={() => startLink('github')}
+                                        onClick={() => !linked.github && startLink('github')}
                                         id="connect-github"
-                                        className="px-4 py-2 rounded bg-gray-800 text-white hover:bg-gray-700"
+                                        disabled={linked.github}
+                                        aria-disabled={linked.github}
+                                        className={
+                                            `px-4 py-2 rounded text-white ` +
+                                            (linked.github
+                                                ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                                                : 'bg-gray-800 hover:bg-gray-700')
+                                        }
+                                        title={linked.github ? '이미 연동됨' : '깃허브 계정 연동'}
                                     >
-                                        깃허브 연동
+                                        {linked.github ? '깃 연동 완료' : '깃허브 연동'}
                                     </button>
                                 </div>
+
 
                             </div>
                         )}

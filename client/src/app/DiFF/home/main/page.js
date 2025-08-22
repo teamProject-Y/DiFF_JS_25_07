@@ -178,19 +178,22 @@ export default function Page() {
                                 resizeObserver={true}
                             >
                                 {trendingArticles.length > 0 ? (
-                                    trendingArticles.map((article, index) => (
+                                    trendingArticles.slice(0, 10).map((article, index) => (   // 🔹 앞에서 10개만
                                         <SwiperSlide key={index}>
-                                            <div className="article-card h-[90%] p-4 bg-white shadow-md rounded-md">
-                                                <h3 className="text-xl font-semibold">{article.title}</h3>
-                                                <p>{article.extra_writer}</p>
-                                                <p className="text-sm text-gray-600">조회수: {article.hits}</p>
-                                                <p className="text-sm text-gray-600">작성일: {article.regDate}</p>
-                                            </div>
+                                            <Link href={`/DiFF/article/detail?id=${article.id}`}>
+                                                <div className="article-card h-[90%] p-4 bg-white shadow-md rounded-md cursor-pointer hover:shadow-lg transition">
+                                                    <h3 className="text-xl font-semibold">{article.title}</h3>
+                                                    <p>{article.extra_writer}</p>
+                                                    <p className="text-sm text-gray-600">조회수: {article.hits}</p>
+                                                    <p className="text-sm text-gray-600">작성일: {article.regDate}</p>
+                                                </div>
+                                            </Link>
                                         </SwiperSlide>
                                     ))
                                 ) : (
                                     <div>트렌딩 게시물이 없습니다.</div>
                                 )}
+
                             </SwiperWrapper>
                         )
                     )}

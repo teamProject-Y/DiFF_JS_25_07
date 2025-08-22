@@ -258,7 +258,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
                             </div>
                         </div>
 
-                        {/* Loading Layer (흰 카드 + CERTIFY) */}
+                        {/* Loading Layer (흰 카드 + DiFF) */}
                         <motion.div
                             className="absolute inset-0 z-50 flex items-center justify-center rounded-3xl bg-white pointer-events-none"
                             variants={loadingLayerVariants}
@@ -272,7 +272,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
                                 animate={logoCtrl}
                                 style={{ transformStyle: 'preserve-3d' }}
                             >
-                                {'CERTIFY'.split('').map((ch, i) => (
+                                {'DiFF'.split('').map((ch, i) => (
                                     <motion.span
                                         key={i}
                                         className="inline-block"
