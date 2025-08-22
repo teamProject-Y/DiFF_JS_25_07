@@ -236,7 +236,18 @@ function ArticleDetailInner() {
                     {/* article info */}
                     <div className="text-sm text-gray-600 mb-6 flex justify-between">
                         <div>
-                            <span>작성자: {article.extra__writer ?? '익명'}</span>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation(); // 부모 Link 클릭 막기
+                                    e.preventDefault();
+                                    window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(
+                                        article.extra__writer
+                                    )}`;
+                                }}
+                                className="hover:underline hover:text-black cursor-pointer "
+                            >
+                                                            {article.extra__writer}
+                                                        </span>
                             <span>작성일: {article.regDate}</span>
                         </div>
                         <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
@@ -255,12 +266,12 @@ function ArticleDetailInner() {
 
                     {/* 하단 버튼 영역 */}
                     <div className="mt-8 flex gap-4">
-                        <Link
-                            href={`/DiFF/article/list?repositoryId=${article.repositoryId}`}
+                        <button
+                            onClick={() => router.back()}
                             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
                         >
-                            목록으로
-                        </Link>
+                            뒤로가기
+                        </button>
 
                         {article.userCanModify && (
                             <Link
