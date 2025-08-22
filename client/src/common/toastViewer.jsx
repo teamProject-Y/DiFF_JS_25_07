@@ -17,6 +17,7 @@ export default function ToastViewer({ content }) {
                 viewerInstance = new Viewer({
                     el: viewerRef.current,
                     initialValue: content || "",
+                    customHTMLSanitizer: (html) => html,
                 });
                 instanceRef.current = viewerInstance;
             }

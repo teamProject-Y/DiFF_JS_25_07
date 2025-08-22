@@ -5,9 +5,21 @@ import { useEffect, useState } from "react";
 import { followingArticleList } from "@/lib/ArticleAPI";
 import { getFollowingList } from "@/lib/UserAPI";
 
+// 게시물에 이미지 있는지 확인
+function extractFirstImage(body) {
+    if (!body) return null;
+    const match = body.match(/!\[[^\]]*\]\(([^)]+)\)/);
+    if (match) {
+        console.log("이미지 URL:", match[1]);
+    }
+
+    match? console.log(match[1]) : console.log("no match");
+    return match ? match[1] : null;
+}
+
 export default function AfterMainPage({ me, trendingArticles }) {
     const [activeTab, setActiveTab] = useState("Trending");
-    const [followingArticles, setFollowingArticles] = useState(null); // ✅ 초기 null
+    const [followingArticles, setFollowingArticles] = useState(null);
     const [following, setFollowing] = useState([]);
     const [member, setMember] = useState([]);
 
@@ -59,7 +71,9 @@ export default function AfterMainPage({ me, trendingArticles }) {
                         {/* 🔹 Trending */}
                         {activeTab === "Trending" && (
                             trendingArticles && trendingArticles.length > 0 ? (
-                                trendingArticles.map((article, idx) => (
+                                    trendingArticles.map((article, idx) => {
+                                        const imgSrc = extractFirstImage(article.body);
+                                        return (
                                     <Link
                                         key={idx}
                                         href={`/DiFF/article/detail?id=${article.id}`}
@@ -101,10 +115,21 @@ export default function AfterMainPage({ me, trendingArticles }) {
                                                     <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
                                                 </div>
                                             </div>
-                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl" />
+                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                {imgSrc ? (
+                                                    <img
+                                                        src={imgSrc}
+                                                        alt="thumbnail"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-gray-400">No Image</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </Link>
-                                ))
+                                        );
+                                    })
                             ) : (
                                 <div>트렌딩 게시물이 없습니다.</div>
                             )
@@ -112,53 +137,66 @@ export default function AfterMainPage({ me, trendingArticles }) {
 
                         {/* 🔹 Following */}
                         {activeTab === "Following" && (
-                            followingArticles === null ? ( // 아직 API 응답 전
+                            followingArticles === null ? (
                                 <></>
                             ) : followingArticles.length > 0 ? (
-                                followingArticles.map((article, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="block cursor-pointer"
-                                        onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
-                                    >
-                                        <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                            <div className="flex-1">
-                                                <div className="text-sm text-gray-500">
-                                                    in Following · by{" "}
-                                                    {article.extra__writer ? (
-                                                        <Link
-                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                            className="hover:underline hover:text-black cursor-pointer"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            {article.extra__writer}
-                                                        </Link>
+                                followingArticles.map((article, idx) => {
+                                    const imgSrc = extractFirstImage(article.body);
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className="block cursor-pointer"
+                                            onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                        >
+                                            <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
+                                                <div className="flex-1">
+                                                    <div className="text-sm text-gray-500">
+                                                        in Following · by{" "}
+                                                        {article.extra__writer ? (
+                                                            <Link
+                                                                href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                className="hover:underline hover:text-black cursor-pointer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {article.extra__writer}
+                                                            </Link>
+                                                        ) : (
+                                                            "Unknown"
+                                                        )}
+                                                    </div>
+
+                                                    <div className="my-2">
+                                                        <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
+                                                        <p className="h-12 text-gray-600">
+                                                            {article.body?.slice(0, 100) || "내용 미리보기 없음"}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                        <span>{new Date(article.regDate).toLocaleDateString("en-US", {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric"
+                                                        })}</span>
+                                                        <span>view: {article.hits}</span>
+                                                        <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
+                                                        <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    {imgSrc ? (
+                                                        <img
+                                                            src={imgSrc}
+                                                            alt="thumbnail"
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     ) : (
-                                                        "Unknown"
+                                                        <span className="text-gray-400">No Image</span>
                                                     )}
                                                 </div>
-
-                                                <div className="my-2">
-                                                    <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
-                                                    <p className="h-12 text-gray-600">
-                                                        {article.body?.slice(0, 100) || "내용 미리보기 없음"}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    <span>{new Date(article.regDate).toLocaleDateString("en-US", {
-                                                        year: "numeric",
-                                                        month: "short",
-                                                        day: "numeric"
-                                                    })}</span>
-                                                    <span>view: {article.hits}</span>
-                                                    <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                    <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
-                                                </div>
                                             </div>
-                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl" />
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <div>팔로잉한 사람이 작성한 게시물이 없습니다.</div>
                             )
@@ -169,3 +207,4 @@ export default function AfterMainPage({ me, trendingArticles }) {
         </div>
     );
 }
+
