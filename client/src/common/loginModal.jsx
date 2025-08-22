@@ -6,7 +6,7 @@ import { login } from '@/lib/UserAPI';
 
 export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/main', afterLoginUriFromPage }) {
     // ===== 폼 상태 =====
-    const [values, setValues] = useState({ loginId: '', loginPw: '' });
+    const [values, setValues] = useState({ email: '', loginPw: '' });
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -21,8 +21,8 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        if (!values.loginId || !values.loginPw) {
-            setError('아이디와 비밀번호를 입력하세요.');
+        if (!values.email || !values.loginPw) {
+            setError('이메일와 비밀번호를 입력하세요.');
             return;
         }
         try {
@@ -70,7 +70,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
         hidden:{ opacity: 0, transition: { duration: 0.35, ease: 'easeOut' } },
     };
 
-    // ✅ 라운드 유지: translate 대신 clip-path로 왼→오 열기
+    // 라운드 유지: translate 대신 clip-path로 왼→오 열기
     const coverVariants = {
         initial: { clipPath: 'inset(0% 0% 0% 0% round 24px)' },          // 전부 덮힘
         slide:   {
@@ -124,6 +124,7 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
         show:   { opacity: 1, transition: { duration: 0.25 } },
         exit:   { opacity: 0, transition: { duration: 0.2 } },
     };
+
     const modal = {
         hidden: { opacity: 0, scale: 0.98, y: 10, filter: 'blur(6px)' },
         show:   { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
@@ -189,11 +190,11 @@ export default function LoginModal({ open, onClose, callbackUrl = '/DiFF/home/ma
                                             <form name="login" className="flex flex-col items-center" onSubmit={handleSubmit}>
                                                 <input
                                                     type="text"
-                                                    name="loginId"
-                                                    id="loginId"
-                                                    value={values.loginId}
+                                                    name="email"
+                                                    id="email"
+                                                    value={values.email}
                                                     onChange={handleChange}
-                                                    placeholder="ID"
+                                                    placeholder="email"
                                                     className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-[min(420px,90%)] p-3"
                                                     autoComplete="username"
                                                     required
