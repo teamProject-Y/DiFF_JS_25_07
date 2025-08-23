@@ -33,10 +33,6 @@ function WriteArticlePage() {
     const [error, setError] = useState('');
     const [repoError, setRepoError] = useState('');
 
-    // editor
-    const editorRef = useRef(null);
-    const editorInstance = useRef(null);
-
     // 로그인 체크
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');

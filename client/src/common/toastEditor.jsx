@@ -7,11 +7,11 @@ import "@toast-ui/editor/dist/toastui-editor.css";
 const handleUpload = async (file) => {
     const data = new FormData();
     data.append("file", file);
-    data.append("upload_preset", "-");
-    data.append("cloud_name", "-");
+    data.append("upload_preset", "teamproject_Y");
+    data.append("cloud_name", "dc12fahac");
 
     const res = await fetch(
-        "https://api.cloudinary.com/v1_1/-/image/upload",
+        "https://api.cloudinary.com/v1_1/dc12fahac/image/upload",
         { method: "POST", body: data }
     );
     const result = await res.json();
@@ -27,7 +27,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
             height: "500px",
             initialEditType: "markdown",
             previewStyle: "vertical",
-            initialValue,
+            initialValue: initialValue || "",
         });
 
         instance.addHook("addImageBlobHook", async (blob /* , callback */) => {
@@ -44,7 +44,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
         });
 
         return () => instance.destroy();
-    }, []);
+    }, [initialValue]);
 
     return <div ref={editorRef}></div>;
 }

@@ -1,25 +1,27 @@
 // pages/usr/home/page.js
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useRouter } from "next/navigation"
 
-import { trendingArticle } from '@/lib/ArticleAPI';
+import {trendingArticle} from '@/lib/ArticleAPI';
 
 // 동적 import (Swiper)
-import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
+import {Navigation, Pagination, A11y, Autoplay} from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-const SwiperWrapper = dynamic(() => import('swiper/react').then(mod => mod.Swiper), { ssr: false });
-const SwiperSlide   = dynamic(() => import('swiper/react').then(mod => mod.SwiperSlide), { ssr: false });
+
+const SwiperWrapper = dynamic(() => import('swiper/react').then(mod => mod.Swiper), {ssr: false});
+const SwiperSlide = dynamic(() => import('swiper/react').then(mod => mod.SwiperSlide), {ssr: false});
 SwiperWrapper.displayName = 'SwiperWrapper';
-SwiperSlide.displayName   = 'SwiperSlide';
+SwiperSlide.displayName = 'SwiperSlide';
 
 // 외부 컴포넌트
-const OverlayMenu     = dynamic(() => import('@/common/overlayMenu'), { ssr: false });
-const HamburgerButton = dynamic(() => import('@/common/HamMenu'), { ssr: false });
+const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), {ssr: false});
+const HamburgerButton = dynamic(() => import('@/common/HamMenu'), {ssr: false});
 
 // 로그인 분기용: 만료/리프레시
 function isExpired(token, skewMs = 30000) {
@@ -31,6 +33,7 @@ function isExpired(token, skewMs = 30000) {
         return true;
     }
 }
+
 async function tryRefresh() {
     if (typeof window === 'undefined') return false;
     const rt = localStorage.getItem('refreshToken');
@@ -38,7 +41,7 @@ async function tryRefresh() {
     try {
         const res = await fetch('/DiFF/auth/refresh', {
             method: 'GET',
-            headers: { 'REFRESH_TOKEN': rt },
+            headers: {'REFRESH_TOKEN': rt},
             credentials: 'include',
         });
         if (!res.ok) return false;
@@ -52,6 +55,7 @@ async function tryRefresh() {
         return false;
     }
 }
+
 function useMountedLogin() {
     const [mounted, setMounted] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
@@ -59,7 +63,10 @@ function useMountedLogin() {
         setMounted(true);
         const compute = async () => {
             const t = localStorage.getItem('accessToken');
-            if (t && !isExpired(t)) { setLoggedIn(true); return; }
+            if (t && !isExpired(t)) {
+                setLoggedIn(true);
+                return;
+            }
             const ok = await tryRefresh();
             setLoggedIn(ok); // ✅ 오타 수정: setLoggedIn(오케이) → setLoggedIn(ok)
         };
@@ -72,7 +79,7 @@ function useMountedLogin() {
             window.removeEventListener('storage', onChange);
         };
     }, []);
-    return { mounted, loggedIn };
+    return {mounted, loggedIn};
 }
 
 // JWT payload 파싱 (사용자 코드 유지)
@@ -95,7 +102,19 @@ function parseJwt(token) {
 
 // 분기용 컴포넌트 import (2개만)
 import BeforeMainPage from './BeforeMainPage';
-import AfterMainPage   from './AfterMainPage';
+import AfterMainPage from './AfterMainPage';
+import removeMd from "remove-markdown";
+
+function extractFirstImage(body) {
+    if (!body) return null;
+    const match = body.match(/!\[[^\]]*\]\(([^)]+)\)/);
+    if (match) {
+        console.log("이미지 URL:", match[1]);
+    }
+
+    match ? console.log(match[1]) : console.log("no match");
+    return match ? match[1] : null;
+}
 
 export default function Page() {
     // const [log, setLog] = useState([]);               // (PreLoginTerminal 내부로 이동됨 — 여기선 유지해도 무해)
@@ -105,14 +124,15 @@ export default function Page() {
     const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [accessToken, setAccessToken] = useState(null);
-    const [user, setUser] = useState({ email: '', blogName: '' });
+    const [user, setUser] = useState({email: '', blogName: ''});
     // const [currentResultText, setCurrentResultText] = useState(null);
     // const [showResultAnim, setShowResultAnim] = useState(false);
     // const [lastDoneStep, setLastDoneStep] = useState(-1);
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const { mounted, loggedIn } = useMountedLogin();
+    const {mounted, loggedIn} = useMountedLogin();
+    const router = useRouter();
 
     const [isClient, setIsClient] = useState(false);
 
@@ -133,7 +153,7 @@ export default function Page() {
             setAccessToken(token);
             if (token) {
                 const userInfo = parseJwt(token);
-                setUser({ email: userInfo.memberEmail, blogName: userInfo.blogName });
+                setUser({email: userInfo.memberEmail, blogName: userInfo.blogName});
             }
         }
     }, []);
@@ -142,20 +162,21 @@ export default function Page() {
 
     /* ───────────────── 분기: JWT 토큰만 보고 결정 ───────────────── */
     if (loggedIn) {
-        return <AfterMainPage me={user} trendingArticles={trendingArticles} />;
+        return <AfterMainPage me={user} trendingArticles={trendingArticles}/>;
     }
+
 
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
         <div className="w-full min-h-screen bg-[#161616]">
             <div className="h-screen">
-                <BeforeMainPage />
+                <BeforeMainPage/>
             </div>
 
             {/* trending */}
-            <div className="w-full h-screen bg-blue-500 px-36 py-10">
+            <div className="w-full h-screen bg-white px-36 py-10">
                 <div className="text-5xl text-black font-bold">Trending</div>
-                <div className="article-slider h-2/3 w-full mt-16 flex bg-blue-300">
+                <div className="article-slider h-2/3 w-full mt-16 flex">
                     {loading ? (
                         <div className="flex justify-between w-full items-start">
                             <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
@@ -168,32 +189,80 @@ export default function Page() {
                                 modules={[Navigation, Pagination, A11y, Autoplay]}
                                 spaceBetween={50}
                                 loop={true}
-                                autoplay={{ delay: 3000 }}
+                                autoplay={{delay: 3000}}
                                 slidesPerView={3}
                                 navigation
-                                pagination={{ clickable: true }}
+                                pagination={{clickable: true}}
                                 allowTouchMove={true}
                                 observer={true}
                                 observeParents={true}
                                 resizeObserver={true}
                             >
                                 {trendingArticles.length > 0 ? (
-                                    trendingArticles.slice(0, 10).map((article, index) => (   // 🔹 앞에서 10개만
-                                        <SwiperSlide key={index}>
-                                            <Link href={`/DiFF/article/detail?id=${article.id}`}>
-                                                <div className="article-card h-[90%] p-4 bg-white shadow-md rounded-md cursor-pointer hover:shadow-lg transition">
-                                                    <h3 className="text-xl font-semibold">{article.title}</h3>
-                                                    <p>{article.extra_writer}</p>
-                                                    <p className="text-sm text-gray-600">조회수: {article.hits}</p>
-                                                    <p className="text-sm text-gray-600">{new Date(article.regDate).toLocaleDateString("en-US", {
-                                                        year: "numeric",
-                                                        month: "short",
-                                                        day: "numeric"
-                                                    })}</p>
-                                                </div>
-                                            </Link>
-                                        </SwiperSlide>
-                                    ))
+                                    trendingArticles.slice(0, 10).map((article, index) => {
+                                        const imgSrc = extractFirstImage(article.body); // 본문에서 첫 이미지 추출
+                                        return (
+                                            <SwiperSlide key={article.id ?? index}>
+                                                {/*<Link href={`/DiFF/article/detail?id=${article.id}`}>*/}
+                                                    <div
+                                                        className="article-card h-[90%] bg-white shadow-md rounded-md cursor-pointer hover:shadow-lg transition"
+                                                        onClick={() => router.push(`/DiFF/article/detail?id=${article.id}`)}
+                                                        role="link"
+                                                        tabIndex={0}
+                                                        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(`/DiFF/article/detail?id=${article.id}`)}
+                                                    >
+                                                        <div
+                                                            className="h-1/2 w-full bg-gray-200 flex items-center justify-center ">
+                                                            {imgSrc ? (
+                                                                <img
+                                                                    src={imgSrc}
+                                                                    alt="thumbnail"
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <span className="text-gray-400">No Image</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="h-1/2 p-5 flex flex-col">
+                                                            <h3 className="text-xl font-semibold clamp-1 mb-2">{article.title}</h3>
+                                                            <p className="clamp-3 text-sm text-gray-600">
+                                                                {article.body ? removeMd(article.body) : ""}
+                                                            </p>
+                                                            <div className="flex-grow"></div>
+                                                            <hr/>
+                                                            <div className="text-sm flex justify-between mt-3">
+                                                                <div>by {article.extra__writer ? (
+                                                                    <Link
+                                                                        href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                        className="hover:underline hover:text-black cursor-pointer font-bold"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    >
+                                                                        {article.extra__writer}
+                                                                    </Link>
+                                                                ) : (
+                                                                    "Unknown"
+                                                                )} · {new Date(article.regDate).toLocaleDateString("en-US", {
+                                                                    year: "numeric",
+                                                                    month: "short",
+                                                                    day: "numeric"
+                                                                })}</div>
+                                                                <div className="text-sm text-gray-600">
+                                                                    <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                    <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
+                                                                </div>
+                                                            </div>
+                                                            {/* className="text-sm text-gray-600">{new Date(article.regDate).toLocaleDateString("en-US", {*/}
+                                                            {/*    year: "numeric",*/}
+                                                            {/*    month: "short",*/}
+                                                            {/*    day: "numeric"*/}
+                                                            {/*})}</p>*/}
+                                                        </div>
+                                                    </div>
+                                                {/*</Link>*/}
+                                            </SwiperSlide>
+                                        );
+                                    })
                                 ) : (
                                     <div>트렌딩 게시물이 없습니다.</div>
                                 )}
@@ -212,7 +281,8 @@ export default function Page() {
 
 
             {/* overlay menu */}
-            <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email} blogName={user.blogName} />
+            <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
+                         blogName={user.blogName}/>
             <div className="pointer-events-none">
                 <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
                     <Link href="/DiFF/member/profile">
@@ -220,7 +290,7 @@ export default function Page() {
                     </Link>
                 </div>
                 <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
-                    <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)} />
+                    <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
                 </div>
             </div>
         </div>
