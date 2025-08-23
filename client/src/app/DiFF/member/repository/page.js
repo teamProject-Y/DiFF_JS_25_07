@@ -47,10 +47,11 @@ export default function RepositoriesPage() {
                 <div className="mx-auto max-w-6xl">
                     <h2 className="text-2xl font-semibold mb-6">내 레포지토리</h2>
 
-                    <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
+                    <div
+                        className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
                         <AnimatePresence>
-                        {selectedRepo && <GhostBar repositories={repositories} selectedRepoId={selectedRepoId}
-                                                   onSelect={setSelectedRepoId}/>}
+                            {selectedRepo && <GhostBar repositories={repositories} selectedRepoId={selectedRepoId}
+                                                       onSelect={setSelectedRepoId}/>}
                         </AnimatePresence>
 
                         <div className="flex-1 relative">
@@ -69,7 +70,7 @@ export default function RepositoriesPage() {
                             <AnimatePresence>
                                 {selectedRepo && (
                                     <RepoContent
-                                        key={`detail-${selectedRepo.id}`}
+                                        key="detail"
                                         repo={selectedRepo}
                                         repositories={repositories}
                                         onChangeRepo={setSelectedRepoId}
