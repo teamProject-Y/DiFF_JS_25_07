@@ -68,7 +68,11 @@ function ArticleListInner() {
                                 {article.body}
                             </p>
                             <div className="text-sm text-gray-500 mt-2">
-                                작성자: {article.extra__writer ?? '익명'} | 작성일: {article.regDate}
+                                작성자: {article.extra__writer ?? '익명'} | {new Date(article.regDate).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                            })}
                             </div>
                         </Link>
                     </li>

@@ -136,8 +136,15 @@ export default function DraftsPage() {
                                 checksum: {draft.checksum ?? '-'}
                             </div>
                             <div className="text-xs text-gray-500">
-                                regDate: {draft.regDate ?? '-'}
+                                regDate: {draft.regDate
+                                ? new Date(draft.regDate).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric"
+                                })
+                                : '-'}
                             </div>
+
                             <div className="text-xs text-gray-500">
                                 repositoryId: {draft.repositoryId ?? '-'}
                             </div>

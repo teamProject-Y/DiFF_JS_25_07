@@ -1,13 +1,27 @@
 'use client';
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { followingArticleList } from "@/lib/ArticleAPI";
-import { getFollowingList } from "@/lib/UserAPI";
+import {useEffect, useState} from "react";
+import {followingArticleList} from "@/lib/ArticleAPI";
+import {getFollowingList} from "@/lib/UserAPI";
+import ToastViewer from "@/common/toastViewer";
+import removeMd from "remove-markdown";
 
-export default function AfterMainPage({ me, trendingArticles }) {
+// 게시물에 이미지 있는지 확인
+function extractFirstImage(body) {
+    if (!body) return null;
+    const match = body.match(/!\[[^\]]*\]\(([^)]+)\)/);
+    if (match) {
+        console.log("이미지 URL:", match[1]);
+    }
+
+    match ? console.log(match[1]) : console.log("no match");
+    return match ? match[1] : null;
+}
+
+export default function AfterMainPage({me, trendingArticles}) {
     const [activeTab, setActiveTab] = useState("Trending");
-    const [followingArticles, setFollowingArticles] = useState(null); // ✅ 초기 null
+    const [followingArticles, setFollowingArticles] = useState(null);
     const [following, setFollowing] = useState([]);
     const [member, setMember] = useState([]);
 
@@ -25,20 +39,20 @@ export default function AfterMainPage({ me, trendingArticles }) {
 
     // Following 게시글 목록 불러오기 (최초 1번만)
     useEffect(() => {
-        followingArticleList({ page: 1, repositoryId: 0, searchItem: 0, keyword: "" })
+        followingArticleList({page: 1, repositoryId: 0, searchItem: 0, keyword: ""})
             .then((res) => {
                 setFollowingArticles(res.followingArticles || []);
             })
             .catch((err) => {
                 console.error("팔로잉 로딩 오류:", err);
             });
-    }, []); // ✅ activeTab 의존성 제거
+    }, []); //
 
     return (
         <div className="w-full min-h-screen bg-white text-black">
             <div className="h-screen">
-                <div className="mx-auto px-6 py-10 flex justify-around">
-                    <main className="flex-grow-1 mr-10">
+                <div className="mx-auto px-36 py-10 flex">
+                    <main className="flex-grow">
                         {/* 탭 버튼 */}
                         <div className="flex items-center border-b">
                             {["Trending", "Following"].map((t) => (
@@ -59,48 +73,66 @@ export default function AfterMainPage({ me, trendingArticles }) {
                         {/* 🔹 Trending */}
                         {activeTab === "Trending" && (
                             trendingArticles && trendingArticles.length > 0 ? (
-                                trendingArticles.map((article, idx) => (
-                                    <Link
-                                        key={idx}
-                                        href={`/DiFF/article/detail?id=${article.id}`}
-                                        className="block"
-                                    >
-                                        <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                            <div className="flex-1">
-                                                <div className="text-sm text-gray-500">
-                                                    in Trending · by{" "}
-                                                    {article.extra__writer ? (
-                                                        <span
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                e.preventDefault();
-                                                                window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`;
-                                                            }}
-                                                            className="hover:underline hover:text-black cursor-pointer"
-                                                        >
-                                                            {article.extra__writer}
-                                                        </span>
+                                trendingArticles.map((article, idx) => {
+                                    const imgSrc = extractFirstImage(article.body);
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className="block cursor-pointer"
+                                            onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                        >
+                                            <div
+                                                className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
+                                                <div className="h-full w-[70%] pr-8 flex flex-col">
+                                                    <div className="text-sm text-gray-500">
+                                                        in Trending · by{" "}
+                                                        {article.extra__writer ? (
+                                                            <Link
+                                                                href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                className="hover:underline hover:text-black cursor-pointer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {article.extra__writer}
+                                                            </Link>
+                                                        ) : (
+                                                            "Unknown"
+                                                        )}
+                                                    </div>
+                                                    <div className="py-2 flex-grow">
+                                                        <h2 className="text-2xl py-2 font-black">{article.title}</h2>
+                                                        <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
+                                                            {article.body ? removeMd(article.body) : ""}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                            <span>{new Date(article.regDate).toLocaleDateString("en-US", {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric"
+                                                            })}</span>
+                                                        <span>view: {article.hits}</span>
+                                                        <span><i
+                                                            className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
+                                                        <span><i
+                                                            className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    {imgSrc ? (
+                                                        <img
+                                                            src={imgSrc}
+                                                            alt="thumbnail"
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     ) : (
-                                                        "Unknown"
+                                                        <span className="text-gray-400">No Image</span>
                                                     )}
                                                 </div>
-                                                <div className="my-2">
-                                                    <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
-                                                    <p className="h-12 text-gray-600">
-                                                        {article.body?.slice(0, 100) || "내용 미리보기 없음"}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    <span>{article.regDate}</span>
-                                                    <span>👀 {article.hits}</span>
-                                                    <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                    <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
-                                                </div>
                                             </div>
-                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl" />
                                         </div>
-                                    </Link>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <div>트렌딩 게시물이 없습니다.</div>
                             )
@@ -108,49 +140,69 @@ export default function AfterMainPage({ me, trendingArticles }) {
 
                         {/* 🔹 Following */}
                         {activeTab === "Following" && (
-                            followingArticles === null ? ( // 아직 API 응답 전
+                            followingArticles === null ? (
                                 <></>
                             ) : followingArticles.length > 0 ? (
-                                followingArticles.map((article, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="block cursor-pointer"
-                                        onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
-                                    >
-                                        <div className="flex h-52 gap-6 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                            <div className="flex-1">
-                                                <div className="text-sm text-gray-500">
-                                                    in Following · by{" "}
-                                                    {article.extra__writer ? (
-                                                        <Link
-                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                            className="hover:underline hover:text-black cursor-pointer"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            {article.extra__writer}
-                                                        </Link>
+                                followingArticles.map((article, idx) => {
+                                    const imgSrc = extractFirstImage(article.body);
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className="block cursor-pointer"
+                                            onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                        >
+                                            <div
+                                                className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
+                                                <div className="h-full w-[70%] pr-8 flex flex-col">
+                                                    <div className="text-sm text-gray-500">
+                                                        in Following · by{" "}
+                                                        {article.extra__writer ? (
+                                                            <Link
+                                                                href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                className="hover:underline hover:text-black cursor-pointer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {article.extra__writer}
+                                                            </Link>
+                                                        ) : (
+                                                            "Unknown"
+                                                        )}
+                                                    </div>
+                                                    <div className="py-2 flex-grow">
+                                                        <h2 className="text-2xl py-2 font-black">{article.title}</h2>
+                                                        <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
+                                                            {article.body ? removeMd(article.body) : ""}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                            <span>{new Date(article.regDate).toLocaleDateString("en-US", {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric"
+                                                            })}</span>
+                                                        <span>view: {article.hits}</span>
+                                                        <span><i
+                                                            className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
+                                                        <span><i
+                                                            className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    {imgSrc ? (
+                                                        <img
+                                                            src={imgSrc}
+                                                            alt="thumbnail"
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     ) : (
-                                                        "Unknown"
+                                                        <span className="text-gray-400">No Image</span>
                                                     )}
                                                 </div>
-
-                                                <div className="my-2">
-                                                    <h2 className="text-2xl pt-2 font-black">{article.title}</h2>
-                                                    <p className="h-12 text-gray-600">
-                                                        {article.body?.slice(0, 100) || "내용 미리보기 없음"}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    <span>{article.regDate}</span>
-                                                    <span>view: {article.hits}</span>
-                                                    <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                    <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
-                                                </div>
                                             </div>
-                                            <div className="w-[30%] h-[100%] bg-gray-200 rounded-xl" />
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <div>팔로잉한 사람이 작성한 게시물이 없습니다.</div>
                             )
@@ -161,3 +213,4 @@ export default function AfterMainPage({ me, trendingArticles }) {
         </div>
     );
 }
+

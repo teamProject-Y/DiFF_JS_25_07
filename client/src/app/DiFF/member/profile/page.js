@@ -46,7 +46,6 @@ function MyInfoInner() {
             });
     }, []);
 
-    // 방금 연동해서 SuccessHandler가 ?linked=google 로 돌려보냈을 때 즉시 반영
     useEffect(() => {
         const justLinked = searchParams.get('linked'); // google | github
         if (justLinked === 'google' || justLinked === 'github') {
@@ -203,8 +202,6 @@ function MyInfoInner() {
                                         {linked.github ? '깃 연동 완료' : '깃허브 연동'}
                                     </button>
                                 </div>
-
-
                             </div>
                         )}
                     </div>
@@ -215,7 +212,11 @@ function MyInfoInner() {
                     <tbody>
                     <tr>
                         <th className="border p-2">가입일</th>
-                        <td className="border p-2 text-center">{member.regDate}</td>
+                        <td className="border p-2 text-center">{new Date(member.regDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric"
+                        })}</td>
                     </tr>
                     <tr>
                         <th className="border p-2">닉네임</th>
