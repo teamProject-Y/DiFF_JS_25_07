@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { fetchUser, uploadProfileImg, followMember, unfollowMember } from "@/lib/UserAPI";
+import { fetchUser, uploadProfileImg, followMember, unfollowMember, getFollowingList } from "@/lib/UserAPI";
 import { useEffect, useState, Suspense } from "react";
 import ThemeToggle from "@/common/thema";
+
 
 
 export default function MyInfoPage() {
@@ -47,6 +48,7 @@ function MyInfoInner() {
             });
     }, []);
 
+
     useEffect(() => {
         const justLinked = searchParams.get('linked'); // google | github
         if (justLinked === 'google' || justLinked === 'github') {
@@ -68,14 +70,28 @@ function MyInfoInner() {
         const nickName = searchParams.get("nickName");
 
         fetchUser(nickName)
-            .then(res => {
-                setMember(res.member);
-                setProfileUrl(res.member?.profileUrl || "");
+            .then(async (res) => {
+                const fetchedMember = res.member;
+                setMember(fetchedMember);
+                setProfileUrl(fetchedMember?.profileUrl || "");
                 setLoading(false);
+
                 if (!nickName || nickName === myNickName) {
                     setIsMyProfile(true);
                 } else {
                     setIsMyProfile(false);
+
+                    // ✅ 팔로잉 여부 체크
+                    try {
+                        const followRes = await getFollowingList(); // 로그인 사용자의 팔로잉 리스트
+                        const list = followRes.data?.followingList || []; // ⚠️ data 안에서 꺼내기
+                        const following = list.some(m => m.id === fetchedMember.id);
+
+                        setMember(prev => ({ ...prev, isFollowing: following }));
+                        console.log("📌 초기 팔로우 여부:", following);
+                    } catch (err) {
+                        console.error("❌ 팔로잉 목록 조회 실패:", err);
+                    }
                 }
             })
             .catch(err => {
@@ -84,6 +100,7 @@ function MyInfoInner() {
                 router.replace('/DiFF/home/main');
             });
     }, [router, searchParams]);
+
 
     const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
@@ -212,11 +229,13 @@ function MyInfoInner() {
                     <tbody>
                     <tr>
                         <th className="border p-2">가입일</th>
-                        <td className="border p-2 text-center">{new Date(member.regDate).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric"
-                        })}</td>
+                        <td className="border p-2 text-center">
+                            {new Date(member.regDate).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                            })}
+                        </td>
                     </tr>
                     <tr>
                         <th className="border p-2">닉네임</th>
@@ -264,46 +283,37 @@ function MyInfoInner() {
                         </div>
                     </>
                 )}
+
                 {/* 상대 프로필일 때 */}
                 {!isMyProfile && (
                     <div className="text-center mb-6">
-                        {member.isFollowing ? (
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        console.log("👉 언팔로우 요청 보냄 (fromMemberId):", member.id);
+                        <button
+                            onClick={async () => {
+                                try {
+                                    if (member.isFollowing) {
+                                        console.log("👉 언팔로우 요청 보냄:", member.id);
                                         const res = await unfollowMember(member.id);
                                         console.log("✅ 언팔로우 응답:", res);
-
                                         setMember(prev => ({ ...prev, isFollowing: false }));
-                                    } catch (err) {
-                                        console.error("❌ 언팔로우 실패:", err);
-                                        alert("언팔로우 실패");
-                                    }
-                                }}
-                                className="px-6 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-500"
-                            >
-                                언팔로우
-                            </button>
-                        ) : (
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        console.log("👉 팔로우 요청 보냄 (fromMemberId):", member.id);
+                                    } else {
+                                        console.log("👉 팔로우 요청 보냄:", member.id);
                                         const res = await followMember(member.id);
                                         console.log("✅ 팔로우 응답:", res);
-
                                         setMember(prev => ({ ...prev, isFollowing: true }));
-                                    } catch (err) {
-                                        console.error("❌ 팔로우 실패:", err);
-                                        alert("팔로우 실패");
                                     }
-                                }}
-                                className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                            >
-                                팔로우
-                            </button>
-                        )}
+                                } catch (err) {
+                                    console.error("❌ 팔로우/언팔로우 실패:", err);
+                                    alert("처리 실패");
+                                }
+                            }}
+                            className={`px-6 py-2 text-sm rounded text-white ${
+                                member.isFollowing
+                                    ? "bg-red-600 hover:bg-red-500"
+                                    : "bg-green-600 hover:bg-green-500"
+                            }`}
+                        >
+                            {member.isFollowing ? "언팔로우" : "팔로우"}
+                        </button>
                     </div>
                 )}
 
