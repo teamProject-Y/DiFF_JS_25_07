@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
 import LoadingOverlay from '@/common/LoadingOverlay';
+import ToastEditor from "@/common/toastEditor";
 
-/** ✅ 바깥 컴포넌트는 Suspense 래퍼만 담당 (CSR bail-out 해결) */
+/** 바깥 컴포넌트는 Suspense 래퍼만 담당 (CSR bail-out 해결) */
 export default function ModifyArticlePage() {
     return (
         <Suspense fallback={<div>로딩...</div>}>
@@ -78,12 +79,16 @@ function ModifyArticlePageInner() {
             // 서버에 보낼 최소 데이터만 구성
             const modifiedArticle = {
                 id: Number(id),
-                title,
-                body
+                title: title,
+                body: body,
+                userCanModify: true
             };
 
-            await modifyArticle(modifiedArticle, token); // 토큰 포함해서 API 호출
+            console.log("body: ", body);
+
+            const modifyRd = await modifyArticle(modifiedArticle, token); // 토큰 포함해서 API 호출
             alert('수정이 완료되었습니다.');
+            console.log(modifyRd);
             router.push(`/DiFF/article/detail?id=${id}`);
         } catch (e) {
             console.error('❌ 수정 실패:', e);
@@ -110,12 +115,7 @@ function ModifyArticlePageInner() {
                         placeholder="제목을 작성하세요"
                         className="border p-2 rounded"
                     />
-                    <textarea
-                        value={body}
-                        onChange={(e) => setBody(e.target.value)}
-                        placeholder="내용을 작성하세요"
-                        className="border p-2 rounded min-h-[200px]"
-                    />
+                    <ToastEditor initialValue={body} onChange={setBody} />
                     <div className="flex gap-4 mt-4">
                         <Link
                             href={`/DiFF/article/detail?id=${id}`}

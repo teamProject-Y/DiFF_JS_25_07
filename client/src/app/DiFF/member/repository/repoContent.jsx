@@ -119,7 +119,11 @@ export default function RepoContent() {
                                 </h3>
                                 <div className="text-sm text-gray-500 mt-2">
                                     <p> 작성자: {article.extra__writer || '익명'}</p>
-                                    <p> 작성일: {article.regDate?.split('T')[0]}</p>
+                                    <p> {new Date(article.regDate).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric"
+                                    })}</p>
                                 </div>
                             </motion.div>
                         ))}
@@ -135,7 +139,11 @@ export default function RepoContent() {
                     <div className="border rounded-xl p-6 bg-white shadow-lg">
                         <strong className="block text-lg"> 메타 정보</strong>
                         <div className="text-sm text-gray-600 mt-3 space-y-2">
-                            <div> 생성일: {selectedRepo.regDate?.split('T')[0]}</div>
+                            <div> 생성일: {new Date(selectedRepo.regDate).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                            })}</div>
                             <div> 커밋 ID: {selectedRepo.lastRqCommit || '없음'}</div>
                             <div> 언어: {selectedRepo.language || 'N/A'}</div>
                         </div>
