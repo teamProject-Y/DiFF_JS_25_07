@@ -164,6 +164,7 @@ function MyInfoInner() {
                                 <ThemeToggle />
 
                                 {/* 소셜 연동 버튼 */}
+                                {/* 소셜 연동 버튼 */}
                                 <div className="flex items-center gap-3 mt-3">
                                     {/* 구글 */}
                                     <button
