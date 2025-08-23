@@ -84,11 +84,21 @@ function MyInfoInner() {
                     // ✅ 팔로잉 여부 체크
                     try {
                         const followRes = await getFollowingList(); // 로그인 사용자의 팔로잉 리스트
-                        const list = followRes.data?.followingList || []; // ⚠️ data 안에서 꺼내기
+                        console.log("팔로잉 API 원본 응답:", followRes);
+
+                        const list = followRes.data1 || followRes.data?.followingList || [];
+                        console.log("팔로잉 리스트 추출:", list);
+                        console.log("현재 프로필 fetchedMember.id:", fetchedMember.id);
+
+                        // 개별 비교 디버깅
+                        list.forEach(m => {
+                            console.log(`👉 비교 대상 id=${m.id}, nickName=${m.nickName}  ===  targetId=${fetchedMember.id}`);
+                        });
+
                         const following = list.some(m => m.id === fetchedMember.id);
+                        console.log("📌 최종 팔로우 여부:", following);
 
                         setMember(prev => ({ ...prev, isFollowing: following }));
-                        console.log("📌 초기 팔로우 여부:", following);
                     } catch (err) {
                         console.error("❌ 팔로잉 목록 조회 실패:", err);
                     }
@@ -100,6 +110,7 @@ function MyInfoInner() {
                 router.replace('/DiFF/home/main');
             });
     }, [router, searchParams]);
+
 
 
     const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
