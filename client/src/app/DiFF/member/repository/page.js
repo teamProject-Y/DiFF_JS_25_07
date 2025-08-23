@@ -6,8 +6,8 @@ import {useEffect, useMemo, useState, useCallback} from "react";
 import {LayoutGroup, AnimatePresence} from "framer-motion";
 
 import RepoFolder from './repoFolder';
-import RepoFolderbar from './repoFolderbar';
 import RepoContent from './repoContent';
+import GhostBar from './RepoGhostBar';
 
 export default function RepositoriesPage() {
     const router = useRouter();
@@ -15,21 +15,18 @@ export default function RepositoriesPage() {
     const [loading, setLoading] = useState(true);
     const [selectedRepoId, setSelectedRepoId] = useState(null);
 
-    // 로그인 체크 + 레포 로드
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!accessToken) {
             router.replace('/DiFF/member/login');
             return;
         }
-
         fetchUser()
             .then(res => {
                 setRepositories(res.repositories || []);
                 setLoading(false);
             })
-            .catch(err => {
-                console.error("레포지토리 오류:", err);
+            .catch(() => {
                 setLoading(false);
                 router.replace('/DiFF/home/main');
             });
@@ -52,25 +49,31 @@ export default function RepositoriesPage() {
 
                     <div
                         className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
+                        <AnimatePresence>
+                            {selectedRepo && <GhostBar repositories={repositories} selectedRepoId={selectedRepoId}
+                                                       onSelect={setSelectedRepoId}/>}
+                        </AnimatePresence>
 
-
-                        {/* 메인 영역 */}
                         <div className="flex-1 relative">
-                            {/* 초기 그리드 */}
-                            <AnimatePresence initial={false}>
+                            {/* 기본(첫 화면): 카드 그리드만 */}
+                            <AnimatePresence>
                                 {!selectedRepo && (
                                     <RepoFolder
+                                        key="grid"
                                         repositories={repositories}
                                         onSelect={setSelectedRepoId}
                                     />
                                 )}
                             </AnimatePresence>
 
-                            {/* 레포 상세 */}
+                            {/* 상세: 선택되면 표시 (필요 시 RepoContent 내부에서 파란 리스트/메타 표시) */}
                             <AnimatePresence>
                                 {selectedRepo && (
                                     <RepoContent
+                                        key="detail"
                                         repo={selectedRepo}
+                                        repositories={repositories}
+                                        onChangeRepo={setSelectedRepoId}
                                         onClose={onClose}
                                     />
                                 )}
