@@ -155,6 +155,22 @@ export const getFollowingList = async () => {
     return response.data;
 }
 
+// 상대방을 팔로우
+export const followMember = async (fromMemberId) => {
+    const response = await UserAPI.post(`/api/DiFF/member/follow`, null, {
+        params: { fromMemberId },  // ✅ 서버가 요구하는 이름 맞추기
+    });
+    return response.data;
+};
+
+// 상대방을 언팔로우
+export const unfollowMember = async (fromMemberId) => {
+    const response = await UserAPI.delete(`/api/DiFF/member/unfollow`, {
+        params: { fromMemberId },  // ✅ 동일하게 수정
+    });
+    return response.data;
+};
+
 // 5-6. 로그아웃 (필요하면 추가 구현)
 // export const logout = async () => { ... };
 

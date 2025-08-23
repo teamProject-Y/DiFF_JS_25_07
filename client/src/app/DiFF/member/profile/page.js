@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { fetchUser, uploadProfileImg } from "@/lib/UserAPI";
+import { fetchUser, uploadProfileImg, followMember, unfollowMember } from "@/lib/UserAPI";
 import { useEffect, useState, Suspense } from "react";
 import ThemeToggle from "@/common/thema";
+
 
 export default function MyInfoPage() {
     return (
@@ -164,7 +165,6 @@ function MyInfoInner() {
                                 <ThemeToggle />
 
                                 {/* 소셜 연동 버튼 */}
-                                {/* 소셜 연동 버튼 */}
                                 <div className="flex items-center gap-3 mt-3">
                                     {/* 구글 */}
                                     <button
@@ -242,7 +242,7 @@ function MyInfoInner() {
                     </tbody>
                 </table>
 
-                {/* 본인 프로필만 */}
+                {/* 본인 프로필일 때 */}
                 {isMyProfile && (
                     <>
                         <div className="text-center mb-6">
@@ -263,6 +263,48 @@ function MyInfoInner() {
                             </button>
                         </div>
                     </>
+                )}
+                {/* 상대 프로필일 때 */}
+                {!isMyProfile && (
+                    <div className="text-center mb-6">
+                        {member.isFollowing ? (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        console.log("👉 언팔로우 요청 보냄 (fromMemberId):", member.id);
+                                        const res = await unfollowMember(member.id);
+                                        console.log("✅ 언팔로우 응답:", res);
+
+                                        setMember(prev => ({ ...prev, isFollowing: false }));
+                                    } catch (err) {
+                                        console.error("❌ 언팔로우 실패:", err);
+                                        alert("언팔로우 실패");
+                                    }
+                                }}
+                                className="px-6 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-500"
+                            >
+                                언팔로우
+                            </button>
+                        ) : (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        console.log("👉 팔로우 요청 보냄 (fromMemberId):", member.id);
+                                        const res = await followMember(member.id);
+                                        console.log("✅ 팔로우 응답:", res);
+
+                                        setMember(prev => ({ ...prev, isFollowing: true }));
+                                    } catch (err) {
+                                        console.error("❌ 팔로우 실패:", err);
+                                        alert("팔로우 실패");
+                                    }
+                                }}
+                                className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                            >
+                                팔로우
+                            </button>
+                        )}
+                    </div>
                 )}
 
                 {/* 뒤로가기 (누구 프로필이든 항상 보임) */}
