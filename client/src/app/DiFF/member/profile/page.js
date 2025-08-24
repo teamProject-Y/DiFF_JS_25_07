@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { fetchUser, uploadProfileImg, followMember, unfollowMember, getFollowingList } from "@/lib/UserAPI";
+import {
+    fetchUser,
+    uploadProfileImg,
+    followMember,
+    unfollowMember,
+    getFollowingList,
+    getFollowerList
+} from "@/lib/UserAPI";
 import { useEffect, useState, Suspense } from "react";
 import ThemeToggle from "@/common/thema";
 
@@ -25,6 +32,8 @@ function MyInfoInner() {
     const [profileUrl, setProfileUrl] = useState("");
     const [isMyProfile, setIsMyProfile] = useState(false);
     const [linked, setLinked] = useState({ google: false, github: false });
+    const [followingCount, setFollowingCount] = useState(0);
+    const [followerCount, setFollowerCount] = useState(0);
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -112,6 +121,29 @@ function MyInfoInner() {
     }, [router, searchParams]);
 
 
+    useEffect(() => {
+        const fetchCounts = async () => {
+            try {
+                const followingRes = await getFollowingList();
+                const followerRes = await getFollowerList();
+
+                // 응답 구조에 따라 맞게 꺼내야 함 (data1Name, data1 구조 확인했었지?)
+                const followingList = followingRes.data1 || [];
+                const followerList = followerRes.data1 || [];
+
+                setFollowingCount(followingList.length);
+                setFollowerCount(followerList.length);
+
+                console.log("📌 Following Count:", followingList.length);
+                console.log("📌 Follower Count:", followerList.length);
+            } catch (err) {
+                console.error("❌ 팔로워/팔로잉 카운트 조회 실패:", err);
+            }
+        };
+
+        fetchCounts();
+    }, []);
+
 
     const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
@@ -158,7 +190,7 @@ function MyInfoInner() {
 
                         {/* 본인 프로필만 출력 */}
                         {isMyProfile && (
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col items-center gap-3">
                                 {/* 숨겨진 파일 input */}
                                 <input
                                     id="profileUpload"
@@ -188,6 +220,12 @@ function MyInfoInner() {
                                 >
                                     프로필 업로드
                                 </button>
+
+                                {/* ✅ 팔로워/팔로잉 카운트 */}
+                                <div className="flex gap-6 text-sm mt-2">
+                                    <span>팔로워 {followerCount}</span>
+                                    <span>팔로잉 {followingCount}</span>
+                                </div>
 
                                 {/* 다크 모드 토글 */}
                                 <ThemeToggle />
@@ -232,6 +270,7 @@ function MyInfoInner() {
                                 </div>
                             </div>
                         )}
+
                     </div>
                 </div>
 

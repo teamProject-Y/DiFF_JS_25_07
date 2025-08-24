@@ -155,6 +155,11 @@ export const getFollowingList = async () => {
     return response.data;
 }
 
+export const getFollowerList = async () => {
+    const response = await UserAPI.get(`/api/DiFF/member/followerList`);
+    return response.data;
+}
+
 // 상대방을 팔로우
 export const followMember = async (fromMemberId) => {
     const response = await UserAPI.post(`/api/DiFF/member/follow`, null, {
