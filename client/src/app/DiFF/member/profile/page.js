@@ -34,6 +34,9 @@ function MyInfoInner() {
     const [linked, setLinked] = useState({ google: false, github: false });
     const [followingCount, setFollowingCount] = useState(0);
     const [followerCount, setFollowerCount] = useState(0);
+    const [followerList, setFollowerList] = useState([]);   // ✅ 선언 필요
+    const [followingList, setFollowingList] = useState([]); // ✅ 선언 필요
+    const [openModal, setOpenModal] = useState(null);
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -144,6 +147,26 @@ function MyInfoInner() {
         fetchCounts();
     }, []);
 
+    useEffect(() => {
+        if (openModal === "follower") {
+            getFollowerList()
+                .then((res) => {
+                    console.log("팔로워 API 응답:", res);
+                    setFollowerList(res.data1 || res); // 응답 구조에 따라 조정
+                })
+                .catch((err) => console.error("팔로워 목록 로딩 오류:", err));
+        }
+
+        if (openModal === "following") {
+            getFollowingList()
+                .then((res) => {
+                    console.log("팔로잉 API 응답:", res);
+                    setFollowingList(res.data1 || res);
+                })
+                .catch((err) => console.error("팔로잉 목록 로딩 오류:", err));
+        }
+    }, [openModal]);
+
 
     const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
@@ -222,10 +245,75 @@ function MyInfoInner() {
                                 </button>
 
                                 {/* ✅ 팔로워/팔로잉 카운트 */}
-                                <div className="flex gap-6 text-sm mt-2">
-                                    <span>팔로워 {followerCount}</span>
-                                    <span>팔로잉 {followingCount}</span>
+                                <div>
+                                    {/* 클릭 영역 */}
+                                    <div className="flex gap-6 text-sm mt-2">
+                                        <span onClick={() => setOpenModal("follower")} className="cursor-pointer">
+                                          팔로워 {followerCount}
+                                        </span>
+                                        <span onClick={() => setOpenModal("following")} className="cursor-pointer">
+                                          팔로잉 {followingCount}
+                                        </span>
+                                    </div>
+
+                                    {/* 팔로워 모달 */}
+                                    {openModal === "follower" && (
+                                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                                                <h2 className="text-lg font-bold mb-4">팔로워 목록</h2>
+                                                <ul className="space-y-2 max-h-60 overflow-y-auto">
+                                                    {followerList.length > 0 ? (
+                                                        followerList.map((f, idx) => (
+                                                            <li key={idx} className="flex items-center gap-3">
+                                                                <img
+                                                                    src={f.profileImg}
+                                                                    alt={f.nickName}
+                                                                    className="w-8 h-8 rounded-full border"
+                                                                />
+                                                                <span>{f.nickName}</span>
+                                                            </li>
+                                                        ))
+                                                    ) : (
+                                                        <p className="text-gray-500">팔로워가 없습니다.</p>
+                                                    )}
+                                                </ul>
+                                                <button onClick={() => setOpenModal(null)} className="mt-4 px-4 py-2 bg-gray-200 rounded">
+                                                    닫기
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 팔로잉 모달 */}
+                                    {openModal === "following" && (
+                                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                                                <h2 className="text-lg font-bold mb-4">팔로잉 목록</h2>
+                                                <ul className="space-y-2 max-h-60 overflow-y-auto">
+                                                    {followingList.length > 0 ? (
+                                                        followingList.map((f, idx) => (
+                                                            <li key={idx} className="flex items-center gap-3">
+                                                                <img
+                                                                    src={f.profileImg}
+                                                                    alt={f.nickName}
+                                                                    className="w-8 h-8 rounded-full border"
+                                                                />
+                                                                <span>{f.nickName}</span>
+                                                            </li>
+                                                        ))
+                                                    ) : (
+                                                        <p className="text-gray-500">팔로잉이 없습니다.</p>
+                                                    )}
+                                                </ul>
+                                                <button onClick={() => setOpenModal(null)} className="mt-4 px-4 py-2 bg-gray-200 rounded">
+                                                    닫기
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
+
+
 
                                 {/* 다크 모드 토글 */}
                                 <ThemeToggle />
@@ -367,7 +455,6 @@ function MyInfoInner() {
                     </div>
                 )}
 
-                {/* 뒤로가기 (누구 프로필이든 항상 보임) */}
                 <div className="text-center">
                     <button
                         onClick={() => router.replace('/DiFF/home/main')}
