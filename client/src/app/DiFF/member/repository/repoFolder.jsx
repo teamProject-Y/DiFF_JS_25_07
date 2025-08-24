@@ -23,7 +23,11 @@ export default function RepoFolder({ repositories, onSelect }) {
                             {repo.name || `Repository ${idx + 1}`}
                         </h3>
                         <p className="text-sm text-gray-500 mb-1">
-                            생성일: {repo.regDate?.split('T')[0]}
+                            생성일: {new Date(repo.regDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric"
+                        })}
                         </p>
                         <p className="text-sm text-gray-500 mb-1">
                             커밋 ID: {repo.lastRqCommit || '없음'}
