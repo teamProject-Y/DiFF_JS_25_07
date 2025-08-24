@@ -258,19 +258,30 @@ function MyInfoInner() {
 
                                     {/* 팔로워 모달 */}
                                     {openModal === "follower" && (
-                                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                                        <div
+                                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                                            onClick={() => setOpenModal(null)}   // 🔹 바깥(배경) 클릭 시 닫힘
+                                        >
+                                            <div
+                                                className="bg-white p-6 rounded-lg shadow-lg w-96"
+                                                onClick={(e) => e.stopPropagation()} // 🔹 안쪽 클릭 시 닫히지 않음
+                                            >
                                                 <h2 className="text-lg font-bold mb-4">팔로워 목록</h2>
                                                 <ul className="space-y-2 max-h-60 overflow-y-auto">
                                                     {followerList.length > 0 ? (
                                                         followerList.map((f, idx) => (
                                                             <li key={idx} className="flex items-center gap-3">
-                                                                <img
-                                                                    src={f.profileImg}
-                                                                    alt={f.nickName}
-                                                                    className="w-8 h-8 rounded-full border"
-                                                                />
-                                                                <span>{f.nickName}</span>
+                                                                <Link
+                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(f.nickName)}`}
+                                                                    className="flex items-center gap-3 hover:underline"
+                                                                >
+                                                                    <img
+                                                                        src={f.profileImg}
+                                                                        alt={f.nickName}
+                                                                        className="w-8 h-8 rounded-full border"
+                                                                    />
+                                                                    <span>{f.nickName}</span>
+                                                                </Link>
                                                             </li>
                                                         ))
                                                     ) : (
@@ -286,19 +297,30 @@ function MyInfoInner() {
 
                                     {/* 팔로잉 모달 */}
                                     {openModal === "following" && (
-                                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                                        <div
+                                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                                            onClick={() => setOpenModal(null)}   // 🔹 바깥(배경) 클릭 시 닫힘
+                                        >
+                                            <div
+                                                className="bg-white p-6 rounded-lg shadow-lg w-96"
+                                                onClick={(e) => e.stopPropagation()} // 🔹 안쪽 클릭 시 닫히지 않음
+                                            >
                                                 <h2 className="text-lg font-bold mb-4">팔로잉 목록</h2>
                                                 <ul className="space-y-2 max-h-60 overflow-y-auto">
                                                     {followingList.length > 0 ? (
                                                         followingList.map((f, idx) => (
                                                             <li key={idx} className="flex items-center gap-3">
-                                                                <img
-                                                                    src={f.profileImg}
-                                                                    alt={f.nickName}
-                                                                    className="w-8 h-8 rounded-full border"
-                                                                />
-                                                                <span>{f.nickName}</span>
+                                                                <Link
+                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(f.nickName)}`}
+                                                                    className="flex items-center gap-3 hover:underline"
+                                                                >
+                                                                    <img
+                                                                        src={f.profileImg}
+                                                                        alt={f.nickName}
+                                                                        className="w-8 h-8 rounded-full border"
+                                                                    />
+                                                                    <span>{f.nickName}</span>
+                                                                </Link>
                                                             </li>
                                                         ))
                                                     ) : (
