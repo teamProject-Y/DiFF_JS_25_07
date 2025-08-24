@@ -260,11 +260,11 @@ function MyInfoInner() {
                                     {openModal === "follower" && (
                                         <div
                                             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                                            onClick={() => setOpenModal(null)}   // 🔹 바깥(배경) 클릭 시 닫힘
+                                            onClick={() => setOpenModal(null)}
                                         >
                                             <div
                                                 className="bg-white p-6 rounded-lg shadow-lg w-96"
-                                                onClick={(e) => e.stopPropagation()} // 🔹 안쪽 클릭 시 닫히지 않음
+                                                onClick={(e) => e.stopPropagation()}
                                             >
                                                 <h2 className="text-lg font-bold mb-4">팔로워 목록</h2>
                                                 <ul className="space-y-2 max-h-60 overflow-y-auto">
