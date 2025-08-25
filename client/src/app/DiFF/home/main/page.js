@@ -203,17 +203,36 @@ export default function Page() {
 
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
-        <div className="w-full min-h-screen transition-colors duration-700" style={{ backgroundColor: bgColor }}>
-            <div id="terminal" className="h-screen w-full" ref={el => sectionRefs.current[0] = el}>
+        <div className="w-full transition-colors duration-700 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+             style={{ backgroundColor: bgColor }}>
+            <div id="terminal" className="h-screen w-full snap-start" ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
 
-            <div id="docs" className="h-screen w-full " ref={el => sectionRefs.current[1] = el}>
-                docs
+            <div id="docs" className="h-screen w-full snap-start" ref={el => sectionRefs.current[1] = el}>
+                <div className="w-4/5 h-1/2 mx-auto">
+
+                </div>
+                <div className="h-1/2">
+                    <img
+                        className="w-1/2 h-full object-cover"
+                        src="/img/img2.jpg"
+                        alt="img 1"
+                    />
+
+                </div>
             </div>
 
+
+
+
+            {/*snap 안됨 해*/}
+
+
+
+
             {/* trending */}
-            <div id="trending" className="w-full h-screen px-36 py-10" ref={el => sectionRefs.current[2] = el}>
+            <div id="trending" className="w-full h-screen snap-start px-36 py-10" ref={el => sectionRefs.current[2] = el}>
                 <div className="text-5xl text-black font-bold">Trending</div>
                 <div className="article-slider h-2/3 w-full mt-16 flex">
                     {loading ? (

@@ -2,7 +2,7 @@
 'use client';
 
 import Header from '@/common/header';
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import { useRouter, usePathname } from 'next/navigation';
 import SidebarLayout from '@/common/sidebarLayout';
 import LayMenu from '@/common/layMenu';
@@ -59,13 +59,14 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
 
     const isHomeMain = pathname?.startsWith('/DiFF/home/main');
     const useDarkColor = isHomeMain && !isAuthed;
+    const scrollRef = useRef(null);
 
     return (
         <>
             <div className="text-neutral-600 min-h-screen">
                 {useDarkColor && <div className="fixed inset-0 -z-10 bg-black" />}
-                <Header />
-                <div className="h-20 bg-inherit">
+                <Header scrollRef={scrollRef} />
+                <div ref={scrollRef} className="h-20 bg-inherit">
                     <div className="flex gap-0 pt-20">
                         {/* 로그인 상태일 때만 항상 보이는 전역 메뉴 */}
                         <SidebarLayout>
