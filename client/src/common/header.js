@@ -71,6 +71,7 @@ export default function Header() {
     }, []);
 
     // 토큰 관련
+    // 토큰 관련
     useEffect(() => {
         if (typeof window !== "undefined") {
             const url = new URL(window.location.href);
@@ -82,6 +83,8 @@ export default function Header() {
                 localStorage.setItem("tokenType", "Bearer");
                 window.history.replaceState({}, document.title, url.pathname);
             }
+
+            // ✅ 초기 상태 동기화
             const token = localStorage.getItem('accessToken');
             setAccessToken(token);
             if (token) {
@@ -89,6 +92,22 @@ export default function Header() {
                     .then(setUser)
                     .catch(console.log);
             }
+
+            // ✅ auth-changed 이벤트 핸들러 등록
+            const handler = () => {
+                const newToken = localStorage.getItem('accessToken');
+                setAccessToken(newToken);
+                if (newToken) {
+                    fetchUser()
+                        .then(setUser)
+                        .catch(console.log);
+                } else {
+                    setUser({});
+                }
+            };
+            window.addEventListener('auth-changed', handler);
+
+            return () => window.removeEventListener('auth-changed', handler);
         }
     }, []);
 

@@ -8,99 +8,68 @@ export const UserAPI = axios.create({
     }
 });
 
+/** 2. 요청 인터셉터: AccessToken 자동 추가 */
 UserAPI.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            console.log("📦 accessToken:", ACCESS_TOKEN);
-
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
-
-            const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-            console.log("📦 refreshToken:", REFRESH_TOKEN);
-
-            console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-
-export const setAuthHeader = () => {
-    if (typeof window !== "undefined") {
-        const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer';
-        const ACCESS_TOKEN = localStorage.getItem("accessToken");
-        const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-
-        // accessToken이 있을 때만 Authorization 헤더 설정
-        if (ACCESS_TOKEN) {
-            UserAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
-        } else {
-            delete UserAPI.defaults.headers['Authorization'];  // 없으면 제거
-        }
-
-        // refreshToken도 마찬가지
-        if (REFRESH_TOKEN) {
-            UserAPI.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
-        } else {
-            delete UserAPI.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
-        }
-    }
-};
-
-
-/** 3. 토큰 자동 재발급 (Refresh) */
+/** 3. AccessToken 자동 갱신 (Refresh) */
 const refreshAccessToken = async () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return null;
 
     const REFRESH_TOKEN = localStorage.getItem("refreshToken");
     if (!REFRESH_TOKEN) {
-        console.warn("refreshToken이 없습니다. 재로그인이 필요합니다.");
-        return;
+        console.warn("❌ refreshToken 없음 → 다시 로그인 필요");
+        return null;
     }
 
     try {
-        const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
-            headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
+        // ✅ POST + body 로 맞춤
+        const res = await axios.post("http://localhost:8080/api/auth/refresh", {
+            refreshToken: REFRESH_TOKEN
         });
 
-        const ACCESS_TOKEN = response.data.accessToken;
+        const ACCESS_TOKEN = res.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
 
-        localStorage.setItem('accessToken', ACCESS_TOKEN);
-        window.dispatchEvent(new Event('auth-changed'));
+        // ✅ 새 토큰 저장
+        localStorage.setItem("accessToken", ACCESS_TOKEN);
         UserAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 
-        console.log("액세스 토큰 갱신 성공:", ACCESS_TOKEN);
-        return ACCESS_TOKEN; // 필요하면 반환
-    } catch (error) {
-        if (error.response) {
-            console.error("토큰 갱신 실패:", error.response.status, error.response.data);
-        } else {
-            console.error("토큰 갱신 요청 자체 실패:", error.message);
-        }
+        console.log("🔑 새 AccessToken 갱신:", ACCESS_TOKEN);
+        return ACCESS_TOKEN;
+    } catch (err) {
+        console.error("❌ 토큰 갱신 실패:", err.response?.data || err.message);
+        // refreshToken도 무효화 → 재로그인 필요
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/DiFF/member/login";
         return null;
     }
 };
 
-/** 4. 인터셉터로 토큰 만료 자동 처리 */
+/** 4. 응답 인터셉터: 토큰 만료 시 자동 재시도 */
 UserAPI.interceptors.response.use(
-    response => response,
-    async error => {
+    (res) => res,
+    async (error) => {
         const originalRequest = error.config;
-        if (
-            error.response &&
-            (error.response.status === 403 || error.response.status === 401) &&
-            !originalRequest._retry
-        ) {
+        if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
             originalRequest._retry = true;
-            await refreshAccessToken();
-            setAuthHeader();
-            return UserAPI(originalRequest);
+            const newToken = await refreshAccessToken();
+            if (newToken) {
+                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                return UserAPI(originalRequest);
+            }
         }
         return Promise.reject(error);
     }
@@ -108,21 +77,32 @@ UserAPI.interceptors.response.use(
 
 /** 5. Auth/회원 관련 API들 */
 
-// 5-1. 로그인
+// 로그인
 export const login = async ({ email, loginPw }) => {
-    const data = { email, loginPw };
-    const response = await UserAPI.post(`http://localhost:8080/api/DiFF/member/login`, data);
-    return response.data;
+    const res = await UserAPI.post("/api/DiFF/auth/login", { email, loginPw });
+    const { accessToken, refreshToken } = res.data;
+
+    // ✅ 로컬 저장
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem("tokenType", "Bearer");
+
+    console.log("✅ 로그인 성공 → 토큰 저장 완료");
+    return res.data;
 };
 
-// 5-2. 회원가입
+// 회원가입
 export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
-    const data = { loginPw, checkLoginPw, nickName, email };
+    const res = await UserAPI.post("/api/DiFF/auth/join", { loginPw, checkLoginPw, nickName, email });
+    const { accessToken, refreshToken } = res.data;
 
-    console.log("📤 회원가입 요청:", data);
-    const response = await UserAPI.post('http://localhost:8080/api/DiFF/member/doJoin', data);
-    console.log("📥 서버 응답:", response.data);
-    return response.data;
+    // ✅ 자동 로그인 효과: 회원가입 후 토큰도 저장
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem("tokenType", "Bearer");
+
+    console.log("✅ 회원가입 + 자동 로그인 성공 → 토큰 저장 완료");
+    return res.data;
 };
 
 // 5-3. 회원 페이지
