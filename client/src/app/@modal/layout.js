@@ -5,7 +5,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import LoginForm from '@/common/loginModal'; // 폼만
-import JoinForm from '@/common/joinModal';   // 폼만
+import JoinForm from '@/common/joinModal';
+import ModalOpenIntro from "@/common/anime/modalOpenIntro";   // 폼만
 
 export default function ModalLayout({ children }) {
     const router = useRouter();
@@ -91,7 +92,6 @@ export default function ModalLayout({ children }) {
                                                     exit={{ x: -40 * dir, opacity: 0 }}
                                                     transition={{ duration: 0.22 }}
                                                 >
-                                                    <h1 className="text-3xl font-semibold text-black mb-6">Join</h1>
                                                     <JoinForm />
                                                 </motion.div>
                                             ) : (
@@ -128,7 +128,6 @@ export default function ModalLayout({ children }) {
                                                     exit={{ x: 40 * dir, opacity: 0 }}
                                                     transition={{ duration: 0.22 }}
                                                 >
-                                                    <h1 className="text-3xl font-semibold text-black mb-6">Sign In</h1>
                                                     <LoginForm callbackUrl={callbackUrl} afterLoginUriFromPage={afterLoginUri} />
                                                 </motion.div>
                                             ) : (
@@ -169,8 +168,13 @@ export default function ModalLayout({ children }) {
                                     </div>
                                 </motion.div>
                             </div>
+
+                            <ModalOpenIntro open={isModalRoute} brandText="DiFF" />
                         </div>
+
+
                     </motion.div>
+
 
                     {/* children은 라우팅 유지용 */}
                     <div style={{ display: 'none' }}>{children}</div>
