@@ -204,14 +204,16 @@ function ProfileInner() {
 
 
     return (
-        <section className="pt-10 md:pt-16 px-4 dark:bg-gray-900 dark:text-white">
+        <section className="px-4 dark:bg-gray-900 dark:text-white">
             <div className="mx-auto max-w-6xl">
                 {err && <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>}
 
                 {/* Tabs */}
                 <div className="mb-3 flex items-center gap-6 text-2xl font-semibold">
                     <span className="text-black">Profile</span>
+                    {isMyProfile && (
                     <Link href="/DiFF/member/settings" className="text-gray-400 hover:text-gray-700">Settings</Link>
+                    )}
                 </div>
                 <div className="h-px w-full bg-gray-300 mb-8" />
 
