@@ -5,12 +5,15 @@ import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
 import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
-import {likeArticle, unlikeArticle, fetchArticleLikes,
-    likeReply, unlikeReply, fetchReplyLikes} from "@/lib/reactionAPI";
+import {
+    likeArticle, unlikeArticle, fetchArticleLikes,
+    likeReply, unlikeReply, fetchReplyLikes
+} from "@/lib/reactionAPI";
 import LoadingOverlay from "@/common/LoadingOverlay";
 import dynamic from "next/dynamic";
 import ToastViewer from "@/common/toastViewer";
-const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
+
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
 function ArticleDetailInner() {
 
@@ -103,10 +106,10 @@ function ArticleDetailInner() {
                     (res.replies || []).map(async (r) => {
                         try {
                             const likeRes = await fetchReplyLikes(r.id); // { liked, count }
-                            return { ...r, liked: likeRes.liked, likeCount: likeRes.count };
+                            return {...r, liked: likeRes.liked, likeCount: likeRes.count};
                         } catch (e) {
                             console.error("❌ 댓글 좋아요 상태 불러오기 실패:", e);
-                            return { ...r, liked: false, likeCount: 0 };
+                            return {...r, liked: false, likeCount: 0};
                         }
                     })
                 );
@@ -186,7 +189,7 @@ function ArticleDetailInner() {
             const withLikes = await Promise.all(
                 (res.replies || []).map(async (r) => {
                     const likeRes = await fetchReplyLikes(r.id);
-                    return { ...r, liked: likeRes.liked, likeCount: likeRes.count };
+                    return {...r, liked: likeRes.liked, likeCount: likeRes.count};
                 })
             );
             setReplies(withLikes);
@@ -203,14 +206,14 @@ function ArticleDetailInner() {
                 await unlikeReply(replyId);
                 setReplies((prev) =>
                     prev.map((item) =>
-                        item.id === replyId ? { ...item, liked: false, likeCount: item.likeCount - 1 } : item
+                        item.id === replyId ? {...item, liked: false, likeCount: item.likeCount - 1} : item
                     )
                 );
             } else {
                 await likeReply(replyId);
                 setReplies((prev) =>
                     prev.map((item) =>
-                        item.id === replyId ? { ...item, liked: true, likeCount: item.likeCount + 1 } : item
+                        item.id === replyId ? {...item, liked: true, likeCount: item.likeCount + 1} : item
                     )
                 );
             }
@@ -234,8 +237,34 @@ function ArticleDetailInner() {
             ) : (
                 <div className="pt-20 max-w-3xl mx-auto">
                     {/* title */}
-                    <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
+                    <div className="flex justify-between">
+                        <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
+                        <i className="fa-solid fa-ellipsis-vertical"></i>
+                        <div>
+                            {article.userCanModify && (
+                                <Link
+                                    href={`/DiFF/article/modify?id=${article.id}`}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                                >
+                                    수정
+                                </Link>
+                            )}
 
+                            {article.userCanDelete && (
+                                <button
+                                    onClick={() => handleDelete(article.id)}
+                                    disabled={deleting}
+                                    className={`px-4 py-2 rounded transition ${
+                                        deleting
+                                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                            : "bg-red-500 text-white hover:bg-red-600"
+                                    }`}
+                                >
+                                    {deleting ? "삭제중…" : "삭제하기"}
+                                </button>
+                            )}
+                        </div>
+                    </div>
                     {/* article info */}
                     <div className="text-gray-600 mb-6 flex justify-between">
                         <div className="flex justify-start">
@@ -268,7 +297,7 @@ function ArticleDetailInner() {
                     {/* 본문 */}
                     <div
                         className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
-                        <ToastViewer content={article.body} showImages={true} />
+                        <ToastViewer content={article.body} showImages={true}/>
                     </div>
 
                     {/* 하단 버튼 영역 */}
@@ -359,7 +388,7 @@ function ArticleDetailInner() {
                             onChange={(e) =>
                                 setReplies((prev) =>
                                     prev.map((item) =>
-                                        item.id === r.id ? { ...item, body: e.target.value } : item
+                                        item.id === r.id ? {...item, body: e.target.value} : item
                                     )
                                 )
                             }
@@ -371,7 +400,10 @@ function ArticleDetailInner() {
                                                         if (res.resultCode.startsWith("S-")) {
                                                             setReplies((prev) =>
                                                                 prev.map((item) =>
-                                                                    item.id === r.id ? { ...item, isEditing: false } : item
+                                                                    item.id === r.id ? {
+                                                                        ...item,
+                                                                        isEditing: false
+                                                                    } : item
                                                                 )
                                                             );
                                                         }
@@ -384,7 +416,7 @@ function ArticleDetailInner() {
                                                     onClick={() =>
                                                         setReplies((prev) =>
                                                             prev.map((item) =>
-                                                                item.id === r.id ? { ...item, isEditing: false } : item
+                                                                item.id === r.id ? {...item, isEditing: false} : item
                                                             )
                                                         )
                                                     }
@@ -400,10 +432,10 @@ function ArticleDetailInner() {
                                             <div className="text-sm text-gray-400 mb-4">
                                                 {r.extra__writer} |
                                                 {new Date(r.regDate).toLocaleDateString("en-US", {
-                                                year: "numeric",
-                                                month: "short",
-                                                day: "numeric"
-                                            })}
+                                                    year: "numeric",
+                                                    month: "short",
+                                                    day: "numeric"
+                                                })}
                                             </div>
 
                                             <div className="flex justify-between items-center">
@@ -429,7 +461,10 @@ function ArticleDetailInner() {
                                                             onClick={() =>
                                                                 setReplies((prev) =>
                                                                     prev.map((item) =>
-                                                                        item.id === r.id ? { ...item, isEditing: true } : item
+                                                                        item.id === r.id ? {
+                                                                            ...item,
+                                                                            isEditing: true
+                                                                        } : item
                                                                     )
                                                                 )
                                                             }
