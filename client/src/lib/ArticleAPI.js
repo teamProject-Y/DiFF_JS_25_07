@@ -134,6 +134,12 @@ export const getMyRepositories = async () => {
     return Array.isArray(repos) ? repos : [];
 };
 
+export async function getAverageMetrics(repositoryId) {
+    const res = await ArticleAPI.get(`/api/DiFF/repository/average/${repositoryId}`);
+    return res.data;
+}
+
+
 // ArticleAPI.js
 export async function getArticle(id) {
     const res = await ArticleAPI.get(`/api/DiFF/article/detail`, {
