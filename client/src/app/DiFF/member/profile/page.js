@@ -1,42 +1,51 @@
+// v2 — user provided JS version (no sidebar)
 'use client';
 
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import ThemeToggle from "@/common/thema";
+
+
 import {
     fetchUser,
     uploadProfileImg,
     followMember,
     unfollowMember,
     getFollowingList,
-    getFollowerList
-} from "@/lib/UserAPI";
-import { useEffect, useState, Suspense } from "react";
-import ThemeToggle from "@/common/thema";
+    getFollowerList,
+} from '@/lib/UserAPI';
 
-
-
-export default function MyInfoPage() {
+export default function ProfileTab() {
     return (
-        <Suspense fallback={<div>로딩...</div>}>
-            <MyInfoInner />
+        <Suspense fallback={<div className="p-8 text-sm">로딩...</div>}>
+            <ProfileInner />
         </Suspense>
     );
 }
 
-function MyInfoInner() {
+function ProfileInner() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [member, setMember] = useState(null);
+
     const [loading, setLoading] = useState(true);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [profileUrl, setProfileUrl] = useState("");
+    const [err, setErr] = useState('');
+    const [member, setMember] = useState(null);
     const [isMyProfile, setIsMyProfile] = useState(false);
-    const [linked, setLinked] = useState({ google: false, github: false });
+    const [profileUrl, setProfileUrl] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const [followingCount, setFollowingCount] = useState(0);
     const [followerCount, setFollowerCount] = useState(0);
-    const [followerList, setFollowerList] = useState([]);   // ✅ 선언 필요
-    const [followingList, setFollowingList] = useState([]); // ✅ 선언 필요
-    const [openModal, setOpenModal] = useState(null);
+    const [followingList, setFollowingList] = useState([]);
+    const [followerList, setFollowerList] = useState([]);
+    const [openModal, setOpenModal] = useState(null); // 'following' | 'follower' | null
+    const [linked, setLinked] = useState({ google: false, github: false });
+
+    // 백엔드 미구현 부분은 "없음"으로 고정 표시
+    const [introduce] = useState('없음');
+    const [stat] = useState({ totalLikes: '없음', repoCount: '없음', postCount: '없음' });
+    const [techTools] = useState([]);
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -167,7 +176,6 @@ function MyInfoInner() {
         }
     }, [openModal]);
 
-
     const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
     const handleUpload = async () => {
@@ -181,6 +189,8 @@ function MyInfoInner() {
         }
     };
 
+
+
     // 소셜 로그인 통합, 연동
     const startLink = (provider) => {
         if (provider !== 'google' && provider !== 'github') return;
@@ -192,295 +202,221 @@ function MyInfoInner() {
     if (loading) return <div>로딩...</div>;
     if (!member) return null;
 
+
     return (
-        <section className="pt-24 text-xl px-4 dark:bg-gray-900">
-            <div className="mx-auto max-w-4xl">
+        <section className="pt-10 md:pt-16 px-4 dark:bg-gray-900 dark:text-white">
+            <div className="mx-auto max-w-6xl">
+                {err && <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>}
 
-                {/* 프로필 이미지 */}
-                <div className="text-center mb-8">
-                    <div className="flex flex-col items-center">
-                        {profileUrl ? (
-                            <img
-                                src={profileUrl}
-                                alt="프로필"
-                                className="w-32 h-32 rounded-full border mb-4 object-cover"
-                            />
-                        ) : (
-                            <div className="w-32 h-32 rounded-full border flex items-center justify-center mb-4 text-gray-400">
-                                No Image
+                {/* Tabs */}
+                <div className="mb-3 flex items-center gap-6 text-2xl font-semibold">
+                    <span className="text-black">Profile</span>
+                    <Link href="/DiFF/member/settings" className="text-gray-400 hover:text-gray-700">Settings</Link>
+                </div>
+                <div className="h-px w-full bg-gray-300 mb-8" />
+
+                {/* 2-Column Layout (좌: 프로필/스탯, 우: 소개/툴) */}
+                <div className="grid grid-cols-1 gap-10 md:grid-cols-[280px,1fr]">
+                    {/* Left */}
+                    <aside>
+                        <div className="flex flex-col items-start">
+                            {/* 아바타만 가운데 정렬 */}
+                            <div className="relative h-28 w-28 overflow-hidden rounded-full border border-gray-300 bg-gray-100 self-center">
+                                {profileUrl ? (
+                                    <img src={profileUrl} alt="avatar" className="h-full w-full object-cover" />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-4xl">🐻</div>
+                                )}
+
                             </div>
-                        )}
 
-                        {/* 본인 프로필만 출력 */}
-                        {isMyProfile && (
-                            <div className="flex flex-col items-center gap-3">
-                                {/* 숨겨진 파일 input */}
-                                <input
-                                    id="profileUpload"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                        const file = e.target.files[0];
-                                        if (!file) return;
-                                        setSelectedFile(file);
+                            {/* 이름/이메일(왼쪽 정렬 유지) */}
+                            <div className="mt-4 text-center self-center">
+                                <div className="text-xl font-semibold">{member.nickName}</div>
+                                <a href={`mailto:${member.email}`} className="mt-1 block text-sm font-semibold text-gray-700">
+                                    {member.email}
+                                </a>
+                            </div>
 
-                                        try {
-                                            const url = await uploadProfileImg(file);
-                                            setProfileUrl(url);
-                                            console.log("업로드 성공:", url);
-                                        } catch (err) {
-                                            console.error("업로드 실패:", err);
-                                            alert("업로드 실패");
-                                        }
-                                    }}
-                                    className="hidden"
-                                />
-
-                                <button
-                                    type="button"
-                                    onClick={() => document.getElementById("profileUpload").click()}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
-                                >
-                                    프로필 업로드
+                            {/* 팔로잉/팔로워 */}
+                            <div className="mt-4 flex items-center gap-4 text-sm self-center">
+                                <button onClick={() => setOpenModal('following')} className="flex items-center gap-2 hover:underline">
+                                    <span className="opacity-70">following :</span> {followingCount}
                                 </button>
-
-                                {/* ✅ 팔로워/팔로잉 카운트 */}
-                                <div>
-                                    {/* 클릭 영역 */}
-                                    <div className="flex gap-6 text-sm mt-2">
-                                        <span onClick={() => setOpenModal("follower")} className="cursor-pointer">
-                                          팔로워 {followerCount}
-                                        </span>
-                                        <span onClick={() => setOpenModal("following")} className="cursor-pointer">
-                                          팔로잉 {followingCount}
-                                        </span>
-                                    </div>
-
-                                    {/* 팔로워 모달 */}
-                                    {openModal === "follower" && (
-                                        <div
-                                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                                            onClick={() => setOpenModal(null)}
-                                        >
-                                            <div
-                                                className="bg-white p-6 rounded-lg shadow-lg w-96"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <h2 className="text-lg font-bold mb-4">팔로워 목록</h2>
-                                                <ul className="space-y-2 max-h-60 overflow-y-auto">
-                                                    {followerList.length > 0 ? (
-                                                        followerList.map((f, idx) => (
-                                                            <li key={idx} className="flex items-center gap-3">
-                                                                <Link
-                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(f.nickName)}`}
-                                                                    className="flex items-center gap-3 hover:underline"
-                                                                >
-                                                                    <img
-                                                                        src={f.profileImg}
-                                                                        alt={f.nickName}
-                                                                        className="w-8 h-8 rounded-full border"
-                                                                    />
-                                                                    <span>{f.nickName}</span>
-                                                                </Link>
-                                                            </li>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-gray-500">팔로워가 없습니다.</p>
-                                                    )}
-                                                </ul>
-                                                <button onClick={() => setOpenModal(null)} className="mt-4 px-4 py-2 bg-gray-200 rounded">
-                                                    닫기
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* 팔로잉 모달 */}
-                                    {openModal === "following" && (
-                                        <div
-                                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                                            onClick={() => setOpenModal(null)}   // 🔹 바깥(배경) 클릭 시 닫힘
-                                        >
-                                            <div
-                                                className="bg-white p-6 rounded-lg shadow-lg w-96"
-                                                onClick={(e) => e.stopPropagation()} // 🔹 안쪽 클릭 시 닫히지 않음
-                                            >
-                                                <h2 className="text-lg font-bold mb-4">팔로잉 목록</h2>
-                                                <ul className="space-y-2 max-h-60 overflow-y-auto">
-                                                    {followingList.length > 0 ? (
-                                                        followingList.map((f, idx) => (
-                                                            <li key={idx} className="flex items-center gap-3">
-                                                                <Link
-                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(f.nickName)}`}
-                                                                    className="flex items-center gap-3 hover:underline"
-                                                                >
-                                                                    <img
-                                                                        src={f.profileImg}
-                                                                        alt={f.nickName}
-                                                                        className="w-8 h-8 rounded-full border"
-                                                                    />
-                                                                    <span>{f.nickName}</span>
-                                                                </Link>
-                                                            </li>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-gray-500">팔로잉이 없습니다.</p>
-                                                    )}
-                                                </ul>
-                                                <button onClick={() => setOpenModal(null)} className="mt-4 px-4 py-2 bg-gray-200 rounded">
-                                                    닫기
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-
-
-                                {/* 다크 모드 토글 */}
-                                <ThemeToggle />
-
-                                {/* 소셜 연동 버튼 */}
-                                <div className="flex items-center gap-3 mt-3">
-                                    {/* 구글 */}
-                                    <button
-                                        type="button"
-                                        onClick={() => !linked.google && startLink('google')}
-                                        id="connect-google"
-                                        disabled={linked.google}
-                                        aria-disabled={linked.google}
-                                        className={
-                                            `px-4 py-2 rounded text-white ` +
-                                            (linked.google
-                                                ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                                                : 'bg-red-500 hover:bg-red-400')
-                                        }
-                                        title={linked.google ? '이미 연동됨' : '구글 계정 연동'}
-                                    >
-                                        {linked.google ? '구 연동 완료' : '구글 연동'}
-                                    </button>
-
-                                    {/* 깃허브 */}
-                                    <button
-                                        type="button"
-                                        onClick={() => !linked.github && startLink('github')}
-                                        id="connect-github"
-                                        disabled={linked.github}
-                                        aria-disabled={linked.github}
-                                        className={
-                                            `px-4 py-2 rounded text-white ` +
-                                            (linked.github
-                                                ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                                                : 'bg-gray-800 hover:bg-gray-700')
-                                        }
-                                        title={linked.github ? '이미 연동됨' : '깃허브 계정 연동'}
-                                    >
-                                        {linked.github ? '깃 연동 완료' : '깃허브 연동'}
-                                    </button>
-                                </div>
+                                <button onClick={() => setOpenModal('follower')} className="flex items-center gap-2 hover:underline">
+                                    <span className="opacity-70">follower :</span> {followerCount}
+                                </button>
                             </div>
-                        )}
 
-                    </div>
+                            {/* 타인 프로필: 팔로우/언팔로우 */}
+                            {/* 본인 프로필만 출력 */}
+                            {isMyProfile && (
+                                // 아바타 바로 아래에 세로(column)로, 가운데 정렬
+                                <div className="mt-3 flex w-full flex-col items-center gap-2">
+
+                                    {/* 숨겨진 파일 input */}
+                                    <input
+                                        id="profileUpload"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+                                            try {
+                                                const url = await uploadProfileImg(file);
+                                                setProfileUrl(url);
+                                                console.log('업로드 성공:', url);
+                                            } catch (err) {
+                                                console.error('업로드 실패:', err);
+                                                alert('업로드 실패');
+                                            }
+                                        }}
+                                    />
+
+                                    {/* 업로드 버튼 */}
+                                    <button
+                                        type="button"
+                                        onClick={() => document.getElementById('profileUpload')?.click()}
+                                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
+                                    >
+                                        프로필 업로드
+                                    </button>
+
+                                    {/* 테마 토글 (버튼 아래, 중앙) */}
+
+                                        <ThemeToggle />
+
+
+                                    {/* 소셜 연동 버튼 (같은 줄, 중앙) */}
+                                    <div className="mt-1 flex items-center justify-center gap-3">
+                                        {/* 구글 */}
+                                        <button
+                                            type="button"
+                                            onClick={() => !linked.google && startLink('google')}
+                                            id="connect-google"
+                                            disabled={linked.google}
+                                            aria-disabled={linked.google}
+                                            className={
+                                                `px-4 py-2 rounded text-white ` +
+                                                (linked.google
+                                                    ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                                                    : 'bg-red-500 hover:bg-red-400')
+                                            }
+                                            title={linked.google ? '이미 연동됨' : '구글 계정 연동'}
+                                        >
+                                            {linked.google ? '구 연동 완료' : '구글 연동'}
+                                        </button>
+
+                                        {/* 깃허브 */}
+                                        <button
+                                            type="button"
+                                            onClick={() => !linked.github && startLink('github')}
+                                            id="connect-github"
+                                            disabled={linked.github}
+                                            aria-disabled={linked.github}
+                                            className={
+                                                `px-4 py-2 rounded text-white ` +
+                                                (linked.github
+                                                    ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                                                    : 'bg-gray-800 hover:bg-gray-700')
+                                            }
+                                            title={linked.github ? '이미 연동됨' : '깃허브 계정 연동'}
+                                        >
+                                            {linked.github ? '깃 연동 완료' : '깃허브 연동'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+
+                            {/* 구분선 */}
+                            <div className="my-4 h-px w-40 bg-gray-300 self-center" />
+
+                            {/* Stats */}
+                            <div className="w-fit self-center text-left">
+                                <h4 className="text-2xl font-semibold mb-3">Stats</h4>
+                                <ul className="text-sm leading-7">
+                                    <li> Total Like : <span className="font-medium">{stat.totalLikes}</span></li>
+                                    <li> Total Repository : <span className="font-medium">{stat.repoCount}</span></li>
+                                    <li> Posts : <span className="font-medium">{stat.postCount}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Right */}
+                    <main>
+                        <section className="mb-8">
+                            <h3 className="mb-3 text-2xl font-bold">introduce</h3>
+                            <div className="min-h-[120px] rounded-md border border-gray-300 bg-gray-100 p-6 text-gray-600">
+                                {introduce}
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 className="mb-3 text-2xl font-bold">Technologies &amp; Tools</h3>
+                            {techTools.length ? (
+                                <ul className="flex flex-wrap gap-2">
+                                    {techTools.map((t, i) => (
+                                        <li
+                                            key={i}
+                                            className="rounded-md border border-gray-300 bg-black/90 px-2.5 py-1 text-xs font-medium text-white"
+                                        >
+                                            {t}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="rounded-md border border-gray-200 p-4 text-sm text-gray-400">없음</div>
+                            )}
+                        </section>
+                    </main>
                 </div>
 
-                {/* 사용자 정보 */}
-                <table className="w-full border-collapse border border-neutral-300 mb-12">
-                    <tbody>
-                    <tr>
-                        <th className="border p-2">가입일</th>
-                        <td className="border p-2 text-center">
-                            {new Date(member.regDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                            })}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th className="border p-2">닉네임</th>
-                        <td className="border p-2 text-center">{member.nickName}</td>
-                    </tr>
-                    <tr>
-                        <th className="border p-2">이메일</th>
-                        <td className="border p-2 text-center">{member.email}</td>
-                    </tr>
-                    {isMyProfile && (
-                        <tr>
-                            <th className="border p-2">회원정보 수정</th>
-                            <td className="border p-2 text-center">
-                                <Link
-                                    href="/DiFF/member/modify"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded"
-                                >
-                                    수정
-                                </Link>
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-
-                {/* 본인 프로필일 때 */}
-                {isMyProfile && (
-                    <>
-                        <div className="text-center mb-6">
-                            <button
-                                onClick={() => router.push('/DiFF/member/repository')}
-                                className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                            >
-                                내 레포지토리 보기
+                {/* 목록 모달 */}
+                {openModal && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                        onClick={() => setOpenModal(null)}
+                    >
+                        <div className="w-96 rounded-lg bg-white p-6 shadow-lg" onClick={(e) => e.stopPropagation()}>
+                            <h2 className="mb-4 text-lg font-bold">
+                                {openModal === 'follower' ? '팔로워' : '팔로잉'} 목록
+                            </h2>
+                            <ul className="max-h-60 space-y-2 overflow-y-auto">
+                                {(openModal === 'follower' ? followerList : followingList)?.length ? (
+                                    (openModal === 'follower' ? followerList : followingList).map((u, idx) => (
+                                        <li key={idx} className="flex items-center gap-3">
+                                            <Link
+                                                href={`/DiFF/member/profile?nickName=${encodeURIComponent(u.nickName)}`}
+                                                className="flex items-center gap-3 hover:underline"
+                                            >
+                                                <img
+                                                    src={u.profileImg || u.profileUrl || ''}
+                                                    alt={u.nickName}
+                                                    className="h-8 w-8 rounded-full border object-cover"
+                                                />
+                                                <span>{u.nickName}</span>
+                                            </Link>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-gray-500">조회된 사용자가 없어.</p>
+                                )}
+                            </ul>
+                            <button onClick={() => setOpenModal(null)} className="mt-4 rounded bg-gray-200 px-4 py-2 text-sm">
+                                닫기
                             </button>
                         </div>
-
-                        <div className="text-center mb-6">
-                            <button
-                                onClick={() => router.push('/DiFF/article/drafts')}
-                                className="px-6 py-2 text-sm bg-black text-white rounded hover:bg-green-500"
-                            >
-                                임시저장
-                            </button>
-                        </div>
-                    </>
-                )}
-
-                {/* 상대 프로필일 때 */}
-                {!isMyProfile && (
-                    <div className="text-center mb-6">
-                        <button
-                            onClick={async () => {
-                                try {
-                                    if (member.isFollowing) {
-                                        console.log("👉 언팔로우 요청 보냄:", member.id);
-                                        const res = await unfollowMember(member.id);
-                                        console.log("✅ 언팔로우 응답:", res);
-                                        setMember(prev => ({ ...prev, isFollowing: false }));
-                                    } else {
-                                        console.log("👉 팔로우 요청 보냄:", member.id);
-                                        const res = await followMember(member.id);
-                                        console.log("✅ 팔로우 응답:", res);
-                                        setMember(prev => ({ ...prev, isFollowing: true }));
-                                    }
-                                } catch (err) {
-                                    console.error("❌ 팔로우/언팔로우 실패:", err);
-                                    alert("처리 실패");
-                                }
-                            }}
-                            className={`px-6 py-2 text-sm rounded text-white ${
-                                member.isFollowing
-                                    ? "bg-red-600 hover:bg-red-500"
-                                    : "bg-green-600 hover:bg-green-500"
-                            }`}
-                        >
-                            {member.isFollowing ? "언팔로우" : "팔로우"}
-                        </button>
                     </div>
                 )}
 
-                <div className="text-center">
+                {/* 하단 네비 */}
+                <div className="pt-8 text-center">
                     <button
                         onClick={() => router.replace('/DiFF/home/main')}
-                        className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
+                        className="rounded bg-neutral-900 px-6 py-2 text-sm text-white hover:bg-neutral-800"
                     >
                         뒤로가기
                     </button>
