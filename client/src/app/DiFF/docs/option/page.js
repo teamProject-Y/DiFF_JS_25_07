@@ -9,25 +9,19 @@ export default function StartPage() {
                 <div className="w-1/5">
                     <DocsSidebar />
                 </div>
-                <main className="prose prose-invert w-2/3 p-10">
+                <main className="prose prose-invert w-3/4 p-10">
                     <div className="title1">4. 옵션</div>
                     <hr/>
-                    <div className="content1">DiFF를 사용하기 위한 방법을 소개합니다. DiFF 사용을 위해 초기 세팅이 필요합니다.</div>
-
-                    <div className="title2">2-1. 회원가입/로그인
-                    </div>
+                    <div className="title2">4-1. 분석 제외</div>
                     <div className="content1">
-                        <ol>
-                            <li className="list_item">자동기록</li>
-                            <li className="list_content">특정 시점을 찾아보고 체크섬을 제공할 필요 없이, DiFF는 스스로 마지막 블로그 작성 시점을 기억합니다.<br/>
-                                각 브랜치 별로 기억하기 때문에 여러 브랜치에서 각각 블로그 작성도 가능합니다.</li>
-                            <li className="list_item">블로그 초안 생성</li>
-                            <li className="list_content">특정 시점을 찾아보고 체크섬을 제공할 필요 없이, DiFF는 스스로 마지막 블로그 작성 시점을 기억합니다.<br/>
-                                각 브랜치 별로 기억하기 때문에 여러 브랜치에서 각각 블로그 작성도 가능합니다.</li>
-                            <li className="list_item">코드 품질 분석</li>
-                            <li className="list_content">특정 시점을 찾아보고 체크섬을 제공할 필요 없이, DiFF는 스스로 마지막 블로그 작성 시점을 기억합니다.<br/>
-                                각 브랜치 별로 기억하기 때문에 여러 브랜치에서 각각 블로그 작성도 가능합니다.</li>
-                        </ol>
+                        코드 품질 분석은 매우 유용하고 실력 향상에 큰 서포터가 될 것입니다. <br/><br/>
+                        하지만 큰 규모의 프로젝트라면 압축과 분석 시간이 많이 소요될 것이며, <br/>
+                        또는 아직 코드 품질 점수를 제공하지 않는 언어를 사용하는 등
+                        코드 품질 점수가 굳이 필요하지 않다면 분석 제외 옵션을 사용할 수 있습니다. <br/><br/>
+                        <div className="p-4 rounded-xl bg-gray-100">
+                            <div className="text-gray-400 mb-4">bash</div>
+                            --no-analysis
+                        </div>
                     </div>
                     <div className="title2">1-2. 이용 대상</div>
                     <div className="content1">

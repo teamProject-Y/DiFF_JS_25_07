@@ -9,29 +9,20 @@ export default function RepoFolder({ repositories, onSelect }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6"
         >
             {repositories?.length > 0 ? (
                 repositories.map((repo, idx) => (
                     <motion.div
                         key={repo.id}
                         layoutId={`repo-${repo.id}`} // ← Sidebar/Content와 연결되는 애니메이션 포인트
-                        className="border border-gray-300 p-4 rounded-lg bg-white shadow-md cursor-pointer hover:bg-gray-100 transition"
+                        className=""
                         onClick={() => onSelect(repo.id)}
                     >
-                        <h3 className="font-bold text-lg mb-2">
+                        <div className="flex justify-center"><i className="fa-solid fa-folder text-[9rem] text-neutral-300 cursor-pointer hover:text-neutral-400 transition"></i></div>
+                        <h3 className="font-bold text-lg mb-2 text-center">
                             {repo.name || `Repository ${idx + 1}`}
                         </h3>
-                        <p className="text-sm text-gray-500 mb-1">
-                            생성일: {new Date(repo.regDate).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric"
-                        })}
-                        </p>
-                        <p className="text-sm text-gray-500 mb-1">
-                            커밋 ID: {repo.lastRqCommit || '없음'}
-                        </p>
                     </motion.div>
                 ))
             ) : (
