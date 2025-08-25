@@ -1,4 +1,3 @@
-// src/app/DiFF/member/login/page.js
 'use client';
 import LoginForm from '@/common/loginModal';
 

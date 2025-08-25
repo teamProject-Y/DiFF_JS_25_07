@@ -1,9 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { fetchUser } from '@/lib/UserAPI';
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import { LayoutGroup, AnimatePresence } from 'framer-motion';
+import {useRouter} from 'next/navigation';
+import {fetchUser} from "@/lib/UserAPI";
+import {useEffect, useMemo, useState, useCallback} from "react";
+import {LayoutGroup, AnimatePresence} from "framer-motion";
 
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
@@ -45,13 +45,14 @@ export default function RepositoriesPage() {
     const [error, setError] = useState('');
     const [selectedRepoId, setSelectedRepoId] = useState(null);
 
-    // 최초 접근: 토큰 없으면 로그인 페이지로, 있으면 사용자 정보/초기 리포 불러오기
+    // 로그인 체크 + 레포 로드
     useEffect(() => {
         const accessToken = getAccessToken();
         if (!accessToken) {
             router.replace('/DiFF/member/login');
             return;
         }
+
         fetchUser()
             .then((res) => {
                 setRepositories(normalizeRepos(res?.repositories || []));
@@ -94,7 +95,7 @@ export default function RepositoriesPage() {
     }, [router]);
 
     const selectedRepo = useMemo(
-        () => repositories.find((r) => r.id === selectedRepoId) || null,
+        () => repositories.find(r => r.id === selectedRepoId) || null,
         [repositories, selectedRepoId]
     );
 
@@ -119,26 +120,26 @@ export default function RepositoriesPage() {
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
-                    <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
+                    <div
+                        className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
                         <AnimatePresence>
-                            {selectedRepo && (
-                                <GhostBar
-                                    repositories={repositories}
-                                    selectedRepoId={selectedRepoId}
-                                    onSelect={setSelectedRepoId}
-                                />
-                            )}
+                            {selectedRepo && <GhostBar repositories={repositories} selectedRepoId={selectedRepoId}
+                                                       onSelect={setSelectedRepoId}/>}
                         </AnimatePresence>
 
                         <div className="flex-1 relative">
-                            {/* 기본(첫 화면): 카드 그리드 */}
+                            {/* 기본(첫 화면): 카드 그리드만 */}
                             <AnimatePresence>
                                 {!selectedRepo && (
-                                    <RepoFolder key="grid" repositories={repositories} onSelect={setSelectedRepoId} />
+                                    <RepoFolder
+                                        key="grid"
+                                        repositories={repositories}
+                                        onSelect={setSelectedRepoId}
+                                    />
                                 )}
                             </AnimatePresence>
 
-                            {/* 상세: 선택되면 표시 */}
+                            {/* 상세: 선택되면 표시 (필요 시 RepoContent 내부에서 파란 리스트/메타 표시) */}
                             <AnimatePresence>
                                 {selectedRepo && (
                                     <RepoContent
@@ -152,9 +153,7 @@ export default function RepositoriesPage() {
                             </AnimatePresence>
                         </div>
                     </div>
-
-                    <br />
-
+                    <br/>
                     {/* 레포 이동 */}
                     <div className="text-center mb-6">
                         <button
