@@ -12,21 +12,21 @@ export default function useModalOpenIntro(open) {
     // Variants
     const letterVariants = {
         initial: { rotateX: 0, opacity: 1 },
-        fold:    { rotateX: 90, opacity: 0, transition: { duration: 0.7, ease: 'easeInOut' } },
+        fold:    { rotateX: 90, opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } },
     };
     const logoWrapVariants = {
         initial: {},
-        fold: { transition: { staggerChildren: 0.06 } },
+        fold: { transition: { staggerChildren: 0.05 } },
     };
     const loadingLayerVariants = {
         shown:  { opacity: 1 },
-        hidden: { opacity: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+        hidden: { opacity: 0, transition: { duration: 0.3, ease: 'easeOut' } },
     };
     const coverVariants = {
         initial: { clipPath: 'inset(0% 0% 0% 0% round 24px)' }, // 전체 덮힘
         slide: {
             clipPath: 'inset(0% 0% 0% 100% round 24px)',          // 좌->우 오픈
-            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+            transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] },
             transitionEnd: { display: 'none', visibility: 'hidden' },
         },
     };
@@ -38,12 +38,11 @@ export default function useModalOpenIntro(open) {
             await loadCtrl.set('shown');
             await coverCtrl.set('initial');
 
-            // 타이밍: 필요하면 여기 ms만 조절
-            await new Promise(r => setTimeout(r, 1300));
+            await new Promise(r => setTimeout(r, 500));
             await logoCtrl.start('fold');
             await loadCtrl.start('hidden');
 
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, 100));
             await coverCtrl.start('slide');
         })();
     }, [open, logoCtrl, loadCtrl, coverCtrl]);

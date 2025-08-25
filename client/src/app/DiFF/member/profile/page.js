@@ -70,12 +70,10 @@ function ProfileInner() {
             });
     }, []);
 
-
     useEffect(() => {
         const justLinked = searchParams.get('linked'); // google | github
         if (justLinked === 'google' || justLinked === 'github') {
             setLinked(prev => ({ ...prev, [justLinked]: true }));
-            // 필요하면 쿼리스트링 정리
             // router.replace('/DiFF/home/main');
         }
     }, [searchParams]);
