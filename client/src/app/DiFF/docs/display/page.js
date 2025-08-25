@@ -9,7 +9,7 @@ export default function StartPage() {
                 <div className="w-1/5">
                     <DocsSidebar />
                 </div>
-                <main className="prose prose-invert w-2/3 p-10">
+                <main className="prose prose-invert w-3/4 p-10">
                     <div className="title1">5. 화면 상세</div>
                     <hr/>
                     <div className="content1">DiFF를 사용하기 위한 방법을 소개합니다. DiFF 사용을 위해 초기 세팅이 필요합니다.</div>
