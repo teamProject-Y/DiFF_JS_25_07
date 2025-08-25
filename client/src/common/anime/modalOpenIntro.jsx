@@ -22,7 +22,7 @@ export default function ModalOpenIntro({ open, brandText = '' }) {
                 animate={loadCtrl}
             >
                 <motion.div
-                    className="text-[64px] md:text-[88px] text-black select-none"
+                    className="text-6xl md:text-[88px] text-black select-none"
                     variants={logoWrapVariants}
                     initial="initial"
                     animate={logoCtrl}

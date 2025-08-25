@@ -6,7 +6,7 @@ import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ThemeToggle from "@/common/thema";
-import {fetchUser,uploadProfileImg} from "@/lib/UserAPI";
+import { fetchUser, uploadProfileImg, modifyUser } from "@/lib/UserAPI";
 import TechSettings from './techSettings';
 
 
