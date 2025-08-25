@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { login } from '@/lib/UserAPI';
 
-export default function LoginForm({ callbackUrl = '/DiFF/home/main', afterLoginUriFromPage }) {
+export default function LoginForm({ open, callbackUrl = '/DiFF/home/main', afterLoginUriFromPage }) {
     const [values, setValues] = useState({ email: '', loginPw: '' });
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
@@ -38,6 +38,7 @@ export default function LoginForm({ callbackUrl = '/DiFF/home/main', afterLoginU
             setSubmitting(false);
         }
     };
+
 
     return (
         <form onSubmit={onSubmit} className="max-w-[460px] mx-auto">
