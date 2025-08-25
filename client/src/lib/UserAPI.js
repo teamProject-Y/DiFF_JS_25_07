@@ -35,7 +35,7 @@ const refreshAccessToken = async () => {
 
     try {
         // ✅ POST + body 로 맞춤
-        const res = await axios.post("http://localhost:8080/api/auth/refresh", {
+        const res = await axios.post("http://localhost:8080/api/DiFF/auth/refresh", {
             refreshToken: REFRESH_TOKEN
         });
 
