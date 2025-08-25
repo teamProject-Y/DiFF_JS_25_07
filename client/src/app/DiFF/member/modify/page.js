@@ -10,13 +10,6 @@ export default function ModifyPage({ initialMember }) {
     const router = useRouter();
     const [member, setMember] = useState(initialMember || null);
     const [form, setForm] = useState({});
-    // const [form, setForm] = useState(initialMember ? {
-    //     id: initialMember.id,
-    //     loginId: initialMember.loginId,
-    //     name: initialMember.name,
-    //     nickName: initialMember.nickName,
-    //     email: initialMember.email,
-    // } : {});
     const [pw, setPw] = useState("");
     const [verified, setVerified] = useState(false);
     const [error, setError] = useState("");
@@ -43,26 +36,6 @@ export default function ModifyPage({ initialMember }) {
             .catch(() => {
                 router.replace('/DiFF/home/main');
             });
-
-
-        // 기존에 있던 거
-        // if (!initialMember) {
-        //     const accessToken = typeof window !== "undefined" && localStorage.getItem('accessToken');
-        //     if (!accessToken) {
-        //         router.replace('/DiFF/member/login');
-        //         return;
-        //     }
-        //     fetchUser().then(user => {
-        //         setMember(user);
-        //         setForm({
-        //             id: user.id,
-        //             loginId: user.loginId,
-        //             name: user.name,
-        //             nickName: user.nickName,
-        //             email: user.email,
-        //         });
-        //     });
-        // }
     }, [router]);
 
 
