@@ -23,6 +23,13 @@ SwiperSlide.displayName = 'SwiperSlide';
 const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), {ssr: false});
 const HamburgerButton = dynamic(() => import('@/common/HamMenu'), {ssr: false});
 
+// background
+const sections = [
+    { id: 'terminal', color: '#161616' },
+    { id: 'docs', color: '#fafafa' },
+    { id: 'trending', color: '#fafafa' }
+];
+
 // 로그인 분기용: 만료/리프레시
 function isExpired(token, skewMs = 30000) {
     try {
@@ -136,6 +143,9 @@ export default function Page() {
 
     const [isClient, setIsClient] = useState(false);
 
+    const [bgColor, setBgColor] = useState(sections[0].color);
+    const sectionRefs = useRef([]);
+
     useEffect(() => setIsClient(true), []);
 
     useEffect(() => {
@@ -158,6 +168,30 @@ export default function Page() {
         }
     }, []);
 
+    // background
+    useEffect(() => {
+        if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
+
+        const observer = new IntersectionObserver(entries => {
+            const visible = entries.find(e => e.isIntersecting);
+            if (visible) {
+                const section = sections.find(s => s.id === visible.target.id);
+                if (section) setBgColor(section.color);
+            }
+        }, { threshold: 0.5 });
+
+        sectionRefs.current.forEach(section => {
+            if (section) observer.observe(section);
+        });
+
+        return () => {
+            sectionRefs.current.forEach(section => {
+                if (section) observer.unobserve(section);
+            });
+        };
+    }, [sectionRefs.current.map(ref => ref)]);
+
+
     if (!mounted) return null; // 마운트 전 렌더 방지
 
     /* ───────────────── 분기: JWT 토큰만 보고 결정 ───────────────── */
@@ -165,16 +199,21 @@ export default function Page() {
         return <AfterMainPage me={user} trendingArticles={trendingArticles}/>;
     }
 
+    console.log("sectionaRefs : " + sectionRefs.current);
 
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
-        <div className="w-full min-h-screen bg-[#161616]">
-            <div className="h-screen">
+        <div className="w-full min-h-screen transition-colors duration-700" style={{ backgroundColor: bgColor }}>
+            <div id="terminal" className="h-screen w-full" ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
 
+            <div id="docs" className="h-screen w-full " ref={el => sectionRefs.current[1] = el}>
+                docs
+            </div>
+
             {/* trending */}
-            <div className="w-full h-screen bg-white px-36 py-10">
+            <div id="trending" className="w-full h-screen px-36 py-10" ref={el => sectionRefs.current[2] = el}>
                 <div className="text-5xl text-black font-bold">Trending</div>
                 <div className="article-slider h-2/3 w-full mt-16 flex">
                     {loading ? (
