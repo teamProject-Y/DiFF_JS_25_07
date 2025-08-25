@@ -1,11 +1,12 @@
-// v2 — user provided JS version (no sidebar)
+// member/profile/page.js
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ThemeToggle from "@/common/thema";
-
+import TechBadges from "@/common/techBadges/techBadges";
+import { getMyTechKeys, getTechKeysByNickName } from "@/lib/TechAPI";
 
 import {
     fetchUser,
@@ -34,6 +35,7 @@ function ProfileInner() {
     const [isMyProfile, setIsMyProfile] = useState(false);
     const [profileUrl, setProfileUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
+    const [techKeys, setTechKeys] = useState([]);
 
     const [followingCount, setFollowingCount] = useState(0);
     const [followerCount, setFollowerCount] = useState(0);
@@ -45,7 +47,6 @@ function ProfileInner() {
     // 백엔드 미구현 부분은 "없음"으로 고정 표시
     const [introduce] = useState('없음');
     const [stat] = useState({ totalLikes: '없음', repoCount: '없음', postCount: '없음' });
-    const [techTools] = useState([]);
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -157,6 +158,23 @@ function ProfileInner() {
     }, []);
 
     useEffect(() => {
+        if (!member) return;
+        const nickName = searchParams.get("nickName");
+        const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
+        const isMine = !nickName || nickName === myNickName;
+
+        (async () => {
+            try {
+                const keys = isMine ? await getMyTechKeys() : await getTechKeysByNickName(member.nickName);
+                setTechKeys(Array.isArray(keys) ? keys : []);
+            } catch (e) {
+                console.error(e);
+                setTechKeys([]);
+            }
+        })();
+    }, [member, searchParams]);
+
+    useEffect(() => {
         if (openModal === "follower") {
             getFollowerList()
                 .then((res) => {
@@ -188,7 +206,6 @@ function ProfileInner() {
             alert("업로드 실패");
         }
     };
-
 
 
     // 소셜 로그인 통합, 연동
@@ -227,7 +244,7 @@ function ProfileInner() {
                                 {profileUrl ? (
                                     <img src={profileUrl} alt="avatar" className="h-full w-full object-cover" />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-4xl">🐻</div>
+                                    <div className="flex h-full w-full items-center justify-center text-4xl">🟡</div>
                                 )}
 
                             </div>
@@ -307,7 +324,7 @@ function ProfileInner() {
                                             }
                                             title={linked.google ? '이미 연동됨' : '구글 계정 연동'}
                                         >
-                                            {linked.google ? '구 연동 완료' : '구글 연동'}
+                                            {linked.google ? '구글 연동 완료' : '구글 연동'}
                                         </button>
 
                                         {/* 깃허브 */}
@@ -358,20 +375,7 @@ function ProfileInner() {
 
                         <section>
                             <h3 className="mb-3 text-2xl font-bold">Technologies &amp; Tools</h3>
-                            {techTools.length ? (
-                                <ul className="flex flex-wrap gap-2">
-                                    {techTools.map((t, i) => (
-                                        <li
-                                            key={i}
-                                            className="rounded-md border border-gray-300 bg-black/90 px-2.5 py-1 text-xs font-medium text-white"
-                                        >
-                                            {t}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <div className="rounded-md border border-gray-200 p-4 text-sm text-gray-400">없음</div>
-                            )}
+                            <TechBadges keys={techKeys} />
                         </section>
                     </main>
                 </div>
