@@ -194,9 +194,9 @@ export default function RepoContent({ onClose }) {
             {/* 🔹 가운데: 선택된 레포의 게시물만 출력 */}
             <div className="p-6 overflow-y-auto">
                 <motion.div variants={block} className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-semibold">
-                        {selectedRepo ? `${selectedRepo.name} 게시물` : '게시물'}
-                    </h2>
+                    {/*<h2 className="text-2xl font-semibold">*/}
+                    {/*    {selectedRepo ? `${selectedRepo.name} 게시물` : '게시물'}*/}
+                    {/*</h2>*/}
                     {onClose && (
                         <button
                             onClick={onClose}

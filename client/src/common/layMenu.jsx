@@ -30,7 +30,7 @@ export default function LayMenu() {
     return (
         <nav className="top-20 h-[calc(100vh-80px)] mx-auto max-w-7xl flex justify-around">
             {/* 왼쪽 메뉴 */}
-            <aside className="py-3 w-64">
+            <aside className="py-3 px-8 w-64">
                 <nav className="space-y-2 text-gray-600 mb-6">
                     {menuItems.map(({ href, label }) => {
                         const isActive =
@@ -41,7 +41,7 @@ export default function LayMenu() {
                                 key={href}
                                 href={href}
                                 className={[
-                                    "block px-8 py-2 transition-colors hover:bg-gray-100",
+                                    "block py-2 transition-colors hover:bg-gray-100",
                                     isActive
                                         ? "text-black font-semibold"
                                         : ""
@@ -52,17 +52,18 @@ export default function LayMenu() {
                         );
                     })}
                 </nav>
+                <hr/>
 
                 {/* Following 목록 */}
-                <div className="pt-4 text-sm text-gray-500">
-                    <div className="font-semibold mb-3 px-8">Following</div>
+                <div className="pt-6 text-sm text-gray-500">
+                    <div className="font-semibold mb-3 text-gray-600">Following</div>
                     {following.length > 0 ? (
                         <ul className="space-y-2">
                             {following.map((f, idx) => (
                                 <li key={idx}>
                                     <Link
                                         href={`/DiFF/member/profile?nickName=${encodeURIComponent(f.nickName)}`}
-                                        className="hover:underline px-8"
+                                        className="hover:underline"
                                     >
                                         {f.nickName}
                                     </Link>

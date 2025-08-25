@@ -9,7 +9,7 @@ export default function StartPage() {
                 <div className="w-1/5">
                     <DocsSidebar />
                 </div>
-                <main className="prose prose-invert w-2/3 p-10">
+                <main className="prose prose-invert w-3/4 p-10">
                     <div className="title1">7. 지원</div>
                     <hr/>
                     <div className="title2">7-1. FAQ
