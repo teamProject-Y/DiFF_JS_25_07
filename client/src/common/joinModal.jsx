@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { signUp } from '@/lib/UserAPI';
 
 export default function JoinForm() {
@@ -12,6 +13,7 @@ export default function JoinForm() {
     });
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const router = useRouter();
 
     const onChange = (e) => setForm(v => ({ ...v, [e.target.name]: e.target.value }));
 
@@ -28,16 +30,28 @@ export default function JoinForm() {
         setError('');
         const msg = validate();
         if (msg) return setError(msg);
+
         try {
             setSubmitting(true);
             const { loginPw, checkLoginPw, nickName, email } = form;
             const res = await signUp({ loginPw, checkLoginPw, nickName, email });
-            if (res?.resultCode === 'S-1') {
-                const token = res?.data1;
-                if (token) localStorage.setItem('accessToken', token);
-                window.location.replace('/DiFF/home/main');
+
+            // ✅ 백엔드 응답 구조 맞추기
+            const { resultCode, msg: serverMsg, data1: accessToken, data2: refreshToken } = res;
+
+            if (resultCode === 'S-1' && accessToken) {
+                // ✅ 토큰 저장 (자동 로그인 상태)
+                localStorage.setItem('tokenType', 'Bearer');
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken || '');
+
+                // ✅ 전역 상태 갱신 이벤트 발생
+                window.dispatchEvent(new Event('auth-changed'));
+
+                // ✅ 메인 페이지로 강제 이동 (SSR 새로고침 보장)
+                window.location.href = '/DiFF/home/main';
             } else {
-                setError(res?.msg || '회원가입에 실패했습니다');
+                setError(serverMsg || '회원가입에 실패했습니다');
                 setSubmitting(false);
             }
         } catch (err) {
@@ -46,12 +60,12 @@ export default function JoinForm() {
         }
     };
 
+
     return (
         <form onSubmit={onSubmit} className="max-w-[460px] mx-auto">
             <div className="text-2xl md:text-3xl font-semibold text-center mb-8">Join</div>
             {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
-            <label className="sr-only">이메일</label>
             <input
                 type="email"
                 name="email"
@@ -59,16 +73,18 @@ export default function JoinForm() {
                 onChange={onChange}
                 placeholder="E-mail"
                 className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-full p-3"
+                required
+                disabled={submitting}
             />
-            <label className="sr-only">닉네임</label>
             <input
                 name="nickName"
                 value={form.nickName}
                 onChange={onChange}
                 placeholder="닉네임"
                 className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-full p-3"
+                required
+                disabled={submitting}
             />
-            <label className="sr-only">비밀번호</label>
             <input
                 type="password"
                 name="loginPw"
@@ -76,8 +92,9 @@ export default function JoinForm() {
                 onChange={onChange}
                 placeholder="비밀번호"
                 className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-full p-3"
+                required
+                disabled={submitting}
             />
-            <label className="sr-only">비밀번호 확인</label>
             <input
                 type="password"
                 name="checkLoginPw"
@@ -85,6 +102,8 @@ export default function JoinForm() {
                 onChange={onChange}
                 placeholder="비밀번호 확인"
                 className="mb-6 bg-white border border-black text-black text-sm rounded-lg w-full p-3"
+                required
+                disabled={submitting}
             />
 
             <button

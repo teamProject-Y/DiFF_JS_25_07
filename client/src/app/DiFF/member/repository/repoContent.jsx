@@ -4,7 +4,19 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchUser } from '@/lib/UserAPI';
-import { fetchArticles } from '@/lib/ArticleAPI';
+import { fetchArticles, getAverageMetrics } from '@/lib/ArticleAPI';
+import { Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 // 🔹 repobar 느낌: 컨테이너 슬라이드 + 자식 stagger
 const container = {
@@ -59,6 +71,9 @@ export default function RepoContent({ onClose }) {
     const [articles, setArticles] = useState([]);
     const [articleLoading, setArticleLoading] = useState(false);
 
+    // 🔹 분석 데이터 상태
+    const [metrics, setMetrics] = useState(null);
+
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!accessToken) {
@@ -71,6 +86,8 @@ export default function RepoContent({ onClose }) {
                 const repos = res.repositories || [];
                 setRepositories(repos);
                 setLoading(false);
+
+                // 첫 로딩 시 첫 번째 레포 자동 선택
                 if (repos.length > 0) {
                     await handleRepoClick(repos[0]);
                 }
@@ -82,6 +99,7 @@ export default function RepoContent({ onClose }) {
             });
     }, [router]);
 
+    // 레포 클릭 시 게시글 불러오기
     const handleRepoClick = async (repo) => {
         setSelectedRepo(repo);
         setArticleLoading(true);
@@ -93,8 +111,13 @@ export default function RepoContent({ onClose }) {
                 keyword: '',
             });
             setArticles(res.articles || []);
+
+            // 🔹 분석 데이터 가져오기
+            const metricsRes = await getAverageMetrics(repo.id);
+            setMetrics(metricsRes);
+
         } catch (err) {
-            console.error('게시글 로딩 오류:', err);
+            console.error('데이터 로딩 오류:', err);
             setArticles([]);
         } finally {
             setArticleLoading(false);
@@ -102,6 +125,36 @@ export default function RepoContent({ onClose }) {
     };
 
     if (loading) return <div>로딩중...</div>;
+
+    // 🔹 차트 데이터 준비
+    const chartData = metrics
+        ? {
+            labels: [
+                'Coverage',
+                'Bugs',
+                'Complexity',
+                'Code Smells',
+                'Duplicated Lines',
+                'Vulnerabilities',
+                'Total Score',
+            ],
+            datasets: [
+                {
+                    label: '분석 평균',
+                    data: [
+                        metrics.coverage,
+                        metrics.bugs,
+                        metrics.complexity,
+                        metrics.codeSmells,
+                        metrics.duplicatedLinesDensity,
+                        metrics.vulnerabilities,
+                        metrics.totalScore,
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                },
+            ],
+        }
+        : null;
 
     return (
         <motion.div
@@ -138,7 +191,7 @@ export default function RepoContent({ onClose }) {
                 </ul>
             </aside>
 
-            {/* 🔹 가운데: 게시물 영역 */}
+            {/* 🔹 가운데: 선택된 레포의 게시물만 출력 */}
             <div className="p-6 overflow-y-auto">
                 <motion.div variants={block} className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-semibold">
@@ -177,11 +230,15 @@ export default function RepoContent({ onClose }) {
                                 </h3>
                                 <div className="text-sm text-gray-500 mt-2">
                                     <p> 작성자: {article.extra__writer || '익명'}</p>
-                                    <p> {new Date(article.regDate).toLocaleDateString("en-US", {
-                                        year: "numeric",
-                                        month: "short",
-                                        day: "numeric"
-                                    })}</p>
+                                    <p>
+                                        {new Date(
+                                            article.regDate
+                                        ).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                        })}
+                                    </p>
                                 </div>
                             </motion.div>
                         ))}
@@ -189,19 +246,45 @@ export default function RepoContent({ onClose }) {
                 ) : (
                     <p>등록된 게시물이 없습니다.</p>
                 )}
+
+                {/* 🔹 분석 그래프 크게 */}
+                {metrics && (
+                    <div className="border rounded-xl p-6 bg-white shadow-lg mt-8">
+                        <strong className="block text-xl mb-4">
+                            {selectedRepo?.name} 분석 결과
+                        </strong>
+                        <Bar
+                            data={chartData}
+                            options={{
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: `${selectedRepo?.name} 품질 지표`,
+                                    },
+                                },
+                            }}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* 🔹 오른쪽: 메타 정보 */}
-            <motion.aside variants={sidePanel} className="p-6 border-l bg-gray-50">
+            <motion.aside className="p-6 border-l bg-gray-50">
                 {selectedRepo ? (
                     <motion.div layout className="border rounded-xl p-6 bg-white shadow-lg">
                         <strong className="block text-lg">메타 정보</strong>
                         <div className="text-sm text-gray-600 mt-3 space-y-2">
-                            <div> 생성일: {new Date(selectedRepo.regDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                            })}</div>
+                            <div>
+                                생성일:{' '}
+                                {new Date(
+                                    selectedRepo.regDate
+                                ).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                })}
+                            </div>
                             <div> 커밋 ID: {selectedRepo.lastRqCommit || '없음'}</div>
                             <div> 언어: {selectedRepo.language || 'N/A'}</div>
                         </div>
