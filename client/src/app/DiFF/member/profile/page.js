@@ -322,7 +322,7 @@ function ProfileInner() {
                                             }
                                             title={linked.google ? '이미 연동됨' : '구글 계정 연동'}
                                         >
-                                            {linked.google ? '구 연동 완료' : '구글 연동'}
+                                            {linked.google ? '구글 연동 완료' : '구글 연동'}
                                         </button>
 
                                         {/* 깃허브 */}
