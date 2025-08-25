@@ -126,7 +126,7 @@ export default function Header() {
                             <Link href="/DiFF/member/login" scroll={false} prefetch={false}>LOGIN</Link>
                         </li>
                         <li>
-                            <Link href="/DiFF/member/join">JOIN</Link>
+                            <Link href="/DiFF/member/join" scroll={false} prefetch={false}>JOIN</Link>
                         </li>
                     </>
                 )}
