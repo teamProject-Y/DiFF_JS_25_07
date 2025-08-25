@@ -1,13 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { login } from '@/lib/UserAPI';
 
 export default function LoginForm({ open, callbackUrl = '/DiFF/home/main', afterLoginUriFromPage }) {
     const [values, setValues] = useState({ email: '', loginPw: '' });
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const router = useRouter();
 
+    // 로그인 성공 후 이동할 URI
     const afterLoginUri = useMemo(() => {
         if (afterLoginUriFromPage) return afterLoginUriFromPage;
         if (typeof window !== 'undefined') return window.location.pathname + window.location.search;
@@ -19,22 +22,37 @@ export default function LoginForm({ open, callbackUrl = '/DiFF/home/main', after
     const onSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        if (!values.email || !values.loginPw) return setError('이메일와 비밀번호를 입력하세요.');
+
+        if (!values.email || !values.loginPw) {
+            return setError('이메일과 비밀번호를 입력하세요.');
+        }
+
         try {
             setSubmitting(true);
+
+            // ✅ 백엔드 로그인 API 호출
             const result = await login(values);
-            if (result?.resultCode !== 'S-1' || !result?.data1) {
-                setError(result?.msg || '로그인 실패');
+
+            // ✅ 응답 구조 맞추기
+            const { resultCode, msg, data1: accessToken, data2: refreshToken } = result;
+
+            if (resultCode !== 'S-1' || !accessToken) {
+                setError(msg || '로그인 실패');
                 setSubmitting(false);
                 return;
             }
-            localStorage.setItem('tokenType', result.dataName || 'Bearer');
-            localStorage.setItem('accessToken', result.data1);
-            localStorage.setItem('refreshToken', result.data2 || '');
+
+            // ✅ 토큰 저장
+            localStorage.setItem('tokenType', 'Bearer');
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken || '');
             window.dispatchEvent(new Event('auth-changed'));
-            window.location.replace(afterLoginUri || callbackUrl);
+
+            // ✅ 로그인 성공 → 메인 이동
+            window.location.href = '/DiFF/home/main'; // 🔥 강제 리로드 방식
+            // 또는 CSR 라우팅 쓰고 싶으면 router.replace('/DiFF/home/main');
         } catch (err) {
-            setError('로그인 실패: 아이디/비밀번호를 확인하세요.');
+            setError(err.response?.data?.msg || '로그인 실패: 아이디/비밀번호를 확인하세요.');
             setSubmitting(false);
         }
     };
@@ -75,12 +93,14 @@ export default function LoginForm({ open, callbackUrl = '/DiFF/home/main', after
                 {submitting ? 'LOGGING IN…' : 'Login'}
             </button>
 
+            {/* 추가 메뉴 */}
             <div className="text-center my-6 flex justify-center gap-6 text-black">
                 <a href="/DiFF/member/join" className="hover:underline">Join</a>
                 <a href="/DiFF/member/findLoginId" className="hover:underline">Find ID</a>
                 <a href="/DiFF/member/findLoginPw" className="hover:underline">Find PW</a>
             </div>
 
+            {/* 소셜 로그인 */}
             <div className="space-y-4">
                 <a
                     href="/login/github"
