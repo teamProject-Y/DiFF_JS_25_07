@@ -9,7 +9,7 @@ export default function RepoFolder({ repositories, onSelect }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6"
+            className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6"
         >
             {repositories?.length > 0 ? (
                 repositories.map((repo, idx) => (
