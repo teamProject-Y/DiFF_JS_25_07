@@ -82,7 +82,7 @@ export const login = async ({ email, loginPw }) => {
     const res = await UserAPI.post("/api/DiFF/auth/login", { email, loginPw });
     const { accessToken, refreshToken } = res.data;
 
-    // ✅ 로컬 저장
+
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("tokenType", "Bearer");
@@ -96,7 +96,7 @@ export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
     const res = await UserAPI.post("/api/DiFF/auth/join", { loginPw, checkLoginPw, nickName, email });
     const { accessToken, refreshToken } = res.data;
 
-    // ✅ 자동 로그인 효과: 회원가입 후 토큰도 저장
+
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("tokenType", "Bearer");
@@ -143,7 +143,7 @@ export const getFollowerList = async () => {
 // 상대방을 팔로우
 export const followMember = async (fromMemberId) => {
     const response = await UserAPI.post(`/api/DiFF/member/follow`, null, {
-        params: { fromMemberId },  // ✅ 서버가 요구하는 이름 맞추기
+        params: { fromMemberId },
     });
     return response.data;
 };
@@ -151,7 +151,7 @@ export const followMember = async (fromMemberId) => {
 // 상대방을 언팔로우
 export const unfollowMember = async (fromMemberId) => {
     const response = await UserAPI.delete(`/api/DiFF/member/unfollow`, {
-        params: { fromMemberId },  // ✅ 동일하게 수정
+        params: { fromMemberId },
     });
     return response.data;
 };
