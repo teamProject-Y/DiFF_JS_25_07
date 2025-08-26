@@ -23,7 +23,6 @@ font-weight: 700; font-size: 13px;
 letter-spacing: 0.02rem; 
 backdrop-filter: blur(10px); 
 -webkit-backdrop-filter: blur(10px); 
-border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
 transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; 
 will-change: transform, height, background-color; 
 &.hide { transform: translateY(-100%); 

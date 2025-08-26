@@ -18,6 +18,6 @@ export default function SidebarLayout({ children }) {
         w-56 shrink-0
         border-r bg-white/90 backdrop-blur
         sticky top-20
-        h-[calc(100vh-80px)] overflow-y-auto
+        h-[calc(100vh-80px)]
       ">{children}</aside>;
 }
