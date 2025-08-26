@@ -23,6 +23,13 @@ SwiperSlide.displayName = 'SwiperSlide';
 const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), {ssr: false});
 const HamburgerButton = dynamic(() => import('@/common/HamMenu'), {ssr: false});
 
+// background
+const sections = [
+    { id: 'terminal', color: '#161616' },
+    { id: 'docs', color: '#fafafa' },
+    { id: 'trending', color: '#fafafa' }
+];
+
 // 로그인 분기용: 만료/리프레시
 function isExpired(token, skewMs = 30000) {
     try {
@@ -117,17 +124,10 @@ function extractFirstImage(body) {
 }
 
 export default function Page() {
-    // const [log, setLog] = useState([]);               // (PreLoginTerminal 내부로 이동됨 — 여기선 유지해도 무해)
-    // const [step, setStep] = useState(0);              // ↑ 같은 이유로 그대로 둬도 동작에는 영향 없음
-    // const [input, setInput] = useState('');           // (필요시 제거 가능)
-    // const [showInput, setShowInput] = useState(false);
     const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [accessToken, setAccessToken] = useState(null);
     const [user, setUser] = useState({email: '', blogName: ''});
-    // const [currentResultText, setCurrentResultText] = useState(null);
-    // const [showResultAnim, setShowResultAnim] = useState(false);
-    // const [lastDoneStep, setLastDoneStep] = useState(-1);
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -135,6 +135,9 @@ export default function Page() {
     const router = useRouter();
 
     const [isClient, setIsClient] = useState(false);
+
+    const [bgColor, setBgColor] = useState(sections[0].color);
+    const sectionRefs = useRef([]);
 
     useEffect(() => setIsClient(true), []);
 
@@ -158,6 +161,30 @@ export default function Page() {
         }
     }, []);
 
+    // background
+    useEffect(() => {
+        if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
+
+        const observer = new IntersectionObserver(entries => {
+            const visible = entries.find(e => e.isIntersecting);
+            if (visible) {
+                const section = sections.find(s => s.id === visible.target.id);
+                if (section) setBgColor(section.color);
+            }
+        }, { threshold: 0.5 });
+
+        sectionRefs.current.forEach(section => {
+            if (section) observer.observe(section);
+        });
+
+        return () => {
+            sectionRefs.current.forEach(section => {
+                if (section) observer.unobserve(section);
+            });
+        };
+    }, [sectionRefs.current.map(ref => ref)]);
+
+
     if (!mounted) return null; // 마운트 전 렌더 방지
 
     /* ───────────────── 분기: JWT 토큰만 보고 결정 ───────────────── */
@@ -165,16 +192,32 @@ export default function Page() {
         return <AfterMainPage me={user} trendingArticles={trendingArticles}/>;
     }
 
+    console.log("sectionaRefs : " + sectionRefs.current);
 
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
-        <div className="w-full min-h-screen bg-[#161616]">
-            <div className="h-screen">
+        <div
+            id="pageScroll"
+            data-scroll-root
+            className="w-full transition-colors duration-700 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+            style={{ backgroundColor: bgColor }}
+        >
+            <div id="terminal" className="h-screen w-full pt-20 snap-start" ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
 
+            <div id="docs" className="h-screen w-full pt-20 snap-start" ref={el => sectionRefs.current[1] = el}>
+                <div className="w-4/5 h-1/2 mx-auto">
+
+                </div>
+                <div className="h-1/2">
+
+                </div>
+            </div>
+
+
             {/* trending */}
-            <div className="w-full h-screen bg-white px-36 py-10">
+            <div id="trending" className="w-full h-screen snap-start px-36 pt-20" ref={el => sectionRefs.current[2] = el}>
                 <div className="text-5xl text-black font-bold">Trending</div>
                 <div className="article-slider h-2/3 w-full mt-16 flex">
                     {loading ? (
@@ -205,7 +248,7 @@ export default function Page() {
                                             <SwiperSlide key={article.id ?? index}>
                                                 {/*<Link href={`/DiFF/article/detail?id=${article.id}`}>*/}
                                                     <div
-                                                        className="article-card h-[90%] bg-white shadow-md rounded-md cursor-pointer hover:shadow-lg transition"
+                                                        className="article-card h-[90%] bg-white shadow-md rounded-b-lg overflow-hidden cursor-pointer hover:shadow-lg transition"
                                                         onClick={() => router.push(`/DiFF/article/detail?id=${article.id}`)}
                                                         role="link"
                                                         tabIndex={0}
@@ -252,11 +295,6 @@ export default function Page() {
                                                                     <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
                                                                 </div>
                                                             </div>
-                                                            {/* className="text-sm text-gray-600">{new Date(article.regDate).toLocaleDateString("en-US", {*/}
-                                                            {/*    year: "numeric",*/}
-                                                            {/*    month: "short",*/}
-                                                            {/*    day: "numeric"*/}
-                                                            {/*})}</p>*/}
                                                         </div>
                                                     </div>
                                                 {/*</Link>*/}
