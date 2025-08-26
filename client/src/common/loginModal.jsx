@@ -30,10 +30,10 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
         try {
             setSubmitting(true);
 
-            // ✅ 백엔드 로그인 API 호출
+            // 백엔드 로그인 API 호출
             const result = await login(values);
 
-            // ✅ 응답 구조 맞추기
+            // 응답 구조 맞추기
             const {resultCode, msg, data1: accessToken, data2: refreshToken} = result;
 
             if (resultCode !== 'S-1' || !accessToken) {
