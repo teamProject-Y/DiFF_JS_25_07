@@ -1,8 +1,8 @@
-// src/app/DiFF/member/repository/RepoGhostBar.jsx
+// src/app/DiFF/member/repository/SideBar.jsx
 'use client';
 import { motion } from 'framer-motion';
 
-export default function RepoGhostBar({ repositories = [] }) {
+export default function SideBar({ repositories = [] }) {
     return (
         <motion.aside
             key="ghost-rail"

@@ -64,7 +64,7 @@ export function WriteArticlePage() {
             try {
                 setLoadingRepos(true);
                 setRepoError('');
-                const list = await getMyRepositories(); // ⭐️ 목록 API
+                const list = await getMyRepositories();
                 if (!mounted) return;
                 setRepos(list);
                 const init =
@@ -110,7 +110,7 @@ export function WriteArticlePage() {
                 draftId: draftId ? Number(draftId) : null
             };
 
-            const res = await writeArticle(data); // ⭐️ doWrite 호출 → DB insert + draft 삭제
+            const res = await writeArticle(data);
 
             console.log('📦 doWrite 응답:', res);
             console.log('📦 repository:', res?.data?.repository);
