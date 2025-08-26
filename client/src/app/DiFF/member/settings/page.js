@@ -5,9 +5,9 @@
 import {useEffect, useState, Suspense} from 'react';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
-import ThemeToggle from "@/common/thema";
-import {fetchUser, uploadProfileImg, modifyUser, getFollowingList} from "@/lib/UserAPI";
+import {fetchUser, uploadProfileImg, modifyUser } from "@/lib/UserAPI";
 import TechSettings from './techSettings';
+import ThemeToggle from "@/common/thema";
 
 
 export default function SettingsTab() {
@@ -28,24 +28,14 @@ function SettingsPage() {
     const [profileUrl, setProfileUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [linkedGithub, setLinkedGithub] = useState(false);
-    const [form, setForm] = useState({});
-    const [error, setError] = useState("");
-    const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
-
     const [linked, setLinked] = useState({google: false, github: false});
+    const [form, setForm] = useState({
+        nickName: '',
+        password: '',
+    });
+    const [error, setError] = useState("");
 
-    const handleUpload = async () => {
-        if (!selectedFile) return alert("파일을 선택하세요!");
-        try {
-            const url = await uploadProfileImg(selectedFile);
-            setProfileUrl(url);
-            console.log("업로드 성공:", url);
-        } catch {
-            alert("업로드 실패");
-        }
-    };
-
-
+    const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
     // 소셜 로그인 통합, 연동
     const startLink = (provider) => {
@@ -61,14 +51,20 @@ function SettingsPage() {
         alert('프로필 제거 로직 연결 예정');
     };
 
-    const onClickGithubLink = () => {
-        // TODO: linked 상태에 따라 link/unlink
-        setLinkedGithub(v => !v);
-        alert(linkedGithub ? '깃허브 연동 해제 예정' : '깃허브 연동 예정');
-    };
     const onClickWithdraw = () => {
         // TODO: 회원탈퇴 API 연결
         alert('회원탈퇴 로직 연결 예정');
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return alert("파일을 선택하세요!");
+        try {
+            const url = await uploadProfileImg(selectedFile);
+            setProfileUrl(url);
+            console.log("업로드 성공:", url);
+        } catch {
+            alert("업로드 실패");
+        }
     };
 
     useEffect(() => {
@@ -238,9 +234,8 @@ function SettingsPage() {
                     <div className="mt-10 grid w-full max-w-2xl grid-cols-[90px_1fr] items-center gap-y-6">
 
                         <form>
-                            <div className="text-lg font-semibold">닉네임</div>
-                            <input name="name" value={form.name ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="이름" />
-                            <input name="nickName" value={form.nickName ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="닉네임" />
+                            <label className="text-lg font-semibold">닉네임</label>
+                            <input name="nickName" value={form.nickName ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="nickname"/>
                             <button type="submit"
                                     className="py-2.5 px-5 w-96 bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700">
                                 UPDATE
@@ -248,6 +243,11 @@ function SettingsPage() {
                         </form>
 
                         <br/>
+
+                        <div className="text-lg font-semibold">테마</div>
+                        <div className="flex items-center gap-3">
+                            <ThemeToggle />
+                        </div>
 
                         <div className="text-lg font-semibold">연동</div>
                         <div>

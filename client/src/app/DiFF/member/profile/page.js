@@ -301,11 +301,6 @@ function ProfileInner() {
                                         프로필 업로드
                                     </button>
 
-                                    {/* 테마 토글 (버튼 아래, 중앙) */}
-
-                                        <ThemeToggle />
-
-
                                     {/* 소셜 연동 버튼 (같은 줄, 중앙) */}
                                     <div className="mt-1 flex items-center justify-center gap-3">
                                         {/* 구글 */}
