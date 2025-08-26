@@ -21,7 +21,7 @@ export default function RepoGhostBar({ repositories = [] }) {
         >
             <ul className="p-2 space-y-2">
                 {repositories.map((repo) => (
-                    // ✅ grid 카드 / 상세 헤더와 동일한 layoutId
+                    // grid 카드 / 상세 헤더와 동일한 layoutId
                     <motion.li
                         key={repo.id}
                         layoutId={`repo-${repo.id}`}

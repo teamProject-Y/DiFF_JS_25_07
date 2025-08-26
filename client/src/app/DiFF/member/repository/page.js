@@ -4,6 +4,7 @@ import {useRouter} from 'next/navigation';
 import {fetchUser} from "@/lib/UserAPI";
 import {useEffect, useMemo, useState, useCallback} from "react";
 import {LayoutGroup, AnimatePresence} from "framer-motion";
+import { getDraftById } from "@/lib/DraftAPI";
 
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
@@ -161,6 +162,15 @@ export default function RepositoriesPage() {
                             className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
                         >
                             내 프로필 보기
+                        </button>
+                    </div>
+
+                    <div className="text-center mb-6">
+                        <button
+                            onClick={() => router.push('/DiFF/article/drafts')}
+                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                        >
+                            임시저장
                         </button>
                     </div>
 

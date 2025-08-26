@@ -22,12 +22,12 @@ export default function DocsSidebar({ className = '', activeKey }) {
     return (
         <aside
             className={
-                'hidden lg:block sticky self-start overflow-auto ' +
+                'hidden lg:block sticky top-20 self-start overflow-auto' +
                 className
             }
         >
-            <nav className="py-4 text-sm">
-                <div className="px-2 pb-10 font-black text-2xl">About DiFF</div>
+            <nav className="">
+                <div className="px-4 pb-10 font-black text-2xl">About DiFF</div>
                 <ul className="space-y-1">
                     {NAV_ITEMS.map((item) => {
                         const href = normalize(item.href);
@@ -41,8 +41,8 @@ export default function DocsSidebar({ className = '', activeKey }) {
                                     href={item.href}
                                     aria-current={isActive ? 'page' : undefined}
                                     className={
-                                        'block p-3 ' +
-                                        (isActive ? 'bg-black text-white font-bold' : 'hover:bg-black/10')
+                                        'block py-2 pl-5 ' +
+                                        (isActive ? 'border-l-4 border-black font-bold' : 'hover:font-bold text-gray-500')
                                     }
                                 >
                                     {item.label}
