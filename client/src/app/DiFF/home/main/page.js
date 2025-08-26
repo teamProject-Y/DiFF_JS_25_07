@@ -124,17 +124,10 @@ function extractFirstImage(body) {
 }
 
 export default function Page() {
-    // const [log, setLog] = useState([]);               // (PreLoginTerminal 내부로 이동됨 — 여기선 유지해도 무해)
-    // const [step, setStep] = useState(0);              // ↑ 같은 이유로 그대로 둬도 동작에는 영향 없음
-    // const [input, setInput] = useState('');           // (필요시 제거 가능)
-    // const [showInput, setShowInput] = useState(false);
     const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [accessToken, setAccessToken] = useState(null);
     const [user, setUser] = useState({email: '', blogName: ''});
-    // const [currentResultText, setCurrentResultText] = useState(null);
-    // const [showResultAnim, setShowResultAnim] = useState(false);
-    // const [lastDoneStep, setLastDoneStep] = useState(-1);
     const [trendingArticles, setTrendingArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -204,35 +197,23 @@ export default function Page() {
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
         <div className="w-full transition-colors duration-700 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
-             style={{ backgroundColor: bgColor }}>
-            <div id="terminal" className="h-screen w-full snap-start" ref={el => sectionRefs.current[0] = el}>
+             id="pageScroll" style={{ backgroundColor: bgColor }}>
+            <div id="terminal" className="h-screen w-full pt-20 snap-start" ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
 
-            <div id="docs" className="h-screen w-full snap-start" ref={el => sectionRefs.current[1] = el}>
+            <div id="docs" className="h-screen w-full pt-20 snap-start" ref={el => sectionRefs.current[1] = el}>
                 <div className="w-4/5 h-1/2 mx-auto">
 
                 </div>
                 <div className="h-1/2">
-                    <img
-                        className="w-1/2 h-full object-cover"
-                        src="/img/img2.jpg"
-                        alt="img 1"
-                    />
 
                 </div>
             </div>
 
 
-
-
-            {/*snap 안됨 해*/}
-
-
-
-
             {/* trending */}
-            <div id="trending" className="w-full h-screen snap-start px-36 py-10" ref={el => sectionRefs.current[2] = el}>
+            <div id="trending" className="w-full h-screen snap-start px-36 pt-20" ref={el => sectionRefs.current[2] = el}>
                 <div className="text-5xl text-black font-bold">Trending</div>
                 <div className="article-slider h-2/3 w-full mt-16 flex">
                     {loading ? (
@@ -263,7 +244,7 @@ export default function Page() {
                                             <SwiperSlide key={article.id ?? index}>
                                                 {/*<Link href={`/DiFF/article/detail?id=${article.id}`}>*/}
                                                     <div
-                                                        className="article-card h-[90%] bg-white shadow-md rounded-md cursor-pointer hover:shadow-lg transition"
+                                                        className="article-card h-[90%] bg-white shadow-md rounded-b-lg overflow-hidden cursor-pointer hover:shadow-lg transition"
                                                         onClick={() => router.push(`/DiFF/article/detail?id=${article.id}`)}
                                                         role="link"
                                                         tabIndex={0}
@@ -310,11 +291,6 @@ export default function Page() {
                                                                     <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
                                                                 </div>
                                                             </div>
-                                                            {/* className="text-sm text-gray-600">{new Date(article.regDate).toLocaleDateString("en-US", {*/}
-                                                            {/*    year: "numeric",*/}
-                                                            {/*    month: "short",*/}
-                                                            {/*    day: "numeric"*/}
-                                                            {/*})}</p>*/}
                                                         </div>
                                                     </div>
                                                 {/*</Link>*/}

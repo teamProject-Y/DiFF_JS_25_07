@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValue } from 'framer-motion';
 import { fetchUser } from '@/lib/UserAPI';
 
 const HeaderWrap = styled.div`
@@ -43,6 +43,7 @@ const HeaderWrap = styled.div`
     }
 `;
 
+
 export default function Header() {
     const [user, setUser] = useState({});
     const [accessToken, setAccessToken] = useState(null);
@@ -50,27 +51,64 @@ export default function Header() {
     const lastScrollY = useRef(0);
 
     /** 스크롤에 따른 배경/높이 보간 (SCSS의 rgba(0,183,255,0) → 1) */
-    const { scrollY } = useScroll();
-    const background = useTransform(
-        scrollY,
-        [0, 100],
-        ['rgba(0, 183, 255, 0)', 'rgba(0, 183, 255, 1)']
-    );
-    const height = useTransform(scrollY, [0, 100], [120, 60]);
+    const y = useMotionValue(0);
+    const background = useTransform(y, [0,100], ['rgba(0,183,255,0)', 'rgba(0,183,255,1)']);
+    const height     = useTransform(y, [0,100], [120, 60]);
 
     /** 아래로 스크롤 시 숨김 */
+    // Header.jsx 안에서 기존 window-only onScroll effect 를 지우고 이걸로 교체
     useEffect(() => {
+        const getEl = () => document.getElementById('pageScroll');
+
+        let target = window;            // 현재 리스너가 붙어있는 대상 (window 또는 엘리먼트)
+        let last = 0;
+
+        const getTop = () =>
+            target instanceof Window ? window.scrollY : (target?.scrollTop ?? 0);
+
         const onScroll = () => {
-            const cur = window.scrollY;
-            if (cur > lastScrollY.current && cur > 60) setHide(true);
-            else setHide(false);
-            lastScrollY.current = cur;
+            const cur = getTop();
+            // 아래로 스크롤 중 + 어느 정도 내려왔으면 숨김
+            setHide(cur > last && cur > 60);
+            last = cur;
         };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
+
+        const attach = (elOrWin) => {
+            // 현재 타깃과 같으면 패스
+            if (target === elOrWin) return;
+            // 이전 타깃 정리
+            if (target) target.removeEventListener?.('scroll', onScroll);
+            target = elOrWin || window;
+            last = getTop(); // 기준점 리셋
+            target.addEventListener('scroll', onScroll, { passive: true });
+        };
+
+        // 1) 처음엔 window에 붙여둠
+        attach(window);
+
+        // 2) #pageScroll 나타나면 갈아타기 (route 전환/동적 렌더링 대비)
+        const mo = new MutationObserver(() => {
+            const el = getEl();
+            if (el) attach(el);
+        });
+        mo.observe(document.body, { childList: true, subtree: true });
+
+        // 혹시 이미 있을 수도 있으니 한 번 즉시 체크
+        const first = getEl();
+        if (first) attach(first);
+
+        y.set(getTop());
+
+        return () => {
+            target?.removeEventListener?.('scroll', onScroll);
+            mo.disconnect();
+        };
+
     }, []);
 
-    // 토큰 관련
+
+
+
     // 토큰 관련
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -119,7 +157,7 @@ export default function Header() {
     }
 
     return (
-        <HeaderWrap className={hide ? 'hide' : ''}>
+        <HeaderWrap className={hide ? 'hide' : ''} style={{ backgroundColor: background, height }} >
             <div className="logo pl-4">
                 <Link href="/DiFF/home/main" className="block text-3xl p-4 text-red-400 font-semibold">
                     DiFF
