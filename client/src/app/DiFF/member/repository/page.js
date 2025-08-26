@@ -315,6 +315,14 @@ export default function RepositoriesPage() {
                             메인으로 가기
                         </button>
                     </div>
+                    <div className="text-center mb-6">
+                        <button
+                            onClick={() => router.push('/DiFF/article/drafts')}
+                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                        >
+                            임시저장
+                        </button>
+                    </div>
                 </div>
             </section>
         </LayoutGroup>);
