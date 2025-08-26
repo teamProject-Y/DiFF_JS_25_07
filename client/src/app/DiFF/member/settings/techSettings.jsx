@@ -40,9 +40,8 @@ export default function TechSettings() {
 
     return (
         <div className="max-w-3xl">
-            <div className="mb-4">
-                <h3 className="text-xl font-semibold">Technologies &amp; Tools 설정</h3>
-            </div>
+
+            <br/>
 
             {/* 후보 목록 그리드: 꺼짐(그레이) / 켜짐(원색) */}
             <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">

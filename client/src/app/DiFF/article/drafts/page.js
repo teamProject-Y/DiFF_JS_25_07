@@ -76,7 +76,7 @@ export default function DraftsPage() {
 
             const resultCode = res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
             const isSuccess =
-                res?.status === 200 || // ✅ HTTP status 200이면 성공
+                res?.status === 200 ||
                 (typeof resultCode === 'string' && resultCode.startsWith('S-')) ||
                 res?.success === true ||
                 (typeof res?.msg === 'string' && res.msg.includes('성공'));

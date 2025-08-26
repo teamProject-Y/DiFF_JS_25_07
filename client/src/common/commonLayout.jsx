@@ -1,4 +1,4 @@
-// src/common/CommonClientLayout.jsx
+// src/common/CommonLayout.jsx
 'use client';
 
 import Header from '@/common/header';
@@ -6,6 +6,7 @@ import {useEffect, useMemo, useState} from "react";
 import { useRouter, usePathname } from 'next/navigation';
 import SidebarLayout from '@/common/sidebarLayout';
 import LayMenu from '@/common/layMenu';
+import clsx from 'clsx';
 
 function isExpired(token, skewMs = 30_000) {
     if (!token) return true;
@@ -42,6 +43,8 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
         }
     }, [router]);
 
+
+
     // 다른 탭에서 로그인/로그아웃해도 동기화
     useEffect(() => {
         const onStorage = (e) => {
@@ -53,20 +56,28 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
         return () => window.removeEventListener('storage', onStorage);
     }, []);
 
-    const isAuthed = useMemo(() => {
-        return accessToken && !isExpired(accessToken);
-    }, [accessToken]);
+    // const isAuthed = useMemo(() => {
+    //     return accessToken && !isExpired(accessToken);
+    // }, [accessToken]);
+    const isAuthed = useMemo(() => accessToken && !isExpired(accessToken), [accessToken]);
 
     const isHomeMain = pathname?.startsWith('/DiFF/home/main');
     const useDarkColor = isHomeMain && !isAuthed;
 
+
     return (
         <>
-            <div className="text-neutral-600 min-h-screen">
+            <div className="text-neutral-600">
                 {useDarkColor && <div className="fixed inset-0 -z-10 bg-black" />}
                 <Header />
-                <div className="h-20 bg-inherit">
-                    <div className="flex gap-0 pt-20">
+                {/*<div className="h-20 bg-inherit">*/}
+                <div
+                    id={isAuthed ? 'appScroll' : undefined}
+                    data-scroll-root={isAuthed ? '' : undefined}
+                    className={clsx(
+                        'flex gap-0',
+                        isAuthed && 'overflow-y-auto' // 헤더 80px 가정
+                    )}>
                         {/* 로그인 상태일 때만 항상 보이는 전역 메뉴 */}
                         <SidebarLayout>
                             <LayMenu />
@@ -78,7 +89,7 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
                             {modal}
                         </main>
                     </div>
-                </div>
+                {/*</div>*/}
             </div>
         </>
     );

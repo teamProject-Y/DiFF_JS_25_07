@@ -72,7 +72,7 @@ DraftAPI.interceptors.response.use(
 
 /** 4) Draft 관련 API */
 export const deleteDraft = async (id) => {
-    const url = `/draft/${id}`; // 최종 URL: http://localhost:8080/api/DiFF/draft/{id}
+    const url = `/draft/${id}`;
     const res = await DraftAPI.delete(url);
     console.log('[API][deleteDraft] status:', res.status, 'data:', res.data);
     // 상태/바디 둘 다 넘겨서 상위에서 정확히 판단
@@ -86,5 +86,5 @@ export const DraftsArticle = async () => {
 
 export const getDraftById = async (id) => {
     const res = await DraftAPI.get(`/draft/${id}`);
-    return res.data.data; // ResultData 안에 data에 Draft가 들어있다고 가정
+    return res.data.data;
 };
