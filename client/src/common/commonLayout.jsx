@@ -76,7 +76,7 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
                     data-scroll-root={isAuthed ? '' : undefined}
                     className={clsx(
                         'flex gap-0',
-                        isAuthed && 'h-[calc(100vh-80px)] overflow-y-auto' // 헤더 80px 가정
+                        isAuthed && 'overflow-y-auto' // 헤더 80px 가정
                     )}>
                         {/* 로그인 상태일 때만 항상 보이는 전역 메뉴 */}
                         <SidebarLayout>
