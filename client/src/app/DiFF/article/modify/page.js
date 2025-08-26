@@ -81,7 +81,7 @@ function ModifyArticlePageInner() {
                 id: Number(id),
                 title: title,
                 body: body,
-                userCanModify: true
+                userCanModify: true,
             };
 
             console.log("body: ", body);
