@@ -111,7 +111,6 @@ export const writeArticle = async (data) => {
     if (data?.repositoryId != null) {
         data = { ...data, repositoryId: Number(data.repositoryId) };
     }
-
     // draftId 숫자 변환
     if (data?.draftId != null) {
         data = { ...data, draftId: Number(data.draftId) };
@@ -196,6 +195,17 @@ export const fetchReplies = async (articleId) => {
     console.log(response.data.replies);
 
     return response.data;
+};
+
+export const createRepository = async (data) => {
+    try {
+        const res = await ArticleAPI.post("/api/DiFF/repository/createRepository", data);
+        console.log("[API][createRepository] status:", res.status, "data:", res.data);
+        return res.data;
+    } catch (err) {
+        console.error("[API][createRepository] error:", err);
+        throw err;
+    }
 };
 
 
