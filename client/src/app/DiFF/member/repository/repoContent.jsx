@@ -8,14 +8,37 @@ import {fetchArticles, getAverageMetrics} from '@/lib/ArticleAPI';
 
 // 애니메이션
 const container = {
-    hidden: {opacity: 0, y: 8},
-    show: {opacity: 1, y: 0, transition: {type: 'spring', bounce: 0.26, duration: 0.45}},
+    hidden: { x: -40, opacity: 0 },
+    show: {
+        x: 0, opacity: 1,
+        transition: {
+            type: 'spring', stiffness: 120, damping: 20,
+            when: 'beforeChildren',
+            staggerChildren: 0.08,
+            delayChildren: 0.02,
+        },
+    },
+    exit: { x: -40, opacity: 0, transition: { type: 'spring', stiffness: 120, damping: 20 } },
 };
 
-const cardsWrap = {hidden: {}, show: {transition: {staggerChildren: 0.06, delayChildren: 0.02}}};
+const listItem = {
+    hidden: { x: -10, opacity: 0 },
+    show:   { x: 0,  opacity: 1, transition: { type: 'spring', stiffness: 220, damping: 18 } },
+};
+
+const block = {
+    hidden: { y: 8, opacity: 0, scale: 0.98 },
+    show:   { y: 0, opacity: 1, scale: 1, transition: { type: 'spring', bounce: 0.28, duration: 0.45 } },
+};
+
+const cardsWrap = {
+    hidden: {},
+    show:   { transition: { staggerChildren: 0.06, delayChildren: 0.02 } },
+};
+
 const card = {
-    hidden: {y: 10, opacity: 0, scale: 0.98},
-    show: {y: 0, opacity: 1, scale: 1, transition: {type: 'spring', bounce: 0.3, duration: 0.5}}
+    hidden: { y: 10, opacity: 0, scale: 0.98 },
+    show:   { y: 0,  opacity: 1, scale: 1, transition: { type: 'spring', bounce: 0.30, duration: 0.5 } },
 };
 
 /**
@@ -74,7 +97,6 @@ export default function RepoContent({
     }, [repo]);
 
     return (
-        <>
         <motion.div
             key={`detail-${repo?.id ?? 'none'}`}
             variants={container}
@@ -91,8 +113,9 @@ export default function RepoContent({
                         {repositories.map((r) => {
                             const sel = r.id === repo?.id;
                             return (
-                                <li
+                                <motion.li
                                     key={r.id}
+                                    variants={listItem}
                                     className={`px-3 py-2 rounded cursor-pointer text-sm hover:bg-gray-200 transition ${
                                         sel ? 'bg-gray-200 font-semibold' : ''
                                     }`}
@@ -100,7 +123,7 @@ export default function RepoContent({
                                 >
                                     <i className={`mr-2 fa-solid ${sel ? 'fa-folder-open' : 'fa-folder'}`}/>
                                     {r.name}
-                                </li>
+                                </motion.li>
                             );
                         })}
                     </ul>
@@ -126,7 +149,8 @@ export default function RepoContent({
 
                 <div className="scrollbar-none flex-1 overflow-y-auto px-0 pb-2 space-y-6 ">
                     {/* 상단 큰 박스 */}
-                    <div className="h-[240px] rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mb-6 mr-6">
+                    <div
+                        className="h-[240px] rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mb-6 mr-6">
                         {tab === 'info' ? (
                             <div className="h-full flex items-center justify-center text-neutral-500">
                                 <div className="text-center">
@@ -142,7 +166,8 @@ export default function RepoContent({
                     </div>
 
                     {/* 하단 큰 박스 */}
-                    <div className="h-[260px] rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mr-6 overflow-hidden">
+                    <div
+                        className="h-[260px] rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mr-6 overflow-hidden">
                         {tab === 'info' ? (
                             <div className="h-full flex items-center justify-center text-neutral-500">
                                 추가 정보(커밋 타임라인/브랜치/이슈 요약 등)
@@ -156,7 +181,8 @@ export default function RepoContent({
                                     <motion.div key={a.id ?? i} variants={card}
                                                 className="h-32 rounded-lg border border-neutral-200 bg-white shadow-sm p-3 hover:shadow-md transition"
                                                 onClick={() => router.push(`/DiFF/article/detail?id=${a.id}`)}>
-                                        <div className="font-semibold line-clamp-1">{a.title || `게시물 ${i + 1}`}</div>
+                                        <div
+                                            className="font-semibold line-clamp-1">{a.title || `게시물 ${i + 1}`}</div>
                                         <div className="text-xs text-neutral-500 mt-1">
                                             {a.extra__writer || '익명'} · {new Date(a.regDate).toLocaleDateString('en-US', {
                                             year: 'numeric',
@@ -203,6 +229,6 @@ export default function RepoContent({
                 </div>
             </aside>
         </motion.div>
-            </>
+
     );
 }
