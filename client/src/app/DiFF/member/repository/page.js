@@ -1,10 +1,10 @@
 'use client';
 
-import {useRouter} from 'next/navigation';
-import {fetchUser} from "@/lib/UserAPI";
-import {useEffect, useMemo, useState, useCallback} from "react";
-import {LayoutGroup, AnimatePresence} from "framer-motion";
-import { getDraftById } from "@/lib/DraftAPI";
+import { useRouter } from 'next/navigation';
+import { fetchUser } from "@/lib/UserAPI";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { LayoutGroup, AnimatePresence } from "framer-motion";
+import { createRepository } from "@/lib/ArticleAPI";
 
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
@@ -41,10 +41,13 @@ const normalizeRepos = (raw) =>
 export default function RepositoriesPage() {
     const router = useRouter();
     const [repositories, setRepositories] = useState([]);
-    const [loading, setLoading] = useState(true); // 초기 사용자/페이지 로딩
-    const [loadingRepos, setLoadingRepos] = useState(false); // 버튼 로딩
+    const [loading, setLoading] = useState(true);
+    const [loadingRepos, setLoadingRepos] = useState(false);
     const [error, setError] = useState('');
     const [selectedRepoId, setSelectedRepoId] = useState(null);
+
+    const [open, setOpen] = useState(false);
+    const [name, setRepoName] = useState("");
 
     // 로그인 체크 + 레포 로드
     useEffect(() => {
@@ -81,7 +84,6 @@ export default function RepositoriesPage() {
             });
             const json = await res.json();
 
-            // ResultData 또는 에러 포맷 대응
             if (!res.ok || (json?.resultCode && String(json.resultCode).startsWith('F')) || json?.error) {
                 throw new Error(json?.msg || json?.message || '리포 조회 실패');
             }
@@ -104,6 +106,32 @@ export default function RepositoriesPage() {
 
     if (loading) return <div className="text-center">로딩...</div>;
 
+    const handleCreate = async () => {
+        if (!name.trim()) {
+            setError("레포지토리 이름을 입력하세요.");
+            return;
+        }
+        setLoading(true);
+        setError("");
+
+        try {
+            const res = await createRepository({ name: name });
+            if (res?.resultCode?.startsWith("S-")) {
+                alert(res.msg);
+                setOpen(false);
+                setRepoName("");
+                // 생성 후 다시 목록 불러오기
+                await fetchRepos();
+            } else {
+                setError(res?.msg || "생성 실패");
+            }
+        } catch (err) {
+            setError(err?.response?.data?.msg || "요청 실패");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <LayoutGroup>
             <section className="px-4">
@@ -121,15 +149,14 @@ export default function RepositoriesPage() {
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
-                    <div
-                        className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
+                    <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
                         <AnimatePresence>
-                            {selectedRepo && <GhostBar repositories={repositories} selectedRepoId={selectedRepoId}
-                                                       onSelect={setSelectedRepoId}/>}
+                            {selectedRepo && (
+                                <GhostBar repositories={repositories} selectedRepoId={selectedRepoId} onSelect={setSelectedRepoId} />
+                            )}
                         </AnimatePresence>
 
                         <div className="flex-1 relative">
-                            {/* 기본(첫 화면): 카드 그리드만 */}
                             <AnimatePresence>
                                 {!selectedRepo && (
                                     <RepoFolder
@@ -140,7 +167,6 @@ export default function RepositoriesPage() {
                                 )}
                             </AnimatePresence>
 
-                            {/* 상세: 선택되면 표시 (필요 시 RepoContent 내부에서 파란 리스트/메타 표시) */}
                             <AnimatePresence>
                                 {selectedRepo && (
                                     <RepoContent
@@ -154,44 +180,80 @@ export default function RepositoriesPage() {
                             </AnimatePresence>
                         </div>
                     </div>
-                    <br/>
-                    {/* 레포 이동 */}
-                    <div className="text-center mb-6">
+
+                    <div className="text-center mt-6 space-y-4">
                         <button
                             onClick={() => router.push('/DiFF/member/profile')}
                             className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
                         >
                             내 프로필 보기
                         </button>
-                    </div>
 
-                    <div className="text-center mb-6">
                         <button
                             onClick={() => router.push('/DiFF/article/drafts')}
                             className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
                         >
                             임시저장
                         </button>
-                    </div>
 
-                    <div className="text-center mt-6">
                         <button
-                            onClick={() => router.replace('/DiFF/home/main')}
-                            className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
-                        >
-                            메인으로 가기
-                        </button>
-                    </div>
-                    <div className="text-center mb-6">
-                        <button
-                            onClick={() => router.push('/DiFF/article/drafts')}
+                            onClick={() => router.push('/DiFF/article/write')}
                             className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
                         >
-                            임시저장
+                            글 작성하기
+                        </button>
+
+                        <button
+                            onClick={() => setOpen(true)}
+                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+                        >
+                            레포지토리 생성
                         </button>
                     </div>
                 </div>
+
+                {/* ✅ 모달 */}
+                {open && (
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+                        onClick={() => setOpen(false)}
+                    >
+                        <div
+                            className="bg-white p-6 rounded shadow-md w-96"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h2 className="text-lg font-bold mb-4">레포지토리 생성</h2>
+
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setRepoName(e.target.value)}
+                                placeholder="레포지토리 이름"
+                                className="w-full border rounded px-3 py-2 mb-2"
+                            />
+
+                            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => setOpen(false)}
+                                    className="px-4 py-2 bg-gray-200 rounded"
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    onClick={handleCreate}
+                                    disabled={loading}
+                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50"
+                                >
+                                    {loading ? "생성 중..." : "생성"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </section>
         </LayoutGroup>
     );
 }
+
