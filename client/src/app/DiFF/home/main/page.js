@@ -196,8 +196,12 @@ export default function Page() {
 
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
-        <div className="w-full transition-colors duration-700 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
-             id="pageScroll" style={{ backgroundColor: bgColor }}>
+        <div
+            id="pageScroll"
+            data-scroll-root
+            className="w-full transition-colors duration-700 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+            style={{ backgroundColor: bgColor }}
+        >
             <div id="terminal" className="h-screen w-full pt-20 snap-start" ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
