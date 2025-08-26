@@ -49,14 +49,13 @@ export default function DraftsPage() {
 
     const handleOpen = (draft) => {
         console.log('[DraftsPage] open clicked. draft:', draft);
-        // 작성 페이지로 이동할 때 repositoryId와 body를 함께 전달
-        const qs = new URLSearchParams({
-            repositoryId: String(draft.repositoryId ?? ''),
-            body: draft.body ?? '',
-        }).toString();
-        console.log('[DraftsPage] push to /DiFF/article/write with qs:', qs);
-        router.push(`/DiFF/article/write?${qs}`);
+        if (!draft?.id) {
+            console.warn('[DraftsPage] draftId 없음, 이동 불가');
+            return;
+        }
+        router.push(`/DiFF/article/write?draftId=${draft.id}`);
     };
+
 
     const handleDelete = async (id) => {
         if (!id) return;

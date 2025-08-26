@@ -1,5 +1,6 @@
 // src/app/DiFF/article/write/page.js
 'use client';
+import { getDraftById } from "@/lib/DraftAPI";
 
 import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -16,18 +17,19 @@ export default function Page() {
     );
 }
 
-function WriteArticlePage() {
+export function WriteArticlePage() {
     const router = useRouter();
     const sp = useSearchParams();
 
-    const bodyFromQuery = sp.get('body') || '';
-    const repoFromQuery = sp.get('repositoryId');
+    // 쿼리스트링
+    const draftId = sp.get('draftId');             // ✅ body 대신 draftId만 받음
+    const repoFromQuery = sp.get('repositoryId');  // 선택된 repo id
 
     // 상태
     const [title, setTitle] = useState('');
-    const [body, setBody] = useState(bodyFromQuery);
-    const [repos, setRepos] = useState([]);     // 내 리포 목록
-    const [repositoryId, setRepositoryId] = useState(null); // 선택 repo id
+    const [body, setBody] = useState('');
+    const [repos, setRepos] = useState([]);
+    const [repositoryId, setRepositoryId] = useState(null);
     const [loadingRepos, setLoadingRepos] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -39,8 +41,21 @@ function WriteArticlePage() {
         if (!token) router.replace('/DiFF/member/login');
     }, [router]);
 
-    // 쿼리 body 동기화
-    useEffect(() => { setBody(bodyFromQuery); }, [bodyFromQuery]);
+    // draftId 있으면 임시저장 불러오기
+    useEffect(() => {
+        if (draftId) {
+            (async () => {
+                try {
+                    const draft = await getDraftById(draftId);
+                    setTitle(draft.title || '');
+                    setBody(draft.body || '');
+                    setRepositoryId(draft.repositoryId || null);
+                } catch (e) {
+                    console.error("임시저장 불러오기 실패:", e);
+                }
+            })();
+        }
+    }, [draftId]);
 
     // 내 리포 목록 불러오기
     useEffect(() => {
@@ -85,10 +100,18 @@ function WriteArticlePage() {
         try {
             setSubmitting(true);
             const checksum = await makeChecksum(body);
-            const data = { title, body, checksum, repositoryId: Number(repositoryId) };
 
-            const res = await writeArticle(data); // ⭐️ doWrite 호출 → DB insert
-            // 콘솔 확인(디버깅)
+            // draftId도 같이 넘김 (백엔드에서 draft 삭제까지 처리)
+            const data = {
+                title,
+                body,
+                checksum,
+                repositoryId: Number(repositoryId),
+                draftId: draftId ? Number(draftId) : null
+            };
+
+            const res = await writeArticle(data); // ⭐️ doWrite 호출 → DB insert + draft 삭제
+
             console.log('📦 doWrite 응답:', res);
             console.log('📦 repository:', res?.data?.repository);
             console.log('📦 draft:', res?.data?.draft);
