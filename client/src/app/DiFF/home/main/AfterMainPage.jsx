@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import {useEffect, useState} from "react";
-import {followingArticleList} from "@/lib/ArticleAPI";
+import {followingArticleList, increaseArticleHits} from "@/lib/ArticleAPI";
 import {getFollowingList} from "@/lib/UserAPI";
-import ToastViewer from "@/common/toastViewer";
 import removeMd from "remove-markdown";
 
 // 게시물에 이미지 있는지 확인
@@ -23,7 +22,6 @@ export default function AfterMainPage({me, trendingArticles}) {
     const [activeTab, setActiveTab] = useState("Trending");
     const [followingArticles, setFollowingArticles] = useState(null);
     const [following, setFollowing] = useState([]);
-    const [member, setMember] = useState([]);
 
     // 팔로잉 유저 목록 불러오기 (최초 1번)
     useEffect(() => {
@@ -48,10 +46,20 @@ export default function AfterMainPage({me, trendingArticles}) {
             });
     }, []); //
 
+    const handleArticleClick = async (id) => {
+        try {
+            await increaseArticleHits(id);  // ✅ 조회수 증가 요청
+            window.location.href = `/DiFF/article/detail?id=${id}`;
+        } catch (err) {
+            console.error("조회수 증가 실패:", err);
+            window.location.href = `/DiFF/article/detail?id=${id}`;
+        }
+    };
+
     return (
         <div className="w-full min-h-screen bg-white text-black pt-20">
             <div className="h-screen">
-                <div className="mx-auto px-36 py-10 flex">
+                <div className="mx-auto px-36 flex">
                     <main className="flex-grow">
                         {/* 탭 버튼 */}
                         <div className="flex items-center border-b">
@@ -70,7 +78,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                             ))}
                         </div>
 
-                        {/* 🔹 Trending */}
+                        {/* Trending */}
                         {activeTab === "Trending" && (
                             trendingArticles && trendingArticles.length > 0 ? (
                                 trendingArticles.map((article, idx) => {
@@ -79,7 +87,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         <div
                                             key={idx}
                                             className="block cursor-pointer"
-                                            onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                            onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
                                                 className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
@@ -149,7 +157,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         <div
                                             key={idx}
                                             className="block cursor-pointer"
-                                            onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                            onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
                                                 className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">

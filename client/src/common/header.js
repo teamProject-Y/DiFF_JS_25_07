@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { fetchUser } from '@/lib/UserAPI';
-import ThemeToggle from "@/common/thema";
 
 const HeaderWrap = styled.div `
 width: 100%; 
@@ -19,12 +18,10 @@ flex-direction: row;
 align-items: center; 
 justify-content: space-between; 
 padding: 0 24px; 
-color: rgba(25, 25, 200, 1); 
 font-weight: 700; font-size: 13px; 
 letter-spacing: 0.02rem; 
 backdrop-filter: blur(10px); 
 -webkit-backdrop-filter: blur(10px); 
-border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
 transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; 
 will-change: transform, height, background-color; 
 &.hide { transform: translateY(-100%); 
@@ -134,11 +131,14 @@ export default function Header() {
     };
 
     return (
-        <HeaderWrap className={hide ? 'hide' : ''} style={{ backgroundColor: background, height }}>
+        <HeaderWrap className={`
+                        ${hide ? 'hide' : ''}
+                        `}
+                    style={{ backgroundColor: background, height }}>
             <div className="pl-4">
-                <Link href="/DiFF/home/main" className="block text-3xl p-4 text-red-400 font-semibold">DiFF</Link>
+                <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold">DiFF</Link>
             </div>
-            <ul className="flex gap-8 text-xl font-semibold pr-8 text-red-400">
+            <ul className="flex gap-8 text-xl font-semibold pr-8">
                 {accessToken ? (
                     <>
                         <li><i className="fa-solid fa-bell" /></li>

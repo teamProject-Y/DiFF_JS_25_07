@@ -1,6 +1,6 @@
 'use client';
 
-import {Suspense, useEffect, useState} from 'react';
+import {Suspense, useEffect, useRef, useState} from 'react';
 import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
@@ -10,10 +10,7 @@ import {
     likeReply, unlikeReply, fetchReplyLikes
 } from "@/lib/reactionAPI";
 import LoadingOverlay from "@/common/LoadingOverlay";
-import dynamic from "next/dynamic";
 import ToastViewer from "@/common/toastViewer";
-
-const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
 function ArticleDetailInner() {
 
@@ -35,7 +32,10 @@ function ArticleDetailInner() {
     const [reply, setReply] = useState('');
     const [replyLoading, setReplyLoading] = useState(false);
 
-    //const [replies, setReplies] = useState([]);
+    // 드롭다운
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuBtnRef = useRef(null);
+    const menuRef = useRef(null);
 
     // 게시글 불러오기
     useEffect(() => {
@@ -122,6 +122,29 @@ function ArticleDetailInner() {
             }
         })();
     }, [id]);
+
+    // 드롭다운
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onDocDown = (e) => {
+            if (menuRef.current?.contains(e.target)) return;
+            if (menuBtnRef.current?.contains(e.target)) return;
+            setMenuOpen(false);
+        };
+        const onKey = (e) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                setMenuOpen(false);
+                menuBtnRef.current?.focus();
+            }
+        };
+        document.addEventListener('mousedown', onDocDown);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('mousedown', onDocDown);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [menuOpen]);
 
     // 게시글 삭제
     const handleDelete = async (id) => {
@@ -235,33 +258,116 @@ function ArticleDetailInner() {
                     <p className="text-red-500">{errMsg}</p>
                 </div>
             ) : (
-                <div className="pt-20 max-w-3xl mx-auto">
+                <div className="max-w-3xl mx-auto">
                     {/* title */}
                     <div className="flex justify-between">
                         <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
-                        <i className="fa-solid fa-ellipsis-vertical"></i>
-                        <div>
-                            {article.userCanModify && (
-                                <Link
-                                    href={`/DiFF/article/modify?id=${article.id}`}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                                >
-                                    수정
-                                </Link>
-                            )}
 
-                            {article.userCanDelete && (
-                                <button
-                                    onClick={() => handleDelete(article.id)}
-                                    disabled={deleting}
-                                    className={`px-4 py-2 rounded transition ${
-                                        deleting
-                                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                            : "bg-red-500 text-white hover:bg-red-600"
-                                    }`}
+                        <div className="relative">
+                            <button
+                                ref={menuBtnRef}
+                                type="button"
+                                aria-haspopup="menu"
+                                aria-expanded={menuOpen}
+                                onClick={() => setMenuOpen(v => !v)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'ArrowDown' && !menuOpen) {
+                                        e.preventDefault();
+                                        setMenuOpen(true);
+                                    }
+                                }}
+                                className="p-2 hover:text-gray-900"
+                            >
+                                <i className="fa-solid fa-ellipsis-vertical"/>
+                            </button>
+
+                            {menuOpen && (
+                                <div
+                                    ref={menuRef}
+                                    role="menu"
+                                    className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
+                                                divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
+                                    onKeyDown={(e) => {
+                                        const items = Array.from(menuRef.current?.querySelectorAll('[role="menuitem"]') || []);
+                                        const i = items.indexOf(document.activeElement);
+                                        let next = i;
+                                        if (e.key === 'ArrowDown') {
+                                            e.preventDefault();
+                                            next = (i + 1) % items.length;
+                                        }
+                                        if (e.key === 'ArrowUp') {
+                                            e.preventDefault();
+                                            next = (i - 1 + items.length) % items.length;
+                                        }
+                                        if (e.key === 'Home') {
+                                            e.preventDefault();
+                                            next = 0;
+                                        }
+                                        if (e.key === 'End') {
+                                            e.preventDefault();
+                                            next = items.length - 1;
+                                        }
+                                        if (items[next]) items[next].focus();
+                                    }}
                                 >
-                                    {deleting ? "삭제중…" : "삭제하기"}
-                                </button>
+                                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                        {article.userCanModify && (
+                                            <li>
+                                                <Link
+                                                    href={`/DiFF/article/modify?id=${article.id}`}
+                                                    role="menuitem"
+                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                    onClick={() => setMenuOpen(false)}
+                                                >
+                                                    수정
+                                                </Link>
+                                            </li>
+                                        )}
+                                        {article.userCanDelete && (
+                                            <li>
+                                                <Link
+                                                    href={`/DiFF/article/modify?id=${article.id}`}
+                                                    role="menuitem"
+                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                    onClick={() => setMenuOpen(false)}
+                                                >
+                                                    삭제
+                                                </Link>
+                                            </li>
+                                        )}
+                                    </ul>
+                                    <div className="py-1">
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100
+                                                    dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                            onClick={async () => {
+                                                try {
+                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                                    // 표준 클립보드 API
+                                                    await navigator.clipboard.writeText(url);
+                                                    alert('링크가 복사되었습니다.');
+                                                } catch {
+                                                    // 구형 브라우저 폴백
+                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                                    const input = document.createElement('input');
+                                                    input.value = url;
+                                                    document.body.appendChild(input);
+                                                    input.select();
+                                                    document.execCommand('copy');
+                                                    document.body.removeChild(input);
+                                                    alert('링크가 복사되었습니다.');
+                                                } finally {
+                                                    setMenuOpen(false);
+                                                }
+                                            }}
+                                        >
+                                            <i className="fa-solid fa-share-nodes mr-2"></i>
+                                            링크 복사
+                                        </button>
+                                    </div>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -370,7 +476,6 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* 댓글 목록 */}
-                    {/* 댓글 목록 */}
                     <div className="my-6 space-y-4">
                         {replyLoading ? (
                             <p className="text-gray-500">댓글 불러오는 중...</p>
@@ -380,19 +485,28 @@ function ArticleDetailInner() {
                             replies.map((r) => (
                                 <div key={r.id} className="mb-2 border-b pb-2">
                                     {r.isEditing ? (
-                                        // ✏️ 댓글 수정 모드
+                                        // 댓글 수정
                                         <div>
-                        <textarea
-                            className="border w-full p-2 rounded"
-                            value={r.body}
-                            onChange={(e) =>
-                                setReplies((prev) =>
-                                    prev.map((item) =>
-                                        item.id === r.id ? {...item, body: e.target.value} : item
-                                    )
-                                )
-                            }
-                        />
+                                            <div className="text-sm text-gray-400 mb-4">
+                                                {r.extra__writer} |
+                                                {new Date(r.regDate).toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "short",
+                                                    day: "numeric"
+                                                })}
+                                            </div>
+                                            <textarea
+                                                className="border w-full p-2 rounded-lg"
+                                                rows="1"
+                                                value={r.body}
+                                                onChange={(e) =>
+                                                    setReplies((prev) =>
+                                                        prev.map((item) =>
+                                                            item.id === r.id ? {...item, body: e.target.value} : item
+                                                        )
+                                                    )
+                                                }
+                                            />
                                             <div className="mt-1 flex gap-2">
                                                 <button
                                                     onClick={async () => {
@@ -427,7 +541,7 @@ function ArticleDetailInner() {
                                             </div>
                                         </div>
                                     ) : (
-                                        // ✅ 일반 댓글 표시
+                                        // 일반 댓글 표시
                                         <div>
                                             <div className="text-sm text-gray-400 mb-4">
                                                 {r.extra__writer} |
