@@ -64,7 +64,6 @@ DraftAPI.interceptors.response.use(
                 await refreshAccessToken();
                 return DraftAPI(original);
             } catch (e) {
-                // 재발급 실패 시 그대로 에러
             }
         }
         return Promise.reject(error);
@@ -83,4 +82,9 @@ export const deleteDraft = async (id) => {
 export const DraftsArticle = async () => {
     const response = await DraftAPI.get('/draft/drafts');
     return response.data;
+};
+
+export const getDraftById = async (id) => {
+    const res = await DraftAPI.get(`/draft/${id}`);
+    return res.data.data; // ResultData 안에 data에 Draft가 들어있다고 가정
 };

@@ -107,15 +107,20 @@ export const trendingArticle = async ({ count, days }) => {
 
 // lib/ArticleAPI.js
 export const writeArticle = async (data) => {
-    // data.repositoryId 는 숫자여야 하면 여기서 캐스팅
+    // repositoryId 숫자 변환
     if (data?.repositoryId != null) {
         data = { ...data, repositoryId: Number(data.repositoryId) };
+    }
+
+    // draftId 숫자 변환
+    if (data?.draftId != null) {
+        data = { ...data, draftId: Number(data.draftId) };
     }
 
     const res = await ArticleAPI.post('/api/DiFF/article/doWrite', data);
     const result = res.data;
 
-    // (원하면) 여기서 로그
+    // (디버깅 로그)
     console.log('📦 doWrite 응답:', result);
     console.log('📦 repository:', result?.data?.repository);
     console.log('📦 draft:', result?.data?.draft);
@@ -123,6 +128,7 @@ export const writeArticle = async (data) => {
 
     return result; // ResultData
 };
+
 
 export const getMyRepositories = async () => {
     const res = await ArticleAPI.get('/api/DiFF/repository/my');
