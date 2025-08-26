@@ -45,6 +45,7 @@ export default function RepositoriesPage() {
     const [loadingRepos, setLoadingRepos] = useState(false); // 버튼 로딩
     const [error, setError] = useState('');
     const [selectedRepoId, setSelectedRepoId] = useState(null);
+    const [tab, setTab] = useState('info');
 
     // 로그인 체크 + 레포 로드
     useEffect(() => {
@@ -64,6 +65,7 @@ export default function RepositoriesPage() {
                 router.replace('/DiFF/home/main');
             });
     }, [router]);
+
 
     const fetchRepos = useCallback(async () => {
         const at = getAccessToken();
@@ -100,6 +102,10 @@ export default function RepositoriesPage() {
         [repositories, selectedRepoId]
     );
 
+    useEffect(() => {
+        if (selectedRepo) setTab('info');
+    }, [selectedRepo?.id]);
+
     const onClose = useCallback(() => setSelectedRepoId(null), []);
 
     if (loading) return <div className="text-center">로딩...</div>;
@@ -121,39 +127,66 @@ export default function RepositoriesPage() {
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
-                    <div
-                        className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
-                        <AnimatePresence>
-                            {selectedRepo && <GhostBar repositories={repositories} selectedRepoId={selectedRepoId}
-                                                       onSelect={setSelectedRepoId}/>}
-                        </AnimatePresence>
-
-                        <div className="flex-1 relative">
-                            {/* 기본(첫 화면): 카드 그리드만 */}
+                    {/* 레포 미선택: 탭 없이 그리드만 */}
+                    {!selectedRepo ? (
+                        <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px] bg-white">
                             <AnimatePresence>
-                                {!selectedRepo && (
-                                    <RepoFolder
-                                        key="grid"
-                                        repositories={repositories}
-                                        onSelect={setSelectedRepoId}
-                                    />
-                                )}
-                            </AnimatePresence>
-
-                            {/* 상세: 선택되면 표시 (필요 시 RepoContent 내부에서 파란 리스트/메타 표시) */}
-                            <AnimatePresence>
-                                {selectedRepo && (
-                                    <RepoContent
-                                        key="detail"
-                                        repo={selectedRepo}
-                                        repositories={repositories}
-                                        onChangeRepo={setSelectedRepoId}
-                                        onClose={onClose}
-                                    />
-                                )}
+                                <RepoFolder
+                                    key="grid"
+                                    repositories={repositories}
+                                    onSelect={setSelectedRepoId}
+                                />
                             </AnimatePresence>
                         </div>
-                    </div>
+                    ) : (
+                        /* 레포 선택됨: 탭이 박스 밖으로 삐져나오게 */
+                        <div className="relative">
+                            {/* 탭바 */}
+                            <div className="absolute -top-6 left-3 z-20 flex gap-2">
+                                {[
+                                    { key: 'info',  label: '정보' },
+                                    { key: 'posts', label: '게시물' },
+                                ].map(t => (
+                                    <button
+                                        key={t.key}
+                                        onClick={() => setTab(t.key)}
+                                        className={`px-4 py-2 text-sm border rounded-t-xl shadow-sm transition
+                      ${tab===t.key
+                                            ? 'bg-white border-gray-200 text-gray-900 -mb-px'
+                                            : 'bg-gray-100/80 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+                                        style={{ clipPath:'polygon(0 0, calc(100% - 14px) 0, 100% 100%, calc(100% - 14px) 100%, 0 100%)' }}
+                                    >
+                                        {t.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* 실제 콘텐츠 박스 */}
+                            <div className="flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px] pt-4 bg-white">
+                                <AnimatePresence>
+                                    <GhostBar
+                                        repositories={repositories}
+                                        selectedRepoId={selectedRepoId}
+                                        onSelect={setSelectedRepoId}
+                                    />
+                                </AnimatePresence>
+
+                                <div className="flex-1 relative">
+                                    <AnimatePresence>
+                                        <RepoContent
+                                            key={`detail-${selectedRepo.id}`}
+                                            repo={selectedRepo}
+                                            repositories={repositories}
+                                            onChangeRepo={setSelectedRepoId}
+                                            onClose={onClose}
+                                        />
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
                     <br/>
                     {/* 레포 이동 */}
                     <div className="text-center mb-6">
@@ -180,14 +213,6 @@ export default function RepositoriesPage() {
                             className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
                         >
                             메인으로 가기
-                        </button>
-                    </div>
-                    <div className="text-center mb-6">
-                        <button
-                            onClick={() => router.push('/DiFF/article/drafts')}
-                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                        >
-                            임시저장
                         </button>
                     </div>
                 </div>
