@@ -269,7 +269,7 @@ export default function RepoContent({ onClose }) {
                 )}
             </div>
 
-            {/* 🔹 오른쪽: 메타 정보 */}
+            {/*🔹 오른쪽: 메타 정보 */}
             <motion.aside className="p-6 border-l bg-gray-50">
                 {selectedRepo ? (
                     <motion.div layout className="border rounded-xl p-6 bg-white shadow-lg">
