@@ -22,8 +22,8 @@ export function WriteArticlePage() {
     const sp = useSearchParams();
 
     // 쿼리스트링
-    const draftId = sp.get('draftId');             // ✅ body 대신 draftId만 받음
-    const repoFromQuery = sp.get('repositoryId');  // 선택된 repo id
+    const draftId = sp.get('draftId');
+    const repoFromQuery = sp.get('repositoryId');
 
     // 상태
     const [title, setTitle] = useState('');

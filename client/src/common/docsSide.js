@@ -26,7 +26,7 @@ export default function DocsSidebar({ className = '', activeKey }) {
                 className
             }
         >
-            <nav className="">
+            <nav>
                 <div className="px-4 pb-10 font-black text-2xl">About DiFF</div>
                 <ul className="space-y-1">
                     {NAV_ITEMS.map((item) => {

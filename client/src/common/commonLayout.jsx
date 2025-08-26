@@ -43,8 +43,6 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
         }
     }, [router]);
 
-
-
     // 다른 탭에서 로그인/로그아웃해도 동기화
     useEffect(() => {
         const onStorage = (e) => {
@@ -85,7 +83,7 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
 
                         {/* 메인 컨텐츠 영역 */}
                         <main className={clsx('flex-1 min-w-0',
-                            isAuthed && 'pt-28'
+                            isAuthed && 'pt-24'
                         )}>
                             {children}
                             {modal}

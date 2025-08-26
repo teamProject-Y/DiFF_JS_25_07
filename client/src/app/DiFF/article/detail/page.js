@@ -10,7 +10,6 @@ import {
     likeReply, unlikeReply, fetchReplyLikes
 } from "@/lib/reactionAPI";
 import LoadingOverlay from "@/common/LoadingOverlay";
-import dynamic from "next/dynamic";
 import ToastViewer from "@/common/toastViewer";
 
 function ArticleDetailInner() {
@@ -259,7 +258,7 @@ function ArticleDetailInner() {
                     <p className="text-red-500">{errMsg}</p>
                 </div>
             ) : (
-                <div className="pt-28 max-w-3xl mx-auto">
+                <div className="max-w-3xl mx-auto">
                     {/* title */}
                     <div className="flex justify-between">
                         <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
@@ -371,32 +370,6 @@ function ArticleDetailInner() {
                                 </div>
                             )}
                         </div>
-
-
-                        {/*<div>*/}
-                        {/*    {article.userCanModify && (*/}
-                        {/*        <Link*/}
-                        {/*            href={`/DiFF/article/modify?id=${article.id}`}*/}
-                        {/*            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"*/}
-                        {/*        >*/}
-                        {/*            수정*/}
-                        {/*        </Link>*/}
-                        {/*    )}*/}
-
-                        {/*{article.userCanDelete && (*/}
-                        {/*    <button*/}
-                        {/*        onClick={() => handleDelete(article.id)}*/}
-                        {/*        disabled={deleting}*/}
-                        {/*        className={`px-4 py-2 rounded transition ${*/}
-                        {/*            deleting*/}
-                        {/*                ? "bg-gray-200 text-gray-500 cursor-not-allowed"*/}
-                        {/*                : "bg-red-500 text-white hover:bg-red-600"*/}
-                        {/*        }`}*/}
-                        {/*    >*/}
-                        {/*        {deleting ? "삭제중…" : "삭제하기"}*/}
-                        {/*    </button>*/}
-                        {/*)}*/}
-                        {/*</div>*/}
                     </div>
                     {/* article info */}
                     <div className="text-gray-600 mb-6 flex justify-between">
@@ -503,7 +476,6 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* 댓글 목록 */}
-                    {/* 댓글 목록 */}
                     <div className="my-6 space-y-4">
                         {replyLoading ? (
                             <p className="text-gray-500">댓글 불러오는 중...</p>
@@ -513,19 +485,28 @@ function ArticleDetailInner() {
                             replies.map((r) => (
                                 <div key={r.id} className="mb-2 border-b pb-2">
                                     {r.isEditing ? (
-                                        // ✏️ 댓글 수정 모드
+                                        // 댓글 수정
                                         <div>
-                        <textarea
-                            className="border w-full p-2 rounded"
-                            value={r.body}
-                            onChange={(e) =>
-                                setReplies((prev) =>
-                                    prev.map((item) =>
-                                        item.id === r.id ? {...item, body: e.target.value} : item
-                                    )
-                                )
-                            }
-                        />
+                                            <div className="text-sm text-gray-400 mb-4">
+                                                {r.extra__writer} |
+                                                {new Date(r.regDate).toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "short",
+                                                    day: "numeric"
+                                                })}
+                                            </div>
+                                            <textarea
+                                                className="border w-full p-2 rounded-lg"
+                                                rows="1"
+                                                value={r.body}
+                                                onChange={(e) =>
+                                                    setReplies((prev) =>
+                                                        prev.map((item) =>
+                                                            item.id === r.id ? {...item, body: e.target.value} : item
+                                                        )
+                                                    )
+                                                }
+                                            />
                                             <div className="mt-1 flex gap-2">
                                                 <button
                                                     onClick={async () => {
@@ -560,7 +541,7 @@ function ArticleDetailInner() {
                                             </div>
                                         </div>
                                     ) : (
-                                        // ✅ 일반 댓글 표시
+                                        // 일반 댓글 표시
                                         <div>
                                             <div className="text-sm text-gray-400 mb-4">
                                                 {r.extra__writer} |

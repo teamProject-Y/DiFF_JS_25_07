@@ -105,7 +105,7 @@ function SettingsPage() {
 
 
     return (
-        <section className="pt-10 md:pt-16 px-4 dark:bg-gray-900 dark:text-white">
+        <section className="px-4 dark:bg-gray-900 dark:text-white">
             <div className="mx-auto max-w-4xl">
                 {/* 상단 탭 타이틀 영역 */}
                 <div className="mb-3 flex items-center gap-6 text-2xl font-semibold">

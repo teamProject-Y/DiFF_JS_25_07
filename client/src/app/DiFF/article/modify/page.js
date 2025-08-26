@@ -105,8 +105,7 @@ function ModifyArticlePageInner() {
                     <p className="text-red-500">{errMsg}</p>
                 </div>
             ) : (
-            <div className="pt-28 w-5/6 mx-auto">
-                {/*<h1 className="text-2xl font-bold mb-6">게시글 수정</h1>*/}
+            <div className="py-6 w-5/6 mx-auto">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <input
                         type="text"

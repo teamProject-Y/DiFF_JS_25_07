@@ -41,12 +41,8 @@ export default function InquiryForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="p-6 mx-12"
-            // border border-gray-200 rounded-lg shadow
-        >
-
+            className="mx-20">
             <h2 className="text-4xl font-bold text-gray-800 my-4">Contact us</h2>
-
             <div className="mt-8">
                 <label className="block mb-2 font-medium text-gray-900 dark:text-white">
                     Title</label>

@@ -4,7 +4,6 @@ import Link from "next/link";
 import {useEffect, useState} from "react";
 import {followingArticleList} from "@/lib/ArticleAPI";
 import {getFollowingList} from "@/lib/UserAPI";
-import ToastViewer from "@/common/toastViewer";
 import removeMd from "remove-markdown";
 
 // 게시물에 이미지 있는지 확인
@@ -23,7 +22,6 @@ export default function AfterMainPage({me, trendingArticles}) {
     const [activeTab, setActiveTab] = useState("Trending");
     const [followingArticles, setFollowingArticles] = useState(null);
     const [following, setFollowing] = useState([]);
-    const [member, setMember] = useState([]);
 
     // 팔로잉 유저 목록 불러오기 (최초 1번)
     useEffect(() => {
@@ -51,7 +49,7 @@ export default function AfterMainPage({me, trendingArticles}) {
     return (
         <div className="w-full min-h-screen bg-white text-black">
             <div className="h-screen">
-                <div className="mx-auto px-36 py-10 flex">
+                <div className="mx-auto px-36 flex">
                     <main className="flex-grow">
                         {/* 탭 버튼 */}
                         <div className="flex items-center border-b">
@@ -70,7 +68,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                             ))}
                         </div>
 
-                        {/* 🔹 Trending */}
+                        {/* Trending */}
                         {activeTab === "Trending" && (
                             trendingArticles && trendingArticles.length > 0 ? (
                                 trendingArticles.map((article, idx) => {
