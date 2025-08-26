@@ -8,7 +8,7 @@ import { createRepository } from "@/lib/ArticleAPI";
 
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
-import GhostBar from './RepoGhostBar';
+import GhostBar from './sideBar';
 
 const getAccessToken = () =>
     (typeof window !== 'undefined' &&
@@ -45,6 +45,7 @@ export default function RepositoriesPage() {
     const [loadingRepos, setLoadingRepos] = useState(false);
     const [error, setError] = useState('');
     const [selectedRepoId, setSelectedRepoId] = useState(null);
+    const [tab, setTab] = useState('info');
 
     const [open, setOpen] = useState(false);
     const [name, setRepoName] = useState("");
@@ -87,7 +88,11 @@ export default function RepositoriesPage() {
             if (!res.ok || (json?.resultCode && String(json.resultCode).startsWith('F')) || json?.error) {
                 throw new Error(json?.msg || json?.message || '리포 조회 실패');
             }
-            const list = Array.isArray(json?.data) ? json.data : Array.isArray(json?.data1) ? json.data1 : [];
+            const list = Array.isArray(json?.data)
+                ? json.data
+                : Array.isArray(json?.data1)
+                    ? json.data1
+                    : [];
             setRepositories(normalizeRepos(list));
             setSelectedRepoId(null);
         } catch (e) {
@@ -98,13 +103,15 @@ export default function RepositoriesPage() {
     }, [router]);
 
     const selectedRepo = useMemo(
-        () => repositories.find(r => r.id === selectedRepoId) || null,
+        () => repositories.find((r) => r.id === selectedRepoId) || null,
         [repositories, selectedRepoId]
     );
 
-    const onClose = useCallback(() => setSelectedRepoId(null), []);
+    useEffect(() => {
+        if (selectedRepo) setTab('info');
+    }, [selectedRepo?.id]);
 
-    if (loading) return <div className="text-center">로딩...</div>;
+    const onClose = useCallback(() => setSelectedRepoId(null), []);
 
     const handleCreate = async () => {
         if (!name.trim()) {
@@ -115,13 +122,12 @@ export default function RepositoriesPage() {
         setError("");
 
         try {
-            const res = await createRepository({ name: name });
+            const res = await createRepository({ name });
             if (res?.resultCode?.startsWith("S-")) {
                 alert(res.msg);
                 setOpen(false);
                 setRepoName("");
-                // 생성 후 다시 목록 불러오기
-                await fetchRepos();
+                await fetchRepos(); // 생성 후 다시 목록 불러오기
             } else {
                 setError(res?.msg || "생성 실패");
             }
@@ -131,6 +137,8 @@ export default function RepositoriesPage() {
             setLoading(false);
         }
     };
+
+    if (loading) return <div className="text-center">로딩...</div>;
 
     return (
         <LayoutGroup>
@@ -149,38 +157,87 @@ export default function RepositoriesPage() {
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
-                    <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px]">
-                        <AnimatePresence>
-                            {selectedRepo && (
-                                <GhostBar repositories={repositories} selectedRepoId={selectedRepoId} onSelect={setSelectedRepoId} />
-                            )}
-                        </AnimatePresence>
-
-                        <div className="flex-1 relative">
+                    {/* 레포 미선택 */}
+                    {!selectedRepo ? (
+                        <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px] bg-white">
                             <AnimatePresence>
-                                {!selectedRepo && (
-                                    <RepoFolder
-                                        key="grid"
-                                        repositories={repositories}
-                                        onSelect={setSelectedRepoId}
-                                    />
-                                )}
+                                <RepoFolder
+                                    key="grid"
+                                    repositories={repositories}
+                                    onSelect={setSelectedRepoId}
+                                />
                             </AnimatePresence>
+                        </div>
+                    ) : (
+                        <div className="relative">
+                            {/* 탭 */}
+                            <div className="absolute -top-6 left-[260px] z-20 flex gap-2">
+                                {[
+                                    { key: 'info', label: '정보' },
+                                    { key: 'posts', label: '게시물' },
+                                ].map((t) => (
+                                    <button
+                                        key={t.key}
+                                        onClick={() => setTab(t.key)}
+                                        className={`px-4 py-2 text-sm border rounded-t-xl shadow-sm transition
+                      ${tab === t.key
+                                            ? 'bg-white border-gray-200 text-gray-900 -mb-px'
+                                            : 'bg-gray-100/80 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+                                        style={{
+                                            clipPath:
+                                                'polygon(0 0, calc(100% - 14px) 0, 100% 100%, calc(100% - 14px) 100%, 0 100%)',
+                                        }}
+                                    >
+                                        {t.label}
+                                    </button>
+                                ))}
+                            </div>
 
-                            <AnimatePresence>
-                                {selectedRepo && (
+                            <div className="grid grid-cols-[260px_1fr] gap-3 items-start">
+                                {/* 왼쪽 사이드바 */}
+                                <aside className="min-h-[calc(100vh-220px)] overflow-y-auto border-r bg-gray-50">
+                                    <ul className="p-4 space-y-2">
+                                        {repositories.map((r) => {
+                                            const sel = r.id === selectedRepoId;
+                                            return (
+                                                <li
+                                                    key={r.id}
+                                                    onClick={() => setSelectedRepoId(r.id)}
+                                                    className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
+                            ${sel
+                                                        ? 'bg-gray-200 text-gray-900 font-semibold'
+                                                        : 'hover:bg-gray-100 text-gray-700'}`}
+                                                    title={r.name}
+                                                >
+                                                    <i
+                                                        className={`fa-solid ${
+                                                            sel ? 'fa-folder-open' : 'fa-folder'
+                                                        } text-gray-600`}
+                                                    />
+                                                    <span className="truncate">{r.name}</span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </aside>
+
+                                {/* 메인 컨텐츠 */}
+                                <div className="relative border border-gray-300 rounded-md bg-white pt-7 h-[calc(100vh-220px)] overflow-hidden">
+                                    <GhostBar repositories={repositories} />
                                     <RepoContent
-                                        key="detail"
+                                        key={`detail-${selectedRepo.id}`}
                                         repo={selectedRepo}
                                         repositories={repositories}
                                         onChangeRepo={setSelectedRepoId}
                                         onClose={onClose}
+                                        useExternalSidebar={true}
                                     />
-                                )}
-                            </AnimatePresence>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
+                    {/* 하단 버튼들 */}
                     <div className="text-center mt-6 space-y-4">
                         <button
                             onClick={() => router.push('/DiFF/member/profile')}
@@ -210,50 +267,55 @@ export default function RepositoriesPage() {
                             레포지토리 생성
                         </button>
                     </div>
-                </div>
 
-                {/* ✅ 모달 */}
-                {open && (
-                    <div
-                        className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-                        onClick={() => setOpen(false)}
-                    >
+                    {/* ✅ 모달 */}
+                    {open && (
                         <div
-                            className="bg-white p-6 rounded shadow-md w-96"
-                            onClick={(e) => e.stopPropagation()}
+                            className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+                            onClick={() => setOpen(false)}
                         >
-                            <h2 className="text-lg font-bold mb-4">레포지토리 생성</h2>
-
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setRepoName(e.target.value)}
-                                placeholder="레포지토리 이름"
-                                className="w-full border rounded px-3 py-2 mb-2"
-                            />
-
-                            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    onClick={() => setOpen(false)}
-                                    className="px-4 py-2 bg-gray-200 rounded"
-                                >
-                                    취소
-                                </button>
-                                <button
-                                    onClick={handleCreate}
-                                    disabled={loading}
-                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50"
-                                >
-                                    {loading ? "생성 중..." : "생성"}
-                                </button>
+                            <div
+                                className="bg-white p-6 rounded shadow-md w-96"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <h2 className="text-lg font-bold mb-4">레포지토리 생성</h2>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setRepoName(e.target.value)}
+                                    placeholder="레포지토리 이름"
+                                    className="w-full border rounded px-3 py-2 mb-2"
+                                />
+                                {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={() => setOpen(false)}
+                                        className="px-4 py-2 bg-gray-200 rounded"
+                                    >
+                                        취소
+                                    </button>
+                                    <button
+                                        onClick={handleCreate}
+                                        disabled={loading}
+                                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50"
+                                    >
+                                        {loading ? '생성 중...' : '생성'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    )}
+
+                    <div className="text-center mt-6">
+                        <button
+                            onClick={() => router.replace('/DiFF/home/main')}
+                            className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
+                        >
+                            메인으로 가기
+                        </button>
                     </div>
-                )}
+                </div>
             </section>
         </LayoutGroup>
     );
 }
-

@@ -221,6 +221,7 @@ function ProfileInner() {
     return (
         <section className="px-4 dark:bg-gray-900 dark:text-white">
             <div className="mx-auto max-w-6xl">
+
                 {err && <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>}
 
                 {/* Tabs */}
@@ -299,11 +300,6 @@ function ProfileInner() {
                                     >
                                         프로필 업로드
                                     </button>
-
-                                    {/* 테마 토글 (버튼 아래, 중앙) */}
-
-                                        <ThemeToggle />
-
 
                                     {/* 소셜 연동 버튼 (같은 줄, 중앙) */}
                                     <div className="mt-1 flex items-center justify-center gap-3">

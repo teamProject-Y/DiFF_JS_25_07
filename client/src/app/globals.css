@@ -273,3 +273,13 @@ li {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+@layer utilities {
+    .scrollbar-none {
+        -ms-overflow-style: none; /* IE, Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+    .scrollbar-none::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+    }
+}

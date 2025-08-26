@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { fetchUser } from '@/lib/UserAPI';
+import ThemeToggle from "@/common/thema";
 
 const HeaderWrap = styled.div `
 width: 100%; 
