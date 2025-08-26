@@ -208,6 +208,12 @@ export const createRepository = async (data) => {
     }
 };
 
-
+export async function increaseArticleHits(articleId) {
+    const res = await fetch(`/api/DiFF/article/hits/${articleId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+    });
+    return res.json();
+}
 
 
