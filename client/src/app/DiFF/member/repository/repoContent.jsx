@@ -37,8 +37,8 @@ const cardsWrap = {
 };
 
 const card = {
-    hidden: {y: 10, opacity: 0, scale: 0.98},
-    show: {y: 0, opacity: 1, scale: 1, transition: {type: 'spring', bounce: 0.30, duration: 0.5}},
+    hidden: { y: 10, opacity: 0, scale: 0.98 },
+    show:   { y: 0,  opacity: 1, scale: 1, transition: { type: 'spring', bounce: 0.30, duration: 0.5 } },
 };
 
 /**
