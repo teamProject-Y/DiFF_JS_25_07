@@ -5,7 +5,7 @@ export const metadata = { title: 'DiFF Docs — 1. 소개' };
 export default function IntroPage() {
     return (
         <div className="min-h-screen">
-            <div className="max-w-7xl p-8 flex">
+            <div className="max-w-7xl px-8 flex">
                 <div className="w-1/5">
                     <DocsSidebar />
                 </div>
