@@ -221,6 +221,7 @@ function ProfileInner() {
     return (
         <section className="px-4 dark:bg-gray-900 dark:text-white">
             <div className="mx-auto max-w-6xl">
+
                 {err && <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>}
 
                 {/* Tabs */}

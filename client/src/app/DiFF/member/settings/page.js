@@ -2,34 +2,37 @@
 
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import {useEffect, useState, Suspense} from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import {useRouter, useSearchParams} from 'next/navigation';
 import ThemeToggle from "@/common/thema";
-import { fetchUser, uploadProfileImg, modifyUser } from "@/lib/UserAPI";
+import {fetchUser, uploadProfileImg, modifyUser, getFollowingList} from "@/lib/UserAPI";
 import TechSettings from './techSettings';
 
 
 export default function SettingsTab() {
     return (
         <Suspense fallback={<div className="p-8 text-sm">로딩...</div>}>
-            <SettingsPage />
+            <SettingsPage/>
         </Suspense>
     );
 }
 
 function SettingsPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
+    const [loading, setLoading] = useState(true);
     const [member, setMember] = useState(null);
-    const [isMyProfile, setIsMyProfile] = useState(false);
+    const [isMySetting, setIsMySetting] = useState(false);
     const [profileUrl, setProfileUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [linkedGithub, setLinkedGithub] = useState(false);
-
+    const [form, setForm] = useState({});
+    const [error, setError] = useState("");
     const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
-    const [linked, setLinked] = useState({ google: false, github: false });
+    const [linked, setLinked] = useState({google: false, github: false});
 
     const handleUpload = async () => {
         if (!selectedFile) return alert("파일을 선택하세요!");
@@ -41,6 +44,8 @@ function SettingsPage() {
             alert("업로드 실패");
         }
     };
+
+
 
     // 소셜 로그인 통합, 연동
     const startLink = (provider) => {
@@ -68,10 +73,35 @@ function SettingsPage() {
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
+        const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
+
         if (!accessToken) {
             router.replace('/DiFF/home/main');
             return;
         }
+
+        const nickName = searchParams.get("nickName");
+
+
+        fetchUser(nickName)
+            .then(async (res) => {
+                const fetchedMember = res.member;
+                setMember(fetchedMember);
+                setProfileUrl(fetchedMember?.profileUrl || "");
+                setLoading(false);
+
+                if (!nickName || nickName === myNickName) {
+                    setIsMySetting(true);
+                } else {
+                    setIsMySetting(false);
+
+                }
+            })
+            .catch(err => {
+                console.error("마이페이지 오류:", err);
+                setLoading(false);
+                router.replace('/DiFF/home/main');
+            });
 
         (async () => {
             try {
@@ -86,7 +116,7 @@ function SettingsPage() {
 
         const base = process.env.NEXT_PUBLIC_API_BASE_URL || '';
         fetch(`${base}/api/DiFF/auth/linked`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: {Authorization: `Bearer ${accessToken}`},
             credentials: 'include',
         })
             .then(res => res.ok ? res.json() : Promise.reject(res))
@@ -100,26 +130,69 @@ function SettingsPage() {
             .catch(() => {
                 // 필요 시 무시 또는 알림
             });
-    }, []);
+    }, [router, searchParams]);
 
 
+
+    useEffect(() => {
+        const accessToken = typeof window !== "undefined" && localStorage.getItem('accessToken');
+        if (!accessToken) {
+            router.replace('/DiFF/member/login');
+            return;
+        }
+
+        fetchUser()
+            .then(user => {
+                setMember(user);
+                setForm({
+                    id: user.id || "",
+                    loginId: user.loginId || "",
+                    name: user.name || "",
+                    nickName: user.nickName || "",
+                    email: user.email || "",
+                });
+            })
+            .catch(() => {
+                router.replace('/DiFF/home/main');
+            });
+    }, [router]);
+
+    // 3. 폼 변경 핸들러
+    const handleChange = e => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    // 4. 회원정보 수정 요청
+    const handleSubmit = async e => {
+        e.preventDefault();
+        setError("");
+        try {
+            await modifyUser(form);
+            router.push("/DiFF/member/settings");
+        } catch {
+            setError("정보 수정에 실패했습니다.");
+        }
+    };
 
     return (
-        <section className="pt-10 md:pt-16 px-4 dark:bg-gray-900 dark:text-white">
-            <div className="mx-auto max-w-4xl">
+        <section className="px-4 dark:bg-gray-900 dark:text-white">
+            <div className="mx-auto max-w-6xl">
+
                 {/* 상단 탭 타이틀 영역 */}
                 <div className="mb-3 flex items-center gap-6 text-2xl font-semibold">
+                    {isMySetting && (
                     <Link href="/DiFF/member/profile" className="text-gray-400 hover:text-gray-700">Profile</Link>
+                        )}
                     <span className="text-black hover:text-gray-700">Settings</span>
                 </div>
-                <div className="h-px w-full bg-gray-300 mb-10" />
+                <div className="h-px w-full bg-gray-300 mb-10"/>
 
                 {/* 중앙 본문 프레임 */}
                 <div className="flex flex-col items-center">
                     {/* 아바타 */}
                     <div className="relative h-28 w-28 overflow-hidden rounded-full border border-gray-300 bg-gray-100">
                         {profileUrl ? (
-                            <img src={profileUrl} alt="avatar" className="h-full w-full object-cover" />
+                            <img src={profileUrl} alt="avatar" className="h-full w-full object-cover"/>
                         ) : (
                             <div className="flex h-full w-full items-center justify-center text-4xl">🟡</div>
                         )}
@@ -163,6 +236,19 @@ function SettingsPage() {
 
                     {/* 연동 */}
                     <div className="mt-10 grid w-full max-w-2xl grid-cols-[90px_1fr] items-center gap-y-6">
+
+                        <form>
+                            <div className="text-lg font-semibold">닉네임</div>
+                            <input name="name" value={form.name ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="이름" />
+                            <input name="nickName" value={form.nickName ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="닉네임" />
+                            <button type="submit"
+                                    className="py-2.5 px-5 w-96 bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700">
+                                UPDATE
+                            </button>
+                        </form>
+
+                        <br/>
+
                         <div className="text-lg font-semibold">연동</div>
                         <div>
                             <button
@@ -183,18 +269,13 @@ function SettingsPage() {
                             </button>
                         </div>
 
-                        {/* 테마 */}
-                        <div className="text-lg font-semibold">테마</div>
-                        <div className="flex items-center gap-3">
-                            <ThemeToggle />
-                        </div>
                     </div>
 
                     {/* Technologies & Tools */}
                     <div className="mt-10 w-full max-w-2xl">
                         <h3 className="mb-3 text-2xl font-bold">Technologies &amp; Tools</h3>
                         <ul className="flex flex-wrap gap-2">
-                            <TechSettings />
+                            <TechSettings/>
                         </ul>
                     </div>
 
