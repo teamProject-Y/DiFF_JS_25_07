@@ -1,6 +1,6 @@
 // member/profile/page.js
 'use client';
-
+import ReactMarkdown from "react-markdown";
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -42,11 +42,11 @@ function ProfileInner() {
     const [followingList, setFollowingList] = useState([]);
     const [followerList, setFollowerList] = useState([]);
     const [openModal, setOpenModal] = useState(null); // 'following' | 'follower' | null
-    const [linked, setLinked] = useState({ google: false, github: false });
+    const [linked, setLinked] = useState({google: false, github: false});
 
     // 백엔드 미구현 부분은 "없음"으로 고정 표시
     const [introduce] = useState('없음');
-    const [stat] = useState({ totalLikes: '없음', repoCount: '없음', postCount: '없음' });
+    const [stat] = useState({totalLikes: '없음', repoCount: '없음', postCount: '없음'});
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -54,7 +54,7 @@ function ProfileInner() {
 
         const base = process.env.NEXT_PUBLIC_API_BASE_URL || '';
         fetch(`${base}/api/DiFF/auth/linked`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: {Authorization: `Bearer ${accessToken}`},
             credentials: 'include',
         })
             .then(res => res.ok ? res.json() : Promise.reject(res))
@@ -73,7 +73,7 @@ function ProfileInner() {
     useEffect(() => {
         const justLinked = searchParams.get('linked'); // google | github
         if (justLinked === 'google' || justLinked === 'github') {
-            setLinked(prev => ({ ...prev, [justLinked]: true }));
+            setLinked(prev => ({...prev, [justLinked]: true}));
             // router.replace('/DiFF/home/main');
         }
     }, [searchParams]);
@@ -118,7 +118,7 @@ function ProfileInner() {
                         const following = list.some(m => m.id === fetchedMember.id);
                         console.log("📌 최종 팔로우 여부:", following);
 
-                        setMember(prev => ({ ...prev, isFollowing: following }));
+                        setMember(prev => ({...prev, isFollowing: following}));
                     } catch (err) {
                         console.error("❌ 팔로잉 목록 조회 실패:", err);
                     }
@@ -222,154 +222,104 @@ function ProfileInner() {
         <section className="px-4 dark:bg-gray-900 dark:text-white">
             <div className="mx-auto max-w-6xl">
 
-                {err && <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>}
+                {err && (
+                    <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>
+                )}
 
                 {/* Tabs */}
                 <div className="mb-3 flex items-center gap-6 text-2xl font-semibold">
                     <span className="text-black">Profile</span>
                     {isMyProfile && (
-                    <Link href="/DiFF/member/settings" className="text-gray-400 hover:text-gray-700">Settings</Link>
+                        <Link
+                            href="/DiFF/member/settings"
+                            className="text-gray-400 hover:text-gray-700"
+                        >
+                            Settings
+                        </Link>
                     )}
                 </div>
-                <div className="h-px w-full bg-gray-300 mb-8" />
+                <div className="h-px w-full bg-gray-300 mb-8"/>
 
                 {/* 2-Column Layout (좌: 프로필/스탯, 우: 소개/툴) */}
                 <div className="grid grid-cols-1 gap-10 md:grid-cols-[280px,1fr]">
+
                     {/* Left */}
                     <aside>
                         <div className="flex flex-col items-start">
-                            {/* 아바타만 가운데 정렬 */}
-                            <div className="relative h-28 w-28 overflow-hidden rounded-full border border-gray-300 bg-gray-100 self-center">
+                            {/* 아바타 */}
+                            <div
+                                className="relative h-28 w-28 overflow-hidden rounded-full border border-gray-300 bg-gray-100 self-center">
                                 {profileUrl ? (
-                                    <img src={profileUrl} alt="avatar" className="h-full w-full object-cover" />
+                                    <img src={profileUrl} alt="avatar" className="h-full w-full object-cover"/>
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-4xl">🟡</div>
                                 )}
-
                             </div>
 
-                            {/* 이름/이메일(왼쪽 정렬 유지) */}
+                            {/* 이름/이메일 */}
                             <div className="mt-4 text-center self-center">
                                 <div className="text-xl font-semibold">{member.nickName}</div>
-                                <a href={`mailto:${member.email}`} className="mt-1 block text-sm font-semibold text-gray-700">
+                                <a
+                                    href={`mailto:${member.email}`}
+                                    className="mt-1 block text-sm font-semibold text-gray-700"
+                                >
                                     {member.email}
                                 </a>
                             </div>
 
                             {/* 팔로잉/팔로워 */}
                             <div className="mt-4 flex items-center gap-4 text-sm self-center">
-                                <button onClick={() => setOpenModal('following')} className="flex items-center gap-2 hover:underline">
+                                <button
+                                    onClick={() => setOpenModal('following')}
+                                    className="flex items-center gap-2 hover:underline"
+                                >
                                     <span className="opacity-70">following :</span> {followingCount}
                                 </button>
-                                <button onClick={() => setOpenModal('follower')} className="flex items-center gap-2 hover:underline">
+                                <button
+                                    onClick={() => setOpenModal('follower')}
+                                    className="flex items-center gap-2 hover:underline"
+                                >
                                     <span className="opacity-70">follower :</span> {followerCount}
                                 </button>
                             </div>
 
-                            {/* 타인 프로필: 팔로우/언팔로우 */}
-                            {/* 본인 프로필만 출력 */}
+                            {/* 본인 프로필일 때만 표시 */}
                             {isMyProfile && (
-                                // 아바타 바로 아래에 세로(column)로, 가운데 정렬
                                 <div className="mt-3 flex w-full flex-col items-center gap-2">
+                                    {/* 구분선 */}
+                                    <div className="my-4 h-px w-40 bg-gray-300 self-center"/>
 
-                                    {/* 숨겨진 파일 input */}
-                                    <input
-                                        id="profileUpload"
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={async (e) => {
-                                            const file = e.target.files?.[0];
-                                            if (!file) return;
-                                            try {
-                                                const url = await uploadProfileImg(file);
-                                                setProfileUrl(url);
-                                                console.log('업로드 성공:', url);
-                                            } catch (err) {
-                                                console.error('업로드 실패:', err);
-                                                alert('업로드 실패');
-                                            }
-                                        }}
-                                    />
-
-                                    {/* 업로드 버튼 */}
-                                    <button
-                                        type="button"
-                                        onClick={() => document.getElementById('profileUpload')?.click()}
-                                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
-                                    >
-                                        프로필 업로드
-                                    </button>
-
-                                    {/* 소셜 연동 버튼 (같은 줄, 중앙) */}
-                                    <div className="mt-1 flex items-center justify-center gap-3">
-                                        {/* 구글 */}
-                                        <button
-                                            type="button"
-                                            onClick={() => !linked.google && startLink('google')}
-                                            id="connect-google"
-                                            disabled={linked.google}
-                                            aria-disabled={linked.google}
-                                            className={
-                                                `px-4 py-2 rounded text-white ` +
-                                                (linked.google
-                                                    ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                                                    : 'bg-red-500 hover:bg-red-400')
-                                            }
-                                            title={linked.google ? '이미 연동됨' : '구글 계정 연동'}
-                                        >
-                                            {linked.google ? '구글 연동 완료' : '구글 연동'}
-                                        </button>
-
-                                        {/* 깃허브 */}
-                                        <button
-                                            type="button"
-                                            onClick={() => !linked.github && startLink('github')}
-                                            id="connect-github"
-                                            disabled={linked.github}
-                                            aria-disabled={linked.github}
-                                            className={
-                                                `px-4 py-2 rounded text-white ` +
-                                                (linked.github
-                                                    ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                                                    : 'bg-gray-800 hover:bg-gray-700')
-                                            }
-                                            title={linked.github ? '이미 연동됨' : '깃허브 계정 연동'}
-                                        >
-                                            {linked.github ? '깃 연동 완료' : '깃허브 연동'}
-                                        </button>
+                                    {/* Stats */}
+                                    <div className="w-fit self-center text-left">
+                                        <h4 className="text-2xl font-semibold mb-3">Stats</h4>
+                                        <ul className="text-sm leading-7">
+                                            <li>
+                                                Total Like : <span className="font-medium">{stat.totalLikes}</span>
+                                            </li>
+                                            <li>
+                                                Total Repository : <span className="font-medium">{stat.repoCount}</span>
+                                            </li>
+                                            <li>
+                                                Posts : <span className="font-medium">{stat.postCount}</span>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             )}
-
-
-                            {/* 구분선 */}
-                            <div className="my-4 h-px w-40 bg-gray-300 self-center" />
-
-                            {/* Stats */}
-                            <div className="w-fit self-center text-left">
-                                <h4 className="text-2xl font-semibold mb-3">Stats</h4>
-                                <ul className="text-sm leading-7">
-                                    <li> Total Like : <span className="font-medium">{stat.totalLikes}</span></li>
-                                    <li> Total Repository : <span className="font-medium">{stat.repoCount}</span></li>
-                                    <li> Posts : <span className="font-medium">{stat.postCount}</span></li>
-                                </ul>
-                            </div>
                         </div>
                     </aside>
 
                     {/* Right */}
                     <main>
                         <section className="mb-8">
-                            <h3 className="mb-3 text-2xl font-bold">introduce</h3>
-                            <div className="min-h-[120px] rounded-md border border-gray-300 bg-gray-100 p-6 text-gray-600">
-                                {introduce}
+                            <h3 className="mb-3 text-2xl font-bold">README</h3>
+                            <div className="min-h-[120px] prose dark:prose-invert max-w-none">
+                                {member?.introduce ? (
+                                    <ReactMarkdown>{member.introduce}</ReactMarkdown>
+                                ) : (
+                                    "아직 자기소개가 없습니다."
+                                )}
                             </div>
-                        </section>
-
-                        <section>
-                            <h3 className="mb-3 text-2xl font-bold">Technologies &amp; Tools</h3>
-                            <TechBadges keys={techKeys} />
                         </section>
                     </main>
                 </div>
@@ -380,7 +330,10 @@ function ProfileInner() {
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
                         onClick={() => setOpenModal(null)}
                     >
-                        <div className="w-96 rounded-lg bg-white p-6 shadow-lg" onClick={(e) => e.stopPropagation()}>
+                        <div
+                            className="w-96 rounded-lg bg-white p-6 shadow-lg"
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             <h2 className="mb-4 text-lg font-bold">
                                 {openModal === 'follower' ? '팔로워' : '팔로잉'} 목록
                             </h2>
@@ -405,7 +358,10 @@ function ProfileInner() {
                                     <p className="text-sm text-gray-500">조회된 사용자가 없어.</p>
                                 )}
                             </ul>
-                            <button onClick={() => setOpenModal(null)} className="mt-4 rounded bg-gray-200 px-4 py-2 text-sm">
+                            <button
+                                onClick={() => setOpenModal(null)}
+                                className="mt-4 rounded bg-gray-200 px-4 py-2 text-sm"
+                            >
                                 닫기
                             </button>
                         </div>

@@ -44,28 +44,33 @@ export default function TechSettings() {
             <br/>
 
             {/* 후보 목록 그리드: 꺼짐(그레이) / 켜짐(원색) */}
-            <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {BADGE_KEYS.map(key => {
-                    const b = BADGE_MAP[key];
-                    const on = selected.includes(key);
-                    return (
-                        <li key={key}>
-                            <button
-                                type="button"
-                                onClick={() => toggle(key)}
-                                className={
-                                    "w-full rounded-md border p-2 flex items-center justify-center " +
-                                    (on ? "bg-white border-gray-300" : "bg-gray-100 border-gray-200 opacity-60 grayscale")
-                                }
-                                title={b.label}
-                                aria-pressed={on}
-                            >
-                                <img src={b.url} alt={b.label} className="h-6" />
-                            </button>
-                        </li>
-                    );
-                })}
-            </ul>
+            {/* 후보 목록 그리드 */}
+            <div className="max-h-64 overflow-y-auto">
+                <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {BADGE_KEYS.map(key => {
+                        const b = BADGE_MAP[key];
+                        const on = selected.includes(key);
+                        return (
+                            <li key={key}>
+                                <button
+                                    type="button"
+                                    onClick={() => toggle(key)}
+                                    className={
+                                        "w-full rounded-md border p-2 flex items-center justify-center " +
+                                        (on
+                                            ? "bg-white border-gray-300"
+                                            : "bg-gray-100 border-gray-200 opacity-60 grayscale")
+                                    }
+                                    title={b.label}
+                                    aria-pressed={on}
+                                >
+                                    <img src={b.url} alt={b.label} className="h-6" />
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
 
             <div className="mt-5 flex items-center gap-3">
                 <button
