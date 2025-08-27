@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {useEffect, useState} from "react";
-import {followingArticleList} from "@/lib/ArticleAPI";
+import {followingArticleList, increaseArticleHits} from "@/lib/ArticleAPI";
 import {getFollowingList} from "@/lib/UserAPI";
 import removeMd from "remove-markdown";
 
@@ -46,6 +46,16 @@ export default function AfterMainPage({me, trendingArticles}) {
             });
     }, []); //
 
+    const handleArticleClick = async (id) => {
+        try {
+            await increaseArticleHits(id);  // ✅ 조회수 증가 요청
+            window.location.href = `/DiFF/article/detail?id=${id}`;
+        } catch (err) {
+            console.error("조회수 증가 실패:", err);
+            window.location.href = `/DiFF/article/detail?id=${id}`;
+        }
+    };
+
     return (
         <div className="w-full min-h-screen bg-white text-black pt-20">
             <div className="h-screen">
@@ -77,7 +87,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         <div
                                             key={idx}
                                             className="block cursor-pointer"
-                                            onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                            onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
                                                 className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
@@ -147,7 +157,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         <div
                                             key={idx}
                                             className="block cursor-pointer"
-                                            onClick={() => (window.location.href = `/DiFF/article/detail?id=${article.id}`)}
+                                            onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
                                                 className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">

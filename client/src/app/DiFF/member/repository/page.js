@@ -12,8 +12,7 @@ import GhostBar from './sideBar';
 
 const getAccessToken = () =>
     (typeof window !== 'undefined' &&
-        (localStorage.getItem('accessToken') || localStorage.getItem('access_token'))) ||
-    '';
+        (localStorage.getItem('accessToken') || localStorage.getItem('access_token'))) || '';
 
 const genId = (r) =>
     String(
@@ -51,7 +50,7 @@ export default function RepositoriesPage() {
     const [open, setOpen] = useState(false);
     const [name, setRepoName] = useState("");
 
-    // 로그인 체크 + 레포 로드
+    // ✅ 최초 1회만 사용자 레포 불러오기
     useEffect(() => {
         const accessToken = getAccessToken();
         if (!accessToken) {
@@ -68,7 +67,7 @@ export default function RepositoriesPage() {
                 setLoading(false);
                 router.replace('/DiFF/home/main');
             });
-    }, [router]);
+    }, []); // ← 빈 배열 → 최초 mount시에만 실행
 
     const fetchRepos = useCallback(async () => {
         const at = getAccessToken();
@@ -114,6 +113,7 @@ export default function RepositoriesPage() {
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
 
+    // ✅ 레포지토리 생성 → DB insert → state에 직접 추가
     const handleCreate = async () => {
         if (!name.trim()) {
             setError("레포지토리 이름을 입력하세요.");
@@ -128,7 +128,16 @@ export default function RepositoriesPage() {
                 alert(res.msg);
                 setOpen(false);
                 setRepoName("");
-                await fetchRepos(); // 생성 후 다시 목록 불러오기
+
+                // 새 레포 직접 state에 추가
+                const newRepo = {
+                    id: res.data, // 서버에서 newRepoId 내려줌
+                    name,
+                    url: "",
+                    defaultBranch: "",
+                    aprivate: false,
+                };
+                setRepositories((prev) => [...prev, newRepo]);
             } else {
                 setError(res?.msg || "생성 실패");
             }
@@ -140,6 +149,7 @@ export default function RepositoriesPage() {
     };
 
     if (loading) return <div className="text-center">로딩...</div>;
+
 
     return (
         <LayoutGroup>
