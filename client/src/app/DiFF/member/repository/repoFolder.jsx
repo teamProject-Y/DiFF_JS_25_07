@@ -22,47 +22,6 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
         onFetchRepos?.();
     }, [closeModal, onFetchRepos]);
 
-    // const handleCreate = useCallback(async (payload) => {
-    //     closeModal();
-    //     // 부모가 처리(예: createRepository 호출 + state 업데이트)
-    //     if (onCreateRepo) onCreateRepo(payload);
-    //     else alert('onCreateRepo 콜백을 내려주세요.');
-    // }, [closeModal, onCreateRepo]);
-
-    const handleCreate = async () => {
-        if (!name.trim()) {
-            setError("레포지토리 이름을 입력하세요.");
-            return;
-        }
-        setLoading(true);
-        setError("");
-
-        try {
-            const res = await createRepository({name});
-            if (res?.resultCode?.startsWith("S-")) {
-                alert(res.msg);
-                setOpen(false);
-                setRepoName("");
-
-                // 새 레포 직접 state에 추가
-                const newRepo = {
-                    id: res.data, // 서버에서 newRepoId 내려줌
-                    name,
-                    url: "",
-                    defaultBranch: "",
-                    aprivate: false,
-                };
-                setRepositories((prev) => [...prev, newRepo]);
-            } else {
-                setError(res?.msg || "생성 실패");
-            }
-        } catch (err) {
-            setError(err?.response?.data?.msg || "요청 실패");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <motion.div
             key="grid"
@@ -85,7 +44,6 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
                 <span className="font-bold text-lg">Add Repository</span>
             </motion.div>
 
-            {/* 기존 레포 타일들 */}
             {repositories?.length > 0 ? (
                 repositories.map((repo, idx) => (
                     <motion.div
@@ -116,9 +74,6 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
     );
 }
 
-/* === 선택 모달 + 폼 === */
-
-/* === 선택 모달 + 폼 === */
 function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
     // 폼 상태
     const [name, setName] = useState('');
@@ -127,7 +82,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
     const [visibility, setVisibility] = useState('Public'); // 'Public' | 'Private'
     const [err, setErr] = useState('');
 
-    // ⬇️ 외부 클릭 감지용 ref
+    // 외부 클릭 감지용 ref
     const visBtnRef = useRef(null);
     const visMenuRef = useRef(null);
 
@@ -190,7 +145,6 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                             <div>Import from GitHub</div>
                         </div>
                         <div className="flex-1 min-h-0 flex gap-4">
-                            {/* 왼쪽: 직접 생성 */}
                             <form onSubmit={submitCreate} className="w-1/2 border-r pr-4 mb-4 flex flex-col">
                                 <div className="my-2">
                                     <label className="block font-medium mb-1 px-2">Repository Name *</label>
