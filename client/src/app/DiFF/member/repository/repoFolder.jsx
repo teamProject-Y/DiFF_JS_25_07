@@ -22,6 +22,40 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
         onFetchRepos?.();
     }, [closeModal, onFetchRepos]);
 
+    const handleCreate = async () => {
+        if (!name.trim()) {
+            setError("레포지토리 이름을 입력하세요.");
+            return;
+        }
+        setLoading(true);
+        setError("");
+
+        try {
+            const res = await createRepository({name});
+            if (res?.resultCode?.startsWith("S-")) {
+                alert(res.msg);
+                setOpen(false);
+                setRepoName("");
+
+                // 새 레포 직접 state에 추가
+                const newRepo = {
+                    id: res.data, // 서버에서 newRepoId 내려줌
+                    name,
+                    url: "",
+                    defaultBranch: "",
+                    aprivate: false,
+                };
+                setRepositories((prev) => [...prev, newRepo]);
+            } else {
+                setError(res?.msg || "생성 실패");
+            }
+        } catch (err) {
+            setError(err?.response?.data?.msg || "요청 실패");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <motion.div
             key="grid"
