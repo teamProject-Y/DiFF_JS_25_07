@@ -154,8 +154,8 @@ export default function RepositoriesPage() {
         <LayoutGroup>
             <section className="px-4">
                 <div className="mx-auto max-w-6xl">
-                    <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
-                        내 리포지토리
+                    <h2 className="text-2xl font-bold mb-4 mx-4 flex items-center gap-3">
+                        My Repository
                         <button
                             onClick={fetchRepos}
                             disabled={loadingRepos}
@@ -174,8 +174,7 @@ export default function RepositoriesPage() {
                                 <RepoFolder
                                     key="grid"
                                     repositories={repositories}
-                                    onSelect={setSelectedRepoId}
-                                />
+                                    onSelect={setSelectedRepoId} />
                             </AnimatePresence>
                         </div>
                     ) : (
@@ -214,15 +213,15 @@ export default function RepositoriesPage() {
                                                     key={r.id}
                                                     onClick={() => setSelectedRepoId(r.id)}
                                                     className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
-                            ${sel
+                                                        ${sel
                                                         ? 'bg-gray-200 text-gray-900 font-semibold'
                                                         : 'hover:bg-gray-100 text-gray-700'}`}
                                                     title={r.name}
                                                 >
                                                     <i
                                                         className={`fa-solid ${
-                                                            sel ? 'fa-folder-open' : 'fa-folder'
-                                                        } text-gray-600`}
+                                                            sel ? 'fa-folder-open text-neutral-500' : 'fa-folder text-neutral-400'
+                                                        } `}
                                                     />
                                                     <span className="truncate">{r.name}</span>
                                                 </li>

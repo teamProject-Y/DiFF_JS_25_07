@@ -109,7 +109,24 @@ export default function RepoContent({
             {/* 왼쪽 내부 레일(옵션) */}
             {!useExternalSidebar && (
                 <aside className="border-r bg-gray-50 p-4 overflow-y-auto">
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="text-md text-gray-500 hover:text-gray-800"
+                        >
+                            <i class="fa-solid fa-angle-left"></i>
+                        </button>
+                    )}
                     <ul className="space-y-2">
+                        <li
+                            key="repo-plus"
+                            className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 text-blue-600 font-semibold"
+                            onClick={() => window.open('https://github.com/new', '_blank')}
+                            title="깃허브로 리포지토리 추가"
+                        >
+                            <i className="fa-solid fa-circle-plus text-neutral-500" />
+                            <span className="truncate">깃허브로 리포지토리 추가</span>
+                        </li>
                         {repositories.map((r) => {
                             const sel = r.id === repo?.id;
                             return (

@@ -13,6 +13,7 @@ export default function SideBar({ repositories = [] }) {
                 opacity: 0,
                 pointerEvents: 'none',
                 width: 256,              // bar 폭(대강 64 * 4)
+                backgroundColor: 'red',  ///////////////////////// 확인용
             }}
             initial={{ x: -40, opacity: 0 }}
             animate={{ x: 0, opacity: 0 }}
@@ -20,6 +21,11 @@ export default function SideBar({ repositories = [] }) {
             transition={{ type: 'spring', stiffness: 120, damping: 20 }}
         >
             <ul className="p-2 space-y-2">
+                <motion.li
+                    key="add"
+                    layoutId={`repo-add`}
+                    style={{ height: 44 }}
+                />
                 {repositories.map((repo) => (
                     // grid 카드 / 상세 헤더와 동일한 layoutId
                     <motion.li
