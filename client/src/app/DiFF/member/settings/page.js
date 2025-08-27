@@ -5,10 +5,9 @@
 import {useEffect, useState, Suspense} from 'react';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
-import {fetchUser, uploadProfileImg, modifyUser } from "@/lib/UserAPI";
+import {fetchUser, uploadProfileImg, modifyNickName } from "@/lib/UserAPI";
 import TechSettings from './techSettings';
 import ThemeToggle from "@/common/thema";
-
 
 export default function SettingsTab() {
     return (
@@ -56,17 +55,6 @@ function SettingsPage() {
         alert('회원탈퇴 로직 연결 예정');
     };
 
-    const handleUpload = async () => {
-        if (!selectedFile) return alert("파일을 선택하세요!");
-        try {
-            const url = await uploadProfileImg(selectedFile);
-            setProfileUrl(url);
-            console.log("업로드 성공:", url);
-        } catch {
-            alert("업로드 실패");
-        }
-    };
-
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
@@ -77,7 +65,6 @@ function SettingsPage() {
         }
 
         const nickName = searchParams.get("nickName");
-
 
         fetchUser(nickName)
             .then(async (res) => {
@@ -158,17 +145,33 @@ function SettingsPage() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    // 4. 회원정보 수정 요청
-    const handleSubmit = async e => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("");
+        setError(""); // 에러 초기화
+
         try {
-            await modifyUser(form);
-            router.push("/DiFF/member/settings");
-        } catch {
-            setError("정보 수정에 실패했습니다.");
+            const res = await modifyNickName({ nickName: form.nickName });
+
+            // 성공 메시지를 setError에 넣고, 색상만 다르게 표시할 수도 있음
+            setError(res.msg || "닉네임이 수정되었습니다 ✅");
+
+            // localStorage 업데이트
+            localStorage.setItem("nickName", form.nickName);
+
+            // 상태 업데이트
+            setMember((prev) => ({ ...prev, nickName: form.nickName }));
+        } catch (err) {
+            console.error("닉네임 수정 실패:", err);
+
+            if (err.response) {
+                setError(err.response.data?.msg || "닉네임 수정에 실패했습니다 ❌");
+            } else {
+                setError("서버와 연결할 수 없습니다 ❌");
+            }
         }
     };
+
+
 
     return (
         <section className="px-4 dark:bg-gray-900 dark:text-white">
@@ -230,16 +233,36 @@ function SettingsPage() {
                         />
                     </div>
 
-                    {/* 연동 */}
                     <div className="mt-10 grid w-full max-w-2xl grid-cols-[90px_1fr] items-center gap-y-6">
 
-                        <form>
+                        <form onSubmit={handleSubmit} className="flex flex-col items-start">
                             <label className="text-lg font-semibold">닉네임</label>
-                            <input name="nickName" value={form.nickName ?? ""} className="mb-4 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100" onChange={handleChange} placeholder="nickname"/>
-                            <button type="submit"
-                                    className="py-2.5 px-5 w-96 bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700">
+                            <input
+                                name="nickName"
+                                value={form.nickName ?? ""}
+                                className="mb-2 w-96 p-2.5 border border-neutral-300 rounded-lg bg-neutral-100"
+                                onChange={handleChange}
+                                placeholder="nickname"
+                            />
+                            <button
+                                type="submit"
+                                className="py-2.5 px-5 w-96 bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700"
+                            >
                                 UPDATE
                             </button>
+
+                            {/* 에러 메시지 표시 */}
+                            {error && (
+                                <p
+                                    className={`mt-2 text-sm ${
+                                        error.includes("성공") ? "text-green-600" : "text-red-600"
+                                    }`}
+                                    style={{ whiteSpace: "nowrap" }} // 줄바꿈 방지
+                                >
+                                    {error}
+                                </p>
+                            )}
+
                         </form>
 
                         <br/>
