@@ -120,6 +120,12 @@ export const modifyNickName = async ({nickName}) => {
     return response.data;
 };
 
+export const modifyIntroduce = async ({introduce}) => {
+    const data = {introduce };
+    const response = await UserAPI.put(`api/DiFF/member/doModifyIntroduce`, data);
+    return response.data;
+};
+
 export const checkPwUser = async (data) => {
     const response = await UserAPI.put(`/api/DiFF/member/checkPw`, data);
     return response.data;
