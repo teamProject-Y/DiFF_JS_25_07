@@ -57,7 +57,7 @@ export default function AfterMainPage({me, trendingArticles}) {
     };
 
     return (
-        <div className="w-full min-h-screen bg-white text-black pt-20">
+        <div className="w-full min-h-screen bg-white text-black">
             <div className="h-screen">
                 <div className="mx-auto px-36 flex">
                     <main className="flex-grow">
