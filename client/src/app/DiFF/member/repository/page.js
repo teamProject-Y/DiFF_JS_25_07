@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { LayoutGroup, AnimatePresence } from "framer-motion";
 import { createRepository } from "@/lib/ArticleAPI";
 
+import RepoPost from "./RepoPost";
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
 import GhostBar from './sideBar';
@@ -154,7 +155,7 @@ export default function RepositoriesPage() {
     return (
         <LayoutGroup>
             <section className="px-4">
-                <div className="mx-auto max-w-6xl">
+                <div className="mx-auto max-w-screen-2xl">
                     <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
                         내 리포지토리
                         <button
@@ -170,7 +171,7 @@ export default function RepositoriesPage() {
 
                     {/* 레포 미선택 */}
                     {!selectedRepo ? (
-                        <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px] bg-white">
+                        <div className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px] bg-white panel-root">
                             <AnimatePresence>
                                 <RepoFolder
                                     key="grid"
@@ -235,14 +236,23 @@ export default function RepositoriesPage() {
                                 {/* 메인 컨텐츠 */}
                                 <div className="relative border border-gray-300 rounded-md bg-white pt-7 h-[calc(100vh-220px)] overflow-hidden">
                                     <GhostBar repositories={repositories} />
-                                    <RepoContent
-                                        key={`detail-${selectedRepo.id}`}
-                                        repo={selectedRepo}
-                                        repositories={repositories}
-                                        onChangeRepo={setSelectedRepoId}
-                                        onClose={onClose}
-                                        useExternalSidebar={true}
-                                    />
+                                    {tab === 'info' ? (
+                                        <RepoContent
+                                            key={`detail-${selectedRepo.id}`}
+                                            repo={selectedRepo}
+                                            repositories={repositories}
+                                            onChangeRepo={setSelectedRepoId}
+                                            onClose={onClose}
+                                            /** ✅ 내부 탭 숨김 플래그 유지 */
+                                            useExternalSidebar={true}
+                                        />
+                                    ) : (
+                                        <RepoPost
+                                            key={`posts-${selectedRepo.id}`}
+                                            repoId={selectedRepo.id}
+                                            repoName={selectedRepo.name}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>
