@@ -10,6 +10,64 @@ import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
 import GhostBar from './sideBar';
 
+// ---------------------------------------------
+// Helper Components
+// ---------------------------------------------
+function IndexPanel({ repo }) {
+    return (
+        <div className="relative border border-gray-300 rounded-r-lg bg-white pt-7 h-[calc(100vh-220px)] overflow-auto px-6">
+            <div className="max-w-3xl mx-auto">
+                <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                    <i className="fa-solid fa-magnifying-glass" /> 인덱스 정보
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="p-4 rounded-xl border bg-gray-50">
+                        <div className="text-xs text-gray-500 uppercase">Repository</div>
+                        <div className="font-medium">{repo?.name || '—'}</div>
+                    </div>
+                    <div className="p-4 rounded-xl border bg-gray-50">
+                        <div className="text-xs text-gray-500 uppercase">Default Branch</div>
+                        <div className="font-medium">{repo?.defaultBranch || '—'}</div>
+                    </div>
+                    <div className="p-4 rounded-xl border bg-gray-50 sm:col-span-2">
+                        <div className="text-xs text-gray-500 uppercase">URL</div>
+                        {repo?.url ? (
+                            <a className="font-medium text-blue-600 hover:underline" href={repo.url} target="_blank" rel="noopener noreferrer">{repo.url}</a>
+                        ) : (
+                            <div className="font-medium text-gray-400">없음</div>
+                        )}
+                    </div>
+                    <div className="p-4 rounded-xl border bg-gray-50">
+                        <div className="text-xs text-gray-500 uppercase">Visibility</div>
+                        <div className="font-medium">{repo?.aprivate ? 'Private' : 'Public'}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function PostsPanel({ repo }) {
+    return (
+        <div className="relative border border-gray-300 rounded-r-lg bg-white pt-7 h-[calc(100vh-220px)] overflow-auto px-6">
+            <div className="max-w-3xl mx-auto">
+                <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                    <i className="fa-regular fa-newspaper" /> 게시물
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">이 영역은 선택한 레포지토리의 게시물을 렌더링합니다. 필요한 컴포넌트나 마크업을 자유롭게 채워 넣으세요.</p>
+                <div className="rounded-xl border border-dashed p-6 text-gray-500">
+                    <div className="text-xs uppercase tracking-wide mb-2">Current Repository</div>
+                    <div className="font-medium">{repo?.name}</div>
+                    <div className="text-sm text-gray-400 truncate">{repo?.url || 'url 없음'}</div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ---------------------------------------------
+// Utils
+// ---------------------------------------------
 const getAccessToken = () =>
     (typeof window !== 'undefined' &&
         (localStorage.getItem('accessToken') || localStorage.getItem('access_token'))) || '';
@@ -37,6 +95,9 @@ const normalizeRepos = (raw) =>
         };
     });
 
+// ---------------------------------------------
+// Page
+// ---------------------------------------------
 export default function RepositoriesPage() {
     const router = useRouter();
     const [repositories, setRepositories] = useState([]);
@@ -44,6 +105,8 @@ export default function RepositoriesPage() {
     const [loadingRepos, setLoadingRepos] = useState(false);
     const [error, setError] = useState('');
     const [selectedRepoId, setSelectedRepoId] = useState(null);
+
+    // tabs: 'index' | 'info' | 'posts'
     const [tab, setTab] = useState('info');
 
     const [open, setOpen] = useState(false);
@@ -112,7 +175,7 @@ export default function RepositoriesPage() {
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
 
-    // ✅ 레포지토리 생성 → DB insert → state에 직접 추가
+    // 레포지토리 생성 → DB insert → state에 직접 추가
     const handleCreate = async () => {
         if (!name.trim()) {
             setError("레포지토리 이름을 입력하세요.");
@@ -149,7 +212,6 @@ export default function RepositoriesPage() {
 
     if (loading) return <div className="text-center">로딩...</div>;
 
-
     return (
         <LayoutGroup>
             <section className="px-4">
@@ -180,31 +242,25 @@ export default function RepositoriesPage() {
                     ) : (
                         <div className="relative">
                             {/* 탭 */}
-                            <div className="absolute -top-6 left-[260px] z-20 flex gap-2">
+                            <div className="absolute -top-8 left-[260px] z-0 flex">
                                 {[
+                                    { key: 'index', label: '인덱스' },
                                     { key: 'info', label: '정보' },
                                     { key: 'posts', label: '게시물' },
                                 ].map((t) => (
                                     <button
                                         key={t.key}
                                         onClick={() => setTab(t.key)}
-                                        className={`px-4 py-2 text-sm border rounded-t-xl shadow-sm transition
-                      ${tab === t.key
-                                            ? 'bg-white border-gray-200 text-gray-900 -mb-px'
-                                            : 'bg-gray-100/80 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-                                        style={{
-                                            clipPath:
-                                                'polygon(0 0, calc(100% - 14px) 0, 100% 100%, calc(100% - 14px) 100%, 0 100%)',
-                                        }}
+                                        className={`px-4 py-2 text-sm border rounded-t-xl shadow-sm transition ${tab === t.key ? 'bg-white text-gray-900 -mb-px' : 'bg-gray-100  text-gray-500 hover:bg-gray-100'}`}
                                     >
                                         {t.label}
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="grid grid-cols-[260px_1fr] gap-3 items-start">
+                            <div className="grid grid-cols-[260px_1fr] items-start">
                                 {/* 왼쪽 사이드바 */}
-                                <aside className="min-h-[calc(100vh-220px)] overflow-y-auto border-r bg-gray-50">
+                                <aside className="min-h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border bg-gray-50">
                                     <ul className="p-4 space-y-2">
                                         {repositories.map((r) => {
                                             const sel = r.id === selectedRepoId;
@@ -212,17 +268,10 @@ export default function RepositoriesPage() {
                                                 <li
                                                     key={r.id}
                                                     onClick={() => setSelectedRepoId(r.id)}
-                                                    className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
-                                                        ${sel
-                                                        ? 'bg-gray-200 text-gray-900 font-semibold'
-                                                        : 'hover:bg-gray-100 text-gray-700'}`}
+                                                    className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${sel ? 'bg-gray-200 text-gray-900 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
                                                     title={r.name}
                                                 >
-                                                    <i
-                                                        className={`fa-solid ${
-                                                            sel ? 'fa-folder-open text-neutral-500' : 'fa-folder text-neutral-400'
-                                                        } `}
-                                                    />
+                                                    <i className={`fa-solid ${sel ? 'fa-folder-open text-neutral-500' : 'fa-folder text-neutral-400'}`} />
                                                     <span className="truncate">{r.name}</span>
                                                 </li>
                                             );
@@ -231,16 +280,27 @@ export default function RepositoriesPage() {
                                 </aside>
 
                                 {/* 메인 컨텐츠 */}
-                                <div className="relative border border-gray-300 rounded-md bg-white pt-7 h-[calc(100vh-220px)] overflow-hidden">
+                                <div className="relative border border-gray-300 rounded-r-lg bg-white pt-7 h-[calc(100vh-220px)] overflow-hidden">
                                     <GhostBar repositories={repositories} />
-                                    <RepoContent
-                                        key={`detail-${selectedRepo.id}`}
-                                        repo={selectedRepo}
-                                        repositories={repositories}
-                                        onChangeRepo={setSelectedRepoId}
-                                        onClose={onClose}
-                                        useExternalSidebar={true}
-                                    />
+
+                                    {tab === 'index' && (
+                                        <IndexPanel repo={selectedRepo} />
+                                    )}
+
+                                    {tab === 'info' && (
+                                        <RepoContent
+                                            key={`detail-${selectedRepo.id}`}
+                                            repo={selectedRepo}
+                                            repositories={repositories}
+                                            onChangeRepo={setSelectedRepoId}
+                                            onClose={onClose}
+                                            useExternalSidebar={true}
+                                        />
+                                    )}
+
+                                    {tab === 'posts' && (
+                                        <PostsPanel repo={selectedRepo} />
+                                    )}
                                 </div>
                             </div>
                         </div>
