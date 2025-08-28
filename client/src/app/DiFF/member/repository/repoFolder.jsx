@@ -173,8 +173,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                         </button>
 
                         <h2 className="text-2xl font-bold m-2 pb-4">Add Repository</h2>
-
-                        <div className="flex justify-around text-xl font-bold mb-4">
+                        <div className="flex justify-around text-lg text-gray-600 font-bold my-4">
                             <div>Create directly here</div>
                             <div>Import from GitHub</div>
                         </div>
@@ -190,7 +189,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                                         className="w-full border rounded-lg px-3 py-2"
                                     />
                                 </div>
-                                <div className="my-4">
+                                <div className="my-2">
                                     <label className="block font-medium mb-1 px-2">Visibility *</label>
                                     <div className="relative">
                                         {/* 토글 버튼 */}
