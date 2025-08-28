@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { fetchUser } from "@/lib/UserAPI";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { LayoutGroup, AnimatePresence } from "framer-motion";
-import { createRepository } from "@/lib/ArticleAPI";
+import {createRepository, repositoryArticles} from "@/lib/ArticleAPI";
 
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
@@ -13,53 +13,110 @@ import GhostBar from './sideBar';
 // ---------------------------------------------
 // Helper Components
 // ---------------------------------------------
-function IndexPanel({ repo }) {
-    return (
-        <div className="relative border border-gray-300 rounded-r-lg bg-white pt-7 h-[calc(100vh-220px)] overflow-auto px-6">
-            <div className="max-w-3xl mx-auto">
-                <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
-                    <i className="fa-solid fa-magnifying-glass" /> 인덱스 정보
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="p-4 rounded-xl border bg-gray-50">
-                        <div className="text-xs text-gray-500 uppercase">Repository</div>
-                        <div className="font-medium">{repo?.name || '—'}</div>
-                    </div>
-                    <div className="p-4 rounded-xl border bg-gray-50">
-                        <div className="text-xs text-gray-500 uppercase">Default Branch</div>
-                        <div className="font-medium">{repo?.defaultBranch || '—'}</div>
-                    </div>
-                    <div className="p-4 rounded-xl border bg-gray-50 sm:col-span-2">
-                        <div className="text-xs text-gray-500 uppercase">URL</div>
-                        {repo?.url ? (
-                            <a className="font-medium text-blue-600 hover:underline" href={repo.url} target="_blank" rel="noopener noreferrer">{repo.url}</a>
-                        ) : (
-                            <div className="font-medium text-gray-400">없음</div>
-                        )}
-                    </div>
-                    <div className="p-4 rounded-xl border bg-gray-50">
-                        <div className="text-xs text-gray-500 uppercase">Visibility</div>
-                        <div className="font-medium">{repo?.aprivate ? 'Private' : 'Public'}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
+// function IndexPanel({ repo }) {
+//     return (
+//         <div className="relative border border-gray-300 rounded-r-lg bg-white pt-7 h-[calc(100vh-220px)] overflow-auto px-6">
+//             <div className="max-w-3xl mx-auto">
+//                 <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+//                     <i className="fa-solid fa-magnifying-glass" /> 인덱스 정보
+//                 </h3>
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+//                     <div className="p-4 rounded-xl border bg-gray-50">
+//                         <div className="text-xs text-gray-500 uppercase">Repository</div>
+//                         <div className="font-medium">{repo?.name || '—'}</div>
+//                     </div>
+//                     <div className="p-4 rounded-xl border bg-gray-50">
+//                         <div className="text-xs text-gray-500 uppercase">Default Branch</div>
+//                         <div className="font-medium">{repo?.defaultBranch || '—'}</div>
+//                     </div>
+//                     <div className="p-4 rounded-xl border bg-gray-50 sm:col-span-2">
+//                         <div className="text-xs text-gray-500 uppercase">URL</div>
+//                         {repo?.url ? (
+//                             <a className="font-medium text-blue-600 hover:underline" href={repo.url} target="_blank" rel="noopener noreferrer">{repo.url}</a>
+//                         ) : (
+//                             <div className="font-medium text-gray-400">없음</div>
+//                         )}
+//                     </div>
+//                     <div className="p-4 rounded-xl border bg-gray-50">
+//                         <div className="text-xs text-gray-500 uppercase">Visibility</div>
+//                         <div className="font-medium">{repo?.aprivate ? 'Private' : 'Public'}</div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
 
-function PostsPanel({ repo }) {
+function PostsPanel({ repositoryId }) {
+    const [articles, setArticles] = useState([]);
+    const [loading, setLoading]   = useState(false);
+    const [error, setError]       = useState("");
+
+    useEffect(() => {
+        let ignore = false;
+
+        if (!repositoryId) {
+            setArticles([]);
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+
+        (async () => {
+            try {
+                const res = await repositoryArticles({ repositoryId });
+                if (res?.resultCode?.startsWith("S-")) {
+                    if (!ignore) setArticles(Array.isArray(res.data) ? res.data : []);
+                } else {
+                    if (!ignore) {
+                        setArticles([]);
+                    }
+                }
+            } catch (e) {
+                if (!ignore) {
+                    setError(e?.response?.data?.msg || e?.message || "요청 실패");
+                }
+            } finally {
+                if (!ignore) setLoading(false);
+            }
+        })();
+
+        return () => { ignore = true; };
+    }, [repositoryId]);
+
     return (
-        <div className="relative border border-gray-300 rounded-r-lg bg-white pt-7 h-[calc(100vh-220px)] overflow-auto px-6">
-            <div className="max-w-3xl mx-auto">
-                <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+        <div className="w-full h-full">
+            <div className="w-[90%] mx-auto">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <i className="fa-regular fa-newspaper" /> 게시물
                 </h3>
-                <p className="text-sm text-gray-500 mb-6">이 영역은 선택한 레포지토리의 게시물을 렌더링합니다. 필요한 컴포넌트나 마크업을 자유롭게 채워 넣으세요.</p>
-                <div className="rounded-xl border border-dashed p-6 text-gray-500">
-                    <div className="text-xs uppercase tracking-wide mb-2">Current Repository</div>
-                    <div className="font-medium">{repo?.name}</div>
-                    <div className="text-sm text-gray-400 truncate">{repo?.url || 'url 없음'}</div>
-                </div>
+
+                {loading && <p className="text-sm text-gray-500">불러오는 중…</p>}
+                {error && <p className="text-sm text-red-500">에러: {error}</p>}
+
+                {!loading && !error && (
+                    articles.length === 0 ? (
+                        <p className="text-sm text-gray-500">아직 게시물이 없어요.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {articles.map((article, idx) => (
+                                <div
+                                    key={article.id ?? article.slug ?? `${idx}-${article.title}`}
+                                    className="rounded-xl border border-dashed p-6 text-gray-500"
+                                >
+                                    <div className="text-xs uppercase tracking-wide mb-2">
+                                        Current Repository
+                                    </div>
+                                    <div className="font-medium">{article.title}</div>
+                                    <div className="text-sm text-gray-400 truncate">
+                                        {article.body}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )
+                )}
             </div>
         </div>
     );
@@ -112,7 +169,7 @@ export default function RepositoriesPage() {
     const [open, setOpen] = useState(false);
     const [name, setRepoName] = useState("");
 
-    // ✅ 최초 1회만 사용자 레포 불러오기
+    // 최초 1회만 사용자 레포 불러오기
     useEffect(() => {
         const accessToken = getAccessToken();
         if (!accessToken) {
@@ -129,7 +186,7 @@ export default function RepositoriesPage() {
                 setLoading(false);
                 router.replace('/DiFF/home/main');
             });
-    }, []); // ← 빈 배열 → 최초 mount시에만 실행
+    }, []);
 
     const fetchRepos = useCallback(async () => {
         const at = getAccessToken();
@@ -242,25 +299,34 @@ export default function RepositoriesPage() {
                     ) : (
                         <div className="relative">
                             {/* 탭 */}
-                            <div className="absolute -top-8 left-[260px] z-0 flex">
+                            <div className="absolute -top-9 left-[230px] flex">
                                 {[
-                                    { key: 'index', label: '인덱스' },
-                                    { key: 'info', label: '정보' },
-                                    { key: 'posts', label: '게시물' },
+                                    // { key: 'index', label: '인덱스' },
+                                    { key: 'info', label: 'Info' },
+                                    { key: 'posts', label: 'Posts' },
                                 ].map((t) => (
                                     <button
                                         key={t.key}
                                         onClick={() => setTab(t.key)}
-                                        className={`px-4 py-2 text-sm border rounded-t-xl shadow-sm transition ${tab === t.key ? 'bg-white text-gray-900 -mb-px' : 'bg-gray-100  text-gray-500 hover:bg-gray-100'}`}
+                                        className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition
+                                        ${tab === t.key ? 'bg-white text-gray-900 -mb-px z-50' : 
+                                            'bg-gray-100  text-gray-500 hover:bg-gray-100'}`}
                                     >
                                         {t.label}
                                     </button>
                                 ))}
                             </div>
 
-                            <div className="grid grid-cols-[260px_1fr] items-start">
+                            {onClose && (
+                            <div className="absolute right-3 top-3 z-50 text-xl font-bold"
+                            onClick={onClose}>
+                                <i className="fa-solid fa-xmark"></i>
+                            </div>
+                            )}
+
+                            <div className="grid grid-cols-[230px_1fr] items-start">
                                 {/* 왼쪽 사이드바 */}
-                                <aside className="min-h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border bg-gray-50">
+                                <aside className="min-h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-50">
                                     <ul className="p-4 space-y-2">
                                         {repositories.map((r) => {
                                             const sel = r.id === selectedRepoId;
@@ -280,12 +346,12 @@ export default function RepositoriesPage() {
                                 </aside>
 
                                 {/* 메인 컨텐츠 */}
-                                <div className="relative border border-gray-300 rounded-r-lg bg-white pt-7 h-[calc(100vh-220px)] overflow-hidden">
+                                <div className="relative border border-gray-300 rounded-r-lg bg-white pt-8 h-[calc(100vh-220px)] overflow-hidden">
                                     <GhostBar repositories={repositories} />
 
-                                    {tab === 'index' && (
-                                        <IndexPanel repo={selectedRepo} />
-                                    )}
+                                    {/*{tab === 'index' && (*/}
+                                    {/*    <IndexPanel repo={selectedRepo} />*/}
+                                    {/*)}*/}
 
                                     {tab === 'info' && (
                                         <RepoContent
@@ -299,7 +365,7 @@ export default function RepositoriesPage() {
                                     )}
 
                                     {tab === 'posts' && (
-                                        <PostsPanel repo={selectedRepo} />
+                                        <PostsPanel repositoryId={selectedRepo.id} />
                                     )}
                                 </div>
                             </div>
@@ -337,7 +403,7 @@ export default function RepositoriesPage() {
                         </button>
                     </div>
 
-                    {/* ✅ 모달 */}
+                    {/* 모달 */}
                     {open && (
                         <div
                             className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
