@@ -173,7 +173,6 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                         </button>
 
                         <h2 className="text-2xl font-bold m-2 pb-4">Add Repository</h2>
-
                         <div className="flex justify-around text-lg text-gray-600 font-bold my-4">
                             <div>Create directly here</div>
                             <div>Import from GitHub</div>
