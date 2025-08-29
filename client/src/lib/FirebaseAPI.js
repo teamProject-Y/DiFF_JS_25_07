@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// 🚨 SSR 방지
+// 🚨 SSR 방지: 서버사이드에서는 실행 안 함
 export async function requestFCMToken() {
     if (typeof window === "undefined") return null;
 
@@ -22,8 +22,7 @@ export async function requestFCMToken() {
         const messaging = getMessaging(app);
 
         const token = await getToken(messaging, {
-            vapidKey:
-                "BLQ2UAfCF3FZRkouiNSd2na7cpbc24Tov1NZjf5UIALy6SbmkkewZ5QpShHtaXmGe2FjiA4Ouq-H1Umsq2L10_8",
+            vapidKey: "BLQ2UAfCF3FZRkouiNSd2na7cpbc24Tov1NZjf5UIALy6SbmkkewZ5QpShHtaXmGe2FjiA4Ouq-H1Umsq2L10_8",
         });
 
         console.log("✅ FCM Token:", token);
@@ -34,7 +33,7 @@ export async function requestFCMToken() {
     }
 }
 
-// ✅ 포그라운드 알림 수신
+// ✅ 포그라운드 알림 수신 (브라우저 열려있을 때)
 export async function initOnMessageListener() {
     if (typeof window === "undefined") return;
 
@@ -46,7 +45,7 @@ export async function initOnMessageListener() {
             console.log("📩 포그라운드 알림 수신됨:", payload);
 
             try {
-                // ✅ data 우선 → fallback 으로 notification
+                // data 우선 → fallback 으로 notification
                 const title = payload.data?.title || payload.notification?.title || "알림";
                 const body  = payload.data?.body  || payload.notification?.body  || "내용 없음";
 
@@ -56,8 +55,36 @@ export async function initOnMessageListener() {
                 console.warn("❌ 알림 띄우기 실패:", e.message);
             }
         });
-
     } catch (err) {
         console.error("❌ onMessage 등록 실패:", err);
+    }
+}
+
+// ✅ FCM 토큰 서버 저장
+export async function saveFcmTokenToServer() {
+    console.log("🚀 saveFcmTokenToServer 실행됨");
+    const token = await requestFCMToken();
+    if (!token) {
+        console.warn("❌ FCM 토큰 발급 실패");
+        return;
+    }
+
+    localStorage.setItem("fcmToken", token);
+
+    const accessToken = localStorage.getItem("accessToken"); // JWT
+
+    const res = await fetch("http://localhost:8080/api/DiFF/member/saveFcmToken", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ fcmToken: token }),
+    });
+
+    if (res.ok) {
+        console.log("✅ 서버에 FCM 토큰 저장 성공");
+    } else {
+        console.error("❌ 서버 저장 실패:", await res.text());
     }
 }
