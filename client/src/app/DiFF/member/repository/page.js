@@ -1,10 +1,11 @@
 'use client';
 
-import {useRouter} from 'next/navigation';
-import {fetchUser} from "@/lib/UserAPI";
-import {useEffect, useMemo, useState, useCallback} from "react";
-import {LayoutGroup, AnimatePresence} from "framer-motion";
-import {createRepository, repositoryArticles} from "@/lib/ArticleAPI";
+import { useRouter } from 'next/navigation';
+import { fetchUser } from "@/lib/UserAPI";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { LayoutGroup, AnimatePresence } from "framer-motion";
+import { repositoryArticles } from "@/lib/ArticleAPI";
+import { createRepository, importGithubRepo } from "@/lib/RepositoryAPI"
 
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
@@ -251,6 +252,31 @@ export default function RepositoriesPage() {
         }
     };
 
+    const handleImportRepo = async (ghRepo) => {
+        try {
+            const res = await importGithubRepo(ghRepo); // { resultCode, msg, data: newRepoId }
+            if (res?.resultCode?.startsWith('S-')) {
+                const newRepo = {
+                    id: res.data, // 서버가 내려주는 새 레포 ID
+                    name: ghRepo?.name || ghRepo?.full_name || '',
+                    url: ghRepo?.html_url || ghRepo?.url || '',
+                    defaultBranch: ghRepo?.default_branch || '',
+                    aprivate: !!ghRepo?.private,
+                };
+
+                setRepositories((prev) => {
+                    if (prev.some((p) => p.id === newRepo.id || p.name === newRepo.name)) return prev;
+                    return [...prev, newRepo];
+                });
+
+                return { ok: true };
+            }
+            return { ok: false, msg: res?.msg || '가져오기 실패' };
+        } catch (e) {
+            return { ok: false, msg: e?.response?.data?.msg || e?.message || '가져오기 실패' };
+        }
+    };
+
     if (loading) return <div className="text-center">로딩...</div>;
 
     return (
@@ -279,8 +305,9 @@ export default function RepositoriesPage() {
                                     key="grid"
                                     repositories={repositories}
                                     onSelect={setSelectedRepoId}
-                                    onFetchRepos={fetchRepos}
+                                    // onFetchRepos={fetchRepos}
                                     onCreateRepo={handleCreate}
+                                    onImportRepo={handleImportRepo}
                                 />
                             </AnimatePresence>
                         </div>
@@ -314,7 +341,7 @@ export default function RepositoriesPage() {
                             <div className="grid grid-cols-[230px_1fr] items-start">
                                 {/* 왼쪽 사이드바 */}
                                 <aside
-                                    className="min-h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-50">
+                                    className="h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-50">
                                     <ul className="p-4 space-y-2">
                                         {repositories.map((r) => {
                                             const sel = r.id === selectedRepoId;

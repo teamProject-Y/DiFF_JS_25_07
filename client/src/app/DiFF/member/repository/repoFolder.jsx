@@ -17,12 +17,6 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
         return () => window.removeEventListener('keydown', onKey);
     }, [openChoice, closeModal]);
 
-    const handleImport = useCallback(() => {
-        closeModal();
-        onFetchRepos?.();
-    }, [closeModal, onFetchRepos]);
-
-
     return (
         <motion.div
             key="grid"
@@ -188,7 +182,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
         setGhErr('');
         setSubmitting(true);
         try {
-            const res = await onImport?.(repo); // 부모가 실제 import 처리
+            const res = await onImport?.(repo); // 부모가 importGithubRepo 호출
             if (res?.ok) {
                 onClose();
                 setGhSelectedId(null);

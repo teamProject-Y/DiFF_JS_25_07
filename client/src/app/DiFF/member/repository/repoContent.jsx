@@ -105,20 +105,10 @@ export default function RepoContent({
             exit="hidden"
             className={`absolute inset-0 grid ${gridCols} gap-8 p-8 bg-white`}
         >
-            {/*<div className="absolute top-3 right-3">*/}
-            {/*    {onClose && (*/}
-            {/*        <button*/}
-            {/*            onClick={onClose}*/}
-            {/*            className="px-3 py-1.5 text-sm rounded-lg bg-neutral-900 text-white hover:bg-neutral-800"*/}
-            {/*        >*/}
-            {/*            <i className="fa-solid fa-xmark"></i>*/}
-            {/*        </button>*/}
-            {/*    )}*/}
-            {/*</div>*/}
 
             {/* 왼쪽 내부 레일(옵션) */}
             {!useExternalSidebar && (
-                <aside className="border-r bg-gray-50 p-4 overflow-y-auto">
+                <aside className="border-r bg-gray-50 p-4 overflow-y-scroll">
                     {onClose && (
                         <button
                             onClick={onClose}
