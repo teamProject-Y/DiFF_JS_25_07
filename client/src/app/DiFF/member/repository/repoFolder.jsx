@@ -2,7 +2,6 @@
 
 import {useState, useCallback, useEffect, useRef} from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
-import {createRepository} from "@/lib/ArticleAPI";
 
 export default function RepoFolder({repositories, onSelect, onFetchRepos, onCreateRepo}) {
     const [openChoice, setOpenChoice] = useState(false);
@@ -22,39 +21,6 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
         onFetchRepos?.();
     }, [closeModal, onFetchRepos]);
 
-    const handleCreate = async () => {
-        if (!name.trim()) {
-            setError("레포지토리 이름을 입력하세요.");
-            return;
-        }
-        setLoading(true);
-        setError("");
-
-        try {
-            const res = await createRepository({name});
-            if (res?.resultCode?.startsWith("S-")) {
-                alert(res.msg);
-                setOpen(false);
-                setRepoName("");
-
-                // 새 레포 직접 state에 추가
-                const newRepo = {
-                    id: res.data, // 서버에서 newRepoId 내려줌
-                    name,
-                    url: "",
-                    defaultBranch: "",
-                    aprivate: false,
-                };
-                setRepositories((prev) => [...prev, newRepo]);
-            } else {
-                setError(res?.msg || "생성 실패");
-            }
-        } catch (err) {
-            setError(err?.response?.data?.msg || "요청 실패");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <motion.div
@@ -102,19 +68,19 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
                 open={openChoice}
                 onClose={closeModal}
                 onImport={handleImport}
-                onCreate={handleCreate}
+                onCreate={onCreateRepo}
             />
         </motion.div>
     );
 }
 
 function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
-    // 폼 상태
     const [name, setName] = useState('');
     const [desc, setDesc] = useState('');
     const [visOpen, setVisOpen] = useState(false);
-    const [visibility, setVisibility] = useState('Public'); // 'Public' | 'Private'
+    const [visibility, setVisibility] = useState('Public');
     const [err, setErr] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     // 외부 클릭 감지용 ref
     const visBtnRef = useRef(null);
@@ -131,14 +97,33 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
         return () => document.removeEventListener('mousedown', handleDown);
     }, [visOpen]);
 
-    const submitCreate = (e) => {
+    const submitCreate = async (e) => {
         e?.preventDefault();
         if (!name.trim()) {
-            setErr('레포지토리 이름을 입력하세요.');
+            setErr('리포지토리 이름을 입력하세요.');
             return;
         }
         setErr('');
-        onCreate?.({name: name.trim(), description: desc.trim(), visibility});
+        setSubmitting(true);
+        try {
+            const res = await onCreate?.({
+                name: name.trim(),
+                description: desc.trim(),
+                visibility,
+            });
+            if (res?.ok) {
+                onClose();
+                setName('');
+                setDesc('');
+                setVisibility('Public');
+            } else {
+                setErr(res?.msg || '생성 실패');
+            }
+        } catch (e) {
+            setErr(e?.message || '요청 실패');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (

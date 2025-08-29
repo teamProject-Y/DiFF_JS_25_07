@@ -203,34 +203,49 @@ export default function RepositoriesPage() {
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
 
-    const handleCreate = async () => {
-        if (!name.trim()) {
-            setError("레포지토리 이름을 입력하세요.");
-            return;
+    const handleCreate = async ({ name, description, visibility }) => {
+        const repoName = (name ?? '').trim();
+        const aPrivate = visibility === 'Private';
+
+        if (!repoName) {
+            setError('레포지토리 이름을 입력하세요.');
+            return { ok: false, msg: '레포지토리 이름을 입력하세요.' };
         }
+
         setLoading(true);
-        setError("");
+        setError('');
 
         try {
-            const res = await createRepository({name});
-            if (res?.resultCode?.startsWith("S-")) {
-                alert(res.msg);
-                setOpen(false);
-                setRepoName("");
+            const payload = {
+                name: repoName,
+                description: (description ?? '').trim(),
+                aPrivate: aPrivate,
+                aprivate: aPrivate,
+            };
 
+            console.log('[createRepository] payload =', payload);
+
+            const res = await createRepository(payload);
+
+            if (res?.resultCode?.startsWith('S-')) {
                 const newRepo = {
                     id: res.data,
-                    name,
-                    url: "",
-                    defaultBranch: "",
-                    aprivate: false,
+                    name: repoName,
+                    url: '',
+                    defaultBranch: '',
+                    aprivate: aPrivate,
                 };
                 setRepositories((prev) => [...prev, newRepo]);
+                return { ok: true };
             } else {
-                setError(res?.msg || "생성 실패");
+                const msg = res?.msg || '생성 실패';
+                setError(msg);
+                return { ok: false, msg };
             }
         } catch (err) {
-            setError(err?.response?.data?.msg || "요청 실패");
+            const msg = err?.response?.data?.msg || '요청 실패';
+            setError(msg);
+            return { ok: false, msg };
         } finally {
             setLoading(false);
         }
@@ -263,7 +278,10 @@ export default function RepositoriesPage() {
                                 <RepoFolder
                                     key="grid"
                                     repositories={repositories}
-                                    onSelect={setSelectedRepoId}/>
+                                    onSelect={setSelectedRepoId}
+                                    onFetchRepos={fetchRepos}
+                                    onCreateRepo={handleCreate}
+                                />
                             </AnimatePresence>
                         </div>
                     ) : (
@@ -360,13 +378,6 @@ export default function RepositoriesPage() {
                             className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
                         >
                             글 작성하기
-                        </button>
-
-                        <button
-                            onClick={() => setOpen(true)}
-                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                        >
-                            레포지토리 생성
                         </button>
                     </div>
 
