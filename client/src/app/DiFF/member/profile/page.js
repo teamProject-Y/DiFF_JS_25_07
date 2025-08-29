@@ -268,6 +268,7 @@ function ProfileInner() {
                             </div>
 
                             {/* 팔로잉/팔로워 */}
+                            {/* 팔로잉/팔로워 */}
                             <div className="mt-4 flex items-center gap-4 text-sm self-center">
                                 <button
                                     onClick={() => setOpenModal('following')}
@@ -282,6 +283,40 @@ function ProfileInner() {
                                     <span className="opacity-70">follower :</span> {followerCount}
                                 </button>
                             </div>
+
+                            {/* ✅ 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
+                            {!isMyProfile && (
+                                <div className="mt-4 flex justify-center">
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                if (member.isFollowing) {
+                                                    console.log("👉 언팔로우 요청:", member.id);
+                                                    await unfollowMember(member.id);
+                                                    setMember(prev => ({ ...prev, isFollowing: false }));
+                                                    setFollowingCount(prev => Math.max(0, prev - 1)); // 카운트 감소
+                                                } else {
+                                                    console.log("👉 팔로우 요청:", member.id);
+                                                    await followMember(member.id);
+                                                    setMember(prev => ({ ...prev, isFollowing: true }));
+                                                    setFollowingCount(prev => prev + 1); // 카운트 증가
+                                                }
+                                            } catch (err) {
+                                                console.error("❌ 팔로우/언팔로우 실패:", err);
+                                                alert("처리 실패");
+                                            }
+                                        }}
+                                        className={`px-6 py-2 text-sm rounded text-white ${
+                                            member.isFollowing
+                                                ? "bg-red-600 hover:bg-red-500"
+                                                : "bg-green-600 hover:bg-green-500"
+                                        }`}
+                                    >
+                                        {member.isFollowing ? "언팔로우" : "팔로우"}
+                                    </button>
+                                </div>
+                            )}
+
 
                             {/* 본인 프로필일 때만 표시 */}
                             {isMyProfile && (
