@@ -1,9 +1,10 @@
 'use client';
 
-import {useState, useCallback, useEffect, useRef} from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
+import { getGithubRepos } from '@/lib/repositoryAPI';
 
-export default function RepoFolder({repositories, onSelect, onFetchRepos, onCreateRepo}) {
+export default function RepoFolder({repositories, onSelect, onFetchRepos, onCreateRepo, onImportRepo}) {
     const [openChoice, setOpenChoice] = useState(false);
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
@@ -28,7 +29,7 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
             initial={{opacity: 0}}
             animate={{opacity: 1}}
             exit={{opacity: 0}}
-            className="w-full p-8 grid gap-8 grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] auto-rows-auto content-start"
+            className="w-full h-[520px] overflow-y-auto p-8 grid gap-8 grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] auto-rows-auto content-start"
         >
             <motion.div
                 key="repo-plus"
@@ -67,8 +68,8 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
             <AddRepoChoiceModal
                 open={openChoice}
                 onClose={closeModal}
-                onImport={handleImport}
                 onCreate={onCreateRepo}
+                onImport={onImportRepo}
             />
         </motion.div>
     );
@@ -81,10 +82,21 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
     const [visibility, setVisibility] = useState('Public');
     const [err, setErr] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [touchedName, setTouchedName] = useState(false);
 
-    // 외부 클릭 감지용 ref
+    // 외부 클릭 감지용
     const visBtnRef = useRef(null);
     const visMenuRef = useRef(null);
+
+    // input 검증용
+    const nameInvalid = touchedName && !name.trim();
+
+    // github repo용
+    const [ghList, setGhList] = useState([]);
+    const [ghLoading, setGhLoading] = useState(false);
+    const [ghErr, setGhErr] = useState('');
+    const [ghQuery, setGhQuery] = useState('');
+    const [ghSelectedId, setGhSelectedId] = useState(null);
 
     useEffect(() => {
         if (!visOpen) return;
@@ -97,10 +109,50 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
         return () => document.removeEventListener('mousedown', handleDown);
     }, [visOpen]);
 
+    const getAccessToken = () =>
+        (typeof window !== 'undefined' &&
+            (localStorage.getItem('accessToken') || localStorage.getItem('access_token'))) || '';
+
+    // 모달 열릴 때 깃허브 리포 불러오기
+    useEffect(() => {
+        if (!open) return;
+        setGhErr('');
+        setGhLoading(true);
+        (async () => {
+            try {
+                const json = await getGithubRepos();
+                if (json?.resultCode && String(json.resultCode).startsWith('F')) {
+                    throw new Error(json?.msg || '깃허브 리포 불러오기 실패');
+                }
+                const list = Array.isArray(json?.data)
+                    ? json.data
+                    : Array.isArray(json?.data1)
+                        ? json.data1
+                        : [];
+                setGhList(list);
+            } catch (e) {
+                setGhErr(e?.message || '요청 실패');
+            } finally {
+                setGhLoading(false);
+            }
+        })();
+    }, [open]);
+
+    const filteredGh = useMemo(() => {
+        const q = ghQuery.trim().toLowerCase();
+        if (!q) return ghList;
+        return ghList.filter((r) => {
+            const n = (r?.name || r?.full_name || '').toLowerCase();
+            return n.includes(q);
+        });
+    }, [ghList, ghQuery]);
+
     const submitCreate = async (e) => {
+
         e?.preventDefault();
+        setTouchedName(true);
+
         if (!name.trim()) {
-            setErr('리포지토리 이름을 입력하세요.');
             return;
         }
         setErr('');
@@ -116,6 +168,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                 setName('');
                 setDesc('');
                 setVisibility('Public');
+                setTouchedName(false);
             } else {
                 setErr(res?.msg || '생성 실패');
             }
@@ -125,6 +178,34 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
             setSubmitting(false);
         }
     };
+
+    const submitImportRepo = async () => {
+        const repo = filteredGh.find((r) => String(r?.id ?? r?.full_name ?? r?.name) === String(ghSelectedId));
+        if (!repo) {
+            setGhErr('가져올 리포지토리를 선택하세요.');
+            return;
+        }
+        setGhErr('');
+        setSubmitting(true);
+        try {
+            const res = await onImport?.(repo); // 부모가 실제 import 처리
+            if (res?.ok) {
+                onClose();
+                setGhSelectedId(null);
+                setGhQuery('');
+            } else {
+                setGhErr(res?.msg || '가져오기 실패');
+            }
+        } catch (e) {
+            setGhErr(e?.message || '요청 실패');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    useEffect(() => {
+        if (touchedName && name.trim()) setErr('');
+    }, [name, touchedName]);
 
     return (
         <AnimatePresence>
@@ -159,23 +240,40 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
 
                         <h2 className="text-2xl font-bold m-2 pb-4">Add Repository</h2>
 
-                        <div className="flex justify-around text-lg text-gray-600 font-bold my-4">
-                            <div>Create directly here</div>
-                            <div>Import from GitHub</div>
-                        </div>
+                        {/*<div className="flex justify-around text-lg text-gray-600 font-bold my-4">*/}
+                        {/*    <div>Create directly here</div>*/}
+                        {/*    <div>Import from GitHub</div>*/}
+                        {/*</div>*/}
                         <div className="flex-1 min-h-0 flex gap-4">
-                            <form onSubmit={submitCreate} className="w-1/2 border-r pr-4 mb-4 flex flex-col">
-                                <div className="my-2">
+                            <form onSubmit={submitCreate} className="w-[45%] rounded-lg border p-4 flex flex-col mr-2">
+                                <p className="text-lg font-bold mb-3">Create directly here</p>
+                                <div className="mt-3">
                                     <label className="block font-medium mb-1 px-2">Repository Name *</label>
                                     <input
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
+                                        onBlur={() => setTouchedName(true)}
                                         placeholder=" "
-                                        className="w-full border rounded-lg px-3 py-2"
+                                        aria-invalid={nameInvalid}
+                                        aria-describedby={nameInvalid ? 'name-error' : undefined}
+                                        className={`w-full rounded-lg px-3 py-2 border
+                                            ${nameInvalid
+                                            ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-400'
+                                            : ''
+                                        }`}
                                     />
+
+                                        <p id="name-error" className={`mt-1 text-xs pl-3
+                                        ${nameInvalid
+                                            ? 'text-red-500'
+                                            : 'text-white'
+                                        }`}>
+                                            리포지토리 이름을 입력하세요.
+                                        </p>
+
                                 </div>
-                                <div className="my-2">
+                                <div className="mt-2 mb-5">
                                     <label className="block font-medium mb-1 px-2">Visibility *</label>
                                     <div className="relative">
                                         {/* 토글 버튼 */}
@@ -241,7 +339,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                                         value={desc}
                                         onChange={(e) => setDesc(e.target.value)}
                                         placeholder=" "
-                                        rows={4}
+                                        rows={3}
                                         className="w-full border rounded-lg px-3 py-2 resize-none"
                                     />
                                 </div>
@@ -260,12 +358,73 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                             </form>
 
                             {/* 오른쪽: 깃허브에서 가져오기 */}
-                            <div className="w-1/2 pl-4 py-3">
-                                <div className="rounded-lg border p-4">
-                                    <h3 className="font-semibold mb-2">Import from GitHub</h3>
-                                    <p className="text-sm text-neutral-600">
-                                        깃허브 계정의 리포지토리를 불러와 연결합니다.
-                                    </p>
+                            <div className="w-[55%]">
+                                <div className="rounded-lg border p-4 flex flex-col h-full">
+                                    <p className="text-lg font-bold mb-3">Import from GitHub</p>
+
+                                    <input
+                                        type="text"
+                                        value={ghQuery}
+                                        onChange={(e) => setGhQuery(e.target.value)}
+                                        placeholder="Search repositories…"
+                                        className="w-full border rounded-lg px-3 py-2 mb-3"
+                                    />
+
+                                    <div
+                                        className="flex-1 min-h-0 border rounded-lg overflow-y-auto p-2"
+                                        style={{ scrollbarGutter: 'stable', maxHeight: 360 }}
+                                    >
+                                        {ghLoading && <p className="text-sm text-neutral-500 px-1 py-2">불러오는 중…</p>}
+                                        {ghErr && <p className="text-sm text-red-500 px-1 py-2">{ghErr}</p>}
+                                        {!ghLoading && !ghErr && filteredGh.length === 0 && (
+                                            <p className="text-sm text-neutral-500 px-1 py-2">검색 결과가 없습니다.</p>
+                                        )}
+
+                                        <ul className="space-y-1">
+                                            {filteredGh.map((r) => {
+                                                const id = String(r?.id ?? r?.full_name ?? r?.name);
+                                                const selected = String(ghSelectedId) === id;
+                                                const name = r?.full_name || r?.name || '(no-name)';
+                                                const isPrivate = !!r?.private;
+                                                return (
+                                                    <li
+                                                        key={id}
+                                                        onClick={() => setGhSelectedId(id)}
+                                                        className={`flex items-center justify-between gap-3 cursor-pointer rounded-md px-3 py-2 ${
+                                                            selected ? 'bg-gray-100 border border-gray-300' : 'hover:bg-gray-50 border border-transparent'
+                                                        }`}
+                                                        title={name}
+                                                    >
+                                                        <div className="flex items-center gap-2 min-w-0">
+                              <span
+                                  className={`inline-block w-3 h-3 rounded-full border ${
+                                      selected ? 'bg-gray-800 border-gray-800' : 'bg-white border-gray-400'
+                                  }`}
+                                  aria-hidden
+                              />
+                                                            <span className="truncate">{name}</span>
+                                                        </div>
+                                                        <span
+                                                            className={`text-xs px-2 py-0.5 rounded ${
+                                                                isPrivate ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
+                                                            }`}
+                                                        >
+                              {isPrivate ? 'Private' : 'Public'}
+                            </span>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={submitImportRepo}
+                                        disabled={submitting || !ghSelectedId}
+                                        className="mt-3 w-full px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60"
+                                    >
+                                        {submitting ? 'Importing…' : 'Import Selected'}
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -256,7 +256,7 @@ export default function RepositoriesPage() {
     return (
         <LayoutGroup>
             <section className="px-4">
-                <div className="mx-auto max-w-6xl">
+                <div className="mx-auto max-w-6xl h-full">
                     <h2 className="text-2xl font-bold mb-4 mx-4 flex items-center gap-3">
                         My Repository
                         <button
@@ -273,7 +273,7 @@ export default function RepositoriesPage() {
                     {/* 레포 미선택 */}
                     {!selectedRepo ? (
                         <div
-                            className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px] bg-white">
+                            className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden  bg-white">
                             <AnimatePresence>
                                 <RepoFolder
                                     key="grid"
@@ -419,22 +419,22 @@ export default function RepositoriesPage() {
                         </div>
                     )}
 
-                    <div className="text-center mt-6">
-                        <button
-                            onClick={() => router.replace('/DiFF/home/main')}
-                            className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
-                        >
-                            메인으로 가기
-                        </button>
-                    </div>
-                    <div className="text-center mb-6">
-                        <button
-                            onClick={() => router.push('/DiFF/article/drafts')}
-                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                        >
-                            임시저장
-                        </button>
-                    </div>
+                    {/*<div className="text-center mt-6">*/}
+                    {/*    <button*/}
+                    {/*        onClick={() => router.replace('/DiFF/home/main')}*/}
+                    {/*        className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"*/}
+                    {/*    >*/}
+                    {/*        메인으로 가기*/}
+                    {/*    </button>*/}
+                    {/*</div>*/}
+                    {/*<div className="text-center mb-6">*/}
+                    {/*    <button*/}
+                    {/*        onClick={() => router.push('/DiFF/article/drafts')}*/}
+                    {/*        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"*/}
+                    {/*    >*/}
+                    {/*        임시저장*/}
+                    {/*    </button>*/}
+                    {/*</div>*/}
                 </div>
             </section>
         </LayoutGroup>
