@@ -174,7 +174,8 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
     };
 
     const submitImportRepo = async () => {
-        const repo = filteredGh.find((r) => String(r?.id ?? r?.full_name ?? r?.name) === String(ghSelectedId));
+        const repo = filteredGh.find(r => String(r.id) === String(ghSelectedId));
+
         if (!repo) {
             setGhErr('가져올 리포지토리를 선택하세요.');
             return;
@@ -354,61 +355,64 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                             {/* 오른쪽: 깃허브에서 가져오기 */}
                             <div className="w-[55%]">
                                 <div className="rounded-lg border p-4 flex flex-col h-full">
-                                    <p className="text-lg font-bold mb-3">Import from GitHub</p>
+                                    <p className="text-lg font-bold mb-6">Import from GitHub</p>
 
                                     <input
                                         type="text"
                                         value={ghQuery}
                                         onChange={(e) => setGhQuery(e.target.value)}
-                                        placeholder="Search repositories…"
+                                        placeholder="Search repository"
                                         className="w-full border rounded-lg px-3 py-2 mb-3"
                                     />
 
                                     <div
-                                        className="flex-1 min-h-0 border rounded-lg overflow-y-auto p-2"
+                                        className="flex-1 min-h-0 border rounded-lg overflow-y-auto p-2 mb-5"
                                         style={{ scrollbarGutter: 'stable', maxHeight: 360 }}
                                     >
-                                        {ghLoading && <p className="text-sm text-neutral-500 px-1 py-2">불러오는 중…</p>}
+                                        {ghLoading && <p className="text-sm text-neutral-500 px-1 py-2">Loading...</p>}
                                         {ghErr && <p className="text-sm text-red-500 px-1 py-2">{ghErr}</p>}
                                         {!ghLoading && !ghErr && filteredGh.length === 0 && (
                                             <p className="text-sm text-neutral-500 px-1 py-2">검색 결과가 없습니다.</p>
                                         )}
 
-                                        <ul className="space-y-1">
+                                        <ul className="space-y-1 mb-4">
                                             {filteredGh.map((r) => {
-                                                const id = String(r?.id ?? r?.full_name ?? r?.name);
-                                                const selected = String(ghSelectedId) === id;
-                                                const name = r?.full_name || r?.name || '(no-name)';
+                                                const key = `ghid:${r.id}`;
+                                                const selectId = String(r.id);
+                                                const selected = String(ghSelectedId) === selectId;
+
+                                                const repoName = r?.name || '(no-name)';
+                                                const owner = r.owner || '';
                                                 const isPrivate = !!r?.private;
+
                                                 return (
                                                     <li
-                                                        key={id}
-                                                        onClick={() => setGhSelectedId(id)}
+                                                        key={key}
+                                                        onClick={() => setGhSelectedId(selectId)}
                                                         className={`flex items-center justify-between gap-3 cursor-pointer rounded-md px-3 py-2 ${
                                                             selected ? 'bg-gray-100 border border-gray-300' : 'hover:bg-gray-50 border border-transparent'
                                                         }`}
-                                                        title={name}
+                                                        title={repoName}
                                                     >
-                                                        <div className="flex items-center gap-2 min-w-0">
-                              <span
-                                  className={`inline-block w-3 h-3 rounded-full border ${
-                                      selected ? 'bg-gray-800 border-gray-800' : 'bg-white border-gray-400'
-                                  }`}
-                                  aria-hidden
-                              />
-                                                            <span className="truncate">{name}</span>
+                                                        <div className="flex items-center gap-3 min-w-0">
+                                                            <span className={`inline-block w-3 h-3 rounded-full border ${
+                                                                selected ? 'bg-gray-800 border-gray-800' : 
+                                                                    'bg-white border-gray-400'}`} />
+                                                            <div className="min-w-0">
+                                                                <div className="truncate font-medium">{repoName}</div>
+                                                                {owner && <div className="text-xs text-neutral-400 truncate">@{owner}</div>}
+                                                            </div>
                                                         </div>
-                                                        <span
-                                                            className={`text-xs px-2 py-0.5 rounded ${
-                                                                isPrivate ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
-                                                            }`}
-                                                        >
-                              {isPrivate ? 'Private' : 'Public'}
-                            </span>
+                                                        <span className={`text-xs px-2 py-0.5 rounded-lg border text-gray-500${
+                                                            isPrivate ? 'bg-rose-100 text-rose-700' : ''
+                                                        }`}>
+                                                          {isPrivate ? 'Private' : 'Public'}
+                                                        </span>
                                                     </li>
                                                 );
                                             })}
                                         </ul>
+
                                     </div>
 
                                     <button
