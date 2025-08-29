@@ -353,6 +353,7 @@ export default function RepositoriesPage() {
                                                     title={r.name}
                                                 >
                                                     <i className={`fa-solid ${sel ? 'fa-folder-open text-neutral-500' : 'fa-folder text-neutral-400'}`}/>
+
                                                     <span className="truncate">{r.name}</span>
                                                 </li>
                                             );
