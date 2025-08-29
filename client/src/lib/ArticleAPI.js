@@ -203,17 +203,6 @@ export const fetchReplies = async (articleId) => {
     return response.data;
 };
 
-export const createRepository = async (data) => {
-    try {
-        const res = await ArticleAPI.post("/api/DiFF/repository/createRepository", data);
-        console.log("[API][createRepository] status:", res.status, "data:", res.data);
-        return res.data;
-    } catch (err) {
-        console.error("[API][createRepository] error:", err);
-        throw err;
-    }
-};
-
 export async function increaseArticleHits(articleId) {
     const res = await fetch(`/api/DiFF/article/hits/${articleId}`, {
         method: "POST",

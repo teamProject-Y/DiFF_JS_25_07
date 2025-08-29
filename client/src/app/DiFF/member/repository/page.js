@@ -1,10 +1,11 @@
 'use client';
 
-import {useRouter} from 'next/navigation';
-import {fetchUser} from "@/lib/UserAPI";
-import {useEffect, useMemo, useState, useCallback} from "react";
-import {LayoutGroup, AnimatePresence} from "framer-motion";
-import {createRepository, repositoryArticles} from "@/lib/ArticleAPI";
+import { useRouter } from 'next/navigation';
+import { fetchUser } from "@/lib/UserAPI";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { LayoutGroup, AnimatePresence } from "framer-motion";
+import { repositoryArticles } from "@/lib/ArticleAPI";
+import { createRepository, importGithubRepo } from "@/lib/RepositoryAPI"
 
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
@@ -203,36 +204,76 @@ export default function RepositoriesPage() {
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
 
-    const handleCreate = async () => {
-        if (!name.trim()) {
-            setError("레포지토리 이름을 입력하세요.");
-            return;
+    const handleCreate = async ({ name, description, visibility }) => {
+        const repoName = (name ?? '').trim();
+        const aPrivate = visibility === 'Private';
+
+        if (!repoName) {
+            setError('레포지토리 이름을 입력하세요.');
+            return { ok: false, msg: '레포지토리 이름을 입력하세요.' };
         }
+
         setLoading(true);
-        setError("");
+        setError('');
 
         try {
-            const res = await createRepository({name});
-            if (res?.resultCode?.startsWith("S-")) {
-                alert(res.msg);
-                setOpen(false);
-                setRepoName("");
+            const payload = {
+                name: repoName,
+                description: (description ?? '').trim(),
+                aPrivate: aPrivate,
+                aprivate: aPrivate,
+            };
 
+            console.log('[createRepository] payload =', payload);
+
+            const res = await createRepository(payload);
+
+            if (res?.resultCode?.startsWith('S-')) {
                 const newRepo = {
                     id: res.data,
-                    name,
-                    url: "",
-                    defaultBranch: "",
-                    aprivate: false,
+                    name: repoName,
+                    url: '',
+                    defaultBranch: '',
+                    aprivate: aPrivate,
                 };
                 setRepositories((prev) => [...prev, newRepo]);
+                return { ok: true };
             } else {
-                setError(res?.msg || "생성 실패");
+                const msg = res?.msg || '생성 실패';
+                setError(msg);
+                return { ok: false, msg };
             }
         } catch (err) {
-            setError(err?.response?.data?.msg || "요청 실패");
+            const msg = err?.response?.data?.msg || '요청 실패';
+            setError(msg);
+            return { ok: false, msg };
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleImportRepo = async (ghRepo) => {
+        try {
+            const res = await importGithubRepo(ghRepo); // { resultCode, msg, data: newRepoId }
+            if (res?.resultCode?.startsWith('S-')) {
+                const newRepo = {
+                    id: res.data, // 서버가 내려주는 새 레포 ID
+                    name: ghRepo?.name || ghRepo?.full_name || '',
+                    url: ghRepo?.html_url || ghRepo?.url || '',
+                    defaultBranch: ghRepo?.default_branch || '',
+                    aprivate: !!ghRepo?.private,
+                };
+
+                setRepositories((prev) => {
+                    if (prev.some((p) => p.id === newRepo.id || p.name === newRepo.name)) return prev;
+                    return [...prev, newRepo];
+                });
+
+                return { ok: true };
+            }
+            return { ok: false, msg: res?.msg || '가져오기 실패' };
+        } catch (e) {
+            return { ok: false, msg: e?.response?.data?.msg || e?.message || '가져오기 실패' };
         }
     };
 
@@ -241,7 +282,7 @@ export default function RepositoriesPage() {
     return (
         <LayoutGroup>
             <section className="px-4">
-                <div className="mx-auto max-w-6xl">
+                <div className="mx-auto max-w-6xl h-full">
                     <h2 className="text-2xl font-bold mb-4 mx-4 flex items-center gap-3">
                         My Repository
                         <button
@@ -258,12 +299,16 @@ export default function RepositoriesPage() {
                     {/* 레포 미선택 */}
                     {!selectedRepo ? (
                         <div
-                            className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden min-h-[520px] bg-white">
+                            className="relative flex border border-gray-200 rounded-lg shadow overflow-hidden  bg-white">
                             <AnimatePresence>
                                 <RepoFolder
                                     key="grid"
                                     repositories={repositories}
-                                    onSelect={setSelectedRepoId}/>
+                                    onSelect={setSelectedRepoId}
+                                    // onFetchRepos={fetchRepos}
+                                    onCreateRepo={handleCreate}
+                                    onImportRepo={handleImportRepo}
+                                />
                             </AnimatePresence>
                         </div>
                     ) : (
@@ -296,7 +341,7 @@ export default function RepositoriesPage() {
                             <div className="grid grid-cols-[230px_1fr] items-start">
                                 {/* 왼쪽 사이드바 */}
                                 <aside
-                                    className="min-h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-50">
+                                    className="h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-50">
                                     <ul className="p-4 space-y-2">
                                         {repositories.map((r) => {
                                             const sel = r.id === selectedRepoId;
@@ -362,13 +407,6 @@ export default function RepositoriesPage() {
                         >
                             글 작성하기
                         </button>
-
-                        <button
-                            onClick={() => setOpen(true)}
-                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                        >
-                            레포지토리 생성
-                        </button>
                     </div>
 
                     {/* 모달 */}
@@ -409,22 +447,22 @@ export default function RepositoriesPage() {
                         </div>
                     )}
 
-                    <div className="text-center mt-6">
-                        <button
-                            onClick={() => router.replace('/DiFF/home/main')}
-                            className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"
-                        >
-                            메인으로 가기
-                        </button>
-                    </div>
-                    <div className="text-center mb-6">
-                        <button
-                            onClick={() => router.push('/DiFF/article/drafts')}
-                            className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"
-                        >
-                            임시저장
-                        </button>
-                    </div>
+                    {/*<div className="text-center mt-6">*/}
+                    {/*    <button*/}
+                    {/*        onClick={() => router.replace('/DiFF/home/main')}*/}
+                    {/*        className="px-6 py-2 text-sm bg-neutral-800 text-white rounded hover:bg-neutral-700"*/}
+                    {/*    >*/}
+                    {/*        메인으로 가기*/}
+                    {/*    </button>*/}
+                    {/*</div>*/}
+                    {/*<div className="text-center mb-6">*/}
+                    {/*    <button*/}
+                    {/*        onClick={() => router.push('/DiFF/article/drafts')}*/}
+                    {/*        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"*/}
+                    {/*    >*/}
+                    {/*        임시저장*/}
+                    {/*    </button>*/}
+                    {/*</div>*/}
                 </div>
             </section>
         </LayoutGroup>

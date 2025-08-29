@@ -217,9 +217,9 @@ export default function Page() {
 
 
             {/* trending */}
-            <div id="trending" className="is-light-bg w-full h-screen snap-start px-36 pt-20" ref={el => sectionRefs.current[2] = el}>
+            <div id="trending" className="is-light-bg w-full h-screen snap-start px-20 pt-20" ref={el => sectionRefs.current[2] = el}>
                 <div className="text-5xl text-black font-bold">Trending</div>
-                <div className="article-slider h-2/3 w-full mt-16 flex">
+                <div className="article-slider h-2/3 w-full mt-8 flex">
                     {loading ? (
                         <div className="flex justify-between w-full items-start">
                             <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
@@ -230,10 +230,10 @@ export default function Page() {
                         isClient && (
                             <SwiperWrapper
                                 modules={[Navigation, Pagination, A11y, Autoplay]}
-                                spaceBetween={50}
+                                spaceBetween={30}
                                 loop={true}
                                 autoplay={{delay: 3000}}
-                                slidesPerView={3}
+                                slidesPerView={4}
                                 navigation
                                 pagination={{clickable: true}}
                                 allowTouchMove={true}

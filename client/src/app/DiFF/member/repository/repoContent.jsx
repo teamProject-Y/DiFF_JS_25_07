@@ -118,7 +118,7 @@ export default function RepoContent({
 
             {/* 왼쪽 내부 레일(옵션) */}
             {!useExternalSidebar && (
-                <aside className="border-r bg-gray-50 p-4 overflow-y-auto">
+                <aside className="border-r bg-gray-50 p-4 overflow-y-scroll">
                     {onClose && (
                         <button
                             onClick={onClose}
