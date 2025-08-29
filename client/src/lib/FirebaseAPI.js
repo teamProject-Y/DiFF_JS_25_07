@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// 🚨 SSR 방지: 서버사이드에서는 실행 안 함
+
 export async function requestFCMToken() {
     if (typeof window === "undefined") return null;
 
@@ -33,7 +33,6 @@ export async function requestFCMToken() {
     }
 }
 
-// ✅ 포그라운드 알림 수신 (브라우저 열려있을 때)
 export async function initOnMessageListener() {
     if (typeof window === "undefined") return;
 
@@ -60,7 +59,6 @@ export async function initOnMessageListener() {
     }
 }
 
-// ✅ FCM 토큰 서버 저장
 export async function saveFcmTokenToServer() {
     console.log("🚀 saveFcmTokenToServer 실행됨");
     const token = await requestFCMToken();
