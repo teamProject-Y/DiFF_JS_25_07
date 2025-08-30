@@ -12,6 +12,7 @@
   "dependencies": {
     "@toast-ui/editor": "^3.2.2",
     "chart.js": "^4.5.0",
+    "firebase": "^12.2.1",
     "form-data": "^4.0.4",
     "luxon": "^3.7.1",
     "react-chartjs-2": "^5.3.0",

@@ -5,6 +5,7 @@ import {useEffect, useState} from "react";
 import {followingArticleList, increaseArticleHits} from "@/lib/ArticleAPI";
 import {getFollowingList} from "@/lib/UserAPI";
 import removeMd from "remove-markdown";
+import {saveFcmTokenToServer} from "@/lib/FirebaseAPI";
 
 // 게시물에 이미지 있는지 확인
 function extractFirstImage(body) {
@@ -22,6 +23,19 @@ export default function AfterMainPage({me, trendingArticles}) {
     const [activeTab, setActiveTab] = useState("Trending");
     const [followingArticles, setFollowingArticles] = useState(null);
     const [following, setFollowing] = useState([]);
+
+    useEffect(() => {
+        const run = async () => {
+            try {
+                console.log("🔔 MainPage 진입 → FCM 토큰 저장 시도");
+                await saveFcmTokenToServer();
+                console.log("✅ MainPage 진입 → FCM 토큰 저장 완료");
+            } catch (err) {
+                console.error("❌ MainPage 진입 → FCM 저장 실패:", err);
+            }
+        };
+        run();
+    }, []);
 
     // 팔로잉 유저 목록 불러오기 (최초 1번)
     useEffect(() => {

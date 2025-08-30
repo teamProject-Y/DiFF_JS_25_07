@@ -1,4 +1,4 @@
-import { UserAPI } from "@/lib/userAPI";
+import { UserAPI } from "@/lib/UserAPI";
 
 // 댓글 수정
 export const modifyReply = async (id, body) => {

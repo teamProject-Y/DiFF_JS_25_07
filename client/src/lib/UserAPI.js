@@ -136,15 +136,27 @@ export const deleteUser = async () => {
     await UserAPI.delete(`/DiFF/member`);
 };
 
-export const getFollowingList = async () => {
-    const response = await UserAPI.get(`/api/DiFF/member/followingList`);
-    return response.data;
-}
+// 닉네임으로 특정 회원 팔로잉 리스트 조회
+export const getFollowingList = async (nickName) => {
+    const url = nickName
+        ? `/api/DiFF/member/followingList?nickName=${encodeURIComponent(nickName)}`
+        : `/api/DiFF/member/followingList`;
 
-export const getFollowerList = async () => {
-    const response = await UserAPI.get(`/api/DiFF/member/followerList`);
+    const response = await UserAPI.get(url);
     return response.data;
-}
+};
+
+// 닉네임으로 특정 회원 팔로워 리스트 조회
+export const getFollowerList = async (nickName) => {
+    const url = nickName
+        ? `/api/DiFF/member/followerList?nickName=${encodeURIComponent(nickName)}`
+        : `/api/DiFF/member/followerList`;
+
+    const response = await UserAPI.get(url);
+    return response.data;
+};
+
+
 
 // 상대방을 팔로우
 export const followMember = async (fromMemberId) => {

@@ -37,8 +37,8 @@ const cardsWrap = {
 };
 
 const card = {
-    hidden: { y: 10, opacity: 0, scale: 0.98 },
-    show:   { y: 0,  opacity: 1, scale: 1, transition: { type: 'spring', bounce: 0.30, duration: 0.5 } },
+    hidden: {y: 10, opacity: 0, scale: 0.98},
+    show: {y: 0, opacity: 1, scale: 1, transition: {type: 'spring', bounce: 0.30, duration: 0.5}},
 };
 
 /**
@@ -105,10 +105,20 @@ export default function RepoContent({
             exit="hidden"
             className={`absolute inset-0 grid ${gridCols} gap-8 p-8 bg-white`}
         >
+            {/*<div className="absolute top-3 right-3">*/}
+            {/*    {onClose && (*/}
+            {/*        <button*/}
+            {/*            onClick={onClose}*/}
+            {/*            className="px-3 py-1.5 text-sm rounded-lg bg-neutral-900 text-white hover:bg-neutral-800"*/}
+            {/*        >*/}
+            {/*            <i className="fa-solid fa-xmark"></i>*/}
+            {/*        </button>*/}
+            {/*    )}*/}
+            {/*</div>*/}
 
             {/* 왼쪽 내부 레일(옵션) */}
             {!useExternalSidebar && (
-                <aside className="border-r bg-gray-50 p-4 overflow-y-auto">
+                <aside className="border-r bg-gray-50 p-4 overflow-y-scroll">
                     {onClose && (
                         <button
                             onClick={onClose}
@@ -124,7 +134,7 @@ export default function RepoContent({
                             onClick={() => window.open('https://github.com/new', '_blank')}
                             title="깃허브로 리포지토리 추가"
                         >
-                            <i className="fa-solid fa-circle-plus text-neutral-500" />
+                            <i className="fa-solid fa-circle-plus text-neutral-500"/>
                             <span className="truncate">깃허브로 리포지토리 추가</span>
                         </li>
                         {repositories.map((r) => {
@@ -149,20 +159,16 @@ export default function RepoContent({
 
             {/* 중앙 메인(정보/게시물 탭 + 상자 2개 틀) */}
             <div className="min-w-0 min-h-0 flex flex-col">
-
-                <div className="mb-4 flex items-center gap-2">
-
-                    <div className="ml-auto flex items-center gap-2">
-                        {onClose && (
-                            <button
-                                onClick={onClose}
-                                className="px-3 py-1.5 text-sm rounded-lg bg-neutral-900 text-white hover:bg-neutral-800"
-                            >
-                                닫기
-                            </button>
-                        )}
-                    </div>
-                </div>
+                {/*<div className="absolute top-3 right-3">*/}
+                {/*    {onClose && (*/}
+                {/*        <button*/}
+                {/*            onClick={onClose}*/}
+                {/*            className="px-3 py-1.5 text-sm rounded-lg bg-neutral-900 text-white hover:bg-neutral-800"*/}
+                {/*        >*/}
+                {/*            <i className="fa-solid fa-xmark"></i>*/}
+                {/*        </button>*/}
+                {/*    )}*/}
+                {/*</div>*/}
 
                 <div className="scrollbar-none flex-1 overflow-y-auto px-0 pb-2 space-y-6 ">
                     {/* 상단 큰 박스 */}
