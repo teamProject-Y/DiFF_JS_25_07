@@ -104,7 +104,6 @@ export const trendingArticle = async ({ count, days }) => {
     return response.data;
 }
 
-
 // lib/ArticleAPI.js
 export const writeArticle = async (data) => {
     // repositoryId 숫자 변환
@@ -178,6 +177,13 @@ export const followingArticleList = async ({ repositoryId, searchItem = 0, keywo
     return res.data;
 };
 
+export const repositoryArticles = async ({ repositoryId }) => {
+    const response = await ArticleAPI.get(`/api/DiFF/repository/articles`, {
+        params: { repositoryId }
+    });
+    return response.data;
+}
+
 // 댓글 작성
 export const postReply = async (articleId, comment) => {
     const response = await UserAPI.post(`/api/DiFF/reply/doWrite`, {
@@ -195,17 +201,6 @@ export const fetchReplies = async (articleId) => {
     console.log(response.data.replies);
 
     return response.data;
-};
-
-export const createRepository = async (data) => {
-    try {
-        const res = await ArticleAPI.post("/api/DiFF/repository/createRepository", data);
-        console.log("[API][createRepository] status:", res.status, "data:", res.data);
-        return res.data;
-    } catch (err) {
-        console.error("[API][createRepository] error:", err);
-        throw err;
-    }
 };
 
 export async function increaseArticleHits(articleId) {

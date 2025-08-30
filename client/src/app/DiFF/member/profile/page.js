@@ -50,36 +50,6 @@ function ProfileInner() {
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
-        if (!accessToken) return;
-
-        const base = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-        fetch(`${base}/api/DiFF/auth/linked`, {
-            headers: {Authorization: `Bearer ${accessToken}`},
-            credentials: 'include',
-        })
-            .then(res => res.ok ? res.json() : Promise.reject(res))
-            .then(data => {
-                // data = { google: bool, github: bool }
-                setLinked({
-                    google: !!data.google,
-                    github: !!data.github,
-                });
-            })
-            .catch(() => {
-                // 필요 시 무시 또는 알림
-            });
-    }, []);
-
-    useEffect(() => {
-        const justLinked = searchParams.get('linked'); // google | github
-        if (justLinked === 'google' || justLinked === 'github') {
-            setLinked(prev => ({...prev, [justLinked]: true}));
-            // router.replace('/DiFF/home/main');
-        }
-    }, [searchParams]);
-
-    useEffect(() => {
-        const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
 
         if (!accessToken) {
@@ -101,27 +71,19 @@ function ProfileInner() {
                 } else {
                     setIsMyProfile(false);
 
-                    // ✅ 팔로잉 여부 체크
-                    try {
-                        const followRes = await getFollowingList(); // 로그인 사용자의 팔로잉 리스트
-                        console.log("팔로잉 API 원본 응답:", followRes);
+                    // ✅ 로그인한 사용자의 팔로잉 목록 조회 (내 기준)
+                    const followRes = await getFollowingList(myNickName);
+                    console.log("팔로잉 API 응답:", followRes);
 
-                        const list = followRes.data1 || followRes.data?.followingList || [];
-                        console.log("팔로잉 리스트 추출:", list);
-                        console.log("현재 프로필 fetchedMember.id:", fetchedMember.id);
+                    const list = followRes.followingList || followRes.data1 || [];
+                    console.log("팔로잉 리스트:", list);
 
-                        // 개별 비교 디버깅
-                        list.forEach(m => {
-                            console.log(`👉 비교 대상 id=${m.id}, nickName=${m.nickName}  ===  targetId=${fetchedMember.id}`);
-                        });
+                    // ✅ 상대방이 내 팔로잉 목록에 있는지 확인
+                    const following = list.some(m => m.id === fetchedMember.id);
 
-                        const following = list.some(m => m.id === fetchedMember.id);
-                        console.log("📌 최종 팔로우 여부:", following);
+                    console.log(`👉 로그인 사용자(${myNickName}) → target(${fetchedMember.nickName}) 팔로잉 여부 =`, following);
 
-                        setMember(prev => ({...prev, isFollowing: following}));
-                    } catch (err) {
-                        console.error("❌ 팔로잉 목록 조회 실패:", err);
-                    }
+                    setMember(prev => ({ ...prev, isFollowing: following }));
                 }
             })
             .catch(err => {
@@ -133,14 +95,16 @@ function ProfileInner() {
 
 
     useEffect(() => {
+        const nickName = searchParams.get("nickName");
+
         const fetchCounts = async () => {
             try {
-                const followingRes = await getFollowingList();
-                const followerRes = await getFollowerList();
+                const followingRes = await getFollowingList(nickName);
+                const followerRes = await getFollowerList(nickName);
 
-                // 응답 구조에 따라 맞게 꺼내야 함 (data1Name, data1 구조 확인했었지?)
-                const followingList = followingRes.data1 || [];
-                const followerList = followerRes.data1 || [];
+                // ✅ 응답 구조에 맞게 꺼내기
+                const followingList = followingRes.followingList || followingRes.data1 || [];
+                const followerList = followerRes.followerList || followerRes.data1 || [];
 
                 setFollowingCount(followingList.length);
                 setFollowerCount(followerList.length);
@@ -153,44 +117,33 @@ function ProfileInner() {
         };
 
         fetchCounts();
-    }, []);
+    }, [searchParams]);
+
 
     useEffect(() => {
-        if (!member) return;
         const nickName = searchParams.get("nickName");
-        const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
-        const isMine = !nickName || nickName === myNickName;
 
-        (async () => {
-            try {
-                const keys = isMine ? await getMyTechKeys() : await getTechKeysByNickName(member.nickName);
-                setTechKeys(Array.isArray(keys) ? keys : []);
-            } catch (e) {
-                console.error(e);
-                setTechKeys([]);
-            }
-        })();
-    }, [member, searchParams]);
-
-    useEffect(() => {
         if (openModal === "follower") {
-            getFollowerList()
+            getFollowerList(nickName)
                 .then((res) => {
                     console.log("팔로워 API 응답:", res);
-                    setFollowerList(res.data1 || res); // 응답 구조에 따라 조정
+                    // ✅ 올바른 키로 파싱
+                    setFollowerList(res.followerList || res.data1 || []);
                 })
                 .catch((err) => console.error("팔로워 목록 로딩 오류:", err));
         }
 
         if (openModal === "following") {
-            getFollowingList()
+            getFollowingList(nickName)
                 .then((res) => {
                     console.log("팔로잉 API 응답:", res);
-                    setFollowingList(res.data1 || res);
+                    // ✅ 올바른 키로 파싱
+                    setFollowingList(res.followingList || res.data1 || []);
                 })
                 .catch((err) => console.error("팔로잉 목록 로딩 오류:", err));
         }
-    }, [openModal]);
+    }, [openModal, searchParams]);
+
 
     const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
@@ -268,6 +221,7 @@ function ProfileInner() {
                             </div>
 
                             {/* 팔로잉/팔로워 */}
+                            {/* 팔로잉/팔로워 */}
                             <div className="mt-4 flex items-center gap-4 text-sm self-center">
                                 <button
                                     onClick={() => setOpenModal('following')}
@@ -282,6 +236,44 @@ function ProfileInner() {
                                     <span className="opacity-70">follower :</span> {followerCount}
                                 </button>
                             </div>
+
+                            {/* ✅ 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
+                            {!isMyProfile && (
+                                <div className="mt-4 flex justify-center">
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                if (member.isFollowing) {
+                                                    console.log("👉 언팔로우 요청:", member.id);
+                                                    await unfollowMember(member.id);
+
+                                                    setMember(prev => ({ ...prev, isFollowing: false }));
+                                                    // ✅ 상대방 프로필이므로 followerCount 조정
+                                                    setFollowerCount(prev => Math.max(0, prev - 1));
+                                                } else {
+                                                    console.log("👉 팔로우 요청:", member.id);
+                                                    await followMember(member.id);
+
+                                                    setMember(prev => ({ ...prev, isFollowing: true }));
+                                                    // ✅ 상대방 프로필이므로 followerCount 조정
+                                                    setFollowerCount(prev => prev + 1);
+                                                }
+                                            } catch (err) {
+                                                console.error("❌ 팔로우/언팔로우 실패:", err);
+                                                alert("처리 실패");
+                                            }
+                                        }}
+                                        className={`px-6 py-2 text-sm rounded text-white ${
+                                            member.isFollowing
+                                                ? "bg-red-600 hover:bg-red-500"
+                                                : "bg-green-600 hover:bg-green-500"
+                                        }`}
+                                    >
+                                        {member.isFollowing ? "언팔로우" : "팔로우"}
+                                    </button>
+                                </div>
+                            )}
+
 
                             {/* 본인 프로필일 때만 표시 */}
                             {isMyProfile && (
