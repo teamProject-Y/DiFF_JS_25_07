@@ -114,7 +114,11 @@ function ModifyArticlePageInner() {
                         placeholder="제목을 작성하세요"
                         className="p-2 rounded"
                     />
-                    <ToastEditor initialValue={body} onChange={setBody} />
+                    <ToastEditor
+                        key={id}
+                        initialValue={article?.body ?? ''}
+                        onChange={setBody}
+                    />
                     <div className="flex gap-4 mt-4">
                         <Link
                             href={`/DiFF/article/detail?id=${id}`}
