@@ -4,10 +4,20 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
 import { getGithubRepos } from '@/lib/repositoryAPI';
 
-export default function RepoFolder({repositories, onSelect, onFetchRepos, onCreateRepo, onImportRepo}) {
+export default function RepoFolder({repositories, onSelect, onCreateRepo, onImportRepo, canManage = true}) {
     const [openChoice, setOpenChoice] = useState(false);
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
+
+    const visibleRepos = useMemo(() => {
+        const list = Array.isArray(repositories) ? repositories : [];
+        if (canManage) return list;
+
+        return list.filter((r) => {
+            const isPrivate = (r?.aprivate ?? r?.aPrivate) === true;
+            return !isPrivate;
+        });
+    }, [repositories, canManage]);
 
     // ESC 닫기
     useEffect(() => {
@@ -25,6 +35,7 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
             exit={{opacity: 0}}
             className="w-full h-[520px] overflow-y-auto p-8 grid gap-8 grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] auto-rows-auto content-start"
         >
+            {canManage && (
             <motion.div
                 key="repo-plus"
                 layoutId="repo-plus"
@@ -38,9 +49,10 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
                 </div>
                 <span className="font-bold text-lg">Add Repository</span>
             </motion.div>
+            )}
 
-            {repositories?.length > 0 ? (
-                repositories.map((repo, idx) => (
+            {visibleRepos?.length > 0 ? (
+                visibleRepos.map((repo, idx) => (
                     <motion.div
                         key={repo.id}
                         layoutId={`repo-${repo.id}`}
@@ -55,16 +67,18 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
                     </motion.div>
                 ))
             ) : (
-                <p>등록된 레포지토리가 없습니다.</p>
+                <p>등록된 리포지토리가 없습니다.</p>
             )}
 
             {/* 선택 모달 */}
+            {canManage && (
             <AddRepoChoiceModal
                 open={openChoice}
                 onClose={closeModal}
                 onCreate={onCreateRepo}
                 onImport={onImportRepo}
             />
+            )}
         </motion.div>
     );
 }
@@ -108,6 +122,16 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
             (localStorage.getItem('accessToken') || localStorage.getItem('access_token'))) || '';
 
     // 모달 열릴 때 깃허브 리포 불러오기
+    const normalizeGhRepos = (raw = []) =>
+        raw.map((r) => ({
+            id: String(r.id),
+            name: r?.name ?? 'Unknown',
+            owner: r?.owner ?? '',
+            private: !!r?.aprivate,
+            url: r?.url ?? '',
+            default_branch: r?.defaultBranch ?? '',
+        }));
+
     useEffect(() => {
         if (!open) return;
         setGhErr('');
@@ -118,12 +142,16 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                 if (json?.resultCode && String(json.resultCode).startsWith('F')) {
                     throw new Error(json?.msg || '깃허브 리포 불러오기 실패');
                 }
-                const list = Array.isArray(json?.data)
-                    ? json.data
-                    : Array.isArray(json?.data1)
-                        ? json.data1
+                const list = Array.isArray(json?.data) ? json.data
+                    : Array.isArray(json?.data1) ? json.data1
                         : [];
-                setGhList(list);
+
+                console.log("before normalized: ", list[0]);
+
+                const normalized = normalizeGhRepos(list);
+                setGhList(normalized);
+                console.log("github repo [0]", normalized[0]);
+
             } catch (e) {
                 setGhErr(e?.message || '요청 실패');
             } finally {
@@ -136,7 +164,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
         const q = ghQuery.trim().toLowerCase();
         if (!q) return ghList;
         return ghList.filter((r) => {
-            const n = (r?.name || r?.full_name || '').toLowerCase();
+            const n = (r?.name || r?.full_name || 'Unknown');
             return n.includes(q);
         });
     }, [ghList, ghQuery]);
@@ -182,8 +210,20 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
         }
         setGhErr('');
         setSubmitting(true);
+
         try {
-            const res = await onImport?.(repo); // 부모가 importGithubRepo 호출
+            const payload = {
+                githubId: String(repo.id),
+                name: repo?.name || repo?.full_name || '',
+                url: repo?.url || '',
+                defaultBranch: repo?.default_branch || '',
+                aPrivate: !!repo?.private,
+                owner: repo?.owner || '',
+            };
+
+            console.log('repo, payload: ', payload);
+
+            const res = await onImport?.(payload);
             if (res?.ok) {
                 onClose();
                 setGhSelectedId(null);
@@ -221,7 +261,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                         animate={{y: 0, opacity: 1, scale: 1}}
                         exit={{y: 12, opacity: 0, scale: 0.98}}
                         transition={{type: 'spring', stiffness: 240, damping: 22}}
-                        className="w-[min(900px,92vw)] h-[min(600px,88vh)] rounded-xl bg-white p-6 shadow-xl relative
+                        className="w-[min(60vw)] h-[min(80vh)] rounded-xl bg-white p-6 shadow-xl relative
                             overflow-hidden flex flex-col"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -235,10 +275,6 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
 
                         <h2 className="text-2xl font-bold m-2 pb-4">Add Repository</h2>
 
-                        {/*<div className="flex justify-around text-lg text-gray-600 font-bold my-4">*/}
-                        {/*    <div>Create directly here</div>*/}
-                        {/*    <div>Import from GitHub</div>*/}
-                        {/*</div>*/}
                         <div className="flex-1 min-h-0 flex gap-4">
                             <form onSubmit={submitCreate} className="w-[45%] rounded-lg border p-4 flex flex-col mr-2">
                                 <p className="text-lg font-bold mb-3">Create directly here</p>
