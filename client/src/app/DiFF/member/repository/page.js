@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchUser } from "@/lib/UserAPI";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { LayoutGroup, AnimatePresence } from "framer-motion";
@@ -9,6 +9,7 @@ import { createRepository, importGithubRepo } from "@/lib/RepositoryAPI"
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
 import GhostBar from './sideBar';
+import Link from "next/link";
 
 const getAccessToken = () =>
     (typeof window !== 'undefined' &&
@@ -40,16 +41,16 @@ const normalizeRepos = (raw) =>
 
 export default function RepositoriesPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [repositories, setRepositories] = useState([]);
+    const [member, setMember] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingRepos, setLoadingRepos] = useState(false);
     const [error, setError] = useState('');
     const [selectedRepoId, setSelectedRepoId] = useState(null);
+    const [isMyRepos, setIsMyRepos] = useState(false);
 
     const [tab, setTab] = useState('info');
-
-    const [open, setOpen] = useState(false);
-    const [name, setRepoName] = useState("");
 
     // 최초 1회만 사용자 레포 불러오기
     useEffect(() => {
@@ -59,56 +60,25 @@ export default function RepositoriesPage() {
             return;
         }
 
-        fetchUser()
+        const nickName = searchParams.get('nickName');
+        const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
+        setIsMyRepos(!nickName || nickName === myNickName);
+        fetchUser(nickName)
             .then((res) => {
                 setRepositories(normalizeRepos(res?.repositories || []));
                 setLoading(false);
+                setMember(res.member);
             })
             .catch(() => {
                 setLoading(false);
                 router.replace('/DiFF/home/main');
             });
-    }, []);
-
-    // const fetchRepos = useCallback(async () => {
-    //     const at = getAccessToken();
-    //     if (!at) {
-    //         router.replace('/DiFF/member/login');
-    //         return;
-    //     }
-    //     setLoadingRepos(true);
-    //     setError('');
-    //     try {
-    //         const res = await fetch('http://localhost:8080/api/DiFF/github/repos', {
-    //             method: 'GET',
-    //             headers: {Authorization: `Bearer ${at}`},
-    //             credentials: 'include',
-    //         });
-    //         const json = await res.json();
-    //
-    //         if (!res.ok || (json?.resultCode && String(json.resultCode).startsWith('F')) || json?.error) {
-    //             throw new Error(json?.msg || json?.message || '리포 조회 실패');
-    //         }
-    //         const list = Array.isArray(json?.data)
-    //             ? json.data
-    //             : Array.isArray(json?.data1)
-    //                 ? json.data1
-    //                 : [];
-    //         setRepositories(normalizeRepos(list));
-    //         setSelectedRepoId(null);
-    //     } catch (e) {
-    //         setError(e?.message || '요청 실패');
-    //     } finally {
-    //         setLoadingRepos(false);
-    //     }
-    // }, [router]);
+    }, [router, searchParams]);
 
     const selectedRepo = useMemo(
         () => repositories.find((r) => r.id === selectedRepoId) || null,
         [repositories, selectedRepoId]
     );
-
-    // console.log("selected repo: " + selectedRepo);
 
     useEffect(() => {
         if (selectedRepo) setTab('info');
@@ -194,20 +164,30 @@ export default function RepositoriesPage() {
 
     if (loading) return <div className="text-center">로딩...</div>;
 
+    const profileHref =
+        isMyRepos ? '/DiFF/member/profile'
+            : `/DiFF/member/profile?nickName=${encodeURIComponent(member?.nickName ?? '')}`;
+
     return (
         <LayoutGroup>
             <section className="px-4">
+
                 <div className="mx-auto max-w-6xl h-full">
-                    <h2 className="text-2xl font-bold mb-4 mx-4 flex items-center gap-3">
-                        My Repository
-                        {/*<button*/}
-                        {/*    onClick={fetchRepos}*/}
-                        {/*    disabled={loadingRepos}*/}
-                        {/*    className="text-sm px-3 py-1.5 rounded-lg bg-black text-white hover:opacity-90 active:opacity-80 disabled:opacity-60"*/}
-                        {/*>*/}
-                        {/*    {loadingRepos ? '불러오는 중…' : '리포 불러오기'}*/}
-                        {/*</button>*/}
-                    </h2>
+                    <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
+
+                        <Link href={profileHref} className="text-gray-400 hover:text-gray-700">Profile</Link>
+                        <span>Repositories</span>
+                        {isMyRepos &&
+                        <Link href="/DiFF/member/settings" className="text-gray-400 hover:text-gray-700">
+                            Settings
+                        </Link>
+                        }
+
+                    </div>
+                    <div className="h-px w-full bg-gray-300 mb-8"/>
+                    {/*<h2 className="text-2xl font-bold mb-4 mx-4 flex items-center gap-3">*/}
+                    {/*    Repositories*/}
+                    {/*</h2>*/}
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
@@ -220,9 +200,9 @@ export default function RepositoriesPage() {
                                     key="grid"
                                     repositories={repositories}
                                     onSelect={setSelectedRepoId}
-                                    // onFetchRepos={fetchRepos}
                                     onCreateRepo={handleCreate}
                                     onImportRepo={handleImportRepo}
+                                    canManage={isMyRepos}
                                 />
                             </AnimatePresence>
                         </div>
@@ -280,21 +260,6 @@ export default function RepositoriesPage() {
                                 <div
                                     className="relative border border-gray-300 rounded-r-lg bg-white pt-8 h-[calc(100vh-220px)] overflow-hidden">
                                     <GhostBar repositories={repositories}/>
-
-                                    {/*{tab === 'info' && (*/}
-                                    {/*    <RepoContent*/}
-                                    {/*        key={`detail-${selectedRepo.id}`}*/}
-                                    {/*        repo={selectedRepo}*/}
-                                    {/*        repositories={repositories}*/}
-                                    {/*        onChangeRepo={setSelectedRepoId}*/}
-                                    {/*        onClose={onClose}*/}
-                                    {/*        useExternalSidebar={true}*/}
-                                    {/*    />*/}
-                                    {/*)}*/}
-
-                                    {/*{tab === 'posts' && (*/}
-                                    {/*    <PostsPanel repositoryId={selectedRepo.id}/>*/}
-                                    {/*)}*/}
                                     <RepoContent
                                         key={`detail-${selectedRepo.id}`}
                                         repo={selectedRepo}
@@ -332,44 +297,6 @@ export default function RepositoriesPage() {
                             글 작성하기
                         </button>
                     </div>
-
-                    {/* 모달 */}
-                    {/*{open && (*/}
-                    {/*    <div*/}
-                    {/*        className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"*/}
-                    {/*        onClick={() => setOpen(false)}*/}
-                    {/*    >*/}
-                    {/*        <div*/}
-                    {/*            className="bg-white p-6 rounded shadow-md w-96"*/}
-                    {/*            onClick={(e) => e.stopPropagation()}*/}
-                    {/*        >*/}
-                    {/*            <h2 className="text-lg font-bold mb-4">레포지토리 생성</h2>*/}
-                    {/*            <input*/}
-                    {/*                type="text"*/}
-                    {/*                value={name}*/}
-                    {/*                onChange={(e) => setRepoName(e.target.value)}*/}
-                    {/*                placeholder="레포지토리 이름"*/}
-                    {/*                className="w-full border rounded px-3 py-2 mb-2"*/}
-                    {/*            />*/}
-                    {/*            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}*/}
-                    {/*            <div className="flex justify-end gap-2">*/}
-                    {/*                <button*/}
-                    {/*                    onClick={() => setOpen(false)}*/}
-                    {/*                    className="px-4 py-2 bg-gray-200 rounded"*/}
-                    {/*                >*/}
-                    {/*                    취소*/}
-                    {/*                </button>*/}
-                    {/*                <button*/}
-                    {/*                    onClick={handleCreate}*/}
-                    {/*                    disabled={loading}*/}
-                    {/*                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50"*/}
-                    {/*                >*/}
-                    {/*                    {loading ? '생성 중...' : '생성'}*/}
-                    {/*                </button>*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
                 </div>
             </section>
         </LayoutGroup>

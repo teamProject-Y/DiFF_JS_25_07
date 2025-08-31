@@ -96,7 +96,7 @@ export default function RepoContent({
             exit="hidden"
             className={`absolute inset-0 grid ${gridCols} gap-6 p-8 bg-white`}
         >
-            {/* 왼쪽 내부 레일(옵션) — 항상 공용 */}
+            {/* 왼쪽 레일 */}
             {!useExternalSidebar && (
                 <aside className="border-r bg-gray-50 p-4 overflow-y-scroll">
                     {onClose && (
@@ -140,7 +140,7 @@ export default function RepoContent({
             {/* 중앙 메인 */}
             <div className="min-w-0 min-h-0 flex flex-col">
                 <div className="flex-1 overflow-y-auto px-0 pb-2 flex flex-col">
-                    {/* 상단 큰 박스 — info 전용 */}
+                    {/* info 전용 */}
                     {activeTab === 'info' && (
                         <div className="flex-grow rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mb-3 mr-3">
                             <div className="h-full flex items-center justify-center text-neutral-500">

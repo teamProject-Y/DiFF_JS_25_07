@@ -3,9 +3,8 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
 import { getGithubRepos } from '@/lib/repositoryAPI';
-import {signOut} from "next-auth/react";
 
-export default function RepoFolder({repositories, onSelect, onFetchRepos, onCreateRepo, onImportRepo}) {
+export default function RepoFolder({repositories, onSelect, onCreateRepo, onImportRepo, canManage = true}) {
     const [openChoice, setOpenChoice] = useState(false);
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
@@ -26,6 +25,7 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
             exit={{opacity: 0}}
             className="w-full h-[520px] overflow-y-auto p-8 grid gap-8 grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] auto-rows-auto content-start"
         >
+            {canManage && (
             <motion.div
                 key="repo-plus"
                 layoutId="repo-plus"
@@ -39,6 +39,7 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
                 </div>
                 <span className="font-bold text-lg">Add Repository</span>
             </motion.div>
+            )}
 
             {repositories?.length > 0 ? (
                 repositories.map((repo, idx) => (
@@ -60,12 +61,14 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
             )}
 
             {/* 선택 모달 */}
+            {canManage && (
             <AddRepoChoiceModal
                 open={openChoice}
                 onClose={closeModal}
                 onCreate={onCreateRepo}
                 onImport={onImportRepo}
             />
+            )}
         </motion.div>
     );
 }
@@ -215,11 +218,6 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                 onClose();
                 setGhSelectedId(null);
                 setGhQuery('');
-            // const res = await onImport?.(repo); // 부모가 importGithubRepo 호출
-            // if (res?.ok) {
-            //     onClose();
-            //     setGhSelectedId(null);
-            //     setGhQuery('');
             } else {
                 setGhErr(res?.msg || '가져오기 실패');
             }
@@ -267,10 +265,6 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
 
                         <h2 className="text-2xl font-bold m-2 pb-4">Add Repository</h2>
 
-                        {/*<div className="flex justify-around text-lg text-gray-600 font-bold my-4">*/}
-                        {/*    <div>Create directly here</div>*/}
-                        {/*    <div>Import from GitHub</div>*/}
-                        {/*</div>*/}
                         <div className="flex-1 min-h-0 flex gap-4">
                             <form onSubmit={submitCreate} className="w-[45%] rounded-lg border p-4 flex flex-col mr-2">
                                 <p className="text-lg font-bold mb-3">Create directly here</p>

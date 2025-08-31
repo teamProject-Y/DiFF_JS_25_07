@@ -157,7 +157,6 @@ function ProfileInner() {
         }
     };
 
-
     // 소셜 로그인 통합, 연동
     const startLink = (provider) => {
         if (provider !== 'google' && provider !== 'github') return;
@@ -169,6 +168,9 @@ function ProfileInner() {
     if (loading) return <div>로딩...</div>;
     if (!member) return null;
 
+    const repoHref =
+        isMyProfile ? '/DiFF/member/repository'
+            : `/DiFF/member/repository?nickName=${encodeURIComponent(member?.nickName ?? '')}`;
 
     return (
         <section className="px-4 dark:bg-gray-900 dark:text-white">
@@ -179,8 +181,9 @@ function ProfileInner() {
                 )}
 
                 {/* Tabs */}
-                <div className="mb-3 flex items-center gap-6 text-2xl font-semibold">
-                    <span className="text-black">Profile</span>
+                <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
+                    <span className="">Profile</span>
+                    <Link href={repoHref} className="text-gray-400 hover:text-gray-700">Repositories</Link>
                     {isMyProfile && (
                         <Link
                             href="/DiFF/member/settings"
