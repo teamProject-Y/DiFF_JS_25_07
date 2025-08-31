@@ -121,8 +121,8 @@ export default function RepositoriesPage() {
         const aPrivate = visibility === 'Private';
 
         if (!repoName) {
-            setError('레포지토리 이름을 입력하세요.');
-            return { ok: false, msg: '레포지토리 이름을 입력하세요.' };
+            setError('리포지토리 이름을 입력하세요.');
+            return { ok: false, msg: '리포지토리 이름을 입력하세요.' };
         }
 
         setLoading(true);
@@ -164,16 +164,19 @@ export default function RepositoriesPage() {
         }
     };
 
-    const handleImportRepo = async (ghRepo) => {
+    const handleImportRepo = async (payload) => {
+
+        console.log("import payload: ", payload);
+
         try {
-            const res = await importGithubRepo(ghRepo); // { resultCode, msg, data: newRepoId }
+            const res = await importGithubRepo(payload);
             if (res?.resultCode?.startsWith('S-')) {
                 const newRepo = {
-                    id: res.data, // 서버가 내려주는 새 레포 ID
-                    name: ghRepo?.name || ghRepo?.full_name || '',
-                    url: ghRepo?.html_url || ghRepo?.url || '',
-                    defaultBranch: ghRepo?.default_branch || '',
-                    aprivate: !!ghRepo?.private,
+                    id: res.data,
+                    name: payload?.name || payload?.full_name || '',
+                    url: payload?.url || '',
+                    defaultBranch: payload?.default_branch || '',
+                    aprivate: !!payload?.private,
                 };
 
                 setRepositories((prev) => {
@@ -331,42 +334,42 @@ export default function RepositoriesPage() {
                     </div>
 
                     {/* 모달 */}
-                    {open && (
-                        <div
-                            className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-                            onClick={() => setOpen(false)}
-                        >
-                            <div
-                                className="bg-white p-6 rounded shadow-md w-96"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <h2 className="text-lg font-bold mb-4">레포지토리 생성</h2>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setRepoName(e.target.value)}
-                                    placeholder="레포지토리 이름"
-                                    className="w-full border rounded px-3 py-2 mb-2"
-                                />
-                                {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-                                <div className="flex justify-end gap-2">
-                                    <button
-                                        onClick={() => setOpen(false)}
-                                        className="px-4 py-2 bg-gray-200 rounded"
-                                    >
-                                        취소
-                                    </button>
-                                    <button
-                                        onClick={handleCreate}
-                                        disabled={loading}
-                                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50"
-                                    >
-                                        {loading ? '생성 중...' : '생성'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/*{open && (*/}
+                    {/*    <div*/}
+                    {/*        className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"*/}
+                    {/*        onClick={() => setOpen(false)}*/}
+                    {/*    >*/}
+                    {/*        <div*/}
+                    {/*            className="bg-white p-6 rounded shadow-md w-96"*/}
+                    {/*            onClick={(e) => e.stopPropagation()}*/}
+                    {/*        >*/}
+                    {/*            <h2 className="text-lg font-bold mb-4">레포지토리 생성</h2>*/}
+                    {/*            <input*/}
+                    {/*                type="text"*/}
+                    {/*                value={name}*/}
+                    {/*                onChange={(e) => setRepoName(e.target.value)}*/}
+                    {/*                placeholder="레포지토리 이름"*/}
+                    {/*                className="w-full border rounded px-3 py-2 mb-2"*/}
+                    {/*            />*/}
+                    {/*            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}*/}
+                    {/*            <div className="flex justify-end gap-2">*/}
+                    {/*                <button*/}
+                    {/*                    onClick={() => setOpen(false)}*/}
+                    {/*                    className="px-4 py-2 bg-gray-200 rounded"*/}
+                    {/*                >*/}
+                    {/*                    취소*/}
+                    {/*                </button>*/}
+                    {/*                <button*/}
+                    {/*                    onClick={handleCreate}*/}
+                    {/*                    disabled={loading}*/}
+                    {/*                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 disabled:opacity-50"*/}
+                    {/*                >*/}
+                    {/*                    {loading ? '생성 중...' : '생성'}*/}
+                    {/*                </button>*/}
+                    {/*            </div>*/}
+                    {/*        </div>*/}
+                    {/*    </div>*/}
+                    {/*)}*/}
                 </div>
             </section>
         </LayoutGroup>

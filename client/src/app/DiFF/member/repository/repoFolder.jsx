@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
 import { getGithubRepos } from '@/lib/repositoryAPI';
+import {signOut} from "next-auth/react";
 
 export default function RepoFolder({repositories, onSelect, onFetchRepos, onCreateRepo, onImportRepo}) {
     const [openChoice, setOpenChoice] = useState(false);
@@ -55,7 +56,7 @@ export default function RepoFolder({repositories, onSelect, onFetchRepos, onCrea
                     </motion.div>
                 ))
             ) : (
-                <p>등록된 레포지토리가 없습니다.</p>
+                <p>등록된 리포지토리가 없습니다.</p>
             )}
 
             {/* 선택 모달 */}
@@ -108,6 +109,16 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
             (localStorage.getItem('accessToken') || localStorage.getItem('access_token'))) || '';
 
     // 모달 열릴 때 깃허브 리포 불러오기
+    const normalizeGhRepos = (raw = []) =>
+        raw.map((r) => ({
+            id: String(r.id),
+            name: r?.name ?? 'Unknown',
+            owner: r?.owner ?? '',
+            private: !!r?.aprivate,
+            url: r?.url ?? '',
+            default_branch: r?.defaultBranch ?? '',
+        }));
+
     useEffect(() => {
         if (!open) return;
         setGhErr('');
@@ -118,12 +129,16 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                 if (json?.resultCode && String(json.resultCode).startsWith('F')) {
                     throw new Error(json?.msg || '깃허브 리포 불러오기 실패');
                 }
-                const list = Array.isArray(json?.data)
-                    ? json.data
-                    : Array.isArray(json?.data1)
-                        ? json.data1
+                const list = Array.isArray(json?.data) ? json.data
+                    : Array.isArray(json?.data1) ? json.data1
                         : [];
-                setGhList(list);
+
+                console.log("before normalized: ", list[0]);
+
+                const normalized = normalizeGhRepos(list);
+                setGhList(normalized);
+                console.log("github repo [0]", normalized[0]);
+
             } catch (e) {
                 setGhErr(e?.message || '요청 실패');
             } finally {
@@ -136,7 +151,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
         const q = ghQuery.trim().toLowerCase();
         if (!q) return ghList;
         return ghList.filter((r) => {
-            const n = (r?.name || r?.full_name || '').toLowerCase();
+            const n = (r?.name || r?.full_name || 'Unknown');
             return n.includes(q);
         });
     }, [ghList, ghQuery]);
@@ -182,12 +197,29 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
         }
         setGhErr('');
         setSubmitting(true);
+
         try {
-            const res = await onImport?.(repo); // 부모가 importGithubRepo 호출
+            const payload = {
+                githubId: String(repo.id),
+                name: repo?.name || repo?.full_name || '',
+                url: repo?.url || '',
+                defaultBranch: repo?.default_branch || '',
+                aPrivate: !!repo?.private,
+                owner: repo?.owner || '',
+            };
+
+            console.log('repo, payload: ', payload);
+
+            const res = await onImport?.(payload);
             if (res?.ok) {
                 onClose();
                 setGhSelectedId(null);
                 setGhQuery('');
+            // const res = await onImport?.(repo); // 부모가 importGithubRepo 호출
+            // if (res?.ok) {
+            //     onClose();
+            //     setGhSelectedId(null);
+            //     setGhQuery('');
             } else {
                 setGhErr(res?.msg || '가져오기 실패');
             }
@@ -221,7 +253,7 @@ function AddRepoChoiceModal({open, onClose, onImport, onCreate}) {
                         animate={{y: 0, opacity: 1, scale: 1}}
                         exit={{y: 12, opacity: 0, scale: 0.98}}
                         transition={{type: 'spring', stiffness: 240, damping: 22}}
-                        className="w-[min(900px,92vw)] h-[min(600px,88vh)] rounded-xl bg-white p-6 shadow-xl relative
+                        className="w-[min(60vw)] h-[min(80vh)] rounded-xl bg-white p-6 shadow-xl relative
                             overflow-hidden flex flex-col"
                         onClick={(e) => e.stopPropagation()}
                     >

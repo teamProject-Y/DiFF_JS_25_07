@@ -75,6 +75,7 @@ export default function RepoContent({
             }
         })();
     }, [repo?.id]);
+
     const gridCols = useExternalSidebar
         ? (activeTab === 'info' ? 'grid-cols-[1fr_300px]' : 'grid-cols-1')
         : (activeTab === 'info' ? 'grid-cols-[220px_1fr_300px]' : 'grid-cols-[220px_1fr]');
