@@ -80,7 +80,7 @@ export default function RepoContent({
         : (activeTab === 'info' ? 'grid-cols-[220px_1fr_300px]' : 'grid-cols-[220px_1fr]');
 
     const createdAt = useMemo(() => {
-        const d = repo?.regDate || repo?.createdAt || repo?.created_at;
+        const d = repo?.regDate;
         return d
             ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
             : 'Unknown';
@@ -103,7 +103,6 @@ export default function RepoContent({
                             onClick={onClose}
                             className="text-md text-gray-500 hover:text-gray-800"
                         >
-                            {/* ✅ class → className */}
                             <i className="fa-solid fa-angle-left"></i>
                         </button>
                     )}
@@ -152,7 +151,7 @@ export default function RepoContent({
                         </div>
                     )}
 
-                    {/* 하단 큰 박스 — info: 추가정보 / posts: 게시물 목록 */}
+                    {/* 하단 박스 — info: 추가정보 / posts: 게시물 목록 */}
                     <div
                         className={`flex-grow bg-white p-4 mr-3 overflow-y-scroll
                         ${activeTab === 'info' ? 'rounded-xl border border-neutral-200 shadow-sm' : 'mt-2'}`}

@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { fetchUser } from "@/lib/UserAPI";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { LayoutGroup, AnimatePresence } from "framer-motion";
-import { repositoryArticles } from "@/lib/ArticleAPI";
 import { createRepository, importGithubRepo } from "@/lib/RepositoryAPI"
 
 import RepoFolder from './repoFolder';
@@ -34,7 +33,8 @@ const normalizeRepos = (raw) =>
             name,
             url,
             defaultBranch: r?.defaultBranch ?? r?.default_branch ?? '',
-            aprivate: !!(r?.aprivate ?? r?.private),
+            aprivate: !!(r?.aprivate ?? r?.aPrivate),
+            regDate: r?.regDate ?? null,
         };
     });
 
@@ -70,43 +70,45 @@ export default function RepositoriesPage() {
             });
     }, []);
 
-    const fetchRepos = useCallback(async () => {
-        const at = getAccessToken();
-        if (!at) {
-            router.replace('/DiFF/member/login');
-            return;
-        }
-        setLoadingRepos(true);
-        setError('');
-        try {
-            const res = await fetch('http://localhost:8080/api/DiFF/github/repos', {
-                method: 'GET',
-                headers: {Authorization: `Bearer ${at}`},
-                credentials: 'include',
-            });
-            const json = await res.json();
-
-            if (!res.ok || (json?.resultCode && String(json.resultCode).startsWith('F')) || json?.error) {
-                throw new Error(json?.msg || json?.message || '리포 조회 실패');
-            }
-            const list = Array.isArray(json?.data)
-                ? json.data
-                : Array.isArray(json?.data1)
-                    ? json.data1
-                    : [];
-            setRepositories(normalizeRepos(list));
-            setSelectedRepoId(null);
-        } catch (e) {
-            setError(e?.message || '요청 실패');
-        } finally {
-            setLoadingRepos(false);
-        }
-    }, [router]);
+    // const fetchRepos = useCallback(async () => {
+    //     const at = getAccessToken();
+    //     if (!at) {
+    //         router.replace('/DiFF/member/login');
+    //         return;
+    //     }
+    //     setLoadingRepos(true);
+    //     setError('');
+    //     try {
+    //         const res = await fetch('http://localhost:8080/api/DiFF/github/repos', {
+    //             method: 'GET',
+    //             headers: {Authorization: `Bearer ${at}`},
+    //             credentials: 'include',
+    //         });
+    //         const json = await res.json();
+    //
+    //         if (!res.ok || (json?.resultCode && String(json.resultCode).startsWith('F')) || json?.error) {
+    //             throw new Error(json?.msg || json?.message || '리포 조회 실패');
+    //         }
+    //         const list = Array.isArray(json?.data)
+    //             ? json.data
+    //             : Array.isArray(json?.data1)
+    //                 ? json.data1
+    //                 : [];
+    //         setRepositories(normalizeRepos(list));
+    //         setSelectedRepoId(null);
+    //     } catch (e) {
+    //         setError(e?.message || '요청 실패');
+    //     } finally {
+    //         setLoadingRepos(false);
+    //     }
+    // }, [router]);
 
     const selectedRepo = useMemo(
         () => repositories.find((r) => r.id === selectedRepoId) || null,
         [repositories, selectedRepoId]
     );
+
+    // console.log("selected repo: " + selectedRepo);
 
     useEffect(() => {
         if (selectedRepo) setTab('info');
@@ -195,13 +197,13 @@ export default function RepositoriesPage() {
                 <div className="mx-auto max-w-6xl h-full">
                     <h2 className="text-2xl font-bold mb-4 mx-4 flex items-center gap-3">
                         My Repository
-                        <button
-                            onClick={fetchRepos}
-                            disabled={loadingRepos}
-                            className="text-sm px-3 py-1.5 rounded-lg bg-black text-white hover:opacity-90 active:opacity-80 disabled:opacity-60"
-                        >
-                            {loadingRepos ? '불러오는 중…' : '리포 불러오기'}
-                        </button>
+                        {/*<button*/}
+                        {/*    onClick={fetchRepos}*/}
+                        {/*    disabled={loadingRepos}*/}
+                        {/*    className="text-sm px-3 py-1.5 rounded-lg bg-black text-white hover:opacity-90 active:opacity-80 disabled:opacity-60"*/}
+                        {/*>*/}
+                        {/*    {loadingRepos ? '불러오는 중…' : '리포 불러오기'}*/}
+                        {/*</button>*/}
                     </h2>
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
