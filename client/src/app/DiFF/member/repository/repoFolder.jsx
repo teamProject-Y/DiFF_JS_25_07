@@ -9,6 +9,16 @@ export default function RepoFolder({repositories, onSelect, onCreateRepo, onImpo
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
 
+    const visibleRepos = useMemo(() => {
+        const list = Array.isArray(repositories) ? repositories : [];
+        if (canManage) return list;
+
+        return list.filter((r) => {
+            const isPrivate = (r?.aprivate ?? r?.aPrivate) === true;
+            return !isPrivate;
+        });
+    }, [repositories, canManage]);
+
     // ESC 닫기
     useEffect(() => {
         if (!openChoice) return;
@@ -41,8 +51,8 @@ export default function RepoFolder({repositories, onSelect, onCreateRepo, onImpo
             </motion.div>
             )}
 
-            {repositories?.length > 0 ? (
-                repositories.map((repo, idx) => (
+            {visibleRepos?.length > 0 ? (
+                visibleRepos.map((repo, idx) => (
                     <motion.div
                         key={repo.id}
                         layoutId={`repo-${repo.id}`}
