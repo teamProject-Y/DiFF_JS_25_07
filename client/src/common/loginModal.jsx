@@ -24,7 +24,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
         setError(null);
 
         if (!values.email || !values.loginPw) {
-            return setError('이메일과 비밀번호를 입력하세요.');
+            return setError("이메일과 비밀번호를 입력하세요.");
         }
 
         try {
@@ -34,28 +34,33 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
             const result = await login(values);
 
             // 응답 구조 맞추기
-            const {resultCode, msg, data1: accessToken, data2: refreshToken} = result;
+            const { resultCode, msg, data1: accessToken, data2: refreshToken } = result;
 
-            if (resultCode !== 'S-1' || !accessToken) {
-                setError(msg || '로그인 실패');
+            if (resultCode !== "S-1" || !accessToken) {
+                setError(msg || "로그인 실패");
                 setSubmitting(false);
                 return;
             }
 
-            // ✅ 토큰 저장
-            localStorage.setItem('tokenType', 'Bearer');
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken || '');
-            window.dispatchEvent(new Event('auth-changed'));
+            localStorage.setItem("tokenType", "Bearer");
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken || "");
+            window.dispatchEvent(new Event("auth-changed"));
 
-            // ✅ 로그인 성공 → 메인 이동
-            window.location.href = '/DiFF/home/main'; // 🔥 강제 리로드 방식
-            // 또는 CSR 라우팅 쓰고 싶으면 router.replace('/DiFF/home/main');
+            window.location.href = "/DiFF/home/main";
         } catch (err) {
-            setError(err.response?.data?.msg || '로그인 실패: 아이디/비밀번호를 확인하세요.');
+
+            if (err.response?.status === 403) {
+                setError("이메일 인증을 완료해야 로그인할 수 있습니다.");
+            } else if (err.response?.status === 401) {
+                setError("아이디 또는 비밀번호가 잘못되었습니다.");
+            } else {
+                setError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            }
             setSubmitting(false);
         }
     };
+
 
 
     return (
