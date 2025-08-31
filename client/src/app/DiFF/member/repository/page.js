@@ -27,7 +27,7 @@ const genId = (r) =>
 const normalizeRepos = (raw) =>
     (raw || []).map((r) => {
         const name = r?.name ?? r?.full_name ?? '';
-        const url = r?.url ?? r?.html_url ?? '';
+        const url = r?.url ?? '';
         return {
             id: genId(r),
             name,
