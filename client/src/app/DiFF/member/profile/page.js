@@ -1,12 +1,12 @@
 // member/profile/page.js
 'use client';
 import ReactMarkdown from "react-markdown";
-import { useEffect, useState, Suspense } from 'react';
+import {useEffect, useState, Suspense} from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import {useRouter, useSearchParams} from 'next/navigation';
 import ThemeToggle from "@/common/thema";
 import TechBadges from "@/common/techBadges/techBadges";
-import { getMyTechKeys, getTechKeysByNickName } from "@/lib/TechAPI";
+import {getMyTechKeys, getTechKeysByNickName} from "@/lib/TechAPI";
 
 import {
     fetchUser,
@@ -20,7 +20,7 @@ import {
 export default function ProfileTab() {
     return (
         <Suspense fallback={<div className="p-8 text-sm">로딩...</div>}>
-            <ProfileInner />
+            <ProfileInner/>
         </Suspense>
     );
 }
@@ -82,7 +82,7 @@ function ProfileInner() {
 
                     console.log(`👉 로그인 사용자(${myNickName}) → target(${fetchedMember.nickName}) 팔로잉 여부 =`, following);
 
-                    setMember(prev => ({ ...prev, isFollowing: following }));
+                    setMember(prev => ({...prev, isFollowing: following}));
                 }
             })
             .catch(err => {
@@ -207,7 +207,9 @@ function ProfileInner() {
                                 {profileUrl ? (
                                     <img src={profileUrl} alt="avatar" className="h-full w-full object-cover"/>
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-4xl">🟡</div>
+                                    <div className="flex h-full w-full items-center justify-center text-6xl">
+                                        <i className="fa-solid fa-skull"></i>
+                                    </div>
                                 )}
                             </div>
 
@@ -248,14 +250,14 @@ function ProfileInner() {
                                                     console.log("👉 언팔로우 요청:", member.id);
                                                     await unfollowMember(member.id);
 
-                                                    setMember(prev => ({ ...prev, isFollowing: false }));
+                                                    setMember(prev => ({...prev, isFollowing: false}));
                                                     // 상대방 프로필이므로 followerCount 조정
                                                     setFollowerCount(prev => Math.max(0, prev - 1));
                                                 } else {
                                                     console.log("👉 팔로우 요청:", member.id);
                                                     await followMember(member.id);
 
-                                                    setMember(prev => ({ ...prev, isFollowing: true }));
+                                                    setMember(prev => ({...prev, isFollowing: true}));
                                                     // 상대방 프로필이므로 followerCount 조정
                                                     setFollowerCount(prev => prev + 1);
                                                 }
@@ -351,8 +353,9 @@ function ProfileInner() {
                                                             className="h-8 w-8 rounded-full border object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="h-8 w-8 rounded-full border flex items-center justify-center text-neutral-500">
-                                                            <i className="fa-solid fa-skull" />
+                                                        <div
+                                                            className="h-8 w-8 rounded-full border flex items-center justify-center text-neutral-500">
+                                                            <i className="fa-solid fa-skull"/>
                                                         </div>
                                                     )}
 
