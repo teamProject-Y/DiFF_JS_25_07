@@ -1,7 +1,6 @@
 // src/app/DiFF/article/write/page.js
 'use client';
-import {getDraftById} from "@/lib/DraftAPI";
-
+import {getDraftById, saveDraft} from "@/lib/DraftAPI";
 import {Suspense, useEffect, useState, useCallback, useRef} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {writeArticle, getMyRepositories} from '@/lib/ArticleAPI';
@@ -23,7 +22,6 @@ export function WriteArticlePage() {
     const sp = useSearchParams();
 
     // 쿼리스트링
-    const draftId = sp.get('draftId');
     const repoFromQuery = sp.get('repositoryId');
 
     // 상태
@@ -35,7 +33,7 @@ export function WriteArticlePage() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [repoError, setRepoError] = useState('');
-
+    const [draftId, setDraftId] = useState(sp.get('draftId'));
     // 로그인 체크
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -104,7 +102,6 @@ export function WriteArticlePage() {
             setSubmitting(true);
             const checksum = await makeChecksum(body);
 
-            // draftId도 같이 넘김 (백엔드에서 draft 삭제까지 처리)
             const data = {
                 title,
                 body,
@@ -116,9 +113,6 @@ export function WriteArticlePage() {
             const res = await writeArticle(data);
 
             console.log('📦 doWrite 응답:', res);
-            console.log('📦 repository:', res?.data?.repository);
-            console.log('📦 draft:', res?.data?.draft);
-            console.log('📦 articleId:', res?.data?.articleId);
 
             if (res?.resultCode?.startsWith('S-')) {
                 router.push(`/DiFF/article/list?repositoryId=${repositoryId}`);
@@ -135,6 +129,60 @@ export function WriteArticlePage() {
             setSubmitting(false);
         }
     };
+
+    const handleSaveDraft = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (!repositoryId) return setError('repositoryId가 없습니다.');
+        if (!title.trim() && !body.trim()) return setError('빈 글은 저장할 수 없습니다.');
+
+        try {
+            setSubmitting(true);
+            const checksum = await makeChecksum(body);
+
+            const data = {
+                id: draftId ? Number(draftId) : null, // 새 글이면 null
+                title,
+                body,
+                checksum,
+                repositoryId: Number(repositoryId)
+            };
+
+            const res = await saveDraft(data);
+
+            console.log("💾 saveDraft 응답:", res);
+            console.log("💾 resultCode:", res?.resultCode);
+            console.log("💾 msg:", res?.msg);
+            console.log("💾 data1 (draftId):", res?.data1);
+
+            if (res && res.resultCode && res.resultCode.startsWith("S-")) {
+                alert("임시저장 완료!");
+
+                // 새 글일 때 draftId 갱신 → update 모드로 전환
+                if (!draftId && res.data1) {
+                    setDraftId(res.data1);
+                }
+
+                // 👉 작성 화면 그대로 유지 (router.push 제거)
+            } else {
+                console.error("❌ saveDraft 실패 응답:", res);
+                setError(res?.msg || "임시저장 실패");
+            }
+        } catch (err) {
+            console.error("💥 saveDraft error:", err);
+            if (err?.response?.status === 401) {
+                router.replace("/DiFF/member/login");
+            } else {
+                setError(err?.response?.data?.msg || err.message || "요청 실패");
+            }
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+
+
 
     return (
         <div className="container mx-auto mt-8 p-6 w-4/5 border border-neutral-300 rounded-xl">
@@ -167,19 +215,21 @@ export function WriteArticlePage() {
             {/* 작성 폼 */}
             <form onSubmit={handleSubmit} className="space-y-4">
 
+                {/* 제목 */}
                 <input
                     className="w-full border p-2 rounded"
                     placeholder="제목"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    required
                 />
 
+                {/* 본문 */}
                 <ToastEditor initialValue={body} onChange={setBody}/>
 
                 {repositoryId && <div className="text-sm text-gray-600">repositoryId: {repositoryId}</div>}
                 {error && <div className="text-sm text-red-600">{error}</div>}
 
+                {/* 버튼들 */}
                 <div className="flex justify-between text-center">
                     <button
                         type="submit"
@@ -190,8 +240,20 @@ export function WriteArticlePage() {
                     </button>
 
                     <button
+                        type="button"
+                        onClick={handleSaveDraft}
+                        disabled={submitting || !repositoryId}
+                        className={`px-6 py-2 text-white rounded ${
+                            submitting ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-500'
+                        }`}
+                    >
+                        {submitting ? '저장 중...' : '임시저장'}
+                    </button>
+
+                    <button
+                        type="button"
                         onClick={() => router.push('/DiFF/article/drafts')}
-                        className={`px-6 py-2 text-white rounded ${submitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-500'}`}
+                        className="px-6 py-2 text-white rounded bg-gray-600 hover:bg-gray-500"
                     >
                         임시저장 글로 가기
                     </button>

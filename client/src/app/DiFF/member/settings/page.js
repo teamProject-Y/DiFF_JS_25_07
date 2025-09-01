@@ -164,7 +164,9 @@ function SettingsPage() {
                             {profileUrl ? (
                                 <img src={profileUrl} alt="avatar" className="h-full w-full object-cover"/>
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center text-4xl">🟡</div>
+                                <div className="flex h-full w-full items-center justify-center text-6xl">
+                                    <i className="fa-solid fa-skull"></i>
+                                </div>
                             )}
                         </div>
 

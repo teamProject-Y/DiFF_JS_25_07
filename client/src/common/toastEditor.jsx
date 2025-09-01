@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 
-// Cloudinary 업로드 함수
 const handleUpload = async (file) => {
     const data = new FormData();
     data.append("file", file);
@@ -15,14 +14,17 @@ const handleUpload = async (file) => {
         { method: "POST", body: data }
     );
     const result = await res.json();
-    return result.secure_url; // 업로드된 URL 반환
+    return result.secure_url;
 };
 
 export default function ToastEditor({ initialValue = "", onChange }) {
-    const editorRef = useRef();
+    const editorRef = useRef(null);
+    const instanceRef = useRef(null);
 
     useEffect(() => {
-        const instance = new Editor({
+        if (!editorRef.current) return;
+
+        instanceRef.current = new Editor({
             el: editorRef.current,
             height: "500px",
             initialEditType: "markdown",
@@ -30,20 +32,26 @@ export default function ToastEditor({ initialValue = "", onChange }) {
             initialValue: initialValue || "",
         });
 
-        instance.addHook("addImageBlobHook", async (blob /* , callback */) => {
+        instanceRef.current.addHook("addImageBlobHook", async (blob) => {
             try {
                 const url = await handleUpload(blob);
-                instance.insertText(`![image](${url})`);
+                instanceRef.current.insertText(`![image](${url})`);
             } catch (e) {
                 console.error("이미지 업로드 실패:", e);
             }
         });
 
-        instance.on("change", () => {
-            if (onChange) onChange(instance.getMarkdown());
+        instanceRef.current.on("change", () => {
+            if (onChange) onChange(instanceRef.current.getMarkdown());
         });
 
-        return () => instance.destroy();
+        return () => instanceRef.current?.destroy();
+    }, []);
+
+    useEffect(() => {
+        if (instanceRef.current && initialValue) {
+            instanceRef.current.setMarkdown(initialValue, false); // false = 커서 유지
+        }
     }, [initialValue]);
 
     return <div ref={editorRef}></div>;
