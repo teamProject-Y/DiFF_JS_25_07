@@ -99,7 +99,6 @@ function ProfileInner() {
             });
     }, [router, searchParams]);
 
-
     useEffect(() => {
         const nickName = searchParams.get("nickName");
 
@@ -398,21 +397,24 @@ function ProfileInner() {
                                             null;
 
                                         return (
-                                            <li key={u?.id ?? u?.nickName ?? idx} className="flex items-center gap-3">
+                                            <li
+                                                key={u?.id ?? u?.nickName ?? idx}
+                                                className="flex items-center gap-3"
+                                                onClick={() => setOpenModal(null)}
+                                            >
                                                 <Link
-                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? '')}`}
+                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? "")}`}
                                                     className="flex items-center gap-3 hover:underline"
                                                 >
                                                     {imgSrc ? (
                                                         <img
                                                             src={imgSrc}
-                                                            alt={u?.nickName || 'user'}
+                                                            alt={u?.nickName || "user"}
                                                             className="h-8 w-8 rounded-full border object-cover"
                                                         />
                                                     ) : (
-                                                        <div
-                                                            className="h-8 w-8 rounded-full border flex items-center justify-center text-neutral-500">
-                                                            <i className="fa-solid fa-skull"/>
+                                                        <div className="h-8 w-8 rounded-full border flex items-center justify-center text-neutral-500">
+                                                            <i className="fa-solid fa-skull" />
                                                         </div>
                                                     )}
 
@@ -420,6 +422,7 @@ function ProfileInner() {
                                                 </Link>
                                             </li>
                                         );
+
                                     })
                                 ) : (
                                     <p className="text-sm text-gray-500">조회된 사용자가 없어.</p>
