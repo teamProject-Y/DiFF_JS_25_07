@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { LayoutGroup, AnimatePresence } from "framer-motion";
 import { createRepository, importGithubRepo } from "@/lib/RepositoryAPI"
 
+import RepoPost from "./RepoPost";
 import RepoFolder from './repoFolder';
 import RepoContent from './repoContent';
 import GhostBar from './sideBar';
@@ -51,6 +52,9 @@ export default function RepositoriesPage() {
     const [isMyRepos, setIsMyRepos] = useState(false);
 
     const [tab, setTab] = useState('info');
+
+    const [open, setOpen] = useState(false);
+    const [name, setRepoName] = useState("");
 
     // 최초 1회만 사용자 레포 불러오기
     useEffect(() => {
@@ -227,7 +231,7 @@ export default function RepositoriesPage() {
                             </div>
 
                             {onClose && (
-                                <div className="absolute right-3 top-3 z-50 text-xl font-bold"
+                                <div className="absolute right-3 top-3 z-50 text-xl cursor-pointer font-bold"
                                      onClick={onClose}>
                                     <i className="fa-solid fa-xmark"></i>
                                 </div>
@@ -260,15 +264,24 @@ export default function RepositoriesPage() {
                                 <div
                                     className="relative border border-gray-300 rounded-r-lg bg-white pt-8 h-[calc(100vh-220px)] overflow-hidden">
                                     <GhostBar repositories={repositories}/>
-                                    <RepoContent
-                                        key={`detail-${selectedRepo.id}`}
-                                        repo={selectedRepo}
-                                        repositories={repositories}
-                                        onChangeRepo={setSelectedRepoId}
-                                        onClose={onClose}
-                                        useExternalSidebar={true}
-                                        activeTab={tab}
-                                    />
+
+                                    {tab === 'info' ? (
+                                        <RepoContent
+                                            key={`detail-${selectedRepo.id}`}
+                                            repo={selectedRepo}
+                                            repositories={repositories}
+                                            onChangeRepo={setSelectedRepoId}
+                                            onClose={onClose}
+                                            useExternalSidebar={true}
+                                            activeTab={tab}
+                                        />
+                                    ) : (
+                                        <RepoPost
+                                            key={`posts-${selectedRepo.id}`}
+                                            repoId={selectedRepo.id}
+                                            repoName={selectedRepo.name}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>

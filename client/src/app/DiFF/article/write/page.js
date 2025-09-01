@@ -1,18 +1,19 @@
 // src/app/DiFF/article/write/page.js
 'use client';
-import { getDraftById } from "@/lib/DraftAPI";
+import {getDraftById} from "@/lib/DraftAPI";
 
-import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { writeArticle, getMyRepositories } from '@/lib/ArticleAPI';
+import {Suspense, useEffect, useState, useCallback, useRef} from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
+import {writeArticle, getMyRepositories} from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
-const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
+
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
 
 export default function Page() {
     return (
         <Suspense fallback={<div className="p-4">Loading…</div>}>
-            <WriteArticlePage />
+            <WriteArticlePage/>
         </Suspense>
     );
 }
@@ -77,7 +78,9 @@ export function WriteArticlePage() {
                 setLoadingRepos(false);
             }
         })();
-        return () => { mounted = false; };
+        return () => {
+            mounted = false;
+        };
     }, [repoFromQuery]);
 
     // SHA-256 체크섬
@@ -95,7 +98,7 @@ export function WriteArticlePage() {
 
         if (!repositoryId) return setError('repositoryId가 없습니다.');
         if (!title.trim()) return setError('제목을 입력하세요.');
-        if (!body.trim())  return setError('내용을 입력하세요.');
+        if (!body.trim()) return setError('내용을 입력하세요.');
 
         try {
             setSubmitting(true);
@@ -163,6 +166,7 @@ export function WriteArticlePage() {
 
             {/* 작성 폼 */}
             <form onSubmit={handleSubmit} className="space-y-4">
+
                 <input
                     className="w-full border p-2 rounded"
                     placeholder="제목"
@@ -171,18 +175,27 @@ export function WriteArticlePage() {
                     required
                 />
 
-                <ToastEditor initialValue={body} onChange={setBody} />
+                <ToastEditor initialValue={body} onChange={setBody}/>
 
                 {repositoryId && <div className="text-sm text-gray-600">repositoryId: {repositoryId}</div>}
                 {error && <div className="text-sm text-red-600">{error}</div>}
 
-                <button
-                    type="submit"
-                    disabled={submitting || !repositoryId}
-                    className={`px-6 py-2 text-white rounded ${submitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-500'}`}
-                >
-                    {submitting ? '업로드 중...' : '작성하기'}
-                </button>
+                <div className="flex justify-between text-center">
+                    <button
+                        type="submit"
+                        disabled={submitting || !repositoryId}
+                        className={`px-6 py-2 text-white rounded ${submitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-500'}`}
+                    >
+                        {submitting ? '업로드 중...' : '작성하기'}
+                    </button>
+
+                    <button
+                        onClick={() => router.push('/DiFF/article/drafts')}
+                        className={`px-6 py-2 text-white rounded ${submitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-500'}`}
+                    >
+                        임시저장 글로 가기
+                    </button>
+                </div>
             </form>
         </div>
     );

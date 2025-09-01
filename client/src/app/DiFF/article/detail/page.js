@@ -543,14 +543,45 @@ function ArticleDetailInner() {
                                     ) : (
                                         // 일반 댓글 표시
                                         <div>
-                                            <div className="text-sm text-gray-400 mb-4">
-                                                {r.extra__writer} |
-                                                {new Date(r.regDate).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "short",
-                                                    day: "numeric"
-                                                })}
+                                            {/* 일반 댓글 표시 */}
+                                            <div>
+                                                <div className="flex items-center justify-between mb-3 text-sm text-gray-500">
+                                                    <div className="flex items-center gap-2">
+                                                        {/* 프로필 사진 */}
+                                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
+                                                            {r.profileUrl ? (
+                                                                <img
+                                                                    src={r.profileUrl}
+                                                                    alt={`${r.extra__writer} 프로필`}
+                                                                    className="w-8 h-8 rounded-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
+                                                                    {r.extra__writer?.[0] ?? "?"}
+                                                                </div>
+                                                            )}
+                                                        </Link>
+
+                                                        {/* 닉네임 */}
+                                                        <Link
+                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
+                                                            className="font-semibold hover:underline"
+                                                        >
+                                                            {r.extra__writer}
+                                                        </Link>
+                                                    </div>
+
+                                                    {/* 날짜 */}
+                                                    <span>
+      {new Date(r.regDate).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+      })}
+    </span>
+                                                </div>
                                             </div>
+
 
                                             <div className="flex justify-between items-center">
                                                 <p>{r.body}</p>
