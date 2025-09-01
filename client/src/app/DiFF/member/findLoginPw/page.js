@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
+import {requestPasswordReset} from "@/lib/UserAPI";
 
 export default function FindPasswordPage() {
     const [email, setEmail] = useState("");
@@ -9,11 +10,10 @@ export default function FindPasswordPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:8080/api/DiFF/member/findPw", null, {
-                params: { email },
-            });
+            await requestPasswordReset(email);
             setMessage("✅ 비밀번호 재설정 메일을 발송했습니다. 이메일을 확인하세요.");
         } catch (err) {
+            console.error("❌ 오류 발생:", err.response?.data);
             setMessage("❌ 메일 발송 실패: " + (err.response?.data || "서버 오류"));
         }
     };
