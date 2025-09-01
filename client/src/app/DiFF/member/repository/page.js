@@ -189,9 +189,6 @@ export default function RepositoriesPage() {
 
                     </div>
                     <div className="h-px w-full bg-gray-300 mb-8"/>
-                    {/*<h2 className="text-2xl font-bold mb-4 mx-4 flex items-center gap-3">*/}
-                    {/*    Repositories*/}
-                    {/*</h2>*/}
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
