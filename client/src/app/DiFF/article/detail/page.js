@@ -3,7 +3,12 @@
 import {Suspense, useEffect, useRef, useState} from 'react';
 import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
-import { fetchUser, getFollowingList, followMember, unfollowMember } from '@/lib/UserAPI';
+import {
+    fetchUser,
+    followMember,
+    unfollowMember,
+    getFollowingList
+} from '@/lib/UserAPI';
 import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
 import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
 import {
@@ -153,6 +158,62 @@ function ArticleDetailInner() {
         };
     }, [menuOpen]);
 
+    // 👇 다양한 응답 키를 하나의 숫자 id로 정규화
+    const toId = (u) => Number(u?.id ?? u?.memberId ?? u?.userId ?? u?.targetId ?? u?.followingsId ?? u?.followingId);
+
+    // 팔로우 관련
+    useEffect(() => {
+
+        (async () => {
+            if (!article?.extra__writer) return;
+
+            try {
+                // 작성자 정보에서 memberId 확보
+                const ures = await fetchUser(article.extra__writer);
+                const targetId = Number(ures?.member?.id) || null;
+                setWriterMemberId(targetId);
+
+                const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
+                const myNick = typeof window !== 'undefined' ? localStorage.getItem('nickName') : null;
+
+                // 내 글이면 버튼 숨김용으로만 false
+                if (myNick && myNick === article.extra__writer) {
+                    setIsFollowing(false);
+                    return;
+                }
+
+                // 3) 내가 팔로우 중인지 서버에서 확인
+                if (myNick && targetId) {
+                    // 프로필 페이지와 동일하게 '내 닉네임'을 넘겨 호출 (백엔드 스펙에 맞춤)
+                    const fl = await getFollowingList(myNick);
+
+                    // 응답 모양 방어적으로 처리
+                    const list =
+                        fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
+
+                    // 안전한 ID 추출 함수 (toId 대신 내부 정의)
+                    const getId = (m) =>
+                        Number(
+                            m?.id ??
+                            m?.memberId ??
+                            m?.userId ??
+                            m?.targetId ??
+                            (m?.user && m.user.id) ??
+                            0
+                        );
+
+                    const following = list.some((m) => getId(m) === targetId);
+                    setIsFollowing(following);
+                } else {
+                    setIsFollowing(false);
+                }
+            } catch (e) {
+                console.error('❌ 팔로우 초기화 실패:', e);
+                setIsFollowing(false);
+            }
+        })();
+    }, [id, article?.extra__writer]);
+
     // 게시글 삭제
     const handleDelete = async (id) => {
 
@@ -253,6 +314,44 @@ function ArticleDetailInner() {
         }
     };
 
+    // 팔로우/언팔로우
+    const handleFollowToggle = async () => {
+        if (!writerMemberId) return;
+        if (followBusy) return;
+        setFollowBusy(true);
+        try {
+            // 1) 서버에 반영
+            if (isFollowing) {
+                const res = await unfollowMember(writerMemberId);
+                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true;
+                if (!ok) throw new Error(res?.msg || '언팔로우 실패');
+            } else {
+                const res = await followMember(writerMemberId);
+                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true;
+                if (!ok) throw new Error(res?.msg || '팔로우 실패');
+            }
+
+            // 2) 서버 진실값으로 재동기화(새로고침해도 동일)
+            const myNick = typeof window !== 'undefined' ? localStorage.getItem('nickName') : null;
+            if (myNick) {
+                const fl = await getFollowingList(myNick);
+                const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
+                const followingNow = list.some(u => toId(u) === Number(writerMemberId));
+                setIsFollowing(followingNow);
+            }
+        } catch (e) {
+            console.error('❌ 팔로우/언팔로우 실패:', e);
+            alert('처리 실패');
+        } finally {
+            setFollowBusy(false);
+        }
+    };
+
+// render 함수 상단(early return들 지나고)에서 추가
+    const myNick = typeof window !== 'undefined' ? localStorage.getItem('nickName') : null;
+    const isMyPost = myNick && article?.extra__writer && myNick === article.extra__writer;
+
+
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
@@ -260,197 +359,217 @@ function ArticleDetailInner() {
         <>
             <LoadingOverlay show={loading}/>
 
-            {errMsg ? (
-                <div className="p-6 max-w-3xl mx-auto">
-                    <p className="text-red-500">{errMsg}</p>
-                </div>
-            ) : (
-                <div className="max-w-3xl mx-auto">
-                    {/* title */}
-                    <div className="flex justify-between">
-                        <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
+        {errMsg ? (
+            <div className="p-6 max-w-3xl mx-auto">
+                <p className="text-red-500">{errMsg}</p>
+            </div>
+        ) : (
+            <div className="max-w-3xl mx-auto">
+                {/* title */}
+                <div className="flex justify-between">
+                    <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
-                        <div className="relative">
-                            <button
-                                ref={menuBtnRef}
-                                type="button"
-                                aria-haspopup="menu"
-                                aria-expanded={menuOpen}
-                                onClick={() => setMenuOpen(v => !v)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'ArrowDown' && !menuOpen) {
-                                        e.preventDefault();
-                                        setMenuOpen(true);
-                                    }
-                                }}
-                                className="p-2 hover:text-gray-900"
-                            >
-                                <i className="fa-solid fa-ellipsis-vertical"/>
-                            </button>
-
-                            {menuOpen && (
-                                <div
-                                    ref={menuRef}
-                                    role="menu"
-                                    className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
-                                                divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
-                                    onKeyDown={(e) => {
-                                        const items = Array.from(menuRef.current?.querySelectorAll('[role="menuitem"]') || []);
-                                        const i = items.indexOf(document.activeElement);
-                                        let next = i;
-                                        if (e.key === 'ArrowDown') {
-                                            e.preventDefault();
-                                            next = (i + 1) % items.length;
-                                        }
-                                        if (e.key === 'ArrowUp') {
-                                            e.preventDefault();
-                                            next = (i - 1 + items.length) % items.length;
-                                        }
-                                        if (e.key === 'Home') {
-                                            e.preventDefault();
-                                            next = 0;
-                                        }
-                                        if (e.key === 'End') {
-                                            e.preventDefault();
-                                            next = items.length - 1;
-                                        }
-                                        if (items[next]) items[next].focus();
-                                    }}
-                                >
-                                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                        {article.userCanModify && (
-                                            <li>
-                                                <Link
-                                                    href={`/DiFF/article/modify?id=${article.id}`}
-                                                    role="menuitem"
-                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    onClick={() => setMenuOpen(false)}
-                                                >
-                                                    수정
-                                                </Link>
-                                            </li>
-                                        )}
-                                        {article.userCanDelete && (
-                                            <li>
-                                                <Link
-                                                    href={`/DiFF/article/modify?id=${article.id}`}
-                                                    role="menuitem"
-                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    onClick={() => setMenuOpen(false)}
-                                                >
-                                                    삭제
-                                                </Link>
-                                            </li>
-                                        )}
-                                    </ul>
-                                    <div className="py-1">
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100
-                                                    dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                            onClick={async () => {
-                                                try {
-                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
-                                                    // 표준 클립보드 API
-                                                    await navigator.clipboard.writeText(url);
-                                                    alert('링크가 복사되었습니다.');
-                                                } catch {
-                                                    // 구형 브라우저 폴백
-                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
-                                                    const input = document.createElement('input');
-                                                    input.value = url;
-                                                    document.body.appendChild(input);
-                                                    input.select();
-                                                    document.execCommand('copy');
-                                                    document.body.removeChild(input);
-                                                    alert('링크가 복사되었습니다.');
-                                                } finally {
-                                                    setMenuOpen(false);
-                                                }
-                                            }}
-                                        >
-                                            <i className="fa-solid fa-share-nodes mr-2"></i>
-                                            링크 복사
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    {/* article info */}
-                    <div className="text-gray-600 mb-6 flex justify-between">
-                        <div className="flex justify-start">
-                            <div
-                                onClick={(e) => {
-                                    e.stopPropagation(); // 부모 Link 클릭 막기
+                    <div className="relative">
+                        <button
+                            ref={menuBtnRef}
+                            type="button"
+                            aria-haspopup="menu"
+                            aria-expanded={menuOpen}
+                            onClick={() => setMenuOpen(v => !v)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown' && !menuOpen) {
                                     e.preventDefault();
-                                    window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(
-                                        article.extra__writer
-                                    )}`;
+                                    setMenuOpen(true);
+                                }
+                            }}
+                            className="p-2 hover:text-gray-900"
+                        >
+                            <i className="fa-solid fa-ellipsis-vertical"/>
+                        </button>
+
+                        {menuOpen && (
+                            <div
+                                ref={menuRef}
+                                role="menu"
+                                className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
+                                                divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
+                                onKeyDown={(e) => {
+                                    const items = Array.from(menuRef.current?.querySelectorAll('[role="menuitem"]') || []);
+                                    const i = items.indexOf(document.activeElement);
+                                    let next = i;
+                                    if (e.key === 'ArrowDown') {
+                                        e.preventDefault();
+                                        next = (i + 1) % items.length;
+                                    }
+                                    if (e.key === 'ArrowUp') {
+                                        e.preventDefault();
+                                        next = (i - 1 + items.length) % items.length;
+                                    }
+                                    if (e.key === 'Home') {
+                                        e.preventDefault();
+                                        next = 0;
+                                    }
+                                    if (e.key === 'End') {
+                                        e.preventDefault();
+                                        next = items.length - 1;
+                                    }
+                                    if (items[next]) items[next].focus();
                                 }}
-                                className="mx-2 hover:underline hover:text-black cursor-pointer text-md font-semibold"
                             >
-                                {article.extra__writer}
+                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                    {article.userCanModify && (
+                                        <li>
+                                            <Link
+                                                href={`/DiFF/article/modify?id=${article.id}`}
+                                                role="menuitem"
+                                                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                onClick={() => setMenuOpen(false)}
+                                            >
+                                                수정
+                                            </Link>
+                                        </li>
+                                    )}
+                                    {article.userCanDelete && (
+                                        <li>
+                                            <Link
+                                                href={`/DiFF/article/modify?id=${article.id}`}
+                                                role="menuitem"
+                                                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                onClick={() => setMenuOpen(false)}
+                                            >
+                                                삭제
+                                            </Link>
+                                        </li>
+                                    )}
+                                </ul>
+                                <div className="py-1">
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100
+                                                    dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                        onClick={async () => {
+                                            try {
+                                                const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                                // 표준 클립보드 API
+                                                await navigator.clipboard.writeText(url);
+                                                alert('링크가 복사되었습니다.');
+                                            } catch {
+                                                // 구형 브라우저 폴백
+                                                const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                                const input = document.createElement('input');
+                                                input.value = url;
+                                                document.body.appendChild(input);
+                                                input.select();
+                                                document.execCommand('copy');
+                                                document.body.removeChild(input);
+                                                alert('링크가 복사되었습니다.');
+                                            } finally {
+                                                setMenuOpen(false);
+                                            }
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-share-nodes mr-2"></i>
+                                        링크 복사
+                                    </button>
+                                </div>
                             </div>
-                            <div className="mx-2 text-gray-500">{new Date(article.regDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                            })}</div>
+                        )}
+                    </div>
+                </div>
+                {/* article info */}
+                <div className="text-gray-600 mb-6 flex justify-between">
+                    <div className="flex justify-start">
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation(); // 부모 Link 클릭 막기
+                                e.preventDefault();
+                                window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(
+                                    article.extra__writer
+                                )}`;
+                            }}
+                            className="mx-2 hover:underline hover:text-black cursor-pointer text-md font-semibold"
+                        >
+                            {article.extra__writer}
                         </div>
+                        <div className="mx-2 text-gray-500">{new Date(article.regDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric"
+                        })}</div>
+                    </div>
+
+                    {/* 우측: 팔로우 버튼 + 좋아요 */}
+                    <div className="flex items-center gap-4">
+                        {/* 팔로우 버튼 (내 글이면 숨김) */}
+                        {!isMyPost && (
+                            <button
+                                onClick={handleFollowToggle}
+                                disabled={followBusy || !writerMemberId}
+                                className={`rounded-full border px-5 py-1.5 text-sm font-semibold transition
+        ${isFollowing
+                                    ? 'border-red-500 text-white bg-red-500 hover:bg-red-600'
+                                    : 'border-emerald-500 text-emerald-600 hover:bg-emerald-50'}
+        ${followBusy ? 'opacity-60 cursor-not-allowed' : ''}
+      `}
+                            >
+                                {isFollowing ? '언팔로우' : '팔로우'}
+                            </button>
+                        )}
+
+                        {/* 좋아요 */}
                         <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
-                            <i
-                                className={`${liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"} fa-heart text-xl`}
-                            ></i>
+                            <i className={`${liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"} fa-heart text-xl`}/>
                             <span className="text-sm text-gray-700">{likeCount}</span>
                         </div>
                     </div>
 
-                    {/* 본문 */}
-                    <div
-                        className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
-                        <ToastViewer content={article.body} showImages={true}/>
-                    </div>
+                </div>
 
-                    {/* 하단 버튼 영역 */}
-                    <div className="mt-8 flex gap-4">
-                        <button
-                            onClick={() => router.back()}
-                            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+                {/* 본문 */}
+                <div
+                    className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
+                    <ToastViewer content={article.body} showImages={true}/>
+                </div>
+
+                {/* 하단 버튼 영역 */}
+                <div className="mt-8 flex gap-4">
+                    <button
+                        onClick={() => router.back()}
+                        className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+                    >
+                        뒤로가기
+                    </button>
+
+                    {article.userCanModify && (
+                        <Link
+                            href={`/DiFF/article/modify?id=${article.id}`}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                         >
-                            뒤로가기
+                            수정
+                        </Link>
+                    )}
+
+                    {article.userCanDelete && (
+                        <button
+                            onClick={() => handleDelete(article.id)}
+                            disabled={deleting}
+                            className={`px-4 py-2 rounded transition ${
+                                deleting
+                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
+                        >
+                            {deleting ? "삭제중…" : "삭제하기"}
                         </button>
+                    )}
+                </div>
 
-                        {article.userCanModify && (
-                            <Link
-                                href={`/DiFF/article/modify?id=${article.id}`}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                            >
-                                수정
-                            </Link>
-                        )}
-
-                        {article.userCanDelete && (
-                            <button
-                                onClick={() => handleDelete(article.id)}
-                                disabled={deleting}
-                                className={`px-4 py-2 rounded transition ${
-                                    deleting
-                                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                        : "bg-red-500 text-white hover:bg-red-600"
-                                }`}
-                            >
-                                {deleting ? "삭제중…" : "삭제하기"}
-                            </button>
-                        )}
-                    </div>
-
-                    {/* 댓글 입력 */}
-                    <div className="mt-10">
-                        <form onSubmit={handleSubmitreply}>
-                            <label htmlFor="chat" className="sr-only">댓글 작성</label>
-                            <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                {/* 댓글 입력 */}
+                <div className="mt-10">
+                    <form onSubmit={handleSubmitreply}>
+                        <label htmlFor="chat" className="sr-only">댓글 작성</label>
+                        <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
                                 <textarea
                                     id="chat"
                                     rows="1"
@@ -461,200 +580,203 @@ function ArticleDetailInner() {
                                                dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="댓글을 입력하세요"
                                 />
-                                <button
-                                    type="submit"
-                                    className="inline-flex justify-center p-4 text-blue-600 rounded-md cursor-pointer
+                            <button
+                                type="submit"
+                                className="inline-flex justify-center p-4 text-blue-600 rounded-md cursor-pointer
                                                hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+                            >
+                                <svg
+                                    className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="currentColor"
+                                    viewBox="0 0 18 20"
                                 >
-                                    <svg
-                                        className="w-5 h-5 rotate-90 rtl:-rotate-90"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="currentColor"
-                                        viewBox="0 0 18 20"
-                                    >
-                                        <path
-                                            d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
-                                    </svg>
-                                    <span className="sr-only">댓글 전송</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                                    <path
+                                        d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
+                                </svg>
+                                <span className="sr-only">댓글 전송</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-                    {/* 댓글 목록 */}
-                    <div className="my-6 space-y-4">
-                        {replyLoading ? (
-                            <p className="text-gray-500">댓글 불러오는 중...</p>
-                        ) : replies.length === 0 ? (
-                            <p className="text-gray-500">아직 댓글이 없습니다.</p>
-                        ) : (
-                            replies.map((r) => (
-                                <div key={r.id} className="mb-2 border-b pb-2">
-                                    {r.isEditing ? (
-                                        // 댓글 수정
-                                        <div>
-                                            <div className="text-sm text-gray-400 mb-4">
-                                                {r.extra__writer} |
-                                                {new Date(r.regDate).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "short",
-                                                    day: "numeric"
-                                                })}
-                                            </div>
-                                            <textarea
-                                                className="border w-full p-2 rounded-lg"
-                                                rows="1"
-                                                value={r.body}
-                                                onChange={(e) =>
+                {/* 댓글 목록 */}
+                <div className="my-6 space-y-4">
+                    {replyLoading ? (
+                        <p className="text-gray-500">댓글 불러오는 중...</p>
+                    ) : replies.length === 0 ? (
+                        <p className="text-gray-500">아직 댓글이 없습니다.</p>
+                    ) : (
+                        replies.map((r) => (
+                            <div key={r.id} className="mb-2 border-b pb-2">
+                                {r.isEditing ? (
+                                    // 댓글 수정
+                                    <div>
+                                        <div className="text-sm text-gray-400 mb-4">
+                                            {r.extra__writer} |
+                                            {new Date(r.regDate).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "short",
+                                                day: "numeric"
+                                            })}
+                                        </div>
+                                        <textarea
+                                            className="border w-full p-2 rounded-lg"
+                                            rows="1"
+                                            value={r.body}
+                                            onChange={(e) =>
+                                                setReplies((prev) =>
+                                                    prev.map((item) =>
+                                                        item.id === r.id ? {...item, body: e.target.value} : item
+                                                    )
+                                                )
+                                            }
+                                        />
+                                        <div className="mt-1 flex gap-2">
+                                            <button
+                                                onClick={async () => {
+                                                    const res = await modifyReply(r.id, r.body);
+                                                    if (res.resultCode.startsWith("S-")) {
+                                                        setReplies((prev) =>
+                                                            prev.map((item) =>
+                                                                item.id === r.id ? {
+                                                                    ...item,
+                                                                    isEditing: false
+                                                                } : item
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                                className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                                            >
+                                                저장
+                                            </button>
+                                            <button
+                                                onClick={() =>
                                                     setReplies((prev) =>
                                                         prev.map((item) =>
-                                                            item.id === r.id ? {...item, body: e.target.value} : item
+                                                            item.id === r.id ? {...item, isEditing: false} : item
                                                         )
                                                     )
                                                 }
-                                            />
-                                            <div className="mt-1 flex gap-2">
-                                                <button
-                                                    onClick={async () => {
-                                                        const res = await modifyReply(r.id, r.body);
-                                                        if (res.resultCode.startsWith("S-")) {
-                                                            setReplies((prev) =>
-                                                                prev.map((item) =>
-                                                                    item.id === r.id ? {
-                                                                        ...item,
-                                                                        isEditing: false
-                                                                    } : item
-                                                                )
-                                                            );
-                                                        }
-                                                    }}
-                                                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                                                >
-                                                    저장
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        setReplies((prev) =>
-                                                            prev.map((item) =>
-                                                                item.id === r.id ? {...item, isEditing: false} : item
-                                                            )
-                                                        )
-                                                    }
-                                                    className="px-2 py-1 bg-gray-400 text-white rounded text-xs"
-                                                >
-                                                    취소
-                                                </button>
-                                            </div>
+                                                className="px-2 py-1 bg-gray-400 text-white rounded text-xs"
+                                            >
+                                                취소
+                                            </button>
                                         </div>
-                                    ) : (
-                                        // 일반 댓글 표시
+                                    </div>
+                                ) : (
+                                    // 일반 댓글 표시
+                                    <div>
+                                        {/* 일반 댓글 표시 */}
                                         <div>
-                                            {/* 일반 댓글 표시 */}
-                                            <div>
-                                                <div className="flex items-center justify-between mb-3 text-sm text-gray-500">
-                                                    <div className="flex items-center gap-2">
-                                                        {/* 프로필 사진 */}
-                                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
-                                                            {r.profileUrl ? (
-                                                                <img
-                                                                    src={r.profileUrl}
-                                                                    alt={`${r.extra__writer} 프로필`}
-                                                                    className="w-8 h-8 rounded-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
-                                                                    {r.extra__writer?.[0] ?? "?"}
-                                                                </div>
-                                                            )}
-                                                        </Link>
+                                            <div
+                                                className="flex items-center justify-between mb-3 text-sm text-gray-500">
+                                                <div className="flex items-center gap-2">
+                                                    {/* 프로필 사진 */}
+                                                    <Link
+                                                        href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
+                                                        {r.profileUrl ? (
+                                                            <img
+                                                                src={r.profileUrl}
+                                                                alt={`${r.extra__writer} 프로필`}
+                                                                className="w-8 h-8 rounded-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div
+                                                                className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
+                                                                {r.extra__writer?.[0] ?? "?"}
+                                                            </div>
+                                                        )}
+                                                    </Link>
 
-                                                        {/* 닉네임 */}
-                                                        <Link
-                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
-                                                            className="font-semibold hover:underline"
-                                                        >
-                                                            {r.extra__writer}
-                                                        </Link>
-                                                    </div>
+                                                    {/* 닉네임 */}
+                                                    <Link
+                                                        href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
+                                                        className="font-semibold hover:underline"
+                                                    >
+                                                        {r.extra__writer}
+                                                    </Link>
+                                                </div>
 
-                                                    {/* 날짜 */}
-                                                    <span>
+                                                {/* 날짜 */}
+                                                <span>
       {new Date(r.regDate).toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
           day: "numeric"
       })}
     </span>
-                                                </div>
-                                            </div>
-
-
-                                            <div className="flex justify-between items-center">
-                                                <p>{r.body}</p>
-
-                                                <div className="flex gap-2 items-center">
-                                                    {/* 댓글 좋아요 버튼 */}
-                                                    <button
-                                                        onClick={() => handleReplyLikeToggle(r.id, r.liked)}
-                                                        className="flex items-center gap-1 text-sm"
-                                                    >
-                                                        <i
-                                                            className={`${
-                                                                r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"
-                                                            } fa-heart`}
-                                                        />
-                                                        <span>{r.likeCount ?? 0}</span>
-                                                    </button>
-
-                                                    {/* 수정/삭제 버튼 */}
-                                                    {r.userCanModify && (
-                                                        <button
-                                                            onClick={() =>
-                                                                setReplies((prev) =>
-                                                                    prev.map((item) =>
-                                                                        item.id === r.id ? {
-                                                                            ...item,
-                                                                            isEditing: true
-                                                                        } : item
-                                                                    )
-                                                                )
-                                                            }
-                                                            className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
-                                                        >
-                                                            수정
-                                                        </button>
-                                                    )}
-                                                    {r.userCanDelete && (
-                                                        <button
-                                                            onClick={async () => {
-                                                                if (confirm("정말 삭제하시겠습니까?")) {
-                                                                    const res = await deleteReply(r.id);
-                                                                    if (res.resultCode.startsWith("S-")) {
-                                                                        setReplies((prev) => prev.filter((item) => item.id !== r.id));
-                                                                        alert("댓글이 삭제 되었습니다.");
-                                                                    }
-                                                                }
-                                                            }}
-                                                            className="px-2 py-1 bg-red-500 text-white rounded text-xs"
-                                                        >
-                                                            삭제
-                                                        </button>
-                                                    )}
-                                                </div>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            ))
-                        )}
-                    </div>
 
-                    <div className="h-32 w-full">
 
-                    </div>
+                                        <div className="flex justify-between items-center">
+                                            <p>{r.body}</p>
+
+                                            <div className="flex gap-2 items-center">
+                                                {/* 댓글 좋아요 버튼 */}
+                                                <button
+                                                    onClick={() => handleReplyLikeToggle(r.id, r.liked)}
+                                                    className="flex items-center gap-1 text-sm"
+                                                >
+                                                    <i
+                                                        className={`${
+                                                            r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"
+                                                        } fa-heart`}
+                                                    />
+                                                    <span>{r.likeCount ?? 0}</span>
+                                                </button>
+
+                                                {/* 수정/삭제 버튼 */}
+                                                {r.userCanModify && (
+                                                    <button
+                                                        onClick={() =>
+                                                            setReplies((prev) =>
+                                                                prev.map((item) =>
+                                                                    item.id === r.id ? {
+                                                                        ...item,
+                                                                        isEditing: true
+                                                                    } : item
+                                                                )
+                                                            )
+                                                        }
+                                                        className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
+                                                    >
+                                                        수정
+                                                    </button>
+                                                )}
+                                                {r.userCanDelete && (
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm("정말 삭제하시겠습니까?")) {
+                                                                const res = await deleteReply(r.id);
+                                                                if (res.resultCode.startsWith("S-")) {
+                                                                    setReplies((prev) => prev.filter((item) => item.id !== r.id));
+                                                                    alert("댓글이 삭제 되었습니다.");
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                                                    >
+                                                        삭제
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
                 </div>
-            )}
+
+                <div className="h-32 w-full">
+
+                </div>
+            </div>
+        )}
         </>
     );
 }

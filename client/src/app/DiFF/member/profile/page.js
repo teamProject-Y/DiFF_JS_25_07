@@ -4,9 +4,6 @@ import ReactMarkdown from "react-markdown";
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import ThemeToggle from "@/common/thema";
-import TechBadges from "@/common/techBadges/techBadges";
-import { getMyTechKeys, getTechKeysByNickName } from "@/lib/TechAPI";
 
 import {
     fetchUser,
@@ -35,7 +32,6 @@ function ProfileInner() {
     const [isMyProfile, setIsMyProfile] = useState(false);
     const [profileUrl, setProfileUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
-    const [techKeys, setTechKeys] = useState([]);
 
     const [followingCount, setFollowingCount] = useState(0);
     const [followerCount, setFollowerCount] = useState(0);
