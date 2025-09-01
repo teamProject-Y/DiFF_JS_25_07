@@ -107,35 +107,33 @@ export default function RepoContent({
                             <i className="fa-solid fa-angle-left"></i>
                         </button>
                     )}
-                    <ul className="space-y-2">
-                        <li
-                            key="repo-plus"
-                            className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 text-blue-600 font-semibold"
-                            onClick={() => window.open('https://github.com/new', '_blank')}
-                            title="깃허브로 리포지토리 추가"
-                        >
-                            <i className="fa-solid fa-circle-plus text-neutral-500"/>
-                            <span className="truncate">깃허브로 리포지토리 추가</span>
-                        </li>
-                        {repositories.map((r) => {
-                            const sel = r.id === repo?.id;
-                            return (
-                                <motion.li
-                                    key={r.id}
-                                    variants={listItem}
-                                    className={`px-3 py-2 rounded cursor-pointer text-sm hover:bg-gray-200 transition ${
-                                        sel ? 'bg-gray-200 font-semibold' : ''
-                                    }`}
-                                    onClick={() => onChangeRepo?.(r.id)}
-                                >
-                                    <i className={`mr-2 fa-solid ${sel ? 'fa-folder-open' : 'fa-folder'}`}/>
-                                    {r.name}
-                                </motion.li>
-                            );
-                        })}
-                    </ul>
+                    {/*<ul className="space-y-2 bg-red-500">*/}
+
+                    {/*    {repositories.map((r) => {*/}
+                    {/*        const sel = r.id === repo?.id;*/}
+                    {/*        return (*/}
+                    {/*            <motion.li*/}
+                    {/*                key={r.id}*/}
+                    {/*                variants={listItem}*/}
+                    {/*                className={`px-3 py-2 rounded cursor-pointer text-sm hover:bg-gray-200 transition ${*/}
+                    {/*                    sel ? 'bg-gray-200 font-semibold' : ''*/}
+                    {/*                }`}*/}
+                    {/*                onClick={() => onChangeRepo?.(r.id)}*/}
+                    {/*            >*/}
+                    {/*                <i className={`mr-2 fa-solid ${sel ? 'fa-folder-open' : 'fa-folder'}`}/>*/}
+                    {/*                {r.name}*/}
+                    {/*            </motion.li>*/}
+                    {/*        );*/}
+                    {/*    })}*/}
+                    {/*</ul>*/}
                 </aside>
             )}
+
+            {repositories.length === 0 &&
+            <div className="w-full h-full bg-red-400">
+
+            </div>
+            }
 
             {/* 중앙 메인 */}
             <div className="min-w-0 min-h-0 flex flex-col">
