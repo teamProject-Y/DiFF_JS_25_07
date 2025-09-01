@@ -4,16 +4,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 
-import LoginForm from '@/common/loginModal'; // 폼만
+import LoginForm from '@/common/loginModal';
 import JoinForm from '@/common/joinModal';
-import ModalOpenIntro from "@/common/anime/modalOpenIntro";   // 폼만
+import ModalOpenIntro from "@/common/anime/modalOpenIntro";
 
 export default function ModalLayout({ children }) {
     const router = useRouter();
     const pathname = usePathname();
     const sp = useSearchParams();
 
-    // 1) 이 경로에만 모달을 켠다
     const isModalRoute = useMemo(
         () => /\/DiFF\/member\/(login|join)$/.test(pathname || ''),
         [pathname]
@@ -23,7 +22,7 @@ export default function ModalLayout({ children }) {
         [pathname]
     );
 
-    // 2) 슬라이드 방향
+    // 슬라이드 방향
     const prevRef = useRef(mode);
     const [dir, setDir] = useState(1);
     useEffect(() => {
@@ -39,10 +38,10 @@ export default function ModalLayout({ children }) {
 
     const panelX = mode === 'join' ? 0 : '-100%';
 
-    // 3) 닫기: 항상 메인으로 replace
+    // 닫기: 항상 메인으로 replace
     const closeToMain = () => router.replace('/DiFF/home/main');
 
-    // 4) 모달이 아닌 경로에서는 아예 렌더하지 않음(완전히 언마운트)
+    // 모달이 아닌 경로에서는 아예 렌더하지 않음(완전히 언마운트)
     return (
         <AnimatePresence mode="wait">
             {isModalRoute && (
@@ -73,10 +72,12 @@ export default function ModalLayout({ children }) {
                         <div className="relative w-[min(1100px,92vw)] h-[min(640px,78vh)] rounded-3xl overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.35)] bg-white">
                             <button
                                 onClick={closeToMain}
-                                className="absolute right-3 top-3 z-20 h-9 w-9 rounded-full bg-black text-white text-lg"
+                                className="absolute right-4 top-4 z-20 h-8 w-8 rounded-full text-xl
+                                flex justify-center items-center"
                                 aria-label="close"
                             >
-                                ×
+                                <i className={`fa-solid fa-xmark 
+                                ${mode === 'join' ? 'text-white' : ''}`}></i>
                             </button>
 
                             <div className="relative grid grid-cols-2 w-full h-full">
