@@ -1,34 +1,39 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import styled from 'styled-components';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { fetchUser } from '@/lib/UserAPI';
+import {motion, useMotionValue, useTransform} from 'framer-motion';
+import {fetchUser} from '@/lib/UserAPI';
 import {searchArticles} from "@/lib/ArticleAPI";
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
+import {usePathname, useSearchParams} from 'next/navigation';
 
-const HeaderWrap = styled.div `
-width: 100%; 
-position: fixed; 
-top: 0; 
-right: 0; 
-left: 0; 
-z-index: 100; 
-display: flex; 
-flex-direction: row; 
-align-items: center; 
-justify-content: space-between; 
-padding: 0 24px; 
-font-weight: 700; font-size: 13px; 
-letter-spacing: 0.02rem; 
-backdrop-filter: blur(10px); 
--webkit-backdrop-filter: blur(10px); 
-transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; 
-will-change: transform, height, background-color; 
-&.hide { transform: translateY(-100%); 
-opacity: 0; 
-pointer-events: none; }`
+const HeaderWrap = styled.div`
+    width: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+    will-change: transform, height, background-color;
+
+    &.hide {
+        transform: translateY(-100%);
+        opacity: 0;
+        pointer-events: none;
+    }`
 ;
 
 export default function Header() {
@@ -38,11 +43,14 @@ export default function Header() {
 
     const y = useMotionValue(0);
     const background = useTransform(y, [0, 100], ['rgba(0,183,255,0)', 'rgba(0,183,255,1)']);
-    const height     = useTransform(y, [0, 100], [120, 60]);
+    const height = useTransform(y, [0, 100], [120, 60]);
     const [keyword, setKeyword] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     useEffect(() => {
         const isScrollable = (el) => {
@@ -53,7 +61,7 @@ export default function Header() {
 
         const findRoot = () =>
             document.getElementById('pageScroll') ||                 // 페이지가 우선
-            document.getElementById('appScroll')  ||                 // 레이아웃 래퍼
+            document.getElementById('appScroll') ||                 // 레이아웃 래퍼
             Array.from(document.querySelectorAll('*')).find(isScrollable) ||
             window;
 
@@ -76,7 +84,7 @@ export default function Header() {
             target = next;
             last = getTop();
             y.set(last);
-            target.addEventListener('scroll', onScroll, { passive: true });
+            target.addEventListener('scroll', onScroll, {passive: true});
         };
 
         // 최초 연결
@@ -88,7 +96,7 @@ export default function Header() {
             if (next !== target) retarget(next);
             if (target !== window && !document.contains(target)) retarget(window);
         });
-        mo.observe(document.body, { childList: true, subtree: true, attributes: true });
+        mo.observe(document.body, {childList: true, subtree: true, attributes: true});
 
         return () => {
             target?.removeEventListener?.('scroll', onScroll);
@@ -158,6 +166,18 @@ export default function Header() {
         return () => clearTimeout(timer);
     }, [keyword]);
 
+    useEffect(() => {
+        // 검색 페이지가 아니면 비움 → placeholder 노출
+        if (!pathname?.startsWith('/DiFF/article/search')) {
+            setKeyword('');
+            setResults([]);
+            return;
+        }
+        // 검색 페이지면 URL 쿼리(keyword)로 입력창 채움 (없으면 빈 값)
+        const q = searchParams.get('keyword') ?? '';
+        setKeyword(q);
+    }, [pathname, searchParams]);
+
     const handleSearch = (e) => {
         e.preventDefault();
         if (!keyword.trim()) return;
@@ -168,61 +188,64 @@ export default function Header() {
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
                         `}
-                    style={{ backgroundColor: background, height }}>
+                    style={{backgroundColor: background, height}}>
 
             <div className="pl-4">
                 <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold">DiFF</Link>
             </div>
 
-            {/* ✅ 검색창 */}
-            <form onSubmit={handleSearch} className="relative flex items-center gap-2">
-                <input
-                    type="text"
-                    placeholder="검색 (닉네임·제목·내용)"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    className="px-3 py-1 border rounded-md text-sm w-64 focus:outline-none"
-                />
-                <button type="submit" className="px-3 py-1 bg-black text-white rounded-md">
-                    검색
-                </button>
+            {/* 검색창 */}
+            <form onSubmit={handleSearch} className="relative flex items-center gap-2 ">
+                <div className="px-3 flex rounded-full border text-neutral-500 overflow-hidden">
+                    <input
+                        type="text"
+                        placeholder="search"
+                        value={keyword}
+                        autoComplete="on"
+                        onChange={(e) => setKeyword(e.target.value)}
+                        className="p-2 w-64 focus:outline-none"
+                    />
+                    <button type="submit" className="">
+                        <i className="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
 
-                {/* 🔽 드롭다운 결과 */}
-                {keyword && results.length > 0 && (
-                    <div className="absolute top-full mt-1 bg-white border rounded-md shadow-lg w-64 max-h-60 overflow-y-auto z-50">
-                        {loading ? (
-                            <p className="p-2 text-sm text-gray-500">검색 중...</p>
-                        ) : (
-                            <ul>
-                                {results.map((a) => (
-                                    <li key={a.id}>
-                                        <Link
-                                            href={`/DiFF/article/detail?id=${a.id}`}
-                                            className="block px-3 py-2 hover:bg-gray-100"
-                                            onClick={() => setKeyword('')}
-                                        >
-                                            <span className="font-semibold">{a.title}</span>
-                                            <p className="text-xs text-gray-600">by {a.nickName}</p>
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                )}
+                {/* 드롭다운 결과 */}
+                {/*{keyword && results.length > 0 && (*/}
+                {/*    <div className="absolute top-full mt-1 bg-white border rounded-md shadow-lg w-64 max-h-60 overflow-y-auto z-50">*/}
+                {/*        {loading ? (*/}
+                {/*            <p className="p-2 text-sm text-gray-500">검색 중...</p>*/}
+                {/*        ) : (*/}
+                {/*            <ul>*/}
+                {/*                {results.map((a) => (*/}
+                {/*                    <li key={a.id}>*/}
+                {/*                        <Link*/}
+                {/*                            href={`/DiFF/article/detail?id=${a.id}`}*/}
+                {/*                            className="block px-3 py-2 hover:bg-gray-100"*/}
+                {/*                            onClick={() => setKeyword('')}*/}
+                {/*                        >*/}
+                {/*                            <span className="font-semibold">{a.title}</span>*/}
+                {/*                            <p className="text-xs text-gray-600">by {a.nickName}</p>*/}
+                {/*                        </Link>*/}
+                {/*                    </li>*/}
+                {/*                ))}*/}
+                {/*            </ul>*/}
+                {/*        )}*/}
+                {/*    </div>*/}
+                {/*)}*/}
             </form>
 
             <ul className="flex gap-8 text-xl font-semibold pr-8">
                 {accessToken ? (
                     <>
-                        <li><i className="fa-solid fa-bell" /></li>
+                        <li><i className="fa-solid fa-bell"/></li>
                         <li><Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link></li>
                         <li><Link href="/DiFF/member/profile">MYPAGE</Link></li>
                     </>
                 ) : (
                     <>
                         <li><Link href="/DiFF/member/login" scroll={false} prefetch={false}>LOGIN</Link></li>
-                        <li><Link href="/DiFF/member/join"  scroll={false} prefetch={false}>JOIN</Link></li>
+                        <li><Link href="/DiFF/member/join" scroll={false} prefetch={false}>JOIN</Link></li>
                     </>
                 )}
             </ul>
