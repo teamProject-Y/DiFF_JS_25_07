@@ -77,14 +77,14 @@ function ProfileInner() {
                 } else {
                     setIsMyProfile(false);
 
-                    // ✅ 로그인한 사용자의 팔로잉 목록 조회 (내 기준)
+                    // 로그인한 사용자의 팔로잉 목록 조회 (내 기준)
                     const followRes = await getFollowingList(myNickName);
                     console.log("팔로잉 API 응답:", followRes);
 
                     const list = followRes.followingList || followRes.data1 || [];
                     console.log("팔로잉 리스트:", list);
 
-                    // ✅ 상대방이 내 팔로잉 목록에 있는지 확인
+                    // 상대방이 내 팔로잉 목록에 있는지 확인
                     const following = list.some(m => m.id === fetchedMember.id);
 
                     console.log(`👉 로그인 사용자(${myNickName}) → target(${fetchedMember.nickName}) 팔로잉 여부 =`, following);
@@ -108,7 +108,7 @@ function ProfileInner() {
                 const followingRes = await getFollowingList(nickName);
                 const followerRes = await getFollowerList(nickName);
 
-                // ✅ 응답 구조에 맞게 꺼내기
+                // 응답 구조에 맞게 꺼내기
                 const followingList = followingRes.followingList || followingRes.data1 || [];
                 const followerList = followerRes.followerList || followerRes.data1 || [];
 
@@ -133,7 +133,7 @@ function ProfileInner() {
             getFollowerList(nickName)
                 .then((res) => {
                     console.log("팔로워 API 응답:", res);
-                    // ✅ 올바른 키로 파싱
+                    // 올바른 키로 파싱
                     setFollowerList(res.followerList || res.data1 || []);
                 })
                 .catch((err) => console.error("팔로워 목록 로딩 오류:", err));
@@ -143,7 +143,7 @@ function ProfileInner() {
             getFollowingList(nickName)
                 .then((res) => {
                     console.log("팔로잉 API 응답:", res);
-                    // ✅ 올바른 키로 파싱
+                    // 올바른 키로 파싱
                     setFollowingList(res.followingList || res.data1 || []);
                 })
                 .catch((err) => console.error("팔로잉 목록 로딩 오류:", err));
@@ -164,7 +164,6 @@ function ProfileInner() {
         }
     };
 
-
     // 소셜 로그인 통합, 연동
     const startLink = (provider) => {
         if (provider !== 'google' && provider !== 'github') return;
@@ -176,6 +175,9 @@ function ProfileInner() {
     if (loading) return <div>로딩...</div>;
     if (!member) return null;
 
+    const repoHref =
+        isMyProfile ? '/DiFF/member/repository'
+            : `/DiFF/member/repository?nickName=${encodeURIComponent(member?.nickName ?? '')}`;
 
     return (
         <section className="px-4 dark:bg-gray-900 dark:text-white">
@@ -186,8 +188,9 @@ function ProfileInner() {
                 )}
 
                 {/* Tabs */}
-                <div className="mb-3 flex items-center gap-6 text-2xl font-semibold">
-                    <span className="text-black">Profile</span>
+                <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
+                    <span className="">Profile</span>
+                    <Link href={repoHref} className="text-gray-400 hover:text-gray-700">Repositories</Link>
                     {isMyProfile && (
                         <Link
                             href="/DiFF/member/settings"
@@ -211,7 +214,9 @@ function ProfileInner() {
                                 {profileUrl ? (
                                     <img src={profileUrl} alt="avatar" className="h-full w-full object-cover"/>
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-4xl">🟡</div>
+                                    <div className="flex h-full w-full items-center justify-center text-6xl">
+                                        <i className="fa-solid fa-skull"></i>
+                                    </div>
                                 )}
                             </div>
 
@@ -292,7 +297,7 @@ function ProfileInner() {
                                 </button>
                             </div>
 
-                            {/* ✅ 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
+                            {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
                             {!isMyProfile && (
                                 <div className="mt-4 flex justify-center">
                                     <button
@@ -302,15 +307,15 @@ function ProfileInner() {
                                                     console.log("👉 언팔로우 요청:", member.id);
                                                     await unfollowMember(member.id);
 
-                                                    setMember(prev => ({ ...prev, isFollowing: false }));
-                                                    // ✅ 상대방 프로필이므로 followerCount 조정
+                                                    setMember(prev => ({...prev, isFollowing: false}));
+                                                    // 상대방 프로필이므로 followerCount 조정
                                                     setFollowerCount(prev => Math.max(0, prev - 1));
                                                 } else {
                                                     console.log("👉 팔로우 요청:", member.id);
                                                     await followMember(member.id);
 
-                                                    setMember(prev => ({ ...prev, isFollowing: true }));
-                                                    // ✅ 상대방 프로필이므로 followerCount 조정
+                                                    setMember(prev => ({...prev, isFollowing: true}));
+                                                    // 상대방 프로필이므로 followerCount 조정
                                                     setFollowerCount(prev => prev + 1);
                                                 }
                                             } catch (err) {
@@ -386,25 +391,41 @@ function ProfileInner() {
                             </h2>
                             <ul className="max-h-60 space-y-2 overflow-y-auto">
                                 {(openModal === 'follower' ? followerList : followingList)?.length ? (
-                                    (openModal === 'follower' ? followerList : followingList).map((u, idx) => (
-                                        <li key={idx} className="flex items-center gap-3">
-                                            <Link
-                                                href={`/DiFF/member/profile?nickName=${encodeURIComponent(u.nickName)}`}
-                                                className="flex items-center gap-3 hover:underline"
-                                            >
-                                                <img
-                                                    src={u.profileImg || u.profileUrl || ''}
-                                                    alt={u.nickName}
-                                                    className="h-8 w-8 rounded-full border object-cover"
-                                                />
-                                                <span>{u.nickName}</span>
-                                            </Link>
-                                        </li>
-                                    ))
+                                    (openModal === 'follower' ? followerList : followingList).map((u, idx) => {
+                                        const imgSrc =
+                                            (typeof u?.profileImg === 'string' && u.profileImg.trim()) ||
+                                            (typeof u?.profileUrl === 'string' && u.profileUrl.trim()) ||
+                                            null;
+
+                                        return (
+                                            <li key={u?.id ?? u?.nickName ?? idx} className="flex items-center gap-3">
+                                                <Link
+                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? '')}`}
+                                                    className="flex items-center gap-3 hover:underline"
+                                                >
+                                                    {imgSrc ? (
+                                                        <img
+                                                            src={imgSrc}
+                                                            alt={u?.nickName || 'user'}
+                                                            className="h-8 w-8 rounded-full border object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div
+                                                            className="h-8 w-8 rounded-full border flex items-center justify-center text-neutral-500">
+                                                            <i className="fa-solid fa-skull"/>
+                                                        </div>
+                                                    )}
+
+                                                    <span>{u?.nickName}</span>
+                                                </Link>
+                                            </li>
+                                        );
+                                    })
                                 ) : (
                                     <p className="text-sm text-gray-500">조회된 사용자가 없어.</p>
                                 )}
                             </ul>
+
                             <button
                                 onClick={() => setOpenModal(null)}
                                 className="mt-4 rounded bg-gray-200 px-4 py-2 text-sm"
