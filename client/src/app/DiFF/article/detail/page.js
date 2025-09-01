@@ -3,6 +3,7 @@
 import {Suspense, useEffect, useRef, useState} from 'react';
 import {useSearchParams, useRouter} from 'next/navigation';
 import Link from 'next/link';
+import { fetchUser, getFollowingList, followMember, unfollowMember } from '@/lib/UserAPI';
 import {getArticle, deleteArticle, postReply, fetchReplies} from '@/lib/ArticleAPI';
 import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
 import {
@@ -36,6 +37,12 @@ function ArticleDetailInner() {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
     const menuRef = useRef(null);
+
+    // 팔로우 관련
+    const [writerMemberId, setWriterMemberId] = useState(null);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followBusy, setFollowBusy] = useState(false);
+
 
     // 게시글 불러오기
     useEffect(() => {
