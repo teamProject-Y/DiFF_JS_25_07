@@ -36,7 +36,20 @@ const normalizeRepos = (raw) =>
             url,
             defaultBranch: r?.defaultBranch ?? r?.default_branch ?? '',
             aprivate: !!(r?.aprivate ?? r?.aPrivate),
-            regDate: r?.regDate ?? null,
+            regDate: r?.regDate
+                ? new Date(r.regDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                })
+                : null,
+            updateDate: r?.updateDate
+                ? new Date(r.updateDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                })
+                : null,
         };
     });
 
@@ -245,12 +258,12 @@ export default function RepositoriesPage() {
                             ))}
                         </div>
 
-                        {onClose && (
-                            <div className="absolute right-3 top-3 z-50 text-xl cursor-pointer font-bold"
-                                 onClick={onClose}>
-                                <i className="fa-solid fa-xmark"></i>
-                            </div>
-                        )}
+                        {/*{onClose && (*/}
+                        {/*    <div className="absolute right-3 top-3 z-50 text-xl cursor-pointer font-bold"*/}
+                        {/*         onClick={onClose}>*/}
+                        {/*        <i className="fa-solid fa-xmark"></i>*/}
+                        {/*    </div>*/}
+                        {/*)}*/}
 
                         <div className="grid grid-cols-[230px_1fr] items-start">
                             {/* 왼쪽 사이드바 */}
@@ -285,7 +298,7 @@ export default function RepositoriesPage() {
                             {/* 메인 컨텐츠 */}
                             <div
                                 className="relative border border-gray-300 rounded-r-lg bg-white pt-8 h-[calc(100vh-220px)] overflow-hidden">
-                                <GhostBar repositories={repositories}/>
+                                {/*<GhostBar repositories={repositories}/>*/}
 
                                 {/* 리포 없을 때 */}
                                 {repositories.length === 0 ? (

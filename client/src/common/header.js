@@ -195,6 +195,7 @@ export default function Header() {
             </div>
 
             {/* 검색창 */}
+            {accessToken &&
             <form onSubmit={handleSearch} className="relative flex items-center gap-2 ">
                 <div className="px-3 flex rounded-full border text-neutral-500 overflow-hidden">
                     <input
@@ -234,6 +235,7 @@ export default function Header() {
                 {/*    </div>*/}
                 {/*)}*/}
             </form>
+            }
 
             <ul className="flex gap-8 text-xl font-semibold pr-8">
                 {accessToken ? (

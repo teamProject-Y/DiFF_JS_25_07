@@ -1,10 +1,8 @@
 'use client';
 
 import {motion} from 'framer-motion';
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState, useRef} from 'react';
 import {useRouter} from 'next/navigation';
-import {fetchUser} from '@/lib/UserAPI';
-import {fetchArticles, getAverageMetrics} from '@/lib/ArticleAPI';
 
 // 애니메이션
 const container = {
@@ -21,26 +19,6 @@ const container = {
     exit: {x: -40, opacity: 0, transition: {type: 'spring', stiffness: 120, damping: 20}},
 };
 
-const listItem = {
-    hidden: {x: -10, opacity: 0},
-    show: {x: 0, opacity: 1, transition: {type: 'spring', stiffness: 220, damping: 18}},
-};
-
-const block = {
-    hidden: {y: 8, opacity: 0, scale: 0.98},
-    show: {y: 0, opacity: 1, scale: 1, transition: {type: 'spring', bounce: 0.28, duration: 0.45}},
-};
-
-const cardsWrap = {
-    hidden: {},
-    show: {transition: {staggerChildren: 0.06, delayChildren: 0.02}},
-};
-
-const card = {
-    hidden: {y: 10, opacity: 0, scale: 0.98},
-    show: {y: 0, opacity: 1, scale: 1, transition: {type: 'spring', bounce: 0.30, duration: 0.5}},
-};
-
 export default function RepoContent({
                                         repo,
                                         repositories = [],
@@ -54,38 +32,65 @@ export default function RepoContent({
     const [articles, setArticles] = useState([]);
     const [articleLoading, setArticleLoading] = useState(false);
     const [metrics, setMetrics] = useState(null);
-
-    // repo 바뀔 때 기사/메트릭 로딩
+    const [editingName, setEditingName] = useState(false);
+    const [nameInput, setNameInput] = useState(repo?.name ?? '');
     useEffect(() => {
-        if (!repo?.id) return;
-        (async () => {
-            setArticleLoading(true);
-            try {
-                const res = await fetchArticles({
-                    repositoryId: repo.id,
-                    page: 1,
-                    searchItem: 0,
-                    keyword: '',
-                });
-                setArticles(res?.articles || []);
-                const m = await getAverageMetrics(repo.id).catch(() => null);
-                setMetrics(m);
-            } finally {
-                setArticleLoading(false);
-            }
-        })();
-    }, [repo?.id]);
+        setNameInput(repo?.name ?? '');
+    }, [repo?.name]);
 
-    const gridCols = useExternalSidebar
-        ? (activeTab === 'info' ? 'grid-cols-[1fr_300px]' : 'grid-cols-1')
-        : (activeTab === 'info' ? 'grid-cols-[220px_1fr_300px]' : 'grid-cols-[220px_1fr]');
+    const onSaveName = async () => {
+        try {
+            // TODO: 저장 엔드포인트 연결
+            // await api.updateRepoName({ id: repo.id, name: nameInput });
+            setEditingName(false);
+        } catch (e) {
+            console.error(e);
+            alert('이름 저장 중 오류가 발생했습니다.');
+        }
+    };
 
-    const createdAt = useMemo(() => {
-        const d = repo?.regDate;
-        return d
-            ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-            : 'Unknown';
-    }, [repo]);
+// 언어 데이터 정규화
+    const rawLang = repo?.languages;
+    const langList = Array.isArray(rawLang)
+        ? rawLang
+        : rawLang && typeof rawLang === 'object'
+            ? Object.entries(rawLang).map(([name, bytes]) => ({name, bytes}))
+            : [];
+    const totalBytes = langList.reduce((a, b) => a + (b.bytes || 0), 0);
+    const pct = (v) => (totalBytes ? Math.round((v / totalBytes) * 100) : 0);
+
+// 추천 표시 정보
+    const created = repo?.reDate || null;
+    const updated = repo?.updateDate || null;
+    const defaultBranch = repo?.defaultBranch || 'main';
+    const visibility = (repo.aprivate ? 'private' : 'public');
+    const license = (repo?.license && (repo.license.name || repo.license)) || '—';
+    const topics = repo?.topics || repo?.tags || [];
+    const stats = {
+        stars: repo?.stargazersCount || repo?.stars || 0,
+        forks: repo?.forksCount || repo?.forks || 0,
+        issues: repo?.openIssuesCount || repo?.issues || 0,
+        watchers: repo?.subscribersCount || repo?.watchers || 0,
+    };
+
+    const nameRef = useRef(null);
+
+    const enterEdit = () => {
+        setEditingName(true);
+        // 인풋 자동 포커스
+        setTimeout(() => nameRef.current?.focus?.(), 0);
+    };
+
+    const cancelEdit = () => {
+        setEditingName(false);
+        setNameInput(repo?.name ?? '');
+    };
+
+    const onKeyDownName = (e) => {
+        if (e.key === 'Enter') onSaveName();
+        if (e.key === 'Escape') cancelEdit();
+    };
+
 
     return (
         <motion.div
@@ -94,7 +99,7 @@ export default function RepoContent({
             initial="hidden"
             animate="show"
             exit="hidden"
-            className={`absolute inset-0 grid ${gridCols} gap-6 p-8 bg-white`}
+            className={`absolute inset-0 pt-10 px-6 overflow-y-auto`}
         >
             {/* 왼쪽 레일 */}
             {!useExternalSidebar && (
@@ -102,45 +107,27 @@ export default function RepoContent({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="text-md text-gray-500 hover:text-gray-800"
+                            className="w-full text-md text-gray-500 hover:text-gray-800"
                         >
                             <i className="fa-solid fa-angle-left"></i>
                         </button>
                     )}
-                    {/*<ul className="space-y-2 bg-red-500">*/}
-
-                    {/*    {repositories.map((r) => {*/}
-                    {/*        const sel = r.id === repo?.id;*/}
-                    {/*        return (*/}
-                    {/*            <motion.li*/}
-                    {/*                key={r.id}*/}
-                    {/*                variants={listItem}*/}
-                    {/*                className={`px-3 py-2 rounded cursor-pointer text-sm hover:bg-gray-200 transition ${*/}
-                    {/*                    sel ? 'bg-gray-200 font-semibold' : ''*/}
-                    {/*                }`}*/}
-                    {/*                onClick={() => onChangeRepo?.(r.id)}*/}
-                    {/*            >*/}
-                    {/*                <i className={`mr-2 fa-solid ${sel ? 'fa-folder-open' : 'fa-folder'}`}/>*/}
-                    {/*                {r.name}*/}
-                    {/*            </motion.li>*/}
-                    {/*        );*/}
-                    {/*    })}*/}
-                    {/*</ul>*/}
                 </aside>
             )}
 
             {repositories.length === 0 &&
-            <div className="w-full h-full bg-red-400">
+                <div className="w-full h-full bg-red-400">
 
-            </div>
+                </div>
             }
 
-            {/* 중앙 메인 */}
-            <div className="min-w-0 min-h-0 flex flex-col">
-                <div className="flex-1 overflow-y-auto px-0 pb-2 flex flex-col">
-                    {/* info 전용 */}
-                    {activeTab === 'info' && (
-                        <div className="flex-grow rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mb-3 mr-3">
+            <div className="flex gap-3 min-h-0 w-full overflow-y-scroll">
+                {/* 중앙 메인(Info) */}
+                <div className="flex-grow flex flex-col">
+                    <div className="flex-1 overflow-y-auto px-0 pb-2 flex flex-col">
+                        {/* 상단 카드 */}
+                        <div
+                            className="flex-grow rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mb-3 mr-3">
                             <div className="h-full flex items-center justify-center text-neutral-500">
                                 <div className="text-center">
                                     <div className="text-lg font-semibold mb-1">{repo?.name ?? 'Repository'}</div>
@@ -148,92 +135,142 @@ export default function RepoContent({
                                 </div>
                             </div>
                         </div>
-                    )}
 
-                    {/* 하단 박스 — info: 추가정보 / posts: 게시물 목록 */}
-                    <div
-                        className={`flex-grow bg-white p-4 mr-3 overflow-y-scroll
-                        ${activeTab === 'info' ? 'rounded-xl border border-neutral-200 shadow-sm' : 'mt-2'}`}
-                                        >
-                    {activeTab === 'info' ? (
+                        {/* 하단 박스 */}
+                        <div
+                            className="flex-grow bg-white p-4 mr-3 overflow-y-scroll rounded-xl border border-neutral-200 shadow-sm">
                             <div className="h-full flex items-center justify-center text-neutral-500">
                                 추가 정보(커밋 타임라인/브랜치/이슈 요약 등)
                             </div>
-                        ) : (
-                            <>
-                                {articleLoading ? (
-                                    <p>Loading...</p>
-                                ) : articles.length > 0 ? (
-                                    <motion.div
-                                        variants={cardsWrap}
-                                        initial="hidden"
-                                        animate="show"
-                                        className="grid grid-cols-1 gap-4"
-                                    >
-                                        {articles.map((a, i) => (
-                                            <motion.div
-                                                key={a.id ?? i}
-                                                variants={card}
-                                                className="h-32 rounded-lg border border-neutral-200 bg-white shadow-sm p-3 hover:shadow-md transition cursor-pointer"
-                                                onClick={() => router.push(`/DiFF/article/detail?id=${a.id}`)}
-                                            >
-                                                <div className="font-semibold line-clamp-1">
-                                                    {a.title || `게시물 ${i + 1}`}
-                                                </div>
-                                                <div className="text-xs text-neutral-500 mt-1">
-                                                    {a.extra__writer || '익명'} · {a.regDate
-                                                    ? new Date(a.regDate).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    })
-                                                    : ''}
-                                                </div>
-                                                <p className="text-sm mt-2 line-clamp-2">
-                                                    {a.body?.slice?.(0, 120) || '요약...'}
-                                                </p>
-                                            </motion.div>
-                                        ))}
-                                    </motion.div>
-                                ) : (
-                                    <p>등록된 게시물이 없습니다.</p>
-                                )}
-                            </>
-                        )}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {activeTab === 'info' && (
-                <aside className="min-w-[280px]">
-                    <div className="rounded-full w-10 h-10 flex items-center justify-center mx-auto">
-                        <a
-                            href={repo.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title={repo.name}
-                        >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                        </a>
-                    </div>
-
-                    <div className="my-6 border-t"/>
-
+                <div className="w-[30%] space-y-3">
                     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
-                        <div className="text-sm text-neutral-500">Created</div>
-                        <div className="text-base font-semibold mt-1">{createdAt}</div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center min-w-0 flex-grow">
+                                {editingName ? (
+                                    <>
+                                        <input
+                                            ref={nameRef}
+                                            value={nameInput}
+                                            onChange={(e) => setNameInput(e.target.value)}
+                                            onKeyDown={onKeyDownName}
+                                            className="flex-grow min-w-0 px-1 py-2 rounded-md border
+                                            focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                            placeholder="Repository name"
+                                        />
+                                        <button
+                                            onClick={onSaveName}
+                                            className="p-1"
+                                            title="Save"
+                                            aria-label="Save name"
+                                        >
+                                            <i className="fa-solid fa-check"></i>
+                                        </button>
+                                        <button
+                                            onClick={cancelEdit}
+                                            className=""
+                                            title="Cancel"
+                                            aria-label="Cancel edit"
+                                        >
+                                            <i className="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="text-xl font-semibold break-all pl-1">
+                                            {repo?.name ?? 'Repository'}
+                                        </p>
+                                        <button
+                                            onClick={enterEdit}
+                                            className="pl-2 pb-1 text-xs text-neutral-300"
+                                            title="Rename"
+                                            aria-label="Rename repository"
+                                        >
+                                            <i className="fa-solid fa-pen"></i>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+
+                        </div>
+
+                        <div className="mt-2 flex w-full text-sm justify-between items-center">
+                            <div className="py-2"><i className="fa-solid fa-calendar text-neutral-400"></i> {repo.regDate}</div>
+                            <span className="ml-auto text-xs px-2 py-1 rounded-full bg-neutral-100 border">
+                              {visibility}
+                            </span>
+                            {repo?.url && (
+                                <a
+                                    href={repo.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={repo?.name}
+                                    className="shrink-0"
+                                >
+                                    &nbsp;&nbsp;<i className="fa-brands fa-github text-2xl"></i>
+                                </a>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="my-6 border-t"/>
+                    {/* 통계 */}
+                    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
+                        <div className="grid grid-cols-4 gap-4 text-center">
+                            <div>
+                                <div className="text-neutral-500 text-xs">Stars</div>
+                                <div className="text-lg font-semibold mt-0.5">{stats.stars}</div>
+                            </div>
+                            <div>
+                                <div className="text-neutral-500 text-xs">Forks</div>
+                                <div className="text-lg font-semibold mt-0.5">{stats.forks}</div>
+                            </div>
+                            <div>
+                                <div className="text-neutral-500 text-xs">Issues</div>
+                                <div className="text-lg font-semibold mt-0.5">{stats.issues}</div>
+                            </div>
+                            <div>
+                                <div className="text-neutral-500 text-xs">Watchers</div>
+                                <div className="text-lg font-semibold mt-0.5">{stats.watchers}</div>
+                            </div>
+                        </div>
+                    </div>
 
+                    {/* 언어 비율 */}
                     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
                         <div className="font-semibold mb-3">Languages</div>
-                        <div className="text-sm text-neutral-500">도넛 차트 영역(언어 비율) — 추후 실제 데이터 바인딩</div>
+                        {langList.length ? (
+                            <ul className="space-y-3">
+                                {langList
+                                    .sort((a, b) => (b.bytes || 0) - (a.bytes || 0))
+                                    .map((l, i) => (
+                                        <li key={i}>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="font-medium">{l.name}</span>
+                                                <span className="text-neutral-500">{pct(l.bytes)}%</span>
+                                            </div>
+                                            <div
+                                                className="w-full h-2 rounded-full bg-neutral-100 overflow-hidden mt-1">
+                                                <div
+                                                    className="h-full rounded-full bg-black/80"
+                                                    style={{width: `${pct(l.bytes)}%`}}
+                                                />
+                                            </div>
+                                        </li>
+                                    ))}
+                            </ul>
+                        ) : (
+                            <div className="text-sm text-neutral-500">
+                                도넛 차트 영역(언어 비율) — 추후 실제 데이터 바인딩
+                            </div>
+                        )}
                     </div>
-                </aside>
-            )}
+
+                </div>
+
+            </div>
         </motion.div>
     );
 }
