@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { fetchUser } from '@/lib/UserAPI';
 import {searchArticles} from "@/lib/ArticleAPI";
+import { useRouter } from 'next/navigation';
 
 const HeaderWrap = styled.div `
 width: 100%; 
@@ -41,7 +42,7 @@ export default function Header() {
     const [keyword, setKeyword] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
-
+    const router = useRouter();
 
     useEffect(() => {
         const isScrollable = (el) => {
@@ -152,10 +153,17 @@ export default function Header() {
             } finally {
                 setLoading(false);
             }
-        }, 300); // 입력 후 300ms 디바운스
+        }, 300);
 
         return () => clearTimeout(timer);
     }, [keyword]);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (!keyword.trim()) return;
+        router.push(`/DiFF/article/search?keyword=${encodeURIComponent(keyword)}`);
+        setResults([]); // 드롭다운 닫기
+    };
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
@@ -167,20 +175,23 @@ export default function Header() {
             </div>
 
             {/* ✅ 검색창 */}
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative flex items-center gap-2">
                 <input
                     type="text"
-                    placeholder="검색어를 입력하세요"
+                    placeholder="검색 (닉네임·제목·내용)"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     className="px-3 py-1 border rounded-md text-sm w-64 focus:outline-none"
                 />
-                {keyword && (
-                    <div className="absolute mt-1 bg-white border rounded-md shadow-lg w-64 max-h-60 overflow-y-auto z-50">
+                <button type="submit" className="px-3 py-1 bg-black text-white rounded-md">
+                    검색
+                </button>
+
+                {/* 🔽 드롭다운 결과 */}
+                {keyword && results.length > 0 && (
+                    <div className="absolute top-full mt-1 bg-white border rounded-md shadow-lg w-64 max-h-60 overflow-y-auto z-50">
                         {loading ? (
                             <p className="p-2 text-sm text-gray-500">검색 중...</p>
-                        ) : results.length === 0 ? (
-                            <p className="p-2 text-sm text-gray-500">검색 결과 없음</p>
                         ) : (
                             <ul>
                                 {results.map((a) => (
@@ -188,7 +199,7 @@ export default function Header() {
                                         <Link
                                             href={`/DiFF/article/detail?id=${a.id}`}
                                             className="block px-3 py-2 hover:bg-gray-100"
-                                            onClick={() => setKeyword('')} // 선택 시 검색창 초기화
+                                            onClick={() => setKeyword('')}
                                         >
                                             <span className="font-semibold">{a.title}</span>
                                             <p className="text-xs text-gray-600">by {a.nickName}</p>
@@ -199,7 +210,8 @@ export default function Header() {
                         )}
                     </div>
                 )}
-            </div>
+            </form>
+
             <ul className="flex gap-8 text-xl font-semibold pr-8">
                 {accessToken ? (
                     <>
