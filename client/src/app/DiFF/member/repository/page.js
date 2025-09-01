@@ -231,7 +231,7 @@ export default function RepositoriesPage() {
                             </div>
 
                             {onClose && (
-                                <div className="absolute right-3 top-3 z-50 text-xl font-bold"
+                                <div className="absolute right-3 top-3 z-50 text-xl cursor-pointer font-bold"
                                      onClick={onClose}>
                                     <i className="fa-solid fa-xmark"></i>
                                 </div>
