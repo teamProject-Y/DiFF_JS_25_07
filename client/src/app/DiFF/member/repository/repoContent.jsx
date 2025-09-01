@@ -128,6 +128,7 @@ export default function RepoContent({
                         {/* 상단 카드 */}
                         <div
                             className="flex-grow rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mb-3 mr-3">
+
                             <div className="h-full flex items-center justify-center text-neutral-500">
                                 <div className="text-center">
                                     <div className="text-lg font-semibold mb-1">{repo?.name ?? 'Repository'}</div>

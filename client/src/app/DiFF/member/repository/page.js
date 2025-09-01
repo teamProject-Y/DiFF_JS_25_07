@@ -257,7 +257,6 @@ export default function RepositoriesPage() {
                                 </button>
                             ))}
                         </div>
-
                         {/*{onClose && (*/}
                         {/*    <div className="absolute right-3 top-3 z-50 text-xl cursor-pointer font-bold"*/}
                         {/*         onClick={onClose}>*/}
