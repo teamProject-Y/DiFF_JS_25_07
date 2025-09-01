@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { fetchUser } from '@/lib/UserAPI';
+import {searchArticles} from "@/lib/ArticleAPI";
+import { useRouter } from 'next/navigation';
 
 const HeaderWrap = styled.div `
 width: 100%; 
@@ -34,13 +36,14 @@ export default function Header() {
     const [accessToken, setAccessToken] = useState(null);
     const [hide, setHide] = useState(false);
 
-    // ▲ 모션값
     const y = useMotionValue(0);
     const background = useTransform(y, [0, 100], ['rgba(0,183,255,0)', 'rgba(0,183,255,1)']);
     const height     = useTransform(y, [0, 100], [120, 60]);
+    const [keyword, setKeyword] = useState('');
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
-    // ▲ 스크롤 루트 자동 탐지 + 라우트 전환 시 재연결
-    // src/common/header.js (핵심 useEffect만)
     useEffect(() => {
         const isScrollable = (el) => {
             if (!el || el === window) return false;
@@ -130,14 +133,85 @@ export default function Header() {
         }
     };
 
+    useEffect(() => {
+        if (!keyword.trim()) {
+            setResults([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            try {
+                setLoading(true);
+                const res = await searchArticles(keyword);
+                if (res?.resultCode?.startsWith('S-')) {
+                    setResults(res.data1 || []);
+                } else {
+                    setResults([]);
+                }
+            } catch (err) {
+                console.error('검색 실패:', err);
+                setResults([]);
+            } finally {
+                setLoading(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [keyword]);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (!keyword.trim()) return;
+        router.push(`/DiFF/article/search?keyword=${encodeURIComponent(keyword)}`);
+        setResults([]); // 드롭다운 닫기
+    };
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
                         `}
                     style={{ backgroundColor: background, height }}>
+
             <div className="pl-4">
                 <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold">DiFF</Link>
             </div>
+
+            {/* ✅ 검색창 */}
+            <form onSubmit={handleSearch} className="relative flex items-center gap-2">
+                <input
+                    type="text"
+                    placeholder="검색 (닉네임·제목·내용)"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    className="px-3 py-1 border rounded-md text-sm w-64 focus:outline-none"
+                />
+                <button type="submit" className="px-3 py-1 bg-black text-white rounded-md">
+                    검색
+                </button>
+
+                {/* 🔽 드롭다운 결과 */}
+                {keyword && results.length > 0 && (
+                    <div className="absolute top-full mt-1 bg-white border rounded-md shadow-lg w-64 max-h-60 overflow-y-auto z-50">
+                        {loading ? (
+                            <p className="p-2 text-sm text-gray-500">검색 중...</p>
+                        ) : (
+                            <ul>
+                                {results.map((a) => (
+                                    <li key={a.id}>
+                                        <Link
+                                            href={`/DiFF/article/detail?id=${a.id}`}
+                                            className="block px-3 py-2 hover:bg-gray-100"
+                                            onClick={() => setKeyword('')}
+                                        >
+                                            <span className="font-semibold">{a.title}</span>
+                                            <p className="text-xs text-gray-600">by {a.nickName}</p>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )}
+            </form>
+
             <ul className="flex gap-8 text-xl font-semibold pr-8">
                 {accessToken ? (
                     <>

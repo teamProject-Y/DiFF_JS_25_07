@@ -240,4 +240,7 @@ export async function increaseArticleHits(articleId) {
     return res.json();
 }
 
-
+export const searchArticles = async (keyword) => {
+    const res = await ArticleAPI.get(`/api/DiFF/article/search`, { params: { keyword } });
+    return res.data;  // { resultCode, msg, data1: [articles] }
+};
