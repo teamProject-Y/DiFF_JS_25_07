@@ -218,8 +218,21 @@ export default function Page() {
 
             {/* trending */}
             <div id="trending" className="is-light-bg w-full h-screen snap-start px-20 pt-20" ref={el => sectionRefs.current[2] = el}>
-                <div className="text-5xl text-black font-bold">Trending</div>
-                <div className="article-slider h-2/3 w-full mt-8 flex">
+                <div className="text-3xl text-black font-bold">TRENDING</div>
+                <div className="article-slider h-2/3 w-full mt-8 flex relative">
+                    <div className="flex absolute right-0 -top-16  font-extralight text-3xl text-neutral-500 z-10">
+                        <button className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
+                                <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </button>
+                        <button className="custom-next rounded-full  m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
+                                <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+
                     {loading ? (
                         <div className="flex justify-between w-full items-start">
                             <div className="w-[30.446%] h-[90%] p-4 bg-white shadow-md rounded-md"></div>
@@ -234,7 +247,10 @@ export default function Page() {
                                 loop={true}
                                 autoplay={{delay: 3000}}
                                 slidesPerView={4}
-                                navigation
+                                navigation={{
+                                    prevEl: ".custom-prev",
+                                    nextEl: ".custom-next",
+                                }}
                                 pagination={{clickable: true}}
                                 allowTouchMove={true}
                                 observer={true}

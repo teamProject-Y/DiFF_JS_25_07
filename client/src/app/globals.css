@@ -41,6 +41,27 @@
 @font-face {
     font-family: 'Pretendard-Regular';
     src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
     font-weight: 400;
     font-style: normal;
 }
@@ -101,6 +122,41 @@ li {
 #list:hover > ul {
     z-index: 20;
     display: block;
+}
+
+/*.custom-pagination .swiper-pagination-bullet {*/
+/*    width: 8px !important;*/
+/*    height: 8px !important;*/
+/*    background: #d4d4d4 !important;*/
+/*    opacity: 1 !important;*/
+/*    border-radius: 9999px !important;*/
+/*    margin: 0 6px !important;*/
+/*    transition: background-color 200ms ease, width 200ms ease !important;*/
+/*}*/
+
+/*.custom-pagination .swiper-pagination-bullet-active {*/
+/*    background: #525252 !important;*/
+/*    width: 24px !important;*/
+/*}*/
+
+/*.custom-pagination .swiper-pagination-bullet:focus-visible {*/
+/*    outline: 2px solid #a3a3a3 !important;*/
+/*    outline-offset: 2px !important;*/
+/*}*/
+
+.article-slider {
+    --swiper-theme-color: #525252;                 /* 활성 점 색 (neutral-600) */
+    --swiper-pagination-bullet-inactive-color: #d4d4d4; /* 비활성 점 색 (neutral-300) */
+    --swiper-pagination-bullet-inactive-opacity: 1;
+    --swiper-pagination-bullet-size: 8px;
+    --swiper-pagination-bullet-horizontal-gap: 6px;
+}
+
+.article-slider .swiper-pagination-bullet-active {
+    background-color: #525252 !important;
+    width: 24px !important;
+    border-radius: 9999px !important;
+    transition: width 200ms ease;
 }
 
 .comments-box hr:first-of-type {
@@ -198,8 +254,8 @@ li {
 
 .gsi-material-button:not(:disabled):active .gsi-material-button-state,
 .gsi-material-button:not(:disabled):focus .gsi-material-button-state {
-    background-color: #303030;
-    opacity: 12%;
+    background-color: #111111;
+    opacity: 100%;
 }
 
 .gsi-material-button:not(:disabled):hover {
