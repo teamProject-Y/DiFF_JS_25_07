@@ -10,7 +10,7 @@ export default function FindPasswordPage() {
         e.preventDefault();
         try {
             await axios.post("http://localhost:8080/api/DiFF/member/findPw", null, {
-                params: { email }, // 백엔드에서 @RequestParam String email 받음
+                params: { email },
             });
             setMessage("✅ 비밀번호 재설정 메일을 발송했습니다. 이메일을 확인하세요.");
         } catch (err) {

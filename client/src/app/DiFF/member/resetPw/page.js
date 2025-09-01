@@ -5,18 +5,20 @@ import axios from "axios";
 
 export default function ResetPasswordPage() {
     const searchParams = useSearchParams();
-    const token = searchParams.get("token"); // ✅ 이메일 링크에서 token 추출
+    const token = searchParams.get("token");
     const [newPw, setNewPw] = useState("");
     const [msg, setMsg] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log("📩 요청 보내는 값:", { token, newPw });
         try {
             await axios.post("http://localhost:8080/api/DiFF/member/updatePassword", null, {
-                params: { token, newPw }, // 백엔드에서 @RequestParam token, newPw 받음
+                params: { token, newPw },
             });
             setMsg("✅ 비밀번호가 성공적으로 변경되었습니다. 로그인해주세요.");
         } catch (err) {
+            console.error("❌ 오류 발생:", err.response?.data);
             setMsg("❌ 오류: " + (err.response?.data || "서버 문제"));
         }
     };
