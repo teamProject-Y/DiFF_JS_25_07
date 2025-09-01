@@ -33,3 +33,11 @@ export const importGithubRepo = async (ghRepo) => {
 
     return await createRepository(payload); // 서버는 Repository로 바인딩
 };
+
+export const deleteRepository = async (ghRepo) => {
+
+}
+
+export const modifyRepository = async (ghRepo) => {
+
+}

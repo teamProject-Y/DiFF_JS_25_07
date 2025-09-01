@@ -191,8 +191,6 @@ export default function Page() {
         return <AfterMainPage me={user} trendingArticles={trendingArticles}/>;
     }
 
-    console.log("sectionaRefs : " + sectionRefs.current);
-
     // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
     return (
         <div
