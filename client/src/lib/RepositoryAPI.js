@@ -9,6 +9,9 @@ export const getGithubRepos = async () => {
 };
 
 export const createRepository = async (data) => {
+
+    console.log("repo create 요청 : " + data);
+
     try {
         const res = await ArticleAPI.post("/api/DiFF/repository/createRepository", data);
         console.log("[API][createRepository] status:", res.status, "data:", res.data);
@@ -20,16 +23,13 @@ export const createRepository = async (data) => {
 };
 
 export const importGithubRepo = async (ghRepo) => {
-
     const payload = {
-        name: ghRepo?.name || ghRepo?.full_name || '',
-        description: ghRepo?.description || '',
-        aPrivate: !!ghRepo?.private,
-        upstreamUrl: ghRepo?.html_url || ghRepo?.url || '',
-        defaultBranch: ghRepo?.default_branch || '',
-        source: 'github',
-        externalId: String(ghRepo?.id ?? ''),
+        name: ghRepo?.name ?? ghRepo?.full_name ?? '',
+        aPrivate: ghRepo?.aPrivate ?? !!ghRepo?.private ?? false,
+        url: ghRepo?.url ?? ghRepo?.html_url ?? ghRepo?.apiUrl ?? '',
+        defaultBranch: ghRepo?.defaultBranch ?? ghRepo?.default_branch ?? '',
+        owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
     };
 
-    return await createRepository(payload); // { resultCode, msg, data(newRepoId) ... }
+    return await createRepository(payload); // 서버는 Repository로 바인딩
 };

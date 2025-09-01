@@ -89,10 +89,39 @@ ArticleAPI.interceptors.response.use(
     }
 );
 
+function normalizeArticlePayload(data) {
+    const payload = { ...(data || {}) };
+
+    // 숫자 필드 정규화
+    if (payload.repositoryId != null) payload.repositoryId = Number(payload.repositoryId);
+    if (payload.draftId != null) payload.draftId = Number(payload.draftId);
+
+    // checksum 동의어 흡수 → payload.checksum 으로 고정
+    const foundChecksum =
+        payload.checksum ??
+        payload.commitHash ??
+        payload.commit_id ??
+        payload.commitId ??
+        payload.latestCommit ??
+        null;
+
+    if (typeof foundChecksum === "string" && foundChecksum.trim()) {
+        payload.checksum = foundChecksum.trim();
+    }
+    // 중복 키 제거(백엔드가 checksum만 받게 깔끔히)
+    delete payload.commitHash;
+    delete payload.commit_id;
+    delete payload.commitId;
+    delete payload.latestCommit;
+
+    return payload;
+}
+
 /** 5. Auth/회원 관련 API들 */
-export const fetchArticles = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
+export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyword = "", page = 1 }) => {
+    const rid = repositoryId ?? repoId;
     const res = await ArticleAPI.get('/api/DiFF/article/list', {
-        params: { repositoryId, searchItem, keyword, page }
+        params: { repositoryId: rid, searchItem, keyword, page }
     });
     return res.data;
 };
@@ -115,7 +144,7 @@ export const writeArticle = async (data) => {
         data = { ...data, draftId: Number(data.draftId) };
     }
 
-    const res = await ArticleAPI.post('/api/DiFF/article/doWrite', data);
+    const res = await ArticleAPI.post('/api/DiFF/article/doWrite', normalizeArticlePayload(data));
     const result = res.data;
 
     // (디버깅 로그)
@@ -154,7 +183,7 @@ export async function getArticle(id) {
 
 // 게시글 수정
 export async function modifyArticle(article, token) {
-    const res = await axios.post(`/api/DiFF/article/modify`, article, {
+    const res = await axios.post(`/api/DiFF/article/modify`, normalizeArticlePayload(article), {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}` // 🔑 토큰 추가

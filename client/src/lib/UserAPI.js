@@ -197,3 +197,19 @@ export const uploadProfileImg = async (file) => {
         throw err;
     }
 };
+
+export const requestPasswordReset = async (email) => {
+    console.log("📩 [UserAPI.requestPasswordReset] 요청 값:", { email });
+
+    return axios.post(`/api/DiFF/member/findPw`, null, {
+        params: { email },
+    });
+};
+
+export const updatePassword = async (token, newPw) => {
+    console.log("📩 [UserAPI.updatePassword] 요청 값:", { token, newPw });
+
+    return axios.post(`/api/DiFF/member/updatePassword`, null, {
+        params: { token, newPw },
+    });
+};
