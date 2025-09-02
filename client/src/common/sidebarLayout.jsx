@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 export default function SidebarLayout({ children }) {
-    const [show, setShow] = useState(false); // 기본 숨김(깜빡임 방지)
+    const [show, setShow] = useState(false);
 
     useEffect(() => {
         try {

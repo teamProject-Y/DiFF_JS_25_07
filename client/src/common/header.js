@@ -8,6 +8,7 @@ import {fetchUser} from '@/lib/UserAPI';
 import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
+import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -52,6 +53,10 @@ export default function Header() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    const [unread, setUnread] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef(null);
     useEffect(() => {
         const isScrollable = (el) => {
             if (!el || el === window) return false;
@@ -184,6 +189,38 @@ export default function Header() {
         router.push(`/DiFF/article/search?keyword=${encodeURIComponent(keyword)}`);
         setResults([]); // 드롭다운 닫기
     };
+
+    useEffect(() => {
+        if (!accessToken) return;
+        hasUnread()
+            .then(setUnread)
+            .catch(err => console.error("알림 체크 실패:", err));
+    }, [accessToken]);
+
+    const handleBellClick = async () => {
+        if (!open) {
+            try {
+                const list = await getNotifications();
+                setNotifications(list);
+                await markAllAsRead();  // 읽음 처리
+                setUnread(false);       // 빨간 점 제거
+            } catch (err) {
+                console.error("알림 목록 가져오기 실패:", err);
+            }
+        }
+        setOpen(!open);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
@@ -196,51 +233,49 @@ export default function Header() {
 
             {/* 검색창 */}
             {accessToken &&
-            <form onSubmit={handleSearch} className="relative flex items-center gap-2 ">
-                <div className="px-3 flex rounded-full border text-neutral-500 overflow-hidden">
-                    <input
-                        type="text"
-                        placeholder="search"
-                        value={keyword}
-                        autoComplete="on"
-                        onChange={(e) => setKeyword(e.target.value)}
-                        className="p-2 w-64 focus:outline-none"
-                    />
-                    <button type="submit" className="">
-                        <i className="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
-
-                {/* 드롭다운 결과 */}
-                {/*{keyword && results.length > 0 && (*/}
-                {/*    <div className="absolute top-full mt-1 bg-white border rounded-md shadow-lg w-64 max-h-60 overflow-y-auto z-50">*/}
-                {/*        {loading ? (*/}
-                {/*            <p className="p-2 text-sm text-gray-500">검색 중...</p>*/}
-                {/*        ) : (*/}
-                {/*            <ul>*/}
-                {/*                {results.map((a) => (*/}
-                {/*                    <li key={a.id}>*/}
-                {/*                        <Link*/}
-                {/*                            href={`/DiFF/article/detail?id=${a.id}`}*/}
-                {/*                            className="block px-3 py-2 hover:bg-gray-100"*/}
-                {/*                            onClick={() => setKeyword('')}*/}
-                {/*                        >*/}
-                {/*                            <span className="font-semibold">{a.title}</span>*/}
-                {/*                            <p className="text-xs text-gray-600">by {a.nickName}</p>*/}
-                {/*                        </Link>*/}
-                {/*                    </li>*/}
-                {/*                ))}*/}
-                {/*            </ul>*/}
-                {/*        )}*/}
-                {/*    </div>*/}
-                {/*)}*/}
-            </form>
+                <form onSubmit={handleSearch} className="relative flex items-center gap-2">
+                    <div className="px-3 flex rounded-full border text-neutral-500 overflow-hidden">
+                        <input
+                            type="text"
+                            placeholder="Search anything"
+                            value={keyword}
+                            autoComplete="on"
+                            onChange={(e) => setKeyword(e.target.value)}
+                            className="p-2 w-64 focus:outline-none"
+                        />
+                        <button type="submit" className="">
+                            <i className="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
             }
 
             <ul className="flex gap-8 text-xl font-semibold pr-8">
                 {accessToken ? (
                     <>
-                        <li><i className="fa-solid fa-bell"/></li>
+                        <li className="relative" ref={dropdownRef}>
+                            <button onClick={handleBellClick} className="relative">
+                                <i className="fa-solid fa-bell"></i>
+                                {unread && (
+                                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                                )}
+                            </button>
+
+                            {open && (
+                                <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-2 z-50">
+                                    {notifications.length > 0 ? (
+                                        notifications.map((n) => (
+                                            <div key={n.id} className="border-b py-2 text-sm">
+                                                <span className="font-medium">{n.type}</span> - {n.message}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-gray-500">알림이 없습니다.</p>
+                                    )}
+                                </div>
+                            )}
+                        </li>
+
                         <li><Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link></li>
                         <li><Link href="/DiFF/member/profile">MYPAGE</Link></li>
                     </>
