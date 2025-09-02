@@ -68,7 +68,7 @@ export default function RepositoriesPage() {
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
 
-    const [tab, setTab] = useState('info');
+    const [tab, setTab] = useState('posts');
 
     useEffect(() => {
         if (repositories.length > 0 && !selectedRepoId) {
@@ -117,7 +117,7 @@ export default function RepositoriesPage() {
     );
 
     useEffect(() => {
-        if (selectedRepo) setTab('info');
+        if (selectedRepo) setTab('posts');
     }, [selectedRepo?.id]);
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
@@ -243,8 +243,8 @@ export default function RepositoriesPage() {
                         {/* 탭 */}
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
-                                {key: 'info', label: 'Info'},
                                 {key: 'posts', label: 'Posts'},
+                                {key: 'info', label: 'Info'},
                             ].map((t) => (
                                 <button
                                     key={t.key}
