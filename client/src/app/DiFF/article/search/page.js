@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { increaseArticleHits, searchArticles } from '@/lib/ArticleAPI';
-import {followMember, searchMembers, unfollowMember} from '@/lib/UserAPI';
+import { followMember, unfollowMember, searchMembers, getFollowingList } from '@/lib/UserAPI';
 import Link from 'next/link';
 
 function extractFirstImage(markdown) {
@@ -31,7 +31,6 @@ export default function SearchPage() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Article');
 
-
     const handleArticleClick = async (id) => {
         try {
             await increaseArticleHits(id);
@@ -47,6 +46,8 @@ export default function SearchPage() {
         (async () => {
             setLoading(true);
             try {
+                console.log("🔍 검색 시작, keyword =", keyword);
+
                 // 게시글 검색
                 const articleRes = await searchArticles(keyword);
                 if (articleRes?.resultCode?.startsWith('S-')) {
@@ -56,11 +57,28 @@ export default function SearchPage() {
                 // 멤버 검색
                 const memberRes = await searchMembers(keyword);
                 if (memberRes?.resultCode?.startsWith('S-')) {
-                    setMembers(memberRes.data1 || []);
+                    const rawMembers = memberRes.data1 || [];
+                    console.log("✅ Member 검색 성공, 원본:", rawMembers);
+
+                    // 🔑 로그인 유저 닉네임
+                    const myNick = localStorage.getItem('nickName');
+
+                    // 🔑 내 팔로잉 목록 한 번만 호출
+                    const followingRes = await getFollowingList(myNick);
+                    const followingList = followingRes.data1 || [];
+                    console.log("📌 내 팔로잉 리스트:", followingList);
+
+                    // 🔑 각 멤버에 대해 isFollowing 채우기
+                    const membersWithFollow = rawMembers.map((m) => {
+                        const isFollowing = followingList.some(f => f.id === m.id);
+                        return {...m, isFollowing};
+                    });
+
+                    console.log("🏁 최종 Member 리스트:", membersWithFollow);
+                    setMembers(membersWithFollow);
                 }
             } catch (err) {
-                console.error('검색 실패:', err);
-                setArticles([]);
+                console.error('🚨 전체 검색 실패:', err);
             } finally {
                 setLoading(false);
             }
@@ -109,7 +127,7 @@ export default function SearchPage() {
                                         >
                                             <div
                                                 className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                                {/* 왼쪽: 텍스트 */}
+                                                {/* 왼쪽 */}
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
                                                     <div className="text-sm text-gray-500">
                                                         in Search · by{" "}
@@ -128,41 +146,18 @@ export default function SearchPage() {
                                                         )}
                                                     </div>
                                                     <div className="py-2 flex-grow">
-                                                        <h2 className="text-2xl py-2 font-black">
-                                                            {article.title}
-                                                        </h2>
+                                                        <h2 className="text-2xl py-2 font-black">{article.title}</h2>
                                                         <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>
-                            {new Date(article.regDate).toLocaleDateString(
-                                "en-US",
-                                {year: "numeric", month: "short", day: "numeric"}
-                            )}
-                          </span>
-                                                        <span>view: {article.hits}</span>
-                                                        <span>
-                            <i className="fa-solid fa-comments"></i>{" "}
-                                                            {article.extra__sumReplies}
-                          </span>
-                                                        <span>
-                            <i className="fa-solid fa-heart"></i>{" "}
-                                                            {article.extra__sumReaction}
-                          </span>
-                                                    </div>
                                                 </div>
-
-                                                {/* 오른쪽: 이미지 */}
+                                                {/* 오른쪽 */}
                                                 <div
                                                     className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
-                                                        <img
-                                                            src={imgSrc}
-                                                            alt="thumbnail"
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                        <img src={imgSrc} alt="thumbnail"
+                                                             className="w-full h-full object-cover"/>
                                                     ) : (
                                                         <span className="text-gray-400">No Image</span>
                                                     )}
@@ -177,30 +172,22 @@ export default function SearchPage() {
                         ) : members.length > 0 ? (
                             <ul className="space-y-4">
                                 {members.map((m) => (
-                                    <li
-                                        key={m.id}
-                                        className="flex items-center justify-between gap-4 border p-4 rounded-md"
-                                    >
-                                        {/* 왼쪽: 프로필 이미지 + 닉네임/이메일 */}
+                                    <li key={m.id}
+                                        className="flex items-center justify-between gap-4 border p-4 rounded-md">
+                                        {/* 프로필 이미지 + 정보 */}
                                         <div className="flex items-center gap-4">
                                             {m.profileUrl ? (
-                                                <img
-                                                    src={m.profileUrl}
-                                                    alt={m.nickName}
-                                                    className="w-12 h-12 rounded-full object-cover border"
-                                                />
+                                                <img src={m.profileUrl} alt={m.nickName}
+                                                     className="w-12 h-12 rounded-full object-cover border"/>
                                             ) : (
                                                 <div
                                                     className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-200 text-gray-500">
                                                     <i className="fa-solid fa-skull"></i>
                                                 </div>
                                             )}
-
                                             <div>
                                                 <Link
-                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(
-                                                        m.nickName
-                                                    )}`}
+                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(m.nickName)}`}
                                                     className="text-lg font-semibold hover:underline"
                                                 >
                                                     {m.nickName}
@@ -208,47 +195,37 @@ export default function SearchPage() {
                                                 <p className="text-sm text-gray-600">{m.email}</p>
                                             </div>
                                         </div>
-
-                                        {/* 오른쪽: 팔로우/언팔로우 버튼 */}
-                                        <div>
-                                            <button
-                                                onClick={async () => {
-                                                    try {
-                                                        if (m.isFollowing) {
-                                                            console.log("👉 언팔로우 요청:", m.id);
-                                                            await unfollowMember(m.id);
-                                                            setMembers((prev) =>
-                                                                prev.map((mem) =>
-                                                                    mem.id === m.id
-                                                                        ? {...mem, isFollowing: false}
-                                                                        : mem
-                                                                )
-                                                            );
-                                                        } else {
-                                                            console.log("👉 팔로우 요청:", m.id);
-                                                            await followMember(m.id);
-                                                            setMembers((prev) =>
-                                                                prev.map((mem) =>
-                                                                    mem.id === m.id
-                                                                        ? {...mem, isFollowing: true}
-                                                                        : mem
-                                                                )
-                                                            );
-                                                        }
-                                                    } catch (err) {
-                                                        console.error("❌ 팔로우/언팔로우 실패:", err);
-                                                        alert("처리 실패");
+                                        {/* 버튼 */}
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    if (m.isFollowing) {
+                                                        await unfollowMember(m.id);
+                                                        setMembers((prev) =>
+                                                            prev.map((mem) =>
+                                                                mem.id === m.id ? {...mem, isFollowing: true} : mem
+                                                            )
+                                                        );
+                                                    } else {
+                                                        await followMember(m.id);
+                                                        setMembers((prev) =>
+                                                            prev.map((mem) =>
+                                                                mem.id === m.id ? {...mem, isFollowing: false} : mem
+                                                            )
+                                                        );
                                                     }
-                                                }}
-                                                className={`px-6 py-2 text-sm rounded text-white ${
-                                                    m.isFollowing
-                                                        ? "bg-red-600 hover:bg-red-500"
-                                                        : "bg-green-600 hover:bg-green-500"
-                                                }`}
-                                            >
-                                                {m.isFollowing ? "언팔로우" : "팔로우"}
-                                            </button>
-                                        </div>
+                                                } catch (err) {
+                                                    console.error("❌ 팔로우/언팔로우 실패:", err);
+                                                }
+                                            }}
+                                            className={`w-24 px-4 py-2 rounded-xl font-semibold transition-colors duration-200 shadow-md
+                                                    ${m.isFollowing
+                                                ? "bg-black text-white hover:bg-white hover:text-red-500 border-red-500"
+                                                : "bg-green-500 text-white hover:bg-white hover:text-green-500 hover:border-green-500 border border-green-500"
+                                            }`}
+                                        >
+                                            {m.isFollowing ? "언팔로우" : "팔로우"}
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
