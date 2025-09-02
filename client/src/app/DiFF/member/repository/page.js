@@ -8,7 +8,7 @@ import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
 import RepoPost from "./RepoPost";
 import {AddRepoModal} from './addRepoModal';
-import RepoContent from './repoContent';
+import {RepoInfo} from './repoInfo';
 import GhostBar from './sideBar';
 import Link from "next/link";
 
@@ -222,10 +222,8 @@ export default function RepositoriesPage() {
     return (
         <LayoutGroup>
             <section className="px-4">
-
                 <div className="mx-auto max-w-6xl h-full">
                     <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
-
                         <Link href={profileHref} className="text-gray-400 hover:text-gray-700">Profile</Link>
                         <span>Repositories</span>
                         {isMyRepos &&
@@ -233,7 +231,6 @@ export default function RepositoriesPage() {
                                 Settings
                             </Link>
                         }
-
                     </div>
                     <div className="h-px w-full bg-gray-300 mb-8"/>
 
@@ -244,7 +241,7 @@ export default function RepositoriesPage() {
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
                                 {key: 'info', label: 'Info'},
-                                {key: 'posts', label: 'Posts'},
+                                {key: 'posts', label: 'Posts'}
                             ].map((t) => (
                                 <button
                                     key={t.key}
@@ -257,12 +254,6 @@ export default function RepositoriesPage() {
                                 </button>
                             ))}
                         </div>
-                        {/*{onClose && (*/}
-                        {/*    <div className="absolute right-3 top-3 z-50 text-xl cursor-pointer font-bold"*/}
-                        {/*         onClick={onClose}>*/}
-                        {/*        <i className="fa-solid fa-xmark"></i>*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
 
                         <div className="grid grid-cols-[230px_1fr] items-start">
                             {/* 왼쪽 사이드바 */}
@@ -337,7 +328,7 @@ export default function RepositoriesPage() {
                                 ) : (
                                     <>
                                         {tab === 'info' && selectedRepo ? (
-                                            <RepoContent
+                                            <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
                                                 repo={selectedRepo}
                                                 repositories={repositories}

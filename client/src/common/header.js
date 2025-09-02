@@ -235,45 +235,21 @@ export default function Header() {
 
             {/* 검색창 */}
             {accessToken &&
-            <form onSubmit={handleSearch} className="relative flex items-center gap-2 ">
-                <div className="px-3 flex rounded-full border text-neutral-500 overflow-hidden">
-                    <input
-                        type="text"
-                        placeholder="search"
-                        value={keyword}
-                        autoComplete="on"
-                        onChange={(e) => setKeyword(e.target.value)}
-                        className="p-2 w-64 focus:outline-none"
-                    />
-                    <button type="submit" className="">
-                        <i className="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
-
-                {/* 드롭다운 결과 */}
-                {/*{keyword && results.length > 0 && (*/}
-                {/*    <div className="absolute top-full mt-1 bg-white border rounded-md shadow-lg w-64 max-h-60 overflow-y-auto z-50">*/}
-                {/*        {loading ? (*/}
-                {/*            <p className="p-2 text-sm text-gray-500">검색 중...</p>*/}
-                {/*        ) : (*/}
-                {/*            <ul>*/}
-                {/*                {results.map((a) => (*/}
-                {/*                    <li key={a.id}>*/}
-                {/*                        <Link*/}
-                {/*                            href={`/DiFF/article/detail?id=${a.id}`}*/}
-                {/*                            className="block px-3 py-2 hover:bg-gray-100"*/}
-                {/*                            onClick={() => setKeyword('')}*/}
-                {/*                        >*/}
-                {/*                            <span className="font-semibold">{a.title}</span>*/}
-                {/*                            <p className="text-xs text-gray-600">by {a.nickName}</p>*/}
-                {/*                        </Link>*/}
-                {/*                    </li>*/}
-                {/*                ))}*/}
-                {/*            </ul>*/}
-                {/*        )}*/}
-                {/*    </div>*/}
-                {/*)}*/}
-            </form>
+                <form onSubmit={handleSearch} className="relative flex items-center gap-2">
+                    <div className="px-3 flex rounded-full border text-neutral-500 overflow-hidden">
+                        <input
+                            type="text"
+                            placeholder="Search anything"
+                            value={keyword}
+                            autoComplete="on"
+                            onChange={(e) => setKeyword(e.target.value)}
+                            className="p-2 w-64 focus:outline-none"
+                        />
+                        <button type="submit" className="">
+                            <i className="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
             }
 
             <ul className="flex gap-8 text-xl font-semibold pr-8">
