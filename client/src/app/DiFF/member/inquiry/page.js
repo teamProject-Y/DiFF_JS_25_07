@@ -5,13 +5,13 @@ import {saveInquiry} from "@/lib/NotionAPI";
 import {useState, useEffect} from "react";
 
 export default function InquiryForm() {
-    const router = useRouter();  // ✅ useRouter 훅 사용
+    const router = useRouter();
     const [inquiry, setInquiry] = useState({
         title: "",
         nickName: "",
         email: "",
         body: "",
-        regDate: new Date().toISOString().split("T")[0]  // yyyy-MM-dd
+        regDate: new Date().toISOString().split("T")[0]
     });
 
     useEffect(() => {
@@ -41,7 +41,7 @@ export default function InquiryForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="mx-20">
+            className="px-32">
             <h2 className="text-4xl font-bold text-gray-800 my-4">Contact us</h2>
             <div className="mt-8">
                 <label className="block mb-2 font-medium text-gray-900 dark:text-white">

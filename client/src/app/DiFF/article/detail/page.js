@@ -43,19 +43,20 @@ function ArticleDetailInner() {
     const menuBtnRef = useRef(null);
     const menuRef = useRef(null);
 
+    const [replyMenuOpen, setReplyMenuOpen] = useState(null);
+
     // === 팔로우 칩용 state ===
-    const [followBusy, setFollowBusy] = useState(false);
     const [authorId, setAuthorId] = useState(null);
     const [myId, setMyId] = useState(null);
-    const [authorNick, setAuthorNick] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const [member, setMember] = useState(null);
     const [isMyPost, setIsMyPost] = useState(false);
     const [hoverUnfollow, setHoverUnfollow] = useState(false);
 
-    const myNick = (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '';
+    const textareaRef = useRef(null);
 
     const norm = (s) => (s ?? '').toString().trim().toLowerCase();
+
     const getId = (m) => Number(
         m?.id ??
         m?.memberId ??
@@ -115,7 +116,7 @@ function ArticleDetailInner() {
 
         (async () => {
             try {
-                const like = await fetchArticleLikes(id); // { liked: true/false, count: number }
+                const like = await fetchArticleLikes(id);
                 console.log("like 불러오기 응답", like);
 
                 // 🔑 이전 상태와 비교 후 다를 때만 업데이트
@@ -181,6 +182,25 @@ function ArticleDetailInner() {
         };
     }, [menuOpen]);
 
+// ESC & outside click to close
+    useEffect(() => {
+        const onKey = (e) => e.key === 'Escape' && setReplyMenuOpen(null);
+        const onDown = (e) => {
+            if (!replyMenuOpen) return;
+            const btn = menuBtnRef.current;
+            const menu = menuRef.current;
+            if (menu && menu.contains(e.target)) return;
+            if (btn && btn.contains(e.target)) return;
+            setReplyMenuOpen(null);
+        };
+        document.addEventListener('keydown', onKey);
+        document.addEventListener('mousedown', onDown);
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            document.removeEventListener('mousedown', onDown);
+        };
+    }, [replyMenuOpen]);
+
     // 팔로우 상태 초기화 useEffect 교체
     useEffect(() => {
         (async () => {
@@ -229,7 +249,7 @@ function ArticleDetailInner() {
         })();
     }, [id, article?.extra__writer, myId]);
 
-    // 내 회원 ID 로드 (닉네임 비교 대신 ID로 판정)
+    // 내 회원 ID 로드
     useEffect(() => {
         (async () => {
             try {
@@ -349,45 +369,51 @@ function ArticleDetailInner() {
         }
     };
 
-    const refreshFollowFromServer = async (id) => {
-        try {
-            const fl = await getFollowingList();
-            const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
-            const now =
-                (id && list.some(m => getId(m) === Number(id))) ||
-                list.some(m => getNick(m) === (authorNick ?? '').trim());
-            setIsFollowing(!!now);
-        } catch (e) {
-            console.error('❌ 팔로우 재확인 실패:', e);
-        }
-    };
+    // const refreshFollowFromServer = async (id) => {
+    //     try {
+    //         const fl = await getFollowingList();
+    //         const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
+    //         const now =
+    //             (id && list.some(m => getId(m) === Number(id))) ||
+    //             list.some(m => getNick(m) === (authorNick ?? '').trim());
+    //         setIsFollowing(!!now);
+    //     } catch (e) {
+    //         console.error('❌ 팔로우 재확인 실패:', e);
+    //     }
+    // };
+    //
+    // const onFollowToggle = async () => {
+    //     if (!authorId || followBusy) return;
+    //     setFollowBusy(true);
+    //     try {
+    //         if (isFollowing) {
+    //             const res = await unfollowMember(authorId);
+    //             const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('팔로우 중이 아닙니다');
+    //             if (!ok) throw new Error(res?.msg || '언팔로우 실패');
+    //         } else {
+    //             const res = await followMember(authorId);
+    //             const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('이미 팔로우');
+    //             if (!ok) throw new Error(res?.msg || '팔로우 실패');
+    //         }
+    //         await refreshFollowFromServer(authorId);
+    //     } catch (e) {
+    //         console.error('❌ 팔/언 실패:', e);
+    //         // 필요하면 alert(e.message);
+    //     } finally {
+    //         setFollowBusy(false);
+    //     }
+    // };
 
-    const onFollowToggle = async () => {
-        if (!authorId || followBusy) return;
-        setFollowBusy(true);
-        try {
-            if (isFollowing) {
-                const res = await unfollowMember(authorId);
-                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('팔로우 중이 아닙니다');
-                if (!ok) throw new Error(res?.msg || '언팔로우 실패');
-            } else {
-                const res = await followMember(authorId);
-                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('이미 팔로우');
-                if (!ok) throw new Error(res?.msg || '팔로우 실패');
-            }
-            await refreshFollowFromServer(authorId);
-        } catch (e) {
-            console.error('❌ 팔/언 실패:', e);
-            // 필요하면 alert(e.message);
-        } finally {
-            setFollowBusy(false);
-        }
-    };
+    // const isOwn = !!article?.extra__writer
+    //     && ( (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '' )
+    //         .trim().toLowerCase()
+    //     === article.extra__writer.trim().toLowerCase();
 
-    const isOwn = !!article?.extra__writer
-        && ( (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '' )
-            .trim().toLowerCase()
-        === article.extra__writer.trim().toLowerCase();
+    const handleInput = (e) => {
+        const textarea = textareaRef.current;
+        textarea.style.height = "auto"; // 입력 전 높이 초기화
+        textarea.style.height = textarea.scrollHeight + "px";
+    };
 
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
@@ -406,11 +432,11 @@ function ArticleDetailInner() {
                     <div className="flex justify-between">
                         <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center">
                             {/* 공유 버튼 */}
                             <button
                                 type="button"
-                                className="p-2 hover:text-gray-900"
+                                className="p-2 hover:text-gray-900 flex items-center"
                                 onClick={async () => {
                                     try {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
@@ -428,12 +454,12 @@ function ArticleDetailInner() {
                                     }
                                 }}
                             >
-                                <i className="fa-solid fa-share-nodes mr-2"></i>
+                                <i className="fa-solid fa-share-nodes"></i>
                             </button>
 
                             {/* 더보기 메뉴 (작성자 글일 때만 보임) */}
                             {isMyPost && (
-                                <div className="relative bg-red-300">
+                                <div className="relative">
                                     <button
                                         ref={menuBtnRef}
                                         type="button"
@@ -446,9 +472,9 @@ function ArticleDetailInner() {
                                                 setMenuOpen(true);
                                             }
                                         }}
-                                        className="p-2 hover:text-gray-900"
+                                        className="py-2 hover:text-gray-900"
                                     >
-                                        <i className="fa-solid fa-ellipsis-cal"></i>
+                                        <i className="fa-solid fa-ellipsis-vertical text-xl"></i>
                                     </button>
 
                                     {menuOpen && (
@@ -458,7 +484,7 @@ function ArticleDetailInner() {
                                             className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
                        divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
                                         >
-                                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                            <ul className="py-1 text-sm text-gray-700 dark:text-gray-200">
                                                 {article.userCanModify && (
                                                     <li>
                                                         <Link
@@ -467,7 +493,7 @@ function ArticleDetailInner() {
                                                             className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                                             onClick={() => setMenuOpen(false)}
                                                         >
-                                                            수정
+                                                            <i className="fa-solid fa-pen"></i> Edit
                                                         </Link>
                                                     </li>
                                                 )}
@@ -477,9 +503,9 @@ function ArticleDetailInner() {
                                                             type="button"
                                                             role="menuitem"
                                                             onClick={() => handleDelete(article.id)}
-                                                            className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                            className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-red-500"
                                                         >
-                                                            삭제
+                                                            <i className="fa-solid fa-trash-can"></i> Delete
                                                         </button>
                                                     </li>
                                                 )}
@@ -492,7 +518,7 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* article info */}
-                    <div className="text-gray-600 mb-6 flex justify-between">
+                    <div className="text-gray-600 my-4 px-2 flex justify-between items-end">
                         <div className="flex items-center gap-2">
                             {/* 닉네임 */}
                             <div
@@ -515,12 +541,12 @@ function ArticleDetailInner() {
                                             try {
                                                 if (member.isFollowing) {
                                                     await unfollowMember(member.id);
-                                                    setMember(prev => ({ ...prev, isFollowing: false }));
+                                                    setMember(prev => ({...prev, isFollowing: false}));
                                                     typeof setFollowerCount === 'function' &&
                                                     setFollowerCount(prev => Math.max(0, prev - 1));
                                                 } else {
                                                     await followMember(member.id);
-                                                    setMember(prev => ({ ...prev, isFollowing: true }));
+                                                    setMember(prev => ({...prev, isFollowing: true}));
                                                     typeof setFollowerCount === 'function' &&
                                                     setFollowerCount(prev => prev + 1);
                                                 }
@@ -566,74 +592,61 @@ function ArticleDetailInner() {
                         <ToastViewer content={article.body} showImages={true}/>
                     </div>
 
-                    {/* 하단 버튼 영역 */}
-                    <div className="mt-8 flex gap-4">
-                        <button
-                            onClick={() => router.back()}
-                            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
-                        >
-                            뒤로가기
-                        </button>
-
-                        {article.userCanModify && (
-                            <Link
-                                href={`/DiFF/article/modify?id=${article.id}`}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                            >
-                                수정
-                            </Link>
-                        )}
-
-                        {article.userCanDelete && (
-                            <button
-                                onClick={() => handleDelete(article.id)}
-                                disabled={deleting}
-                                className={`px-4 py-2 rounded transition ${
-                                    deleting
-                                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                        : "bg-red-500 text-white hover:bg-red-600"
-                                }`}
-                            >
-                                {deleting ? "삭제중…" : "삭제하기"}
-                            </button>
-                        )}
-                    </div>
-
                     {/* 댓글 입력 */}
                     <div className="mt-10">
-                        <form onSubmit={handleSubmitreply}>
-                            <label htmlFor="chat" className="sr-only">댓글 작성</label>
-                            <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                        <form onSubmit={handleSubmitreply} className="relative">
+                            <label htmlFor="comment" className="sr-only">댓글 작성</label>
+
+                            <div
+                                className="relative rounded-2xl border border-black/10 dark:border-white/15
+                                 bg-white/80 dark:bg-black/40 backdrop-blur-sm
+                                 shadow-sm transition-all
+                                 focus-within:border-black/20 dark:focus-within:border-white/30"
+                            >
+                                {/* textarea */}
                                 <textarea
-                                    id="chat"
-                                    rows="1"
+                                    id="comment"
+                                    ref={textareaRef}
                                     value={reply}
+                                    onInput={handleInput}
                                     onChange={(e) => setReply(e.target.value)}
-                                    className="block resize-none mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300
-                                               focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600
-                                               dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="댓글을 입력하세요"
+                                    onKeyDown={(e) => {
+                                        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                                            e.preventDefault();
+                                            if (reply.trim()) handleSubmitreply(e);
+                                        }
+                                    }}
+                                    maxLength={1000}
+                                    placeholder="What are your thoughts?"
+                                    className="block w-full resize-none bg-transparent
+                                       p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
+                                       text-gray-900 dark:text-gray-100
+                                       placeholder-gray-400 dark:placeholder-gray-500
+                                       focus:outline-none"
                                 />
-                                <button
-                                    type="submit"
-                                    className="inline-flex justify-center p-4 text-blue-600 rounded-md cursor-pointer
-                                               hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
-                                >
-                                    <svg
-                                        className="w-5 h-5 rotate-90 rtl:-rotate-90"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="currentColor"
-                                        viewBox="0 0 18 20"
+
+                                <div className="absolute bottom-2 right-2 flex items-center gap-2">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      {reply.trim().length}/1000
+                                    </span>
+                                    <button
+                                        type="submit"
+                                        disabled={!reply.trim()}
+                                        className="px-4 py-2 rounded-full
+                                         bg-black text-white dark:bg-white dark:text-black
+                                         text-xs font-medium
+                                         shadow-sm hover:shadow-md
+                                         transition-all
+                                         disabled:opacity-40 disabled:cursor-not-allowed
+                                         active:scale-[0.98]"
                                     >
-                                        <path
-                                            d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
-                                    </svg>
-                                    <span className="sr-only">댓글 전송</span>
-                                </button>
+                                        Comment
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
+
 
                     {/* 댓글 목록 */}
                     <div className="my-6 space-y-4">
@@ -643,167 +656,219 @@ function ArticleDetailInner() {
                             <p className="text-gray-500">아직 댓글이 없습니다.</p>
                         ) : (
                             replies.map((r) => (
-                                <div key={r.id} className="mb-2 border-b pb-2">
-                                    {r.isEditing ? (
-                                        // 댓글 수정
-                                        <div>
-                                            <div className="text-sm text-gray-400 mb-4">
-                                                {r.extra__writer} |
-                                                {new Date(r.regDate).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "short",
-                                                    day: "numeric"
-                                                })}
-                                            </div>
-                                            <textarea
-                                                className="border w-full p-2 rounded-lg"
-                                                rows="1"
-                                                value={r.body}
-                                                onChange={(e) =>
-                                                    setReplies((prev) =>
-                                                        prev.map((item) =>
-                                                            item.id === r.id ? {...item, body: e.target.value} : item
-                                                        )
-                                                    )
-                                                }
-                                            />
-                                            <div className="mt-1 flex gap-2">
-                                                <button
-                                                    onClick={async () => {
-                                                        const res = await modifyReply(r.id, r.body);
-                                                        if (res.resultCode.startsWith("S-")) {
-                                                            setReplies((prev) =>
-                                                                prev.map((item) =>
-                                                                    item.id === r.id ? {
-                                                                        ...item,
-                                                                        isEditing: false
-                                                                    } : item
-                                                                )
-                                                            );
-                                                        }
-                                                    }}
-                                                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                                                >
-                                                    저장
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        setReplies((prev) =>
-                                                            prev.map((item) =>
-                                                                item.id === r.id ? {...item, isEditing: false} : item
-                                                            )
-                                                        )
-                                                    }
-                                                    className="px-2 py-1 bg-gray-400 text-white rounded text-xs"
-                                                >
-                                                    취소
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        // 일반 댓글 표시
-                                        <div>
-                                            {/* 일반 댓글 표시 */}
-                                            <div>
+                                <div key={r.id} className="relative mb-2 border-b pb-4">
+                                    <div className="flex gap-3">
+                                        {/* Avatar */}
+                                        <Link
+                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
+                                            className="mr-1"
+                                        >
+                                            {r.profileUrl ? (
+                                                <img
+                                                    src={r.profileUrl}
+                                                    alt={`${r.extra__writer} profile`}
+                                                    className="w-10 h-10 rounded-full object-cover"
+                                                />
+                                            ) : (
                                                 <div
-                                                    className="flex items-center justify-between mb-3 text-sm text-gray-500">
-                                                    <div className="flex items-center gap-2">
-                                                        {/* 프로필 사진 */}
-                                                        <Link
-                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
-                                                            {r.profileUrl ? (
-                                                                <img
-                                                                    src={r.profileUrl}
-                                                                    alt={`${r.extra__writer} 프로필`}
-                                                                    className="w-8 h-8 rounded-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <div
-                                                                    className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
-                                                                    {r.extra__writer?.[0] ?? "?"}
-                                                                </div>
-                                                            )}
-                                                        </Link>
+                                                    className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold">
+                                                    <i className="fa-solid fa-skull"></i>
+                                                </div>
+                                            )}
+                                        </Link>
 
-                                                        {/* 닉네임 */}
+                                        {/* Right side */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex-1">
+                                                    {/* Header: nickname + date (고정) */}
+                                                    <div className="leading-6 break-words mt-1">
                                                         <Link
                                                             href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
-                                                            className="font-semibold hover:underline"
+                                                            className="font-semibold text-lg hover:underline"
                                                         >
                                                             {r.extra__writer}
                                                         </Link>
-                                                    </div>
-
-                                                    {/* 날짜 */}
-                                                    <span>
-                                                        {new Date(r.regDate).toLocaleDateString("en-US", {
+                                                        &nbsp;ㆍ&nbsp;
+                                                        <span className="text-sm text-gray-500">
+                                                            {new Date(r.regDate).toLocaleDateString("en-US", {
                                                                 year: "numeric",
                                                                 month: "short",
-                                                                day: "numeric"
-                                                            }
-                                                        )
-                                                        }
-                                                    </span>
+                                                                day: "numeric",
+                                                            })}
+                                                        </span>
+                                                    </div>
+
+                                                    {r.isEditing ? (
+                                                        <div className="m-1 mt-3">
+                                                            <textarea
+                                                                className="w-full bg-transparent resize-none min-h-[30px] max-h-[240px] overflow-y-auto
+                                                                          rounded-md border border-black/10 dark:border-white/15 p-2 text-sm
+                                                                          focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20"
+                                                                value={r.editBody ?? r.body ?? ""}
+                                                                onInput={(e) => {
+                                                                    e.target.style.height = "auto";
+                                                                    e.target.style.height = Math.min(e.target.scrollHeight, 240) + "px";
+                                                                }}
+                                                                onChange={(e) =>
+                                                                    setReplies((prev) =>
+                                                                        prev.map((item) =>
+                                                                            item.id === r.id ? {
+                                                                            ...item,
+                                                                                editBody: e.target.value
+                                                                        } : item
+                                                                          )
+                                                                      )
+                                                                  }
+                                                              />
+                                                            <div className="mt-2 flex items-center gap-2">
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        const nextBody = r.editBody ?? "";
+                                                                        const res = await modifyReply(r.id, nextBody);
+                                                                        if (res.resultCode?.startsWith?.("S-")) {
+                                                                            setReplies((prev) =>
+                                                                                prev.map((item) =>
+                                                                                    item.id === r.id
+                                                                                        ? {
+                                                                                            ...item,
+                                                                                            body: nextBody,
+                                                                                            isEditing: false,
+                                                                                            editBody: undefined
+                                                                                        }
+                                                                                        : item
+                                                                                )
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                    className="px-3 py-1.5 rounded-full bg-black text-white dark:bg-white dark:text-black text-xs
+                                                                             shadow-sm hover:shadow-md transition"
+                                                                >
+                                                                    Save
+                                                                </button>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        setReplies((prev) =>
+                                                                            prev.map((item) =>
+                                                                                item.id === r.id
+                                                                                    ? {
+                                                                                        ...item,
+                                                                                        isEditing: false,
+                                                                                        editBody: undefined
+                                                                                    }
+                                                                                    : item
+                                                                            )
+                                                                        )
+                                                                    }
+                                                                    className="px-3 py-1.5 rounded-full border border-black/15 dark:border-white/20 text-xs
+                             hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="m-1 mt-3 flex items-center gap-3 text-gray-500">
+              <span className="whitespace-pre-wrap align-baseline text-gray-800 dark:text-gray-100">
+                {r.body}
+              </span>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
 
-
-                                            <div className="flex justify-between items-center">
-                                                <p>{r.body}</p>
-
-                                                <div className="flex gap-2 items-center">
-                                                    {/* 댓글 좋아요 버튼 */}
+                                                {/* Right controls: like + menu (고정) */}
+                                                <div className="flex items-center gap-1 shrink-0">
                                                     <button
                                                         onClick={() => handleReplyLikeToggle(r.id, r.liked)}
-                                                        className="flex items-center gap-1 text-sm"
+                                                        aria-label="이 댓글 좋아요"
+                                                        aria-pressed={r.liked}
+                                                        className="p-1 flex items-center gap-1"
+                                                        title="like"
                                                     >
                                                         <i
                                                             className={`${
                                                                 r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"
-                                                            } fa-heart`}
+                                                            } fa-heart text-base`}
                                                         />
-                                                        <span>{r.likeCount ?? 0}</span>
+                                                        {r.likeCount !== 0 &&
+                                                            <span className="text-sm">{r.likeCount}</span>}
                                                     </button>
 
-                                                    {/* 수정/삭제 버튼 */}
-                                                    {r.userCanModify && (
-                                                        <button
-                                                            onClick={() =>
-                                                                setReplies((prev) =>
-                                                                    prev.map((item) =>
-                                                                        item.id === r.id ? {
-                                                                            ...item,
-                                                                            isEditing: true
-                                                                        } : item
-                                                                    )
-                                                                )
-                                                            }
-                                                            className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
-                                                        >
-                                                            수정
-                                                        </button>
-                                                    )}
-                                                    {r.userCanDelete && (
-                                                        <button
-                                                            onClick={async () => {
-                                                                if (confirm("정말 삭제하시겠습니까?")) {
-                                                                    const res = await deleteReply(r.id);
-                                                                    if (res.resultCode.startsWith("S-")) {
-                                                                        setReplies((prev) => prev.filter((item) => item.id !== r.id));
-                                                                        alert("댓글이 삭제 되었습니다.");
-                                                                    }
+                                                    {(r.userCanModify || r.userCanDelete) && (
+                                                        <div className="relative">
+                                                            <button
+                                                                type="button"
+                                                                ref={r.id === replyMenuOpen ? menuBtnRef : null}
+                                                                aria-haspopup="menu"
+                                                                aria-expanded={replyMenuOpen === r.id}
+                                                                onClick={() =>
+                                                                    setReplyMenuOpen(replyMenuOpen === r.id ? null : r.id)
                                                                 }
-                                                            }}
-                                                            className="px-2 py-1 bg-red-500 text-white rounded text-xs"
-                                                        >
-                                                            삭제
-                                                        </button>
+                                                                className="text-gray-600 dark:text-gray-300"
+                                                                title="More"
+                                                            >
+                                                                <i className="fa-solid fa-ellipsis-vertical text-sm"></i>
+                                                            </button>
+
+                                                            {replyMenuOpen === r.id && (
+                                                                <div
+                                                                    ref={menuRef}
+                                                                    role="menu"
+                                                                    className="absolute right-0 mt-2 z-20 min-w-36 overflow-hidden rounded-xl
+                             border border-black/10 dark:border-white/15 py-1
+                             bg-white dark:bg-gray-800 shadow-lg"
+                                                                >
+                                                                    {r.userCanModify && (
+                                                                        <button
+                                                                            role="menuitem"
+                                                                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                                            onClick={() => {
+                                                                                setReplyMenuOpen(null);
+                                                                                setReplies((prev) =>
+                                                                                    prev.map((item) =>
+                                                                                        item.id === r.id
+                                                                                            ? {
+                                                                                                ...item,
+                                                                                                isEditing: true,
+                                                                                                editBody: item.body
+                                                                                            }
+                                                                                            : item
+                                                                                    )
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            <i className="fa-solid fa-pen"></i> Edit
+                                                                        </button>
+                                                                    )}
+                                                                    {r.userCanDelete && (
+                                                                        <button
+                                                                            role="menuitem"
+                                                                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400
+                                 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                                            onClick={async () => {
+                                                                                setReplyMenuOpen(null);
+                                                                                if (confirm("Are you sure you want to delete this comment?")) {
+                                                                                    const res = await deleteReply(r.id);
+                                                                                    if (res.resultCode?.startsWith?.("S-")) {
+                                                                                        setReplies((prev) => prev.filter((item) => item.id !== r.id));
+                                                                                        alert("Comment deleted.");
+                                                                                    }
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            <i className="fa-solid fa-trash-can"></i> Delete
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
+
                             ))
                         )}
                     </div>

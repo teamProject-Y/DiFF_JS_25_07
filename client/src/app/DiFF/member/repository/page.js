@@ -222,10 +222,8 @@ export default function RepositoriesPage() {
     return (
         <LayoutGroup>
             <section className="px-4">
-
                 <div className="mx-auto max-w-6xl h-full">
                     <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
-
                         <Link href={profileHref} className="text-gray-400 hover:text-gray-700">Profile</Link>
                         <span>Repositories</span>
                         {isMyRepos &&
@@ -233,7 +231,6 @@ export default function RepositoriesPage() {
                                 Settings
                             </Link>
                         }
-
                     </div>
                     <div className="h-px w-full bg-gray-300 mb-8"/>
 

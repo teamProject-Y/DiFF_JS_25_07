@@ -54,9 +54,6 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
         return () => window.removeEventListener('storage', onStorage);
     }, []);
 
-    // const isAuthed = useMemo(() => {
-    //     return accessToken && !isExpired(accessToken);
-    // }, [accessToken]);
     const isAuthed = useMemo(() => accessToken && !isExpired(accessToken), [accessToken]);
 
     const isHomeMain = pathname?.startsWith('/DiFF/home/main');

@@ -72,9 +72,9 @@ export default function AfterMainPage({me, trendingArticles}) {
     };
 
     return (
-        <div className="w-full min-h-screen bg-white text-black">
+        <div className="w-full min-h-screen bg-white text-black dark:bg-black dark:text-white">
             <div className="h-screen">
-                <div className="mx-auto px-36 flex">
+                <div className="mx-auto px-32 flex">
                     <main className="flex-grow">
                         {/* 탭 버튼 */}
                         <div className="flex items-center border-b">
