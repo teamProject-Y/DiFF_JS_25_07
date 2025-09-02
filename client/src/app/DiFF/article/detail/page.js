@@ -406,114 +406,91 @@ function ArticleDetailInner() {
                     <div className="flex justify-between">
                         <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
-                        <div className="relative">
+                        <div className="flex items-center gap-2">
+                            {/* 공유 버튼 */}
                             <button
-                                ref={menuBtnRef}
                                 type="button"
-                                aria-haspopup="menu"
-                                aria-expanded={menuOpen}
-                                onClick={() => setMenuOpen(v => !v)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'ArrowDown' && !menuOpen) {
-                                        e.preventDefault();
-                                        setMenuOpen(true);
+                                className="p-2 hover:text-gray-900"
+                                onClick={async () => {
+                                    try {
+                                        const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                        await navigator.clipboard.writeText(url);
+                                        alert("링크가 복사되었습니다.");
+                                    } catch {
+                                        const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                        const input = document.createElement("input");
+                                        input.value = url;
+                                        document.body.appendChild(input);
+                                        input.select();
+                                        document.execCommand("copy");
+                                        document.body.removeChild(input);
+                                        alert("링크가 복사되었습니다.");
                                     }
                                 }}
-                                className="p-2 hover:text-gray-900"
                             >
-                                <i className="fa-solid fa-ellipsis-cal"/>
+                                <i className="fa-solid fa-share-nodes mr-2"></i>
                             </button>
 
-                            {menuOpen && (
-                                <div
-                                    ref={menuRef}
-                                    role="menu"
-                                    className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
-                                                divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
-                                    onKeyDown={(e) => {
-                                        const items = Array.from(menuRef.current?.querySelectorAll('[role="menuitem"]') || []);
-                                        const i = items.indexOf(document.activeElement);
-                                        let next = i;
-                                        if (e.key === 'ArrowDown') {
-                                            e.preventDefault();
-                                            next = (i + 1) % items.length;
-                                        }
-                                        if (e.key === 'ArrowUp') {
-                                            e.preventDefault();
-                                            next = (i - 1 + items.length) % items.length;
-                                        }
-                                        if (e.key === 'Home') {
-                                            e.preventDefault();
-                                            next = 0;
-                                        }
-                                        if (e.key === 'End') {
-                                            e.preventDefault();
-                                            next = items.length - 1;
-                                        }
-                                        if (items[next]) items[next].focus();
-                                    }}
-                                >
-                                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                        {article.userCanModify && (
-                                            <li>
-                                                <Link
-                                                    href={`/DiFF/article/modify?id=${article.id}`}
-                                                    role="menuitem"
-                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    onClick={() => setMenuOpen(false)}
-                                                >
-                                                    수정
-                                                </Link>
-                                            </li>
-                                        )}
-                                        {article.userCanDelete && (
-                                            <li>
-                                                <Link
-                                                    href={`/DiFF/article/modify?id=${article.id}`}
-                                                    role="menuitem"
-                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    onClick={() => setMenuOpen(false)}
-                                                >
-                                                    삭제
-                                                </Link>
-                                            </li>
-                                        )}
-                                    </ul>
-                                    <div className="py-1">
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100
-                                                    dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                            onClick={async () => {
-                                                try {
-                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
-                                                    // 표준 클립보드 API
-                                                    await navigator.clipboard.writeText(url);
-                                                    alert('링크가 복사되었습니다.');
-                                                } catch {
-                                                    // 구형 브라우저 폴백
-                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
-                                                    const input = document.createElement('input');
-                                                    input.value = url;
-                                                    document.body.appendChild(input);
-                                                    input.select();
-                                                    document.execCommand('copy');
-                                                    document.body.removeChild(input);
-                                                    alert('링크가 복사되었습니다.');
-                                                } finally {
-                                                    setMenuOpen(false);
-                                                }
-                                            }}
+                            {/* 더보기 메뉴 (작성자 글일 때만 보임) */}
+                            {isMyPost && (
+                                <div className="relative bg-red-300">
+                                    <button
+                                        ref={menuBtnRef}
+                                        type="button"
+                                        aria-haspopup="menu"
+                                        aria-expanded={menuOpen}
+                                        onClick={() => setMenuOpen(v => !v)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "ArrowDown" && !menuOpen) {
+                                                e.preventDefault();
+                                                setMenuOpen(true);
+                                            }
+                                        }}
+                                        className="p-2 hover:text-gray-900"
+                                    >
+                                        <i className="fa-solid fa-ellipsis-cal"></i>
+                                    </button>
+
+                                    {menuOpen && (
+                                        <div
+                                            ref={menuRef}
+                                            role="menu"
+                                            className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
+                       divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
                                         >
-                                            <i className="fa-solid fa-share-nodes mr-2"></i>
-                                            링크 복사
-                                        </button>
-                                    </div>
+                                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                                {article.userCanModify && (
+                                                    <li>
+                                                        <Link
+                                                            href={`/DiFF/article/modify?id=${article.id}`}
+                                                            role="menuitem"
+                                                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                            onClick={() => setMenuOpen(false)}
+                                                        >
+                                                            수정
+                                                        </Link>
+                                                    </li>
+                                                )}
+                                                {article.userCanDelete && (
+                                                    <li>
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            onClick={() => handleDelete(article.id)}
+                                                            className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                        >
+                                                            삭제
+                                                        </button>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
                     </div>
+
                     {/* article info */}
                     <div className="text-gray-600 mb-6 flex justify-between">
                         <div className="flex items-center gap-2">
