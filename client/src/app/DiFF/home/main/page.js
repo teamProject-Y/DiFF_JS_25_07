@@ -331,7 +331,7 @@ export default function Page() {
             <br/>
 
 
-            {/* overlay menu */}
+            {/* toogle menu */}
             <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
                          blogName={user.blogName}/>
             <div className="pointer-events-none">

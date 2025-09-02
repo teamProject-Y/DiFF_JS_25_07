@@ -60,6 +60,7 @@ export default function SearchPage() {
                 }
             } catch (err) {
                 console.error('검색 실패:', err);
+                setArticles([]);
             } finally {
                 setLoading(false);
             }

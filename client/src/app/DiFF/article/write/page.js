@@ -185,7 +185,17 @@ export function WriteArticlePage() {
 
 
     return (
-        <div className="container mx-auto mt-8 p-6 w-4/5 border border-neutral-300 rounded-xl">
+<>
+        <div>
+            <button
+                onClick={() => router.push('/DiFF/member/repository')}
+            >
+                <i className="fa-solid fa-angle-left"></i>
+            </button>
+        </div>
+
+    <div className="container mx-auto mt-8 p-6 w-4/5 border border-neutral-300 rounded-xl">
+
 
             {/* 리포지토리 선택 */}
             <div className="mb-4">
@@ -260,5 +270,6 @@ export function WriteArticlePage() {
                 </div>
             </form>
         </div>
+</>
     );
 }
