@@ -228,7 +228,7 @@ function ArticleDetailInner() {
         })();
     }, [id, article?.extra__writer, myId]);
 
-    // 내 회원 ID 로드 (닉네임 비교 대신 ID로 판정)
+  // 내 회원 ID 로드 (닉네임 비교 대신 ID로 판정)
      useEffect(() => {
            (async () => {
                  try {
@@ -387,7 +387,6 @@ function ArticleDetailInner() {
         && ( (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '' )
             .trim().toLowerCase()
         === article.extra__writer.trim().toLowerCase();
-
 
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
@@ -553,7 +552,7 @@ function ArticleDetailInner() {
                                             }
                                         }}
                                         className={`px-3 py-1 text-sm rounded-full border transition
-    ${
+                                          ${
                                             member.isFollowing
                                                 ? hoverUnfollow
                                                     ? "bg-red-600 text-white border-red-600 hover:bg-red-500"
@@ -568,7 +567,6 @@ function ArticleDetailInner() {
                                     >
                                         {member.isFollowing ? (hoverUnfollow ? "언팔로우" : "팔로잉") : "팔로우"}
                                     </button>
-
                                 </div>
                             )}
                         </div>
