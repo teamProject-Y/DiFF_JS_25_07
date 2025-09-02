@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { increaseArticleHits, searchArticles } from '@/lib/ArticleAPI';
-import {searchMembers } from '@/lib/UserAPI';
+import {followMember, searchMembers, unfollowMember} from '@/lib/UserAPI';
 import Link from 'next/link';
 
 function extractFirstImage(markdown) {
@@ -78,14 +78,14 @@ export default function SearchPage() {
 
                         {/* 탭 버튼 */}
                         <div className="flex items-center border-b mb-4">
-                            {['Article', 'Profile'].map((t) => (
+                            {["Article", "Profile"].map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setActiveTab(t)}
                                     className={`p-4 -mb-px ${
                                         activeTab === t
-                                            ? 'border-b-2 border-black font-semibold'
-                                            : 'text-gray-500'
+                                            ? "border-b-2 border-black font-semibold"
+                                            : "text-gray-500"
                                     }`}
                                 >
                                     {t}
@@ -96,7 +96,7 @@ export default function SearchPage() {
                         {/* 로딩 상태 */}
                         {loading ? (
                             <p>검색 중...</p>
-                        ) : activeTab === 'Article' ? (
+                        ) : activeTab === "Article" ? (
                             articles.length > 0 ? (
                                 articles.map((article) => {
                                     const imgSrc = extractFirstImage(article.body);
@@ -111,7 +111,7 @@ export default function SearchPage() {
                                                 {/* 왼쪽: 텍스트 */}
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
                                                     <div className="text-sm text-gray-500">
-                                                        in Search · by{' '}
+                                                        in Search · by{" "}
                                                         {article.extra__writer ? (
                                                             <Link
                                                                 href={`/DiFF/member/profile?nickName=${encodeURIComponent(
@@ -123,7 +123,7 @@ export default function SearchPage() {
                                                                 {article.extra__writer}
                                                             </Link>
                                                         ) : (
-                                                            'Unknown'
+                                                            "Unknown"
                                                         )}
                                                     </div>
                                                     <div className="py-2 flex-grow">
@@ -131,25 +131,25 @@ export default function SearchPage() {
                                                             {article.title}
                                                         </h2>
                                                         <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
-                                                            {article.body ? removeMd(article.body) : ''}
+                                                            {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                    <span>
-                                                        {new Date(article.regDate).toLocaleDateString(
-                                                            'en-US',
-                                                            {year: 'numeric', month: 'short', day: 'numeric'}
-                                                        )}
-                                                    </span>
+                          <span>
+                            {new Date(article.regDate).toLocaleDateString(
+                                "en-US",
+                                {year: "numeric", month: "short", day: "numeric"}
+                            )}
+                          </span>
                                                         <span>view: {article.hits}</span>
                                                         <span>
-                                                        <i className="fa-solid fa-comments"></i>{' '}
+                            <i className="fa-solid fa-comments"></i>{" "}
                                                             {article.extra__sumReplies}
-                                                    </span>
+                          </span>
                                                         <span>
-                                                        <i className="fa-solid fa-heart"></i>{' '}
+                            <i className="fa-solid fa-heart"></i>{" "}
                                                             {article.extra__sumReaction}
-                                                    </span>
+                          </span>
                                                     </div>
                                                 </div>
 
@@ -174,39 +174,83 @@ export default function SearchPage() {
                                 <div>게시글 검색 결과가 없습니다.</div>
                             )
                         ) : members.length > 0 ? (
-                            members.map((m) => (
-                                <li
-                                    key={m.id}
-                                    className="flex items-center gap-4 border p-4 rounded-md"
-                                >
-                                    {/* 프로필 이미지 */}
-                                    {m.profileUrl ? (
-                                        <img
-                                            src={m.profileUrl}
-                                            alt={m.nickName}
-                                            className="w-12 h-12 rounded-full object-cover border"
-                                        />
-                                    ) : (
-                                        <div
-                                            className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-200 text-gray-500">
-                                            <i className="fa-solid fa-skull"></i>
-                                        </div>
-                                    )}
+                            <ul className="space-y-4">
+                                {members.map((m) => (
+                                    <li
+                                        key={m.id}
+                                        className="flex items-center justify-between gap-4 border p-4 rounded-md"
+                                    >
+                                        {/* 왼쪽: 프로필 이미지 + 닉네임/이메일 */}
+                                        <div className="flex items-center gap-4">
+                                            {m.profileUrl ? (
+                                                <img
+                                                    src={m.profileUrl}
+                                                    alt={m.nickName}
+                                                    className="w-12 h-12 rounded-full object-cover border"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-200 text-gray-500">
+                                                    <i className="fa-solid fa-skull"></i>
+                                                </div>
+                                            )}
 
-                                    {/* 닉네임 + 이메일 */}
-                                    <div>
-                                        <Link
-                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(
-                                                m.nickName
-                                            )}`}
-                                            className="text-lg font-semibold hover:underline"
-                                        >
-                                            {m.nickName}
-                                        </Link>
-                                        <p className="text-sm text-gray-600">{m.email}</p>
-                                    </div>
-                                </li>
-                            ))
+                                            <div>
+                                                <Link
+                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(
+                                                        m.nickName
+                                                    )}`}
+                                                    className="text-lg font-semibold hover:underline"
+                                                >
+                                                    {m.nickName}
+                                                </Link>
+                                                <p className="text-sm text-gray-600">{m.email}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* 오른쪽: 팔로우/언팔로우 버튼 */}
+                                        <div>
+                                            <button
+                                                onClick={async () => {
+                                                    try {
+                                                        if (m.isFollowing) {
+                                                            console.log("👉 언팔로우 요청:", m.id);
+                                                            await unfollowMember(m.id);
+                                                            setMembers((prev) =>
+                                                                prev.map((mem) =>
+                                                                    mem.id === m.id
+                                                                        ? {...mem, isFollowing: false}
+                                                                        : mem
+                                                                )
+                                                            );
+                                                        } else {
+                                                            console.log("👉 팔로우 요청:", m.id);
+                                                            await followMember(m.id);
+                                                            setMembers((prev) =>
+                                                                prev.map((mem) =>
+                                                                    mem.id === m.id
+                                                                        ? {...mem, isFollowing: true}
+                                                                        : mem
+                                                                )
+                                                            );
+                                                        }
+                                                    } catch (err) {
+                                                        console.error("❌ 팔로우/언팔로우 실패:", err);
+                                                        alert("처리 실패");
+                                                    }
+                                                }}
+                                                className={`px-6 py-2 text-sm rounded text-white ${
+                                                    m.isFollowing
+                                                        ? "bg-red-600 hover:bg-red-500"
+                                                        : "bg-green-600 hover:bg-green-500"
+                                                }`}
+                                            >
+                                                {m.isFollowing ? "언팔로우" : "팔로우"}
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
                         ) : (
                             <div>프로필 검색 결과가 없습니다.</div>
                         )}
