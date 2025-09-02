@@ -67,17 +67,17 @@ export default function SearchPage() {
     }, [keyword]);
 
     return (
-        <div className="w-full min-h-screen bg-white text-black">
+        <div className="w-full min-h-screen overflow-auto">
             <div className="h-screen">
                 <div className="mx-auto px-36 flex">
                     <main className="flex-grow">
                         {/* 타이틀 */}
-                        <h1 className="text-2xl font-bold mb-4">
-                            Showing Results for "{keyword}"
+                        <h1 className="text-2xl font-bold mb-4 text-gray-500">
+                            Showing Results for <span className="text-black">"{keyword}"</span>
                         </h1>
 
                         {/* 탭 버튼 */}
-                        <div className="flex items-center border-b mb-4">
+                        <div className="flex items-center border-b ">
                             {['Article', 'Profile'].map((t) => (
                                 <button
                                     key={t}
@@ -126,7 +126,7 @@ export default function SearchPage() {
                                                             'Unknown'
                                                         )}
                                                     </div>
-                                                    <div className="py-2 flex-grow">
+                                                    <div className="py-2 flex-grow text-black">
                                                         <h2 className="text-2xl py-2 font-black">
                                                             {article.title}
                                                         </h2>
@@ -177,29 +177,29 @@ export default function SearchPage() {
                             members.map((m) => (
                                 <li
                                     key={m.id}
-                                    className="flex items-center gap-4 border p-4 rounded-md"
+                                    className="flex items-center gap-4 p-6 border-b"
                                 >
                                     {/* 프로필 이미지 */}
                                     {m.profileUrl ? (
                                         <img
                                             src={m.profileUrl}
                                             alt={m.nickName}
-                                            className="w-12 h-12 rounded-full object-cover border"
+                                            className="w-16 h-16 rounded-full object-cover border"
                                         />
                                     ) : (
                                         <div
-                                            className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-200 text-gray-500">
+                                            className="w-16 h-16 rounded-full flex items-center justify-center bg-gray-100 text-4xl">
                                             <i className="fa-solid fa-skull"></i>
                                         </div>
                                     )}
 
                                     {/* 닉네임 + 이메일 */}
-                                    <div>
+                                    <div className="ml-4">
                                         <Link
                                             href={`/DiFF/member/profile?nickName=${encodeURIComponent(
                                                 m.nickName
                                             )}`}
-                                            className="text-lg font-semibold hover:underline"
+                                            className="text-xl font-bold"
                                         >
                                             {m.nickName}
                                         </Link>
