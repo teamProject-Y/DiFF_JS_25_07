@@ -61,8 +61,6 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
         }
     };
 
-
-
     return (
         <form onSubmit={onSubmit} className="max-w-[460px] mx-auto text-sm">
             <div className="text-2xl md:text-3xl font-semibold text-center mb-8">Login</div>

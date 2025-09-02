@@ -213,3 +213,8 @@ export const updatePassword = async (token, newPw) => {
         params: { token, newPw },
     });
 };
+
+export const searchMembers = async (keyword) => {
+    const res = await UserAPI.get(`/api/DiFF/member/search`, { params: { keyword } });
+    return res.data;
+};
