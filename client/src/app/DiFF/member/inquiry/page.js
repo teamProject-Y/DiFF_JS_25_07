@@ -193,6 +193,10 @@ export default function InquiryForm() {
                                 onChange={(e) => setInquiry({...inquiry, email: e.target.value})}
                                 onBlur={() => setTouched(prev => ({...prev, email: true}))}
                                 className={`bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5
+                                autofill:shadow-[inset_0_0_0_9999px_rgb(249,250,251)]
+                                autofill:text-gray-900
+                                dark:autofill:shadow-[inset_0_0_0_9999px_rgb(55,65,81)]
+                                dark:autofill:text-white
                                  ${showError('email')
                                     ? 'focus:ring-1 border-red-500 focus:ring-red-500 focus:border-red-500 dark:border-red-500 dark:focus:ring-red-500 dark:focus:border-red-500'
                                     : 'border-gray-300 focus:outline-none focus:ring-0 focus-visible:outline-none'}
