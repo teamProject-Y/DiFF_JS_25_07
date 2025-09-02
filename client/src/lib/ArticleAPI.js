@@ -156,7 +156,6 @@ export const writeArticle = async (data) => {
     return result; // ResultData
 };
 
-
 export const getMyRepositories = async () => {
     const res = await ArticleAPI.get('/api/DiFF/repository/my');
     const repos =
@@ -178,8 +177,8 @@ export async function getArticle(id) {
     const res = await ArticleAPI.get(`/api/DiFF/article/detail`, {
         params: { id }
     });
-    return res.data.data;
-};
+    return res.data.data1;
+}
 
 // 게시글 수정
 export async function modifyArticle(article, token) {

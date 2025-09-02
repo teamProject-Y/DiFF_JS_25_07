@@ -86,6 +86,7 @@ function ArticleDetailInner() {
 
             try {
                 const art = await getArticle(id);
+                console.log("api 응답: ", art)
                 if (!alive) return;
                 if (!art) {
                     setErrMsg('게시글을 불러오지 못했습니다.');
@@ -194,13 +195,13 @@ function ArticleDetailInner() {
                 const authorNickN = norm(article.extra__writer);
                 setAuthorId(targetId);
 
-                     // 🔒 ID로 내 글 판정 (myId가 아직 없으면 일단 진행, 다음 렌더에서 막힘)
-                         if (myId && targetId && myId === targetId) {
-                           setIsMyPost(true);
-                           setMember(null);
-                           return;
-                         }
-                     setIsMyPost(false);
+                // 🔒 ID로 내 글 판정 (myId가 아직 없으면 일단 진행, 다음 렌더에서 막힘)
+                if (myId && targetId && myId === targetId) {
+                    setIsMyPost(true);
+                    setMember(null);
+                    return;
+                }
+                setIsMyPost(false);
 
                 // 2) 내 팔로잉 리스트
                 const fl = await getFollowingList(); // <-- 인자 없이 호출 (null 이슈 회피)
@@ -228,18 +229,18 @@ function ArticleDetailInner() {
         })();
     }, [id, article?.extra__writer, myId]);
 
-  // 내 회원 ID 로드 (닉네임 비교 대신 ID로 판정)
-     useEffect(() => {
-           (async () => {
-                 try {
-                       const me = await fetchUser(); // nickName 전달 X → 현재 로그인 사용자
-                       setMyId(Number(me?.member?.id) || null);
-                     } catch (e) {
-                       console.error('내 정보 로드 실패:', e);
-                       setMyId(null);
-                     }
-               })();
-         }, [id]);
+    // 내 회원 ID 로드 (닉네임 비교 대신 ID로 판정)
+    useEffect(() => {
+        (async () => {
+            try {
+                const me = await fetchUser(); // nickName 전달 X → 현재 로그인 사용자
+                setMyId(Number(me?.member?.id) || null);
+            } catch (e) {
+                console.error('내 정보 로드 실패:', e);
+                setMyId(null);
+            }
+        })();
+    }, [id]);
 
     // 글 아이디 바뀌면 팔로우 관련 상태 초기화 (잔존 상태 제거)
     useEffect(() => {
@@ -405,114 +406,91 @@ function ArticleDetailInner() {
                     <div className="flex justify-between">
                         <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
 
-                        <div className="relative">
+                        <div className="flex items-center gap-2">
+                            {/* 공유 버튼 */}
                             <button
-                                ref={menuBtnRef}
                                 type="button"
-                                aria-haspopup="menu"
-                                aria-expanded={menuOpen}
-                                onClick={() => setMenuOpen(v => !v)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'ArrowDown' && !menuOpen) {
-                                        e.preventDefault();
-                                        setMenuOpen(true);
+                                className="p-2 hover:text-gray-900"
+                                onClick={async () => {
+                                    try {
+                                        const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                        await navigator.clipboard.writeText(url);
+                                        alert("링크가 복사되었습니다.");
+                                    } catch {
+                                        const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
+                                        const input = document.createElement("input");
+                                        input.value = url;
+                                        document.body.appendChild(input);
+                                        input.select();
+                                        document.execCommand("copy");
+                                        document.body.removeChild(input);
+                                        alert("링크가 복사되었습니다.");
                                     }
                                 }}
-                                className="p-2 hover:text-gray-900"
                             >
-                                <i className="fa-solid fa-ellipsis-vertical"/>
+                                <i className="fa-solid fa-share-nodes mr-2"></i>
                             </button>
 
-                            {menuOpen && (
-                                <div
-                                    ref={menuRef}
-                                    role="menu"
-                                    className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
-                                                divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
-                                    onKeyDown={(e) => {
-                                        const items = Array.from(menuRef.current?.querySelectorAll('[role="menuitem"]') || []);
-                                        const i = items.indexOf(document.activeElement);
-                                        let next = i;
-                                        if (e.key === 'ArrowDown') {
-                                            e.preventDefault();
-                                            next = (i + 1) % items.length;
-                                        }
-                                        if (e.key === 'ArrowUp') {
-                                            e.preventDefault();
-                                            next = (i - 1 + items.length) % items.length;
-                                        }
-                                        if (e.key === 'Home') {
-                                            e.preventDefault();
-                                            next = 0;
-                                        }
-                                        if (e.key === 'End') {
-                                            e.preventDefault();
-                                            next = items.length - 1;
-                                        }
-                                        if (items[next]) items[next].focus();
-                                    }}
-                                >
-                                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                        {article.userCanModify && (
-                                            <li>
-                                                <Link
-                                                    href={`/DiFF/article/modify?id=${article.id}`}
-                                                    role="menuitem"
-                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    onClick={() => setMenuOpen(false)}
-                                                >
-                                                    수정
-                                                </Link>
-                                            </li>
-                                        )}
-                                        {article.userCanDelete && (
-                                            <li>
-                                                <Link
-                                                    href={`/DiFF/article/modify?id=${article.id}`}
-                                                    role="menuitem"
-                                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    onClick={() => setMenuOpen(false)}
-                                                >
-                                                    삭제
-                                                </Link>
-                                            </li>
-                                        )}
-                                    </ul>
-                                    <div className="py-1">
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100
-                                                    dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                            onClick={async () => {
-                                                try {
-                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
-                                                    // 표준 클립보드 API
-                                                    await navigator.clipboard.writeText(url);
-                                                    alert('링크가 복사되었습니다.');
-                                                } catch {
-                                                    // 구형 브라우저 폴백
-                                                    const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
-                                                    const input = document.createElement('input');
-                                                    input.value = url;
-                                                    document.body.appendChild(input);
-                                                    input.select();
-                                                    document.execCommand('copy');
-                                                    document.body.removeChild(input);
-                                                    alert('링크가 복사되었습니다.');
-                                                } finally {
-                                                    setMenuOpen(false);
-                                                }
-                                            }}
+                            {/* 더보기 메뉴 (작성자 글일 때만 보임) */}
+                            {isMyPost && (
+                                <div className="relative bg-red-300">
+                                    <button
+                                        ref={menuBtnRef}
+                                        type="button"
+                                        aria-haspopup="menu"
+                                        aria-expanded={menuOpen}
+                                        onClick={() => setMenuOpen(v => !v)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "ArrowDown" && !menuOpen) {
+                                                e.preventDefault();
+                                                setMenuOpen(true);
+                                            }
+                                        }}
+                                        className="p-2 hover:text-gray-900"
+                                    >
+                                        <i className="fa-solid fa-ellipsis-cal"></i>
+                                    </button>
+
+                                    {menuOpen && (
+                                        <div
+                                            ref={menuRef}
+                                            role="menu"
+                                            className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
+                       divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
                                         >
-                                            <i className="fa-solid fa-share-nodes mr-2"></i>
-                                            링크 복사
-                                        </button>
-                                    </div>
+                                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                                {article.userCanModify && (
+                                                    <li>
+                                                        <Link
+                                                            href={`/DiFF/article/modify?id=${article.id}`}
+                                                            role="menuitem"
+                                                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                            onClick={() => setMenuOpen(false)}
+                                                        >
+                                                            수정
+                                                        </Link>
+                                                    </li>
+                                                )}
+                                                {article.userCanDelete && (
+                                                    <li>
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            onClick={() => handleDelete(article.id)}
+                                                            className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                        >
+                                                            삭제
+                                                        </button>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
                     </div>
+
                     {/* article info */}
                     <div className="text-gray-600 mb-6 flex justify-between">
                         <div className="flex items-center gap-2">
@@ -551,21 +529,21 @@ function ArticleDetailInner() {
                                                 alert("처리 실패");
                                             }
                                         }}
-                                        className={`px-3 py-1 text-sm rounded-full border transition
+                                        className={`py-1 text-sm rounded-full border transition w-20 
                                           ${
                                             member.isFollowing
                                                 ? hoverUnfollow
-                                                    ? "bg-red-600 text-white border-red-600 hover:bg-red-500"
-                                                    : "bg-green-600 text-white border-green-600 hover:bg-green-500"
-                                                : "text-emerald-600 border-emerald-500 hover:bg-emerald-50"
+                                                    ? "text-red-500 border hover:border-red-500"
+                                                    : "border text-gray-500 bg-gray-100"
+                                                : "hover:bg-gray-100 border-gray-700"
                                         }`}
                                         aria-label={
                                             member.isFollowing
-                                                ? (hoverUnfollow ? "언팔로우" : "팔로잉")
-                                                : "팔로우"
+                                                ? (hoverUnfollow ? "Unfollow" : "Following")
+                                                : "Follow"
                                         }
                                     >
-                                        {member.isFollowing ? (hoverUnfollow ? "언팔로우" : "팔로잉") : "팔로우"}
+                                        {member.isFollowing ? (hoverUnfollow ? "Unfollow" : "Following") : "Follow"}
                                     </button>
                                 </div>
                             )}
