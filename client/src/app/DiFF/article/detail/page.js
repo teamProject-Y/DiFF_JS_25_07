@@ -46,10 +46,12 @@ function ArticleDetailInner() {
     // === 팔로우 칩용 state ===
     const [followBusy, setFollowBusy] = useState(false);
     const [authorId, setAuthorId] = useState(null);
+    const [myId, setMyId] = useState(null);
     const [authorNick, setAuthorNick] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const [member, setMember] = useState(null);
     const [isMyPost, setIsMyPost] = useState(false);
+    const [hoverUnfollow, setHoverUnfollow] = useState(false);
 
     const myNick = (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '';
 
@@ -182,23 +184,23 @@ function ArticleDetailInner() {
     useEffect(() => {
         (async () => {
             if (!article?.extra__writer) return;
+            if (myId === null) return;
 
             try {
-                const myNickLS = (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '';
-                const myNickN = norm(myNickLS);
-                const authorNickN = norm(article.extra__writer);
-
-                // 내 글이면 버튼 숨김
-                if (myNickN && myNickN === authorNickN) {
-                    setIsMyPost(true);
-                    setMember(null);
-                    return;
-                }
-                setIsMyPost(false);
 
                 // 1) 작성자 id
                 const u = await fetchUser(article.extra__writer);
                 const targetId = Number(u?.member?.id) || 0;
+                const authorNickN = norm(article.extra__writer);
+                setAuthorId(targetId);
+
+                     // 🔒 ID로 내 글 판정 (myId가 아직 없으면 일단 진행, 다음 렌더에서 막힘)
+                         if (myId && targetId && myId === targetId) {
+                           setIsMyPost(true);
+                           setMember(null);
+                           return;
+                         }
+                     setIsMyPost(false);
 
                 // 2) 내 팔로잉 리스트
                 const fl = await getFollowingList(); // <-- 인자 없이 호출 (null 이슈 회피)
@@ -224,8 +226,27 @@ function ArticleDetailInner() {
                 setMember({id: null, isFollowing: false, nickName: article.extra__writer});
             }
         })();
-    }, [id, article?.extra__writer]);
+    }, [id, article?.extra__writer, myId]);
 
+  // 내 회원 ID 로드 (닉네임 비교 대신 ID로 판정)
+     useEffect(() => {
+           (async () => {
+                 try {
+                       const me = await fetchUser(); // nickName 전달 X → 현재 로그인 사용자
+                       setMyId(Number(me?.member?.id) || null);
+                     } catch (e) {
+                       console.error('내 정보 로드 실패:', e);
+                       setMyId(null);
+                     }
+               })();
+         }, [id]);
+
+    // 글 아이디 바뀌면 팔로우 관련 상태 초기화 (잔존 상태 제거)
+    useEffect(() => {
+        setIsMyPost(false);
+        setMember(null);
+        setIsFollowing(false);
+    }, [id]);
 
     // 게시글 삭제
     const handleDelete = async (id) => {
@@ -362,6 +383,10 @@ function ArticleDetailInner() {
         }
     };
 
+    const isOwn = !!article?.extra__writer
+        && ( (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '' )
+            .trim().toLowerCase()
+        === article.extra__writer.trim().toLowerCase();
 
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
@@ -506,34 +531,41 @@ function ArticleDetailInner() {
                             {!isMyPost && member?.id && (
                                 <div className="flex">
                                     <button
+                                        onMouseEnter={() => setHoverUnfollow(true)}
+                                        onMouseLeave={() => setHoverUnfollow(false)}
                                         onClick={async () => {
                                             try {
                                                 if (member.isFollowing) {
-                                                    console.log("👉 언팔로우 요청:", member.id);
                                                     await unfollowMember(member.id);
-
-                                                    setMember(prev => ({...prev, isFollowing: false}));
-                                                    // 상대방 프로필이므로 followerCount 조정 (없으면 무시)
-                                                    typeof setFollowerCount === 'function' && setFollowerCount(prev => Math.max(0, prev - 1));
+                                                    setMember(prev => ({ ...prev, isFollowing: false }));
+                                                    typeof setFollowerCount === 'function' &&
+                                                    setFollowerCount(prev => Math.max(0, prev - 1));
                                                 } else {
-                                                    console.log("👉 팔로우 요청:", member.id);
                                                     await followMember(member.id);
-
-                                                    setMember(prev => ({...prev, isFollowing: true}));
-                                                    typeof setFollowerCount === 'function' && setFollowerCount(prev => prev + 1);
+                                                    setMember(prev => ({ ...prev, isFollowing: true }));
+                                                    typeof setFollowerCount === 'function' &&
+                                                    setFollowerCount(prev => prev + 1);
                                                 }
                                             } catch (err) {
                                                 console.error("❌ 팔로우/언팔로우 실패:", err);
                                                 alert("처리 실패");
                                             }
                                         }}
-                                        className={`px-3 py-1 text-sm rounded-full border ${
+                                        className={`px-3 py-1 text-sm rounded-full border transition
+                                          ${
                                             member.isFollowing
-                                                ? "bg-green-600 text-white hover:bg-green-500"
+                                                ? hoverUnfollow
+                                                    ? "bg-red-600 text-white border-red-600 hover:bg-red-500"
+                                                    : "bg-green-600 text-white border-green-600 hover:bg-green-500"
                                                 : "text-emerald-600 border-emerald-500 hover:bg-emerald-50"
                                         }`}
+                                        aria-label={
+                                            member.isFollowing
+                                                ? (hoverUnfollow ? "언팔로우" : "팔로잉")
+                                                : "팔로우"
+                                        }
                                     >
-                                        {member.isFollowing ? "팔로잉" : "팔로우"}
+                                        {member.isFollowing ? (hoverUnfollow ? "언팔로우" : "팔로잉") : "팔로우"}
                                     </button>
                                 </div>
                             )}
