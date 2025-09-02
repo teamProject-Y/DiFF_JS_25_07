@@ -8,7 +8,6 @@ import {fetchUser} from '@/lib/UserAPI';
 import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
-import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -53,10 +52,6 @@ export default function Header() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const [unread, setUnread] = useState(false);
-    const [notifications, setNotifications] = useState([]);
-    const [open, setOpen] = useState(false);
-    const dropdownRef = useRef(null);
     useEffect(() => {
         const isScrollable = (el) => {
             if (!el || el === window) return false;
@@ -189,38 +184,6 @@ export default function Header() {
         router.push(`/DiFF/article/search?keyword=${encodeURIComponent(keyword)}`);
         setResults([]); // 드롭다운 닫기
     };
-
-    useEffect(() => {
-        if (!accessToken) return;
-        hasUnread()
-            .then(setUnread)
-            .catch(err => console.error("알림 체크 실패:", err));
-    }, [accessToken]);
-
-    const handleBellClick = async () => {
-        if (!open) {
-            try {
-                const list = await getNotifications();
-                setNotifications(list);
-                await markAllAsRead();  // 읽음 처리
-                setUnread(false);       // 빨간 점 제거
-            } catch (err) {
-                console.error("알림 목록 가져오기 실패:", err);
-            }
-        }
-        setOpen(!open);
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
@@ -277,29 +240,7 @@ export default function Header() {
             <ul className="flex gap-8 text-xl font-semibold pr-8">
                 {accessToken ? (
                     <>
-                        <li className="relative" ref={dropdownRef}>
-                            <button onClick={handleBellClick} className="relative">
-                                <i className="fa-solid fa-bell"></i>
-                                {unread && (
-                                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-                                )}
-                            </button>
-
-                            {open && (
-                                <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-2 z-50">
-                                    {notifications.length > 0 ? (
-                                        notifications.map((n) => (
-                                            <div key={n.id} className="border-b py-2 text-sm">
-                                                <span className="font-medium">{n.type}</span> - {n.message}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-gray-500">알림이 없습니다.</p>
-                                    )}
-                                </div>
-                            )}
-                        </li>
-
+                        <li><i className="fa-solid fa-bell"/></li>
                         <li><Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link></li>
                         <li><Link href="/DiFF/member/profile">MYPAGE</Link></li>
                     </>
