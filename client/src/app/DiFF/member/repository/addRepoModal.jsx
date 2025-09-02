@@ -4,85 +4,6 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getGithubRepos } from '@/lib/RepositoryAPI';
 
-// export default function RepoFolder({repositories, onSelect, onCreateRepo, onImportRepo, canManage = true}) {
-//     const [openChoice, setOpenChoice] = useState(false);
-//     const openModal = useCallback(() => setOpenChoice(true), []);
-//     const closeModal = useCallback(() => setOpenChoice(false), []);
-//
-//     const visibleRepos = useMemo(() => {
-//         const list = Array.isArray(repositories) ? repositories : [];
-//         if (canManage) return list;
-//
-//         return list.filter((r) => {
-//             const isPrivate = (r?.aprivate ?? r?.aPrivate) === true;
-//             return !isPrivate;
-//         });
-//     }, [repositories, canManage]);
-//
-//     // ESC 닫기
-//     useEffect(() => {
-//         if (!openChoice) return;
-//         const onKey = (e) => e.key === 'Escape' && closeModal();
-//         window.addEventListener('keydown', onKey);
-//         return () => window.removeEventListener('keydown', onKey);
-//     }, [openChoice, closeModal]);
-//
-//     return (
-//         <motion.div
-//             key="grid"
-//             initial={{opacity: 0}}
-//             animate={{opacity: 1}}
-//             exit={{opacity: 0}}
-//             className="w-full h-[520px] overflow-y-auto p-8 grid gap-8 grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] auto-rows-auto content-start"
-//         >
-//             {canManage && (
-//             <motion.div
-//                 key="repo-plus"
-//                 layoutId="repo-plus"
-//                 className="cursor-pointer flex flex-col items-center justify-center"
-//                 onClick={openModal}
-//                 title="Add Repository"
-//             >
-//                 <div className="relative w-[9rem] h-[9rem]">
-//                     <i className="fa-solid fa-folder-plus text-[9rem] text-neutral-200 hover:text-neutral-400
-//             absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
-//                 </div>
-//                 <span className="font-bold text-lg">Add Repository</span>
-//             </motion.div>
-//             )}
-//
-//             {visibleRepos?.length > 0 ? (
-//                 visibleRepos.map((repo, idx) => (
-//                     <motion.div
-//                         key={repo.id}
-//                         layoutId={`repo-${repo.id}`}
-//                         className="flex flex-col items-center cursor-pointer"
-//                         onClick={() => onSelect(repo.id)}
-//                         title={repo.name}
-//                     >
-//                         <i className="fa-solid fa-folder text-[9rem] text-neutral-400 hover:text-neutral-500 transition"></i>
-//                         <h3 className="font-bold text-lg text-center">
-//                             {repo.name || `Repository ${idx + 1}`}
-//                         </h3>
-//                     </motion.div>
-//                 ))
-//             ) : (
-//                 <p>등록된 리포지토리가 없습니다.</p>
-//             )}
-//
-//             {/* 선택 모달 */}
-//             {canManage && (
-//             <AddRepoChoiceModal
-//                 open={openChoice}
-//                 onClose={closeModal}
-//                 onCreate={onCreateRepo}
-//                 onImport={onImportRepo}
-//             />
-//             )}
-//         </motion.div>
-//     );
-// }
-
 export function AddRepoModal({
                                  open,
                                  onClose,
@@ -113,6 +34,26 @@ export function AddRepoModal({
     const [ghQuery, setGhQuery] = useState('');
     const [ghSelectedId, setGhSelectedId] = useState(null);
 
+    const resetAll = useCallback(() => {
+        setName('');
+        setDesc('');
+        setVisibility('Public');
+        setTouchedName(false);
+        setErr('');
+        setSubmitting(false);
+        setVisOpen(false);
+
+        // setGhList([]);
+        setGhLoading(false);
+        setGhErr('');
+        setGhQuery('');
+        setGhSelectedId(null);
+    }, []);
+
+    useEffect(() => {
+        if (!open) resetAll();
+    }, [open, resetAll]);
+
     useEffect(() => {
         if (!visOpen) return;
         const handleDown = (e) => {
@@ -136,6 +77,8 @@ export function AddRepoModal({
             url: r?.html_url ?? r?.url ?? '',
             default_branch: r?.default_branch ?? r?.defaultBranch ?? '',
         }));
+
+
 
     // 깃허브 미연동 상태에서 모달이 열리면 리스트/선택값 클리어
     useEffect(() => {
@@ -279,7 +222,8 @@ export function AddRepoModal({
                         animate={{ y: 0, opacity: 1, scale: 1 }}
                         exit={{ y: 12, opacity: 0, scale: 0.98 }}
                         transition={{ type: 'spring', stiffness: 240, damping: 22 }}
-                        className="w-[min(60vw)] h-[min(80vh)] rounded-xl bg-white p-6 shadow-xl relative overflow-hidden flex flex-col"
+                        className="w-[min(60vw)] h-[min(80vh)] rounded-xl
+                        bg-gray-50 p-6 shadow-xl relative overflow-hidden flex flex-col"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
@@ -294,7 +238,7 @@ export function AddRepoModal({
 
                         <div className="flex-1 min-h-0 flex gap-4">
                             {/* 왼쪽: 직접 생성 */}
-                            <form onSubmit={submitCreate} className="w-[45%] rounded-lg border p-4 flex flex-col mr-2">
+                            <form onSubmit={submitCreate} className="w-[45%] bg-white rounded-lg border p-4 flex flex-col mr-2">
                                 <p className="text-lg font-bold mb-3">Create directly here</p>
                                 <div className="mt-3">
                                     <label className="block font-medium mb-1 px-2">Repository Name *</label>
@@ -306,16 +250,16 @@ export function AddRepoModal({
                                         placeholder=" "
                                         aria-invalid={nameInvalid}
                                         aria-describedby={nameInvalid ? 'name-error' : undefined}
-                                        className={`w-full rounded-lg px-3 py-2 border ${
-                                            nameInvalid ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-400' : ''
+                                        className={`w-full rounded-lg px-3 py-2 border-gray-300 border ${
+                                            nameInvalid ? 'border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500' : ''
                                         }`}
                                     />
 
                                     <p
                                         id="name-error"
-                                        className={`mt-1 text-xs pl-3 ${nameInvalid ? 'text-red-500' : 'text-white'}`}
+                                        className={`mt-1 text-xs pl-2 ${nameInvalid ? 'text-red-500' : 'text-white'}`}
                                     >
-                                        리포지토리 이름을 입력하세요.
+                                        Please enter repository name
                                     </p>
                                 </div>
 
@@ -329,7 +273,8 @@ export function AddRepoModal({
                                             aria-haspopup="listbox"
                                             aria-expanded={visOpen}
                                             onClick={() => setVisOpen((v) => !v)}
-                                            className="hover:bg-neutral-200 focus:bg-neutral-200 border w-full rounded-lg font-medium px-4 py-2 inline-flex items-center justify-between"
+                                            className="hover:bg-gray-100 focus:bg-gray-100 border-gray-300 border
+                                             w-full rounded-lg font-medium px-4 py-2 inline-flex items-center justify-between"
                                         >
                                             {visibility}
                                             <svg
@@ -383,8 +328,8 @@ export function AddRepoModal({
                                         value={desc}
                                         onChange={(e) => setDesc(e.target.value)}
                                         placeholder=" "
-                                        rows={3}
-                                        className="w-full border rounded-lg px-3 py-2 resize-none"
+                                        rows={5}
+                                        className="w-full border-gray-300 border rounded-lg px-3 py-2 resize-none focus:ring-1"
                                     />
                                 </div>
 
@@ -392,15 +337,19 @@ export function AddRepoModal({
                                 <div className="flex-grow"></div>
 
                                 <div className="mt-auto pt-2">
-                                    <button type="submit" className="w-full px-4 py-2 rounded-lg bg-neutral-200 hover:bg-neutral-300">
-                                        Create Repository
+                                    <button
+                                        type="submit"
+                                        disabled={submitting || !name.trim()}
+                                        className="w-full px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60"
+                                    >
+                                        {submitting ? 'Creating…' : 'Create Repository'}
                                     </button>
                                 </div>
                             </form>
 
                             {/* 오른쪽: 깃허브에서 가져오기 */}
-                            <div className="w-[55%]">
-                                <div className="rounded-lg border p-4 flex flex-col h-full">
+                            <div className="w-[55%] bg-white rounded-lg border p-4">
+                                <div className="flex flex-col h-full">
                                     <p className="text-lg font-bold mb-6">Import from GitHub</p>
 
                                     {!isGithubLinked ? (
@@ -426,11 +375,11 @@ export function AddRepoModal({
                                                 value={ghQuery}
                                                 onChange={(e) => setGhQuery(e.target.value)}
                                                 placeholder="Search repository"
-                                                className="w-full border rounded-lg px-3 py-2 mb-3"
+                                                className="w-full border-gray-300 border rounded-lg px-3 py-2 my-5"
                                             />
 
                                             <div
-                                                className="flex-1 min-h-0 border rounded-lg overflow-y-auto p-2 mb-5"
+                                                className="flex-1 min-h-0 border-gray-300 border rounded-lg overflow-y-auto p-2 mb-8"
                                                 style={{ scrollbarGutter: 'stable', maxHeight: 360 }}
                                             >
                                                 {ghLoading && (
@@ -456,7 +405,9 @@ export function AddRepoModal({
                                                         return (
                                                             <li
                                                                 key={key}
-                                                                onClick={() => setGhSelectedId(selectId)}
+                                                                onClick={() =>
+                                                                    setGhSelectedId((prev) => (prev === selectId ? null : selectId))
+                                                                }
                                                                 className={`flex items-center justify-between gap-3 cursor-pointer rounded-md px-3 py-2 ${
                                                                     selected
                                                                         ? 'bg-gray-100 border border-gray-300'
@@ -465,11 +416,11 @@ export function AddRepoModal({
                                                                 title={repoName}
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0">
-                                  <span
-                                      className={`inline-block w-3 h-3 rounded-full border ${
-                                          selected ? 'bg-gray-800 border-gray-800' : 'bg-white border-gray-400'
-                                      }`}
-                                  />
+                                                                    <span
+                                                                        className={`inline-block w-3 h-3 rounded-full border ${
+                                                                            selected ? 'bg-gray-800 border-gray-800' : 'bg-white border-gray-400'
+                                                                        }`}
+                                                                    />
                                                                     <div className="min-w-0">
                                                                         <div className="truncate font-medium">{repoName}</div>
                                                                         {owner && (
@@ -482,19 +433,18 @@ export function AddRepoModal({
                                                                         isPrivate ? 'bg-rose-100 text-rose-700' : ''
                                                                     }`}
                                                                 >
-                                  {isPrivate ? 'Private' : 'Public'}
-                                </span>
+                                                                  {isPrivate ? 'Private' : 'Public'}
+                                                                </span>
                                                             </li>
                                                         );
                                                     })}
                                                 </ul>
                                             </div>
-
                                             <button
                                                 type="button"
                                                 onClick={submitImportRepo}
                                                 disabled={submitting || !ghSelectedId}
-                                                className="mt-3 w-full px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60"
+                                                className="mt-auto w-full px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60"
                                             >
                                                 {submitting ? 'Importing…' : 'Import Selected'}
                                             </button>
