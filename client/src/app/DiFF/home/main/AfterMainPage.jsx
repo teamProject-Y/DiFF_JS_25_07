@@ -6,7 +6,7 @@ import {followingArticleList, increaseArticleHits} from "@/lib/ArticleAPI";
 import {getFollowingList} from "@/lib/UserAPI";
 import removeMd from "remove-markdown";
 import {saveFcmTokenToServer} from "@/lib/FirebaseAPI";
-import LoginToggle from "@/common/toogle/loginToggle";
+import LoginSpeedDial from "@/common/toogle/loginSpeedDial";
 
 // 게시물에 이미지 있는지 확인
 function extractFirstImage(body) {
@@ -232,16 +232,16 @@ export default function AfterMainPage({me, trendingArticles}) {
                         )}
 
                         {/* toogle menu (로그인 후 전용) */}
-                        <LoginToggle
+                        <LoginSpeedDial
                             writeHref="/DiFF/article/write"
-                            draftsHref="/DiFF/drafts"
+                            draftsHref="/DiFF/article/drafts"
                             onToggleTheme={() => {
                                 // 다크모드 토글 로직 연결
                                 document.documentElement.classList.toggle("dark");
                                 localStorage.theme =
                                     document.documentElement.classList.contains("dark")
                                         ? "dark"
-                                        : "light";
+                                        : "";
                             }}
                         />
 
