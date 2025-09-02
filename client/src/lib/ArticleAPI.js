@@ -241,6 +241,8 @@ export async function increaseArticleHits(articleId) {
 }
 
 export const searchArticles = async (keyword) => {
-    const res = await ArticleAPI.get(`/api/DiFF/article/search`, { params: { keyword } });
-    return res.data;  // { resultCode, msg, data1: [articles] }
+    const res = await ArticleAPI.get(`/api/DiFF/article/search`, {
+        params: { keyword }  // 자동 인코딩됨
+    });
+    return res.data;
 };
