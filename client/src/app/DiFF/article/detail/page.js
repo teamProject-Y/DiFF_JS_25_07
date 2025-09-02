@@ -9,6 +9,12 @@ import {
     likeArticle, unlikeArticle, fetchArticleLikes,
     likeReply, unlikeReply, fetchReplyLikes
 } from "@/lib/reactionAPI";
+import {
+    fetchUser,
+    followMember,
+    unfollowMember,
+    getFollowingList
+} from '@/lib/UserAPI';
 import LoadingOverlay from "@/common/LoadingOverlay";
 import ToastViewer from "@/common/toastViewer";
 
@@ -36,6 +42,32 @@ function ArticleDetailInner() {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
     const menuRef = useRef(null);
+
+    // === 팔로우 칩용 state ===
+    const [followBusy, setFollowBusy] = useState(false);
+    const [authorId, setAuthorId] = useState(null);
+    const [authorNick, setAuthorNick] = useState(null);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [member, setMember] = useState(null);
+    const [isMyPost, setIsMyPost] = useState(false);
+
+    const myNick = (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '';
+
+    const norm = (s) => (s ?? '').toString().trim().toLowerCase();
+    const getId = (m) => Number(
+        m?.id ??
+        m?.memberId ??
+        m?.userId ??
+        m?.targetId ??
+        m?.followingId ??
+        m?.followingsId ??
+        m?.user?.id ??
+        m?.target?.id ??
+        0
+    );
+
+    const getNick = (m) =>
+        (m?.nickName ?? m?.nickname ?? m?.name ?? m?.user?.nickName ?? m?.user?.name ?? m?.extra__writer ?? '').toString().trim();
 
     // 게시글 불러오기
     useEffect(() => {
@@ -146,6 +178,55 @@ function ArticleDetailInner() {
         };
     }, [menuOpen]);
 
+    // 팔로우 상태 초기화 useEffect 교체
+    useEffect(() => {
+        (async () => {
+            if (!article?.extra__writer) return;
+
+            try {
+                const myNickLS = (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '';
+                const myNickN = norm(myNickLS);
+                const authorNickN = norm(article.extra__writer);
+
+                // 내 글이면 버튼 숨김
+                if (myNickN && myNickN === authorNickN) {
+                    setIsMyPost(true);
+                    setMember(null);
+                    return;
+                }
+                setIsMyPost(false);
+
+                // 1) 작성자 id
+                const u = await fetchUser(article.extra__writer);
+                const targetId = Number(u?.member?.id) || 0;
+
+                // 2) 내 팔로잉 리스트
+                const fl = await getFollowingList(); // <-- 인자 없이 호출 (null 이슈 회피)
+                const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
+
+                // 디버깅: 이 블록 "안에서만" 찍어라
+                console.log('[FOLLOW DEBUG] authorId=', targetId, 'authorNick=', article.extra__writer);
+                console.table((list || []).slice(0, 5).map(m => ({
+                    rawId: m?.id ?? m?.memberId ?? m?.followingId ?? m?.targetId ?? m?.user?.id,
+                    normId: getId(m),
+                    nick: getNick(m)
+                })));
+
+                // ID 우선 → 닉네임 보강
+                const isFollowing =
+                    (targetId && list.some(m => getId(m) === targetId)) ||
+                    list.some(m => norm(getNick(m)) === authorNickN);
+
+                setMember({id: targetId || null, isFollowing, nickName: article.extra__writer});
+                console.log('[FOLLOW DEBUG] isFollowing=', isFollowing);
+            } catch (e) {
+                console.error('❌ 작성자 member 구성 실패:', e);
+                setMember({id: null, isFollowing: false, nickName: article.extra__writer});
+            }
+        })();
+    }, [id, article?.extra__writer]);
+
+
     // 게시글 삭제
     const handleDelete = async (id) => {
 
@@ -245,6 +326,42 @@ function ArticleDetailInner() {
             alert("댓글 좋아요 처리 중 오류가 발생했습니다.");
         }
     };
+
+    const refreshFollowFromServer = async (id) => {
+        try {
+            const fl = await getFollowingList();
+            const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
+            const now =
+                (id && list.some(m => getId(m) === Number(id))) ||
+                list.some(m => getNick(m) === (authorNick ?? '').trim());
+            setIsFollowing(!!now);
+        } catch (e) {
+            console.error('❌ 팔로우 재확인 실패:', e);
+        }
+    };
+
+    const onFollowToggle = async () => {
+        if (!authorId || followBusy) return;
+        setFollowBusy(true);
+        try {
+            if (isFollowing) {
+                const res = await unfollowMember(authorId);
+                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('팔로우 중이 아닙니다');
+                if (!ok) throw new Error(res?.msg || '언팔로우 실패');
+            } else {
+                const res = await followMember(authorId);
+                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('이미 팔로우');
+                if (!ok) throw new Error(res?.msg || '팔로우 실패');
+            }
+            await refreshFollowFromServer(authorId);
+        } catch (e) {
+            console.error('❌ 팔/언 실패:', e);
+            // 필요하면 alert(e.message);
+        } finally {
+            setFollowBusy(false);
+        }
+    };
+
 
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
@@ -373,32 +490,65 @@ function ArticleDetailInner() {
                     </div>
                     {/* article info */}
                     <div className="text-gray-600 mb-6 flex justify-between">
-                        <div className="flex justify-start">
+                        <div className="flex items-center gap-2">
+                            {/* 닉네임 */}
                             <div
                                 onClick={(e) => {
-                                    e.stopPropagation(); // 부모 Link 클릭 막기
                                     e.preventDefault();
-                                    window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(
-                                        article.extra__writer
-                                    )}`;
+                                    window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`;
                                 }}
                                 className="mx-2 hover:underline hover:text-black cursor-pointer text-md font-semibold"
                             >
                                 {article.extra__writer}
                             </div>
-                            <div className="mx-2 text-gray-500">{new Date(article.regDate).toLocaleDateString("en-US", {
+
+                            {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
+                            {!isMyPost && member?.id && (
+                                <div className="flex">
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                if (member.isFollowing) {
+                                                    console.log("👉 언팔로우 요청:", member.id);
+                                                    await unfollowMember(member.id);
+
+                                                    setMember(prev => ({...prev, isFollowing: false}));
+                                                    // 상대방 프로필이므로 followerCount 조정 (없으면 무시)
+                                                    typeof setFollowerCount === 'function' && setFollowerCount(prev => Math.max(0, prev - 1));
+                                                } else {
+                                                    console.log("👉 팔로우 요청:", member.id);
+                                                    await followMember(member.id);
+
+                                                    setMember(prev => ({...prev, isFollowing: true}));
+                                                    typeof setFollowerCount === 'function' && setFollowerCount(prev => prev + 1);
+                                                }
+                                            } catch (err) {
+                                                console.error("❌ 팔로우/언팔로우 실패:", err);
+                                                alert("처리 실패");
+                                            }
+                                        }}
+                                        className={`px-3 py-1 text-sm rounded-full border ${
+                                            member.isFollowing
+                                                ? "bg-green-600 text-white hover:bg-green-500"
+                                                : "text-emerald-600 border-emerald-500 hover:bg-emerald-50"
+                                        }`}
+                                    >
+                                        {member.isFollowing ? "팔로잉" : "팔로우"}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 오른쪽 날짜 영역 기존 그대로 */}
+                        <div className="text-gray-500">
+                            {new Date(article.regDate).toLocaleDateString("en-US", {
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric"
-                            })}</div>
-                        </div>
-                        <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
-                            <i
-                                className={`${liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"} fa-heart text-xl`}
-                            ></i>
-                            <span className="text-sm text-gray-700">{likeCount}</span>
+                            })}
                         </div>
                     </div>
+
 
                     {/* 본문 */}
                     <div
@@ -545,10 +695,12 @@ function ArticleDetailInner() {
                                         <div>
                                             {/* 일반 댓글 표시 */}
                                             <div>
-                                                <div className="flex items-center justify-between mb-3 text-sm text-gray-500">
+                                                <div
+                                                    className="flex items-center justify-between mb-3 text-sm text-gray-500">
                                                     <div className="flex items-center gap-2">
                                                         {/* 프로필 사진 */}
-                                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
+                                                        <Link
+                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
                                                             {r.profileUrl ? (
                                                                 <img
                                                                     src={r.profileUrl}
@@ -556,7 +708,8 @@ function ArticleDetailInner() {
                                                                     className="w-8 h-8 rounded-full object-cover"
                                                                 />
                                                             ) : (
-                                                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
+                                                                <div
+                                                                    className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
                                                                     {r.extra__writer?.[0] ?? "?"}
                                                                 </div>
                                                             )}
@@ -573,12 +726,14 @@ function ArticleDetailInner() {
 
                                                     {/* 날짜 */}
                                                     <span>
-      {new Date(r.regDate).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric"
-      })}
-    </span>
+                                                        {new Date(r.regDate).toLocaleDateString("en-US", {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric"
+                                                            }
+                                                        )
+                                                        }
+                                                    </span>
                                                 </div>
                                             </div>
 
