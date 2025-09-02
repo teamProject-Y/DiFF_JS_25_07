@@ -145,10 +145,10 @@ function SettingsPage() {
             <div className="mx-auto max-w-6xl">
 
                 {/* 상단 탭 타이틀 */}
-                <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
-                    <Link href="/DiFF/member/profile" className="text-gray-400 hover:text-gray-700">Profile</Link>
-                    <Link href="/DiFF/member/repository" className="text-gray-400 hover:text-gray-700">Repositories</Link>
-                    <span className=" hover:text-gray-700">Settings</span>
+                <div className="flex items-center text-gray-500">
+                    <Link href="/DiFF/member/profile" className="p-4 -mb-px">Profile</Link>
+                    <Link href="/DiFF/member/repository" className="p-4 -mb-px">Repositories</Link>
+                    <span className="text-black p-4 -mb-px font-semibold border-b-2 border-black">Settings</span>
                 </div>
                 <div className="h-px w-full bg-gray-300 mb-10"/>
 

@@ -57,6 +57,7 @@ export default function Header() {
     const [notifications, setNotifications] = useState([]);
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
+
     useEffect(() => {
         const isScrollable = (el) => {
             if (!el || el === window) return false;

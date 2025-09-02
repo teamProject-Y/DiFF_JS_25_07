@@ -80,7 +80,7 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
 
                         {/* 메인 컨텐츠 영역 */}
                         <main className={clsx('flex-1 min-w-0',
-                            isAuthed && 'pt-24'
+                            isAuthed && 'pt-20'
                         )}>
                             {children}
                             {modal}

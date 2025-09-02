@@ -170,10 +170,9 @@ export default function DraftsPage() {
     return (
         <div className="pb-6 px-32">
             <div className="flex items-center border-b mb-3">
-                    <button className="p-4 -mb-px border-b-2 border-black font-semibold">
+                    <button className="p-4 -mb-px border-b-2 text-black border-black font-semibold">
                         Drafts
                     </button>
-
             </div>
             {content}
         </div>

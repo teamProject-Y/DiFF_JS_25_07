@@ -27,7 +27,7 @@ export default function DocsSidebar({ className = '', activeKey }) {
             }
         >
             <nav>
-                <div className="px-4 pb-10 font-black text-2xl">About DiFF</div>
+                <div className="px-4 py-10 font-black text-2xl">About DiFF</div>
                 <ul className="space-y-1">
                     {NAV_ITEMS.map((item) => {
                         const href = normalize(item.href);

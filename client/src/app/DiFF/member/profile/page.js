@@ -31,7 +31,6 @@ function ProfileInner() {
     const [member, setMember] = useState(null);
     const [isMyProfile, setIsMyProfile] = useState(false);
     const [profileUrl, setProfileUrl] = useState('');
-    const [selectedFile, setSelectedFile] = useState(null);
 
     const [followingCount, setFollowingCount] = useState(0);
     const [followerCount, setFollowerCount] = useState(0);
@@ -152,28 +151,6 @@ function ProfileInner() {
         }
     }, [openModal, searchParams]);
 
-
-    const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
-
-    const handleUpload = async () => {
-        if (!selectedFile) return alert("파일을 선택하세요!");
-        try {
-            const url = await uploadProfileImg(selectedFile);
-            setProfileUrl(url);
-            console.log("업로드 성공:", url);
-        } catch {
-            alert("업로드 실패");
-        }
-    };
-
-    // 소셜 로그인 통합, 연동
-    const startLink = (provider) => {
-        if (provider !== 'google' && provider !== 'github') return;
-
-        const url = `/api/DiFF/auth/link/${provider}?mode=link`;
-        window.location.href = url;
-    };
-
     if (loading) return <div>로딩...</div>;
     if (!member) return null;
 
@@ -190,19 +167,19 @@ function ProfileInner() {
                 )}
 
                 {/* Tabs */}
-                <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
-                    <span className="">Profile</span>
-                    <Link href={repoHref} className="text-gray-400 hover:text-gray-700">Repositories</Link>
+                <div className="flex items-center text-gray-500">
+                    <span className="text-black p-4 -mb-px font-semibold border-b-2 border-black">Profile</span>
+                    <Link href={repoHref} className="p-4 -mb-px">Repositories</Link>
                     {isMyProfile && (
                         <Link
                             href="/DiFF/member/settings"
-                            className="text-gray-400 hover:text-gray-700"
+                            className="p-4 -mb-px"
                         >
                             Settings
                         </Link>
                     )}
                 </div>
-                <div className="h-px w-full bg-gray-300 mb-8"/>
+                <div className="h-px w-full bg-gray-300 mb-10"/>
 
                 {/* 2-Column Layout (좌: 프로필/스탯, 우: 소개/툴) */}
                 <div className="grid grid-cols-1 gap-10 md:grid-cols-[280px,1fr]">
@@ -375,7 +352,7 @@ function ProfileInner() {
                         onClick={() => setOpenModal(null)}
                     >
                         <div
-                            className="w-96 rounded-lg bg-white p-6 shadow-lg"
+                            className="w-96 rounded-lg bg-white p-6 shadow-lg z-[200]"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <h2 className="mb-4 text-lg font-bold">
@@ -414,7 +391,7 @@ function ProfileInner() {
                                         );
                                     })
                                 ) : (
-                                    <p className="text-sm text-gray-500">조회된 사용자가 없어.</p>
+                                    <p className="text-sm text-gray-500">fasdfasjdlfkjasdlkfasf</p>
                                 )}
                             </ul>
 
@@ -427,16 +404,6 @@ function ProfileInner() {
                         </div>
                     </div>
                 )}
-
-                {/* 하단 네비 */}
-                <div className="pt-8 text-center">
-                    <button
-                        onClick={() => router.replace('/DiFF/home/main')}
-                        className="rounded bg-neutral-900 px-6 py-2 text-sm text-white hover:bg-neutral-800"
-                    >
-                        뒤로가기
-                    </button>
-                </div>
             </div>
         </section>
     );

@@ -3,10 +3,13 @@ import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getFollowingList } from "@/lib/UserAPI";
+import { useRouter } from "next/navigation"
+
 
 export default function LayMenu() {
     const [following, setFollowing] = useState([]);
     const pathname = usePathname();
+    const router = useRouter();
 
     useEffect(() => {
         getFollowingList()
@@ -63,7 +66,7 @@ export default function LayMenu() {
                                 <li key={idx}
                                     role="link"
                                     tabIndex={0}
-                                    onClick={() => router.push(href)}
+                                    onClick={() => router.push(`/DiFF/member/profile?nickName=${f.nickName}`)}
                                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(href)}
                                     className="px-9 py-1 hover:underline
                                     cursor-pointer">
