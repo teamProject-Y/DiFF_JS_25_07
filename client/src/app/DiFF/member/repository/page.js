@@ -8,7 +8,7 @@ import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
 import RepoPost from "./RepoPost";
 import {AddRepoModal} from './addRepoModal';
-import RepoContent from './repoContent';
+import {RepoInfo} from './repoInfo';
 import GhostBar from './sideBar';
 import Link from "next/link";
 
@@ -244,7 +244,7 @@ export default function RepositoriesPage() {
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
                                 {key: 'info', label: 'Info'},
-                                {key: 'posts', label: 'Posts'},
+                                {key: 'posts', label: 'Posts'}
                             ].map((t) => (
                                 <button
                                     key={t.key}
@@ -257,12 +257,6 @@ export default function RepositoriesPage() {
                                 </button>
                             ))}
                         </div>
-                        {/*{onClose && (*/}
-                        {/*    <div className="absolute right-3 top-3 z-50 text-xl cursor-pointer font-bold"*/}
-                        {/*         onClick={onClose}>*/}
-                        {/*        <i className="fa-solid fa-xmark"></i>*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
 
                         <div className="grid grid-cols-[230px_1fr] items-start">
                             {/* 왼쪽 사이드바 */}
@@ -337,7 +331,7 @@ export default function RepositoriesPage() {
                                 ) : (
                                     <>
                                         {tab === 'info' && selectedRepo ? (
-                                            <RepoContent
+                                            <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
                                                 repo={selectedRepo}
                                                 repositories={repositories}
