@@ -41,7 +41,6 @@ function ProfileInner() {
     const [githubUrl, setGithubUrl] = useState('');
 
     const [introduce] = useState('없음');
-    const [stat] = useState({totalLikes: '없음', repoCount: '없음', postCount: '없음'});
 
     const pickGithubUrl = (m) =>
         typeof m?.githubUrl === 'string' ? m.githubUrl.trim() : '';
@@ -182,10 +181,10 @@ function ProfileInner() {
                 <div className="h-px w-full bg-gray-300 mb-10"/>
 
                 {/* 2-Column Layout (좌: 프로필/스탯, 우: 소개/툴) */}
-                <div className="grid grid-cols-1 gap-10 md:grid-cols-[280px,1fr]">
+                <div className="flex w-full">
 
                     {/* Left */}
-                    <aside>
+                    <aside className="w-[20%] min-w-[180px] mx-8">
                         <div className="flex flex-col items-start">
                             {/* 아바타 */}
                             <div
@@ -306,22 +305,22 @@ function ProfileInner() {
 
                             {/* 본인 프로필일 때만 표시 */}
                             {isMyProfile && (
-                                <div className="mt-3 flex w-full flex-col items-center gap-2">
+                                <div className="mt-3 flex w-full flex-col gap-2">
                                     {/* 구분선 */}
-                                    <div className="my-4 h-px w-40 bg-gray-300 self-center"/>
+                                    <div className="my-4 h-px w-full bg-gray-300 self-center"/>
 
                                     {/* Stats */}
-                                    <div className="w-fit self-center text-left">
-                                        <h4 className="text-2xl font-semibold mb-3">Stats</h4>
+                                    <div className="text-left px-5">
+                                        <h4 className="text-xl font-semibold mb-3">Stats</h4>
                                         <ul className="text-sm leading-7">
                                             <li>
-                                                Total Like : <span className="font-medium">{stat.totalLikes}</span>
+                                                Likes : <span className="font-medium">{member.extra__likeCounts}</span>
                                             </li>
                                             <li>
-                                                Total Repository : <span className="font-medium">{stat.repoCount}</span>
+                                                Repositories : <span className="font-medium">{member.extra__repoCounts}</span>
                                             </li>
                                             <li>
-                                                Posts : <span className="font-medium">{stat.postCount}</span>
+                                                Posts : <span className="font-medium">{member.extra__postCounts}</span>
                                             </li>
                                         </ul>
                                     </div>
