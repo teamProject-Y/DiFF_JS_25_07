@@ -520,6 +520,7 @@ function ArticleDetailInner() {
                             {/* 닉네임 */}
                             <div
                                 onClick={(e) => {
+                                    e.stopPropagation(); // 부모 Link 클릭 막기
                                     e.preventDefault();
                                     window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`;
                                 }}
@@ -527,7 +528,11 @@ function ArticleDetailInner() {
                             >
                                 {article.extra__writer}
                             </div>
-
+                            <div className="mx-2 text-gray-500">{new Date(article.regDate).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                            })}</div>
                             {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
                             {!isMyPost && member?.id && (
                                 <div className="flex">
@@ -573,16 +578,13 @@ function ArticleDetailInner() {
                             )}
                         </div>
 
-                        {/* 오른쪽 날짜 영역 기존 그대로 */}
-                        <div className="text-gray-500">
-                            {new Date(article.regDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                            })}
+                        <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
+                            <i
+                                className={`${liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"} fa-heart text-xl`}
+                            ></i>
+                            <span className="text-sm text-gray-700">{likeCount}</span>
                         </div>
                     </div>
-
 
                     {/* 본문 */}
                     <div
