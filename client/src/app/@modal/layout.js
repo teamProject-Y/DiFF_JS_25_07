@@ -51,7 +51,7 @@ export default function ModalLayout({ children }) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                 >
-                    {/* overlay */}
+                    {/* toogle */}
                     <motion.div
                         className="fixed inset-0 z-[100] bg-black/60"
                         initial={{ opacity: 0 }}

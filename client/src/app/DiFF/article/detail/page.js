@@ -44,11 +44,9 @@ function ArticleDetailInner() {
     const menuRef = useRef(null);
 
     // === 팔로우 칩용 state ===
-    const [followReady, setFollowReady] = useState(false);
-    const [followBusy, setFollowBusy]   = useState(false);
-    const [hoverUnfollow, setHoverUnfollow] = useState(false);
-    const [authorId, setAuthorId]       = useState(null);
-    const [authorNick, setAuthorNick]   = useState(null);
+    const [followBusy, setFollowBusy] = useState(false);
+    const [authorId, setAuthorId] = useState(null);
+    const [authorNick, setAuthorNick] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const [member, setMember] = useState(null);
     const [isMyPost, setIsMyPost] = useState(false);
@@ -56,7 +54,7 @@ function ArticleDetailInner() {
     const myNick = (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '';
 
     const norm = (s) => (s ?? '').toString().trim().toLowerCase();
-    const getId  = (m) => Number(
+    const getId = (m) => Number(
         m?.id ??
         m?.memberId ??
         m?.userId ??
@@ -67,10 +65,9 @@ function ArticleDetailInner() {
         m?.target?.id ??
         0
     );
+
     const getNick = (m) =>
         (m?.nickName ?? m?.nickname ?? m?.name ?? m?.user?.nickName ?? m?.user?.name ?? m?.extra__writer ?? '').toString().trim();
-
-
 
     // 게시글 불러오기
     useEffect(() => {
@@ -181,14 +178,14 @@ function ArticleDetailInner() {
         };
     }, [menuOpen]);
 
-    // ✅ 팔로우 상태 초기화 useEffect 교체
+    // 팔로우 상태 초기화 useEffect 교체
     useEffect(() => {
         (async () => {
             if (!article?.extra__writer) return;
 
             try {
                 const myNickLS = (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '';
-                const myNickN  = norm(myNickLS);
+                const myNickN = norm(myNickLS);
                 const authorNickN = norm(article.extra__writer);
 
                 // 내 글이면 버튼 숨김
@@ -203,11 +200,11 @@ function ArticleDetailInner() {
                 const u = await fetchUser(article.extra__writer);
                 const targetId = Number(u?.member?.id) || 0;
 
-                // 2) 내 팔로잉 리스트 (🚩 nickName 인자 "안" 보내도 됨: 백엔드가 로그인 사용자 기준으로 처리)
-                const fl   = await getFollowingList(); // <-- 인자 없이 호출 (null 이슈 회피)
+                // 2) 내 팔로잉 리스트
+                const fl = await getFollowingList(); // <-- 인자 없이 호출 (null 이슈 회피)
                 const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
 
-                // 디버깅: 이 블록 "안에서만" 찍어라 (스코프 밖은 ReferenceError)
+                // 디버깅: 이 블록 "안에서만" 찍어라
                 console.log('[FOLLOW DEBUG] authorId=', targetId, 'authorNick=', article.extra__writer);
                 console.table((list || []).slice(0, 5).map(m => ({
                     rawId: m?.id ?? m?.memberId ?? m?.followingId ?? m?.targetId ?? m?.user?.id,
@@ -215,20 +212,19 @@ function ArticleDetailInner() {
                     nick: getNick(m)
                 })));
 
-                // ID 우선 → 닉네임 보강(대소문자/공백 무시)
+                // ID 우선 → 닉네임 보강
                 const isFollowing =
                     (targetId && list.some(m => getId(m) === targetId)) ||
                     list.some(m => norm(getNick(m)) === authorNickN);
 
-                setMember({ id: targetId || null, isFollowing, nickName: article.extra__writer });
+                setMember({id: targetId || null, isFollowing, nickName: article.extra__writer});
                 console.log('[FOLLOW DEBUG] isFollowing=', isFollowing);
             } catch (e) {
                 console.error('❌ 작성자 member 구성 실패:', e);
-                setMember({ id: null, isFollowing: false, nickName: article.extra__writer });
+                setMember({id: null, isFollowing: false, nickName: article.extra__writer});
             }
         })();
     }, [id, article?.extra__writer]);
-
 
 
     // 게시글 삭제
@@ -333,7 +329,7 @@ function ArticleDetailInner() {
 
     const refreshFollowFromServer = async (id) => {
         try {
-            const fl   = await getFollowingList();
+            const fl = await getFollowingList();
             const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
             const now =
                 (id && list.some(m => getId(m) === Number(id))) ||
@@ -350,11 +346,11 @@ function ArticleDetailInner() {
         try {
             if (isFollowing) {
                 const res = await unfollowMember(authorId);
-                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg||'').includes('팔로우 중이 아닙니다');
+                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('팔로우 중이 아닙니다');
                 if (!ok) throw new Error(res?.msg || '언팔로우 실패');
             } else {
                 const res = await followMember(authorId);
-                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg||'').includes('이미 팔로우');
+                const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('이미 팔로우');
                 if (!ok) throw new Error(res?.msg || '팔로우 실패');
             }
             await refreshFollowFromServer(authorId);
@@ -506,7 +502,6 @@ function ArticleDetailInner() {
                                 {article.extra__writer}
                             </div>
 
-                            {/* ★ 여기에 그대로 삽입 (chip처럼 보이게 클래스만 살짝 줄여도 되고, 원문 유지해도 됨) */}
                             {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
                             {!isMyPost && member?.id && (
                                 <div className="flex">
@@ -546,10 +541,13 @@ function ArticleDetailInner() {
 
                         {/* 오른쪽 날짜 영역 기존 그대로 */}
                         <div className="text-gray-500">
-                            {new Date(article.regDate).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"})}
+                            {new Date(article.regDate).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                            })}
                         </div>
                     </div>
-
 
 
                     {/* 본문 */}
@@ -697,10 +695,12 @@ function ArticleDetailInner() {
                                         <div>
                                             {/* 일반 댓글 표시 */}
                                             <div>
-                                                <div className="flex items-center justify-between mb-3 text-sm text-gray-500">
+                                                <div
+                                                    className="flex items-center justify-between mb-3 text-sm text-gray-500">
                                                     <div className="flex items-center gap-2">
                                                         {/* 프로필 사진 */}
-                                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
+                                                        <Link
+                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}>
                                                             {r.profileUrl ? (
                                                                 <img
                                                                     src={r.profileUrl}
@@ -708,7 +708,8 @@ function ArticleDetailInner() {
                                                                     className="w-8 h-8 rounded-full object-cover"
                                                                 />
                                                             ) : (
-                                                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
+                                                                <div
+                                                                    className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold">
                                                                     {r.extra__writer?.[0] ?? "?"}
                                                                 </div>
                                                             )}
@@ -725,12 +726,14 @@ function ArticleDetailInner() {
 
                                                     {/* 날짜 */}
                                                     <span>
-      {new Date(r.regDate).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric"
-      })}
-    </span>
+                                                        {new Date(r.regDate).toLocaleDateString("en-US", {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric"
+                                                            }
+                                                        )
+                                                        }
+                                                    </span>
                                                 </div>
                                             </div>
 
