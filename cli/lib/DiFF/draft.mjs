@@ -9,9 +9,8 @@ import {appendMeta} from "./init.mjs";
 import path from "path";
 import axios from "axios";
 
-export async function mkDraft(memberId, branch) {
-    console.log("🚀 mkDraft started...");
-
+export async function mkDraft(memberId, branch, draftId) {
+    console.log('🚀 mkDraft started...');
     const from = await getLastRequestChecksum(branch);
     const to = await getLastChecksum(branch);
     const diff = await getDiFF(from, to);
@@ -22,22 +21,18 @@ export async function mkDraft(memberId, branch) {
         return null;
     }
 
-    const draftId = await createDraft(memberId, repositoryId);
-    if (!draftId) {
-        console.error("🚨 draftId 생성 실패 → sendDiFF 실행 중단");
-        return null;
-    }
     console.log("✅ 최종 draftId:", draftId);
 
+    // ✅ draftId는 index.mjs에서 받은 값 그대로 사용
     const ok = await sendDiFF(memberId, repositoryId, draftId, to, diff);
 
     if (ok) {
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);
-        return draftId;
-    }
 
-    return null;
+        // 👉 zip 업로드 + 분석 실행은 여기서 필요하면 실행
+        // await uploadZip(memberId, repositoryId, draftId, to);
+    }
 }
 
 /** 서버에 빈 draft 생성 후 draftId 리턴 */
