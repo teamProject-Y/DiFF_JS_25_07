@@ -207,7 +207,7 @@ export default function RepositoriesPage() {
         }
     };
 
-    if (loading) return <div className="text-center">로딩...</div>;
+    if (loading) return <div className="text-center">loading...</div>;
 
     const profileHref =
         isMyRepos ? '/DiFF/member/profile'

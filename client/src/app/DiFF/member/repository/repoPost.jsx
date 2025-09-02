@@ -10,7 +10,7 @@ function PostCard({article}) {
 
     const handleArticleClick = async (id) => {
         try {
-            await increaseArticleHits(id);
+            await increaseArticleHits(id);  청
             window.location.href = `/DiFF/article/detail?id=${id}`;
         } catch (err) {
             console.error("조회수 증가 실패:", err);
@@ -20,7 +20,7 @@ function PostCard({article}) {
 
     return (
         <div
-            onClick={handleArticleClick}
+            onClick={() => handleArticleClick(article.id)}
             className="block cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition"
         >
             {/* 제목 */}
@@ -61,7 +61,12 @@ export default function RepoPost({repoId}) {
                 const root = resp ?? {};
                 const list = root?.data?.articles ?? root?.articles ?? root?.data ?? [];
                 if (mounted && Array.isArray(list)) {
-                    setArticles(list);
+                    // id를 항상 문자열로 변환해서 안전하게 저장
+                    const normalized = list.map(a => ({
+                        ...a,
+                        id: String(a.id ?? a.articleId ?? crypto.randomUUID()),
+                    }));
+                    setArticles(normalized);
                 }
             } catch (e) {
                 if (mounted) {
@@ -84,7 +89,7 @@ export default function RepoPost({repoId}) {
 
     return (
         <div className="absolute inset-0 overflow-y-auto p-6">
-            {loading && <div className="py-10 text-center text-gray-500">로딩 중…</div>}
+            {loading && <div className="py-10 text-center text-gray-500">loading...</div>}
             {!loading && error && (
                 <div className="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-600">
                     {error}
