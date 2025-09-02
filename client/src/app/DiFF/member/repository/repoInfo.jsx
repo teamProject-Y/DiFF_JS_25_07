@@ -19,19 +19,14 @@ const container = {
     exit: {x: -40, opacity: 0, transition: {type: 'spring', stiffness: 120, damping: 20}},
 };
 
-export default function RepoContent({
-                                        repo,
-                                        repositories = [],
-                                        onChangeRepo,
-                                        onClose,
-                                        useExternalSidebar = false,
-                                        activeTab = 'info',
-                                    }) {
+export function RepoInfo({
+                             repo,
+                             repositories = [],
+                             onClose,
+                             useExternalSidebar = false,
+                         }) {
     const router = useRouter();
 
-    const [articles, setArticles] = useState([]);
-    const [articleLoading, setArticleLoading] = useState(false);
-    const [metrics, setMetrics] = useState(null);
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
     useEffect(() => {
@@ -60,12 +55,8 @@ export default function RepoContent({
     const pct = (v) => (totalBytes ? Math.round((v / totalBytes) * 100) : 0);
 
 // 추천 표시 정보
-    const created = repo?.reDate || null;
-    const updated = repo?.updateDate || null;
     const defaultBranch = repo?.defaultBranch || 'main';
     const visibility = (repo.aprivate ? 'private' : 'public');
-    const license = (repo?.license && (repo.license.name || repo.license)) || '—';
-    const topics = repo?.topics || repo?.tags || [];
     const stats = {
         stars: repo?.stargazersCount || repo?.stars || 0,
         forks: repo?.forksCount || repo?.forks || 0,
@@ -91,7 +82,6 @@ export default function RepoContent({
         if (e.key === 'Escape') cancelEdit();
     };
 
-
     return (
         <motion.div
             key={`detail-${repo?.id ?? 'none'}`}
@@ -99,7 +89,7 @@ export default function RepoContent({
             initial="hidden"
             animate="show"
             exit="hidden"
-            className={`absolute inset-0 pt-10 px-6 overflow-y-auto`}
+            className={`absolute inset-0 p-6 overflow-y-auto`}
         >
             {/* 왼쪽 레일 */}
             {!useExternalSidebar && (
@@ -121,32 +111,34 @@ export default function RepoContent({
                 </div>
             }
 
-            <div className="flex gap-3 min-h-0 w-full overflow-y-scroll">
+            <div className="flex gap-3 h-full w-full overflow-y-scroll">
                 {/* 중앙 메인(Info) */}
                 <div className="flex-grow flex flex-col">
-                    <div className="flex-1 overflow-y-auto px-0 pb-2 flex flex-col">
+                    <div className="flex-1 overflow-y-auto flex flex-col">
                         {/* 상단 카드 */}
                         <div
-                            className="flex-grow rounded-xl border border-neutral-200 shadow-sm bg-white p-4 mb-3 mr-3">
-                            <div className="h-full flex items-center justify-center text-neutral-500">
-                                <div className="text-center">
-                                    <div className="text-lg font-semibold mb-1">{repo?.name ?? 'Repository'}</div>
-                                    <div className="text-sm">README 요약 / 최근 커밋 / 브랜치 등 들어갈 영역</div>
-                                </div>
-                            </div>
+                            className="h-[35%] rounded-xl border border-neutral-200 shadow-sm p-4 mb-3 mr-3">
+
+                            그래프
                         </div>
 
                         {/* 하단 박스 */}
                         <div
-                            className="flex-grow bg-white p-4 mr-3 overflow-y-scroll rounded-xl border border-neutral-200 shadow-sm">
-                            <div className="h-full flex items-center justify-center text-neutral-500">
-                                추가 정보(커밋 타임라인/브랜치/이슈 요약 등)
-                            </div>
+                            className="flex-grow p-4 mr-3 overflow-y-scroll rounded-xl border border-neutral-200 shadow-sm">
+                            {repo.url ?
+                                <>
+                                    깃허브 커밋들 가져오기
+                                </>
+                                :
+                                <>
+                                    깃허브 연결할래?
+                                </>
+                            }
                         </div>
                     </div>
                 </div>
 
-                <div className="w-[30%] space-y-3">
+                <div className="w-[30%] space-y-3 flex flex-col">
                     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
                         <div className="flex items-center gap-3">
                             <div className="flex items-center min-w-0 flex-grow">
@@ -198,7 +190,8 @@ export default function RepoContent({
                         </div>
 
                         <div className="mt-2 flex w-full text-sm justify-between items-center">
-                            <div className="py-2"><i className="fa-solid fa-calendar text-neutral-400"></i> {repo.regDate}</div>
+                            <div className="py-2"><i
+                                className="fa-solid fa-calendar text-neutral-400"></i> {repo.regDate}</div>
                             <span className="ml-auto text-xs px-2 py-1 rounded-full bg-neutral-100 border">
                               {visibility}
                             </span>
@@ -210,7 +203,7 @@ export default function RepoContent({
                                     title={repo?.name}
                                     className="shrink-0"
                                 >
-                                    &nbsp;&nbsp;<i className="fa-brands fa-github text-2xl"></i>
+                                    &nbsp;&nbsp;&nbsp;<i className="fa-brands fa-github text-2xl"></i>
                                 </a>
                             )}
                         </div>
@@ -239,34 +232,19 @@ export default function RepoContent({
                     </div>
 
                     {/* 언어 비율 */}
-                    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
+                    <div className="rounded-xl border border-neutral-200 flex-grow shadow-sm p-4">
                         <div className="font-semibold mb-3">Languages</div>
-                        {langList.length ? (
-                            <ul className="space-y-3">
-                                {langList
-                                    .sort((a, b) => (b.bytes || 0) - (a.bytes || 0))
-                                    .map((l, i) => (
-                                        <li key={i}>
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="font-medium">{l.name}</span>
-                                                <span className="text-neutral-500">{pct(l.bytes)}%</span>
-                                            </div>
-                                            <div
-                                                className="w-full h-2 rounded-full bg-neutral-100 overflow-hidden mt-1">
-                                                <div
-                                                    className="h-full rounded-full bg-black/80"
-                                                    style={{width: `${pct(l.bytes)}%`}}
-                                                />
-                                            </div>
-                                        </li>
-                                    ))}
-                            </ul>
-                        ) : (
-                            <div className="text-sm text-neutral-500">
-                                도넛 차트 영역(언어 비율) — 추후 실제 데이터 바인딩
-                            </div>
-                        )}
+                        <div className="text-sm text-neutral-500">
+                            도넛 차트 영역(언어 비율) — 추후 실제 데이터 바인딩
+                        </div>
                     </div>
+
+                    <button className="w-full p-2 hover:bg-red-500 hover:text-white bg-white
+                        border border-neutral-200 rounded-xl shadow-sm text-red-500 transition-colors">
+
+                        Delete Repository
+                    </button>
+
 
                 </div>
 
