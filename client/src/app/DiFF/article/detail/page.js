@@ -421,7 +421,7 @@ function ArticleDetailInner() {
                                 }}
                                 className="p-2 hover:text-gray-900"
                             >
-                                <i className="fa-solid fa-ellipsis-vertical"/>
+                                <i className="fa-solid fa-ellipsis-cal"/>
                             </button>
 
                             {menuOpen && (
@@ -552,21 +552,21 @@ function ArticleDetailInner() {
                                                 alert("처리 실패");
                                             }
                                         }}
-                                        className={`px-3 py-1 text-sm rounded-full border transition
+                                        className={`py-1 text-sm rounded-full border transition w-20 
                                           ${
                                             member.isFollowing
                                                 ? hoverUnfollow
-                                                    ? "bg-red-600 text-white border-red-600 hover:bg-red-500"
-                                                    : "bg-green-600 text-white border-green-600 hover:bg-green-500"
-                                                : "text-emerald-600 border-emerald-500 hover:bg-emerald-50"
+                                                    ? "text-red-500 border hover:border-red-500"
+                                                    : "border text-gray-500 bg-gray-100"
+                                                : "hover:bg-gray-100 border-gray-700"
                                         }`}
                                         aria-label={
                                             member.isFollowing
-                                                ? (hoverUnfollow ? "언팔로우" : "팔로잉")
-                                                : "팔로우"
+                                                ? (hoverUnfollow ? "Unfollow" : "Following")
+                                                : "Follow"
                                         }
                                     >
-                                        {member.isFollowing ? (hoverUnfollow ? "언팔로우" : "팔로잉") : "팔로우"}
+                                        {member.isFollowing ? (hoverUnfollow ? "Unfollow" : "Following") : "Follow"}
                                     </button>
                                 </div>
                             )}
