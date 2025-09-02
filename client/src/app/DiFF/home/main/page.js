@@ -199,11 +199,11 @@ export default function Page() {
             className="w-full transition-colors duration-700 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
             style={{ backgroundColor: bgColor }}
         >
-            <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start" ref={el => sectionRefs.current[0] = el}>
+            <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg" ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
 
-            <div id="docs" className="is-light-bg h-screen w-full pt-20 snap-start" ref={el => sectionRefs.current[1] = el}>
+            <div id="docs" className="is-light-bg h-screen w-full pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
                 <div className="w-4/5 h-1/2 mx-auto">
 
                 </div>
@@ -214,7 +214,7 @@ export default function Page() {
 
 
             {/* trending */}
-            <div id="trending" className="is-light-bg w-full h-screen snap-start px-20 pt-20" ref={el => sectionRefs.current[2] = el}>
+            <div id="trending" className="is-light-bg w-full h-screen snap-start px-20 pt-20 dark:is-dark-bg" ref={el => sectionRefs.current[2] = el}>
                 <div className="text-3xl text-black font-bold">TRENDING</div>
                 <div className="article-slider h-2/3 w-full mt-8 flex relative">
                     <div className="flex absolute right-0 -top-16  font-extralight text-3xl text-neutral-500 z-10">
