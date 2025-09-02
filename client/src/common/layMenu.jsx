@@ -58,16 +58,15 @@ export default function LayMenu() {
                 <div className="pt-6 text-sm text-gray-500">
                     <div className="font-semibold mb-3 px-8 text-gray-600">Following</div>
                     {following.length > 0 ? (
-                        <ul className="space-y-2">
+                        <ul className="">
                             {following.map((f, idx) => (
                                 <li key={idx}
                                     role="link"
                                     tabIndex={0}
                                     onClick={() => router.push(href)}
                                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(href)}
-                                    className="px-9 py-2 rounded-md hover:underline hover:bg-muted
-                                    cursor-pointer focus-visible:outline-none
-                                    focus-visible:ring-2 focus-visible:ring-offset-2">
+                                    className="px-9 py-1 hover:underline
+                                    cursor-pointer">
                                         {f.nickName}
                                 </li>
                             ))}

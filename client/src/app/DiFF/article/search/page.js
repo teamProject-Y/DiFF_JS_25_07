@@ -69,7 +69,7 @@ export default function SearchPage() {
     return (
         <div className="w-full min-h-screen overflow-auto">
             <div className="h-screen">
-                <div className="mx-auto px-36 flex">
+                <div className="mx-auto px-32 flex">
                     <main className="flex-grow">
                         {/* 타이틀 */}
                         <h1 className="text-2xl font-bold mb-4 text-gray-500">
