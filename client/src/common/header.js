@@ -17,7 +17,7 @@ const HeaderWrap = styled.div`
     top: 0;
     right: 0;
     left: 0;
-    z-index: 30;
+    z-index: 100;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -246,6 +246,7 @@ export default function Header() {
                     </div>
                 </form>
             }
+            <ThemeToggle/>
 
             <ul className="flex gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
                 {accessToken ? (

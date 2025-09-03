@@ -248,8 +248,6 @@ li {
     opacity: 8%;
 }
 
-
-
 /** docs **/
 .title1 {
     font-size: 25px;
@@ -319,5 +317,6 @@ li {
         display: none; /* Chrome, Safari */
     }
 }
+
 
 
