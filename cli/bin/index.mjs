@@ -76,7 +76,7 @@ program
             const isRunning = { value: true };
             const animationPromise = runAnimation(isRunning);
 
-            const analysis = await doAnalysis(selectedBranch, memberId, draftId, diffId); // ✅ diffId 전달
+            const analysis = await doAnalysis(selectedBranch, memberId, draftId, diffId);
 
             isRunning.value = false;
             await animationPromise;
@@ -95,7 +95,7 @@ program
         /** diff + draft 업데이트 **/
         const lastChecksum = await getLastChecksum(selectedBranch);
 
-        const draft = await mkDraft(memberId, selectedBranch, draftId, diffId, lastChecksum); // ✅ checksum 전달
+        const draft = await mkDraft(memberId, selectedBranch, draftId, diffId, lastChecksum);
         console.log(chalk.bgCyanBright(chalk.black("draft 생성 시작")));
 
 

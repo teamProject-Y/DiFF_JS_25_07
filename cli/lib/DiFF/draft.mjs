@@ -14,7 +14,7 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
     console.log('🚀 mkDraft started...');
 
     const from = await getLastRequestChecksum(branch);
-    const to = await getLastChecksum(branch); // ✅ 최종 체크섬
+    const to = await getLastChecksum(branch);
     const diff = await getDiFF(from, to);
     const repositoryId = await getRepositoryId();
 
@@ -23,14 +23,13 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
         return null;
     }
 
-    console.log("✅ 최종 draftId:", draftId, "diffId:", diffId, "checksum:", to);
+    // console.log("✅ 최종 draftId:", draftId, "diffId:", diffId, "checksum:", to);
 
-    // ✅ checksum도 서버에 같이 전송
     const ok = await sendDiFF(memberId, repositoryId, draftId, diffId, to, diff);
 
     if (ok) {
-        await updateMeta(branch, to);      // ✅ .DiFF/meta.json 갱신
-        await appendLogs(branch, from, to); // ✅ 로그 기록
+        await updateMeta(branch, to);
+        await appendLogs(branch, from, to);
     }
 
     return ok ? { draftId, diffId, checksum: to } : null;
@@ -47,8 +46,8 @@ export async function createDraft(memberId, repositoryId) {
         console.log("📥 draft 생성 응답:", data);
 
         if (data.resultCode?.startsWith("S-")) {
-            const { draftId, diffId } = data.data1;  // ✅ data1 사용
-            console.log(`✅ draft 생성 성공 → draftId=${draftId}, diffId=${diffId}`);
+            const { draftId, diffId } = data.data1;
+            // console.log(`✅ draft 생성 성공 → draftId=${draftId}, diffId=${diffId}`);
             return { draftId, diffId };
         } else {
             console.log("❌ draft 생성 실패:", data.msg);

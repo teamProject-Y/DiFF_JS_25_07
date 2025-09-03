@@ -247,19 +247,3 @@ export const searchArticles = async (keyword) => {
     });
     return res.data;
 };
-
-export const getArticlesWithAnalysis = async (articleId) => {
-    console.log("API - getArticlesWithAnalysis 호출, articleId:", articleId);
-    const res = await ArticleAPI.get(`/api/DiFF/article/articleWithAnalysis`, {
-        params: { articleId }
-    });
-    return res.data.data;
-};
-
-// 특정 레포 안의 모든 게시글 + 분석
-export const getArticlesWithAnalysisByRepo = async (repositoryId) => {
-    const res = await ArticleAPI.get(`/api/DiFF/article/repositoryWithAnalysis`, {
-        params: { repositoryId }
-    });
-    return res.data.data;
-};

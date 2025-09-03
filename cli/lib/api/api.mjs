@@ -57,10 +57,10 @@ export async function mkRepo(memberId, repoName, commitHash){
             firstCommit: commitHash
         });
 
-    if (data.resultCode.startsWith('S-')) { // 인증 성공
-        return data.data1; // memberId 리턴
+    if (data.resultCode.startsWith('S-')) {
+        return data.data1;
 
-    } else { // 인증 실패
+    } else {
         console.log("This repository name is already in use.");
         return null;
     }
@@ -70,8 +70,6 @@ export async function mkRepo(memberId, repoName, commitHash){
 
 export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     try {
-        console.log("🚀 sendDiFF 호출");
-
         const { data } = await axios.post(
             "http://localhost:8080/api/DiFF/draft/receiveDiff",
             {
@@ -79,7 +77,7 @@ export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum
                 repositoryId,
                 draftId,
                 diffId,
-                lastChecksum: checksum, // ✅ 체크섬 같이 보냄
+                lastChecksum: checksum,
                 diff,
             }
         );

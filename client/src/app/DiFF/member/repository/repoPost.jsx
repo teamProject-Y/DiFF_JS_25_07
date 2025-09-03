@@ -1,13 +1,16 @@
 // src/common/RepoPost.jsx
 'use client';
 
-import {useEffect, useState} from 'react';
-import {fetchArticles, increaseArticleHits} from '@/lib/ArticleAPI';
-import {useRouter} from 'next/navigation';
+import AnalysisGraph from "./analysisGraph";
+import { useEffect, useState } from 'react';
+import { fetchArticles, increaseArticleHits } from '@/lib/ArticleAPI';
+import { useRouter } from 'next/navigation';
 
-function PostCard({article}) {
+// 개별 게시글 카드
+function PostCard({ article }) {
     const router = useRouter();
-    const { analysis } = article; // ✅ article 안에 analysis 꺼내오기
+    const { analysis } = article; // ✅ analysis 꺼내오기
+
     const handleArticleClick = async (id) => {
         try {
             await increaseArticleHits(id);
@@ -21,48 +24,31 @@ function PostCard({article}) {
     return (
         <div
             onClick={() => handleArticleClick(article.id)}
-            className="block cursor-pointer border rounded-xl p-4 hover:bg-gray-50 transition"
+            className="p-4 border rounded-md cursor-pointer hover:bg-gray-50 transition"
         >
-            {/* 제목 */}
-            <h2 className="text-xl font-bold mb-3 line-clamp-2">{article.title}</h2>
-
-            {/* 메타 정보 */}
+            <h2 className="text-lg font-bold mb-2">{article.title}</h2>
             <div className="flex gap-6 text-sm text-gray-600 mb-3">
                 <span>view: {article.hits}</span>
                 <span>
-        <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
-    </span>
+                    <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
+                </span>
                 <span>
-        <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
-    </span>
+                    <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
+                </span>
             </div>
 
-
-            {/* ✨ 분석 점수 + 등급 */}
+            {/* 분석 결과 */}
             {analysis && (
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                    <div className="p-2 rounded bg-red-100 text-red-700 text-center">
-                        Security: {analysis.vulnerabilities} ({analysis.gradeSecurity})
-                    </div>
-                    <div className="p-2 rounded bg-yellow-100 text-yellow-700 text-center">
-                        Reliability: {analysis.bugs} ({analysis.gradeReliability})
-                    </div>
-                    <div className="p-2 rounded bg-green-100 text-green-700 text-center">
-                        Maintainability: {analysis.codeSmells} ({analysis.gradeMaintainability})
-                    </div>
-                    <div className="p-2 rounded bg-gray-100 text-gray-700 text-center">
-                        Coverage: {analysis.coverage}% ({analysis.gradeCoverage})
-                    </div>
-                    <div className="p-2 rounded bg-orange-100 text-orange-700 text-center col-span-2">
-                        Duplications: {analysis.duplicatedLinesDensity}% ({analysis.gradeDuplications})
-                    </div>
+                <div className="mt-3">
+                    <AnalysisGraph analysis={analysis} />
                 </div>
             )}
         </div>
     );
 }
 
-export default function RepoPost({repoId}) {
+// 게시글 목록
+export default function RepoPost({ repoId }) {
     const [loading, setLoading] = useState(true);
     const [articles, setArticles] = useState([]);
     const [error, setError] = useState('');
@@ -87,7 +73,7 @@ export default function RepoPost({repoId}) {
                 hits: a?.hits ?? a?.viewCount ?? 0,
                 extra__sumReplies: a?.extra__sumReplies ?? a?.commentCount ?? 0,
                 extra__sumReaction: a?.extra__sumReaction ?? a?.likeCount ?? 0,
-                analysis: a?.analysis ?? null, // ✅ analysis 확인
+                analysis: a?.analysis ?? null,
             };
         });
     };
@@ -115,6 +101,7 @@ export default function RepoPost({repoId}) {
                         hits: 123,
                         extra__sumReplies: 5,
                         extra__sumReaction: 10,
+                        analysis: null,
                     }]);
                     setError(e?.message || '요청 실패');
                     console.error('[RepoPost] fetchArticles error:', e);
@@ -140,7 +127,7 @@ export default function RepoPost({repoId}) {
             {!loading && articles.length > 0 && (
                 <div className="grid gap-6 grid-cols-1">
                     {articles.map((a) => (
-                        <PostCard key={a.id} article={a}/>
+                        <PostCard key={a.id} article={a} />
                     ))}
                 </div>
             )}
