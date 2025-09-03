@@ -204,16 +204,11 @@ export default function Page() {
                 <BeforeMainPage/>
             </div>
 
-            <div id="docs" className="is-light-bg h-screen w-full pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
-                <div className="w-4/5 h-1/2 mx-auto">
 
-                </div>
-                <div className="h-1/2">
+            <section id="docs" className="is-light-bg w-full min-h-screen pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
+                <BeforeExplain />
 
-                        <BeforeExplain containerId="pageScroll" />
-
-                </div>
-            </div>
+            </section>
 
 
             {/* trending */}
@@ -263,56 +258,56 @@ export default function Page() {
                                         return (
                                             <SwiperSlide key={article.id ?? index}>
                                                 {/*<Link href={`/DiFF/article/detail?id=${article.id}`}>*/}
+                                                <div
+                                                    className="article-card h-[90%] bg-white shadow-md rounded-b-lg overflow-hidden cursor-pointer hover:shadow-lg transition"
+                                                    onClick={() => router.push(`/DiFF/article/detail?id=${article.id}`)}
+                                                    role="link"
+                                                    tabIndex={0}
+                                                    onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(`/DiFF/article/detail?id=${article.id}`)}
+                                                >
                                                     <div
-                                                        className="article-card h-[90%] bg-white shadow-md rounded-b-lg overflow-hidden cursor-pointer hover:shadow-lg transition"
-                                                        onClick={() => router.push(`/DiFF/article/detail?id=${article.id}`)}
-                                                        role="link"
-                                                        tabIndex={0}
-                                                        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(`/DiFF/article/detail?id=${article.id}`)}
-                                                    >
-                                                        <div
-                                                            className="h-1/2 w-full bg-gray-200 flex items-center justify-center ">
-                                                            {imgSrc ? (
-                                                                <img
-                                                                    src={imgSrc}
-                                                                    alt="thumbnail"
-                                                                    className="w-full h-full object-cover"
-                                                                />
+                                                        className="h-1/2 w-full bg-gray-200 flex items-center justify-center ">
+                                                        {imgSrc ? (
+                                                            <img
+                                                                src={imgSrc}
+                                                                alt="thumbnail"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-gray-400">No Image</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="h-1/2 p-5 flex flex-col">
+                                                        <h3 className="text-xl font-semibold clamp-1 mb-2">{article.title}</h3>
+                                                        <p className="clamp-3 text-sm text-gray-600">
+                                                            {article.body ? removeMd(article.body) : ""}
+                                                        </p>
+                                                        <div className="flex-grow"></div>
+                                                        <hr/>
+                                                        <div className="text-sm flex justify-between mt-3">
+                                                            <div>by {article.extra__writer ? (
+                                                                <Link
+                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                    className="hover:underline hover:text-black cursor-pointer font-bold"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    {article.extra__writer}
+                                                                </Link>
                                                             ) : (
-                                                                <span className="text-gray-400">No Image</span>
-                                                            )}
-                                                        </div>
-                                                        <div className="h-1/2 p-5 flex flex-col">
-                                                            <h3 className="text-xl font-semibold clamp-1 mb-2">{article.title}</h3>
-                                                            <p className="clamp-3 text-sm text-gray-600">
-                                                                {article.body ? removeMd(article.body) : ""}
-                                                            </p>
-                                                            <div className="flex-grow"></div>
-                                                            <hr/>
-                                                            <div className="text-sm flex justify-between mt-3">
-                                                                <div>by {article.extra__writer ? (
-                                                                    <Link
-                                                                        href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                                        className="hover:underline hover:text-black cursor-pointer font-bold"
-                                                                        onClick={(e) => e.stopPropagation()}
-                                                                    >
-                                                                        {article.extra__writer}
-                                                                    </Link>
-                                                                ) : (
-                                                                    "Unknown"
-                                                                )} · {new Date(article.regDate).toLocaleDateString("en-US", {
-                                                                    year: "numeric",
-                                                                    month: "short",
-                                                                    day: "numeric"
-                                                                })}</div>
-                                                                <div className="text-sm text-gray-600">
-                                                                    <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                                                    <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
-                                                                </div>
+                                                                "Unknown"
+                                                            )} · {new Date(article.regDate).toLocaleDateString("en-US", {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric"
+                                                            })}</div>
+                                                            <div className="text-sm text-gray-600">
+                                                                <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
+                                                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
                                                             </div>
                                                         </div>
                                                     </div>
+                                                </div>
                                                 {/*</Link>*/}
                                             </SwiperSlide>
                                         );
