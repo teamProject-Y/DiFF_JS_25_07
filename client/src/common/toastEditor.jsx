@@ -2,6 +2,8 @@
 import React, { useEffect, useRef } from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
+import {useTheme} from "@/common/thema";
 
 const handleUpload = async (file) => {
     const data = new FormData();
@@ -20,6 +22,7 @@ const handleUpload = async (file) => {
 export default function ToastEditor({ initialValue = "", onChange }) {
     const editorRef = useRef(null);
     const instanceRef = useRef(null);
+    const theme = useTheme();
 
     useEffect(() => {
         if (!editorRef.current) return;
@@ -30,6 +33,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
             initialEditType: "markdown",
             previewStyle: "vertical",
             initialValue: initialValue || "",
+            theme: theme,
         });
 
         instanceRef.current.addHook("addImageBlobHook", async (blob) => {
