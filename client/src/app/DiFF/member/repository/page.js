@@ -8,7 +8,7 @@ import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
 import RepoPost from "./RepoPost";
 import {AddRepoModal} from './addRepoModal';
-import {RepoInfo} from './repoInfo';
+import RepoInfo from './repoInfo';
 import GhostBar from './sideBar';
 import Link from "next/link";
 
@@ -330,7 +330,7 @@ export default function RepositoriesPage() {
                                         {tab === 'info' && selectedRepo ? (
                                             <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
-                                                repo={selectedRepo}
+                                                repo={selectedRepo}   // ✅ 여기서 repo.id 전달됨
                                                 repositories={repositories}
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}

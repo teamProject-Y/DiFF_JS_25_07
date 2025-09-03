@@ -22,6 +22,22 @@ export const createRepository = async (data) => {
     }
 };
 
+export const getLanguageDistribution = async (repoId) => {
+    try {
+        console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/languages");
+        const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/languages`);
+        console.log("[API] 응답:", res.data);
+
+        return res.data?.data1 ?? [];
+    } catch (err) {
+        console.error("[API] getLanguageDistribution error:", err);
+        throw err;
+    }
+};
+
+
+
+
 export const importGithubRepo = async (ghRepo) => {
     const payload = {
         name: ghRepo?.name ?? ghRepo?.full_name ?? '',

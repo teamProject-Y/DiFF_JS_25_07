@@ -1,30 +1,39 @@
 'use client';
 
-import {motion} from 'framer-motion';
-import {useEffect, useMemo, useState, useRef} from 'react';
-import {useRouter} from 'next/navigation';
+import { motion } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import LanguageChart from "./langaugeChart";
+import { getLanguageDistribution } from "@/lib/RepositoryAPI";
 
 // 애니메이션
 const container = {
-    hidden: {x: -40, opacity: 0},
+    hidden: { x: -40, opacity: 0 },
     show: {
-        x: 0, opacity: 1,
+        x: 0,
+        opacity: 1,
         transition: {
-            type: 'spring', stiffness: 120, damping: 20,
+            type: 'spring',
+            stiffness: 120,
+            damping: 20,
             when: 'beforeChildren',
             staggerChildren: 0.08,
             delayChildren: 0.02,
         },
     },
-    exit: {x: -40, opacity: 0, transition: {type: 'spring', stiffness: 120, damping: 20}},
+    exit: {
+        x: -40,
+        opacity: 0,
+        transition: { type: 'spring', stiffness: 120, damping: 20 },
+    },
 };
 
-export function RepoInfo({
-                             repo,
-                             repositories = [],
-                             onClose,
-                             useExternalSidebar = false,
-                         }) {
+export default function RepoInfo({
+                                     repo,
+                                     repositories = [],
+                                     onClose,
+                                     useExternalSidebar = false,
+                                 }) {
     const router = useRouter();
 
     const [editingName, setEditingName] = useState(false);
@@ -44,19 +53,26 @@ export function RepoInfo({
         }
     };
 
-// 언어 데이터 정규화
-    const rawLang = repo?.languages;
-    const langList = Array.isArray(rawLang)
-        ? rawLang
-        : rawLang && typeof rawLang === 'object'
-            ? Object.entries(rawLang).map(([name, bytes]) => ({name, bytes}))
-            : [];
-    const totalBytes = langList.reduce((a, b) => a + (b.bytes || 0), 0);
-    const pct = (v) => (totalBytes ? Math.round((v / totalBytes) * 100) : 0);
+    // 언어 비율 데이터
+    const [languages, setLanguages] = useState([]);
+    useEffect(() => {
+        if (repo?.id) {
+            console.log("[RepoInfo] repo.id =", repo.id); // ✅ repo id 확인
 
-// 추천 표시 정보
+            getLanguageDistribution(repo.id)
+                .then((data) => {
+                    console.log("[RepoInfo] getLanguageDistribution result =", data); // ✅ API 결과 확인
+                    setLanguages(data);
+                })
+                .catch((err) => {
+                    console.error("[RepoInfo] API error =", err);
+                });
+        }
+    }, [repo?.id]);
+
+    // 추천 표시 정보
     const defaultBranch = repo?.defaultBranch || 'main';
-    const visibility = (repo.aprivate ? 'private' : 'public');
+    const visibility = repo?.aprivate ? 'private' : 'public';
     const stats = {
         stars: repo?.stargazersCount || repo?.stars || 0,
         forks: repo?.forksCount || repo?.forks || 0,
@@ -65,18 +81,14 @@ export function RepoInfo({
     };
 
     const nameRef = useRef(null);
-
     const enterEdit = () => {
         setEditingName(true);
-        // 인풋 자동 포커스
         setTimeout(() => nameRef.current?.focus?.(), 0);
     };
-
     const cancelEdit = () => {
         setEditingName(false);
         setNameInput(repo?.name ?? '');
     };
-
     const onKeyDownName = (e) => {
         if (e.key === 'Enter') onSaveName();
         if (e.key === 'Escape') cancelEdit();
@@ -234,9 +246,8 @@ export function RepoInfo({
                     {/* 언어 비율 */}
                     <div className="rounded-xl border border-neutral-200 flex-grow shadow-sm p-4">
                         <div className="font-semibold mb-3">Languages</div>
-                        <div className="text-sm text-neutral-500">
-                            도넛 차트 영역(언어 비율) — 추후 실제 데이터 바인딩
-                        </div>
+
+                            <LanguageChart languages={languages} />
                     </div>
 
                     <button className="w-full p-2 hover:bg-red-500 hover:text-white bg-white
