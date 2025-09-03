@@ -1,9 +1,9 @@
 // src/app/DiFF/article/drafts/page.js
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { DraftsArticle, deleteDraft } from '@/lib/DraftAPI';
+import {useEffect, useState, useMemo} from 'react';
+import {useRouter} from 'next/navigation';
+import {DraftsArticle, deleteDraft} from '@/lib/DraftAPI';
 
 export default function DraftsPage() {
     const router = useRouter();
@@ -108,7 +108,7 @@ export default function DraftsPage() {
     };
 
     const content = useMemo(() => {
-        if (loading) return <div className="p-6">로딩중...</div>;
+        if (loading) return <div className="p-6">Loading...</div>;
         if (error) return <div className="p-6 text-red-600">{error}</div>;
         if (!drafts.length)
             return <div className="p-6">임시저장 글이 없습니다.</div>;
@@ -118,34 +118,31 @@ export default function DraftsPage() {
                 {drafts.map((draft) => (
                     <li
                         key={draft.id}
-                        className="border rounded-lg p-5 flex items-start justify-between gap-3 hover:bg-gray-100"
+                        className="border rounded-lg p-5 flex items-start justify-between gap-3 hover:bg-gray-100
+                        dark:border-neutral-700 dark:hover:bg-neutral-800 dark:text-neutral-300"
                     >
                         <button
                             className="text-left flex-1 p-1"
                             onClick={() => handleOpen(draft)}
                             title="작성 페이지로 이동"
                         >
-                            <div className="text-lg font-semibold truncate mb-2">
+                            <div className="text-xl font-semibold truncate mb-3">
                                 {draft.title || '(No title)'}
                             </div>
-                            <div className="text-gray-600 break-words line-clamp-2 mb-5">
+                            <div className="text-gray-600 dark:text-neutral-400 break-words line-clamp-2 mb-5">
                                 {draft.body || '(No body)'}
                             </div>
-                            <div className="mt-1 text-xs text-gray-500">
-                                checksum: {draft.checksum ?? '-'}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                                Created At. {draft.regDate
-                                ? new Date(draft.regDate).toLocaleDateString("en-US", {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric"
-                                })
-                                : '-'}
-                            </div>
-
-                            <div className="text-xs text-gray-500">
-                                Repository: {draft.extra__repositoryName}
+                            <div className="flex flex-col gap-1 mt-1 text-sm
+                                text-gray-500 dark:text-neutral-500">
+                                    <p>checksum: {draft.checksum ?? '-'}</p>
+                                <p>Created At. {draft.regDate
+                                    ? new Date(draft.regDate).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric"
+                                    })
+                                    : '-'}</p>
+                                <p>Repository: {draft.extra__repositoryName}</p>
                             </div>
                         </button>
 
@@ -157,7 +154,7 @@ export default function DraftsPage() {
                                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                     : 'hover:text-red-500 hover:border-red-500'
                             }`}
-                            title="초안 삭제"
+                            title="Delete draft"
                         >
                             {deletingId === draft.id ? 'Deleting...' : 'Delete'}
                         </button>
@@ -168,11 +165,12 @@ export default function DraftsPage() {
     }, [loading, error, drafts, deletingId]);
 
     return (
-        <div className="pb-6 px-32">
-            <div className="flex items-center border-b mb-3">
-                    <button className="p-4 -mb-px border-b-2 text-black border-black font-semibold">
-                        Drafts
-                    </button>
+        <div className="pb-6 px-32 ">
+            <div className="flex items-center border-b dark:border-neutral-700 mb-3">
+                <button className="p-4 -mb-px font-semibold text-black dark:text-neutral-200
+                    border-b-2 border-black dark:border-neutral-400">
+                    Drafts
+                </button>
             </div>
             {content}
         </div>

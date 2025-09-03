@@ -1,42 +1,96 @@
 "use client";
-import { useState } from "react";
-import axios from "axios";
-import {requestPasswordReset} from "@/lib/UserAPI";
+
+import { useMemo, useState } from "react";
+import { requestPasswordReset } from "@/lib/UserAPI";
 
 export default function FindPasswordPage() {
     const [email, setEmail] = useState("");
-    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [msg, setMsg] = useState(null);
+
+    const canSubmit = useMemo(() => {
+        if (loading) return false;
+        if (!email) return false;
+        return /\S+@\S+\.\S+/.test(email);
+    }, [email, loading]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!canSubmit) return;
+        setLoading(true);
+        setMsg(null);
         try {
             await requestPasswordReset(email);
-            setMessage("✅ 비밀번호 재설정 메일을 발송했습니다. 이메일을 확인하세요.");
+            setMsg({ type: "success", text: "Password reset email sent. Please check your inbox." });
+            setEmail("");
         } catch (err) {
-            console.error("❌ 오류 발생:", err.response?.data);
-            setMessage("❌ 메일 발송 실패: " + (err.response?.data || "서버 오류"));
+            const detail =
+                err?.response?.data?.message ||
+                err?.response?.data ||
+                err?.message ||
+                "Server error";
+            setMsg({ type: "error", text: `Failed to send email: ${detail}` });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onKeyDown = (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit(e);
         }
     };
 
     return (
-        <div className="max-w-md mx-auto mt-20 p-6 border rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-4">비밀번호 찾기</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="가입한 이메일"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-2 border rounded mb-4"
-                />
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded"
-                >
-                    메일 발송
-                </button>
-            </form>
-            {message && <p className="mt-4 text-sm">{message}</p>}
+        <div className="min-h-screen w-full bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300 flex items-center justify-center px-4">
+            <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white/70 p-8 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/30 shadow-sm">
+                <header className="mb-6">
+                    <h1 className="text-2xl font-semibold tracking-tight">Forgot Password</h1>
+                    <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                        Enter the email you used to sign up. We’ll send you a reset link.
+                    </p>
+                </header>
+
+                <form onSubmit={handleSubmit} onKeyDown={onKeyDown} className="space-y-4">
+                    <div className="space-y-2">
+                        <label htmlFor="email" className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                            Email
+                        </label>
+                        <input
+                            id="email"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full rounded-xl border border-neutral-300 bg-neutral-100/70 px-4 py-3 text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-600 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-100"
+                            autoComplete="email"
+                            required
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={!canSubmit}
+                        className="group relative inline-flex w-full items-center justify-center rounded-xl border border-neutral-300 bg-neutral-900 px-4 py-3 text-sm font-medium text-neutral-100 transition-all hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-100 dark:text-neutral-900"
+                    >
+                        {loading && (
+                            <span className="absolute left-4 inline-block h-4 w-4 animate-spin rounded-full border border-neutral-500 border-t-transparent dark:border-neutral-400 dark:border-t-transparent" />
+                        )}
+                        Send reset link
+                    </button>
+                </form>
+
+                {msg && (
+                    <div
+                        className="mt-5 rounded-xl border border-neutral-300 px-4 py-3 text-sm text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        {msg.text}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

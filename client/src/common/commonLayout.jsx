@@ -63,9 +63,8 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
     return (
         <>
             <div className="text-neutral-600">
-                {useDarkColor && <div className="fixed inset-0 -z-10 bg-black" />}
+                {useDarkColor && <div className="fixed inset-0 -z-10 dark:bg-neutral-900" />}
                 <Header />
-                {/*<div className="h-20 bg-inherit">*/}
                 <div
                     id={isAuthed ? 'appScroll' : undefined}
                     data-scroll-root={isAuthed ? '' : undefined}

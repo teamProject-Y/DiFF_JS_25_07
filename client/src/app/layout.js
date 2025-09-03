@@ -32,7 +32,7 @@ export default function RootLayout({ children, modal }) {
           })();`}
             </Script>
         </head>
-        <body>
+        <body className="text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300">
         <CommonLayout>
             {children}
             {modal}

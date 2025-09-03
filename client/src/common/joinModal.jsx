@@ -40,15 +40,15 @@ export default function JoinForm() {
             const { resultCode, msg: serverMsg, data1: accessToken, data2: refreshToken } = res;
 
             if (resultCode === 'S-1' && accessToken) {
-                // ✅ 토큰 저장 (자동 로그인 상태)
+                // 토큰 저장 (자동 로그인 상태)
                 localStorage.setItem('tokenType', 'Bearer');
                 localStorage.setItem('accessToken', accessToken);
                 localStorage.setItem('refreshToken', refreshToken || '');
 
-                // ✅ 전역 상태 갱신 이벤트 발생
+                // 전역 상태 갱신 이벤트 발생
                 window.dispatchEvent(new Event('auth-changed'));
 
-                // ✅ 메인 페이지로 강제 이동 (SSR 새로고침 보장)
+                // 메인 페이지로 강제 이동 (SSR 새로고침 보장)
                 window.location.href = '/DiFF/home/main';
             } else {
                 setError(serverMsg || '회원가입에 실패했습니다');
@@ -66,7 +66,6 @@ export default function JoinForm() {
             <div className="text-2xl md:text-3xl font-semibold text-center mb-8">Join</div>
             {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
-
             <div className="relative my-4">
                 <input
                     type="text"
@@ -74,25 +73,16 @@ export default function JoinForm() {
                     value={form.email}
                     onChange={onChange}
                     placeholder=" "
-                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     autoComplete="username"
                     required
                     disabled={submitting}
                 />
                 <label htmlFor="email"
-                       className="absolute text-gray-400 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
+                       className="absolute text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
                     email</label>
             </div>
-            {/*<input*/}
-            {/*    type="email"*/}
-            {/*    name="email"*/}
-            {/*    value={form.email}*/}
-            {/*    onChange={onChange}*/}
-            {/*    placeholder="E-mail"*/}
-            {/*    className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-full p-3"*/}
-            {/*    required*/}
-            {/*    disabled={submitting}*/}
-            {/*/>*/}
+
             <div className="relative my-4">
                 <input
                     type="text"
@@ -100,23 +90,14 @@ export default function JoinForm() {
                     value={form.nickName}
                     onChange={onChange}
                     placeholder=" "
-                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     required
                     disabled={submitting}
                 />
                 <label htmlFor="Nick Name"
-                       className="absolute text-gray-400 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
+                       className="absolute text-gray-400  duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
                     Nick Name</label>
             </div>
-            {/*<input*/}
-            {/*    name="nickName"*/}
-            {/*    value={form.nickName}*/}
-            {/*    onChange={onChange}*/}
-            {/*    placeholder="닉네임"*/}
-            {/*    className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-full p-3"*/}
-            {/*    required*/}
-            {/*    disabled={submitting}*/}
-            {/*/>*/}
 
             <div className="relative my-4">
                 <input
@@ -125,25 +106,16 @@ export default function JoinForm() {
                     value={form.loginPw}
                     onChange={onChange}
                     placeholder=" "
-                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     autoComplete="current-password"
                     required
                     disabled={submitting}
                 />
                 <label htmlFor="Password"
-                       className="absolute text-gray-400 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
+                       className="absolute text-gray-400 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
                     Password</label>
             </div>
-            {/*<input*/}
-            {/*    type="password"*/}
-            {/*    name="loginPw"*/}
-            {/*    value={form.loginPw}*/}
-            {/*    onChange={onChange}*/}
-            {/*    placeholder="비밀번호"*/}
-            {/*    className="mb-4 bg-white border border-black text-black text-sm rounded-lg w-full p-3"*/}
-            {/*    required*/}
-            {/*    disabled={submitting}*/}
-            {/*/>*/}
+
             <div className="relative my-4">
                 <input
                     type="password"
@@ -151,26 +123,15 @@ export default function JoinForm() {
                     value={form.checkLoginPw}
                     onChange={onChange}
                     placeholder=" "
-                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     autoComplete="current-password"
                     required
                     disabled={submitting}
                 />
                 <label htmlFor="Password Check"
-                       className="absolute text-gray-400 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
+                       className="absolute text-gray-400 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
                     Password Check</label>
             </div>
-
-            {/*<input*/}
-            {/*    type="password"*/}
-            {/*    name="checkLoginPw"*/}
-            {/*    value={form.checkLoginPw}*/}
-            {/*    onChange={onChange}*/}
-            {/*    placeholder="비밀번호 확인"*/}
-            {/*    className="mb-6 bg-white border border-black text-black text-sm rounded-lg w-full p-3"*/}
-            {/*    required*/}
-            {/*    disabled={submitting}*/}
-            {/*/>*/}
 
             <button
                 type="submit"
@@ -181,9 +142,6 @@ export default function JoinForm() {
             </button>
 
             <div className="text-center mt-6 space-y-2">
-                {/*<a href="/DiFF/member/login" className="text-sm font-semibold underline">*/}
-                {/*    로그인*/}
-                {/*</a>*/}
                 <a
                     href="/login/google"
                     className="flex items-center justify-center gap-3 border border-black text-black bg-white py-3 px-4 rounded-lg mx-auto"
@@ -211,7 +169,6 @@ export default function JoinForm() {
                     </svg>
                     <span>Sign in with GitHub</span>
                 </a>
-
             </div>
         </form>
     );

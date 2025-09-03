@@ -44,10 +44,10 @@ export default function LayMenu() {
                                 key={href}
                                 href={href}
                                 className={[
-                                    "block py-3 px-8 transition-colors hover:bg-gray-100",
+                                    "block py-3 px-8 transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800",
                                     isActive
-                                        ? "text-black font-semibold"
-                                        : ""
+                                        ? "font-semibold text-black dark:text-neutral-200"
+                                        : "dark:text-neutral-500"
                                 ].join(" ")}
                             >
                                 {label}
@@ -55,11 +55,11 @@ export default function LayMenu() {
                         );
                     })}
                 </nav>
-                <hr/>
+                <hr className="dark:border-neutral-700 mx-5" />
 
                 {/* Following 목록 */}
                 <div className="pt-6 text-sm text-gray-500">
-                    <div className="font-semibold mb-3 px-8 text-gray-600">Following</div>
+                    <div className="font-semibold mb-3 px-8 text-gray-600 dark:text-neutral-200">Following</div>
                     {following.length > 0 ? (
                         <ul className="">
                             {following.map((f, idx) => (
@@ -68,7 +68,7 @@ export default function LayMenu() {
                                     tabIndex={0}
                                     onClick={() => router.push(`/DiFF/member/profile?nickName=${f.nickName}`)}
                                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(href)}
-                                    className="px-9 py-1 hover:underline
+                                    className="px-9 py-1 hover:underline dark:text-neutral-300
                                     cursor-pointer">
                                         {f.nickName}
                                 </li>
