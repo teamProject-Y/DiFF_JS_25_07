@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import LanguageChart from "./langaugeChart";
-import { getLanguageDistribution } from "@/lib/RepositoryAPI";
+import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
+import {getAnalysisHistory, getLanguageDistribution} from "@/lib/RepositoryAPI";
 
 // 애니메이션
 const container = {
@@ -38,6 +39,13 @@ export default function RepoInfo({
 
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
+    const [history, setHistory] = useState([]);
+
+    useEffect(() => {
+        if (repo?.id) {
+            getAnalysisHistory(repo.id).then(setHistory);
+        }
+    }, [repo?.id]);
     useEffect(() => {
         setNameInput(repo?.name ?? '');
     }, [repo?.name]);
@@ -130,7 +138,7 @@ export default function RepoInfo({
                         {/* 상단 카드 */}
                         <div
                             className="h-[35%] rounded-xl border border-neutral-200 shadow-sm p-4 mb-3 mr-3">
-
+                            <AnalysisHistoryChart history={history} />
                             그래프
                         </div>
 

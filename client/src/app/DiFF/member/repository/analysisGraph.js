@@ -1,5 +1,4 @@
-"use client";
-
+'use client';
 import { Doughnut } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -13,7 +12,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 // ✅ Circle 컴포넌트
 const Circle = ({ grade, color }) => (
     <div
-        className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-white"
+        className="flex items-center justify-center w-8 h-8 rounde-full font-bold text-white"
         style={{ backgroundColor: color }}
     >
         {grade}
