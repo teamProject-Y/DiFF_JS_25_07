@@ -4,7 +4,8 @@ import ReactMarkdown from "react-markdown";
 import {useEffect, useState, Suspense} from 'react';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
-
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import {
     fetchUser,
     uploadProfileImg,
@@ -119,7 +120,6 @@ function ProfileInner() {
 
         fetchCounts();
     }, [searchParams]);
-
 
     useEffect(() => {
         const nickName = searchParams.get("nickName");
@@ -332,15 +332,20 @@ function ProfileInner() {
                     <main>
                         <section className="mb-8">
                             <h3 className="mb-3 text-2xl font-bold">README</h3>
-                            <div className="min-h-[120px] prose dark:prose-invert max-w-none">
+                            <div className="min-h-[120px] prose dark:prose-invert max-w-none markdown">
                                 {member?.introduce ? (
-                                    <ReactMarkdown>{member.introduce}</ReactMarkdown>
+                                    <ReactMarkdown
+                                    >
+                                        {member.introduce}
+                                    </ReactMarkdown>
                                 ) : (
                                     "아직 자기소개가 없습니다."
                                 )}
                             </div>
                         </section>
                     </main>
+
+
                 </div>
 
                 {/* 목록 모달 */}

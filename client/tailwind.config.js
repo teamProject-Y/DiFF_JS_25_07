@@ -13,5 +13,6 @@ module.exports = {
     plugin(function ({ addVariant, e }) {
       addVariant('autofill', '&:-webkit-autofill')
       addVariant('dark-autofill', '.dark &:-webkit-autofill')
+      plugins: [require('@tailwindcss/typography')]
     }),],
 };

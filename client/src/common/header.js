@@ -262,11 +262,13 @@ export default function Header() {
                             {open && (
                                 <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-2 z-50">
                                     {notifications.length > 0 ? (
-                                        notifications.map((n) => (
-                                            <div key={n.id} className="border-b py-2 text-sm">
-                                                <span className="font-medium">{n.type}</span> - {n.message}
-                                            </div>
-                                        ))
+                                        <div className="max-h-60 overflow-y-auto"> {/* ✅ 스크롤 영역 */}
+                                            {notifications.map((n) => (
+                                                <div key={n.id} className="border-b py-2 text-sm">
+                                                    <span className="font-medium">{n.type}</span> - {n.message}
+                                                </div>
+                                            ))}
+                                        </div>
                                     ) : (
                                         <p className="text-sm text-gray-500">알림이 없습니다.</p>
                                     )}

@@ -18,15 +18,15 @@ import "chartjs-adapter-date-fns";
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale);
 
 export default function AnalysisHistoryChart({ history }) {
-    console.log("[AnalysisHistoryChart] history =", history); // ✅ 데이터 확인
+    console.log("[AnalysisHistoryChart] history =", history);
 
     if (!history || history.length === 0) {
         return <p className="text-gray-500 text-center">분석 데이터 없음</p>;
     }
 
-    // ✅ 날짜 라벨
+
     const labels = history.map(h => {
-        console.log("📅 analyzeDate =", h.analyzeDate); // ✅ 날짜 변환 확인
+        console.log("📅 analyzeDate =", h.analyzeDate);
         return new Date(h.analyzeDate);
     });
 
@@ -99,15 +99,42 @@ export default function AnalysisHistoryChart({ history }) {
     console.log("[AnalysisHistoryChart] labels =", labels);
     console.log("[AnalysisHistoryChart] datasets =", data.datasets);
 
-    return <Line data={data} options={{
-        responsive: true,
-        plugins: {
-            legend: { position: "top" },
-            title: { display: true, text: "Analysis History" },
-        },
-        scales: {
-            x: { type: "time", time: { unit: "day" } },
-            y: { beginAtZero: true },
-        },
-    }} />;
+    return (
+        <Line
+            data={data}
+            options={{
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: "right",
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: "circle",
+                            padding: 15,
+                        },
+                    },
+                    title: { display: true, text: "Analysis History" },
+                },
+                elements: {
+                    point: {
+                        radius: 4,
+                        hoverRadius: 6,
+                    },
+                    line: {
+                        fill: false,
+                    },
+                },
+                scales: {
+                    x: {
+                        type: "time",
+                        time: { unit: "day" },
+                    },
+                    y: {
+                        beginAtZero: true,
+                    },
+                },
+            }}
+        />
+    );
+
 }
