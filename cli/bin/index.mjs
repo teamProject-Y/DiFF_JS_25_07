@@ -63,12 +63,12 @@ program
         }
 
         /** ⚡ draft 먼저 생성 **/
-        const draftId = await createDraft(memberId, repositoryId);
+        const { draftId, diffId } = await createDraft(memberId, repositoryId);
         if (!draftId) {
-            console.log(chalk.bgRedBright(chalk.black("draft 생성 실패")));
+            console.log(chalk.bgRedBright("draft 생성 실패"));
             process.exit(1);
         }
-        console.log(chalk.bgGreen(`✅ draftId 생성 완료 → ${draftId}`));
+        console.log(chalk.bgGreen(`✅ draftId=${draftId}, diffId=${diffId} 생성 완료`));
 
         /** 코드 분석 **/
         if (options.analysis) {
@@ -76,7 +76,7 @@ program
             const isRunning = { value: true };
             const animationPromise = runAnimation(isRunning);
 
-            const analysis = await doAnalysis(selectedBranch, memberId, draftId);
+            const analysis = await doAnalysis(selectedBranch, memberId, draftId, diffId); // ✅ diffId 전달
 
             isRunning.value = false;
             await animationPromise;
@@ -92,7 +92,7 @@ program
         }
 
         /** diff + draft 업데이트 **/
-        const draft = await mkDraft(memberId, selectedBranch, draftId);
+        const draft = await mkDraft(memberId, selectedBranch, draftId, diffId);
         console.log(chalk.bgCyanBright(chalk.black("draft 생성 시작")));
 
         if (draft === null) {

@@ -68,8 +68,7 @@ export async function mkRepo(memberId, repoName, commitHash){
 
 
 
-/** diff 전달 + GPT + 분석 실행 */
-export async function sendDiFF(memberId, repositoryId, draftId, to, diff) {
+export async function sendDiFF(memberId, repositoryId, draftId, diffId, to, diff) {
     try {
         console.log(chalk.bgCyanBright("sendDiFF 호출"));
 
@@ -79,6 +78,7 @@ export async function sendDiFF(memberId, repositoryId, draftId, to, diff) {
                 memberId,
                 repositoryId,
                 draftId,
+                diffId,          // ✅ 추가
                 lastChecksum: to,
                 diff,
             }

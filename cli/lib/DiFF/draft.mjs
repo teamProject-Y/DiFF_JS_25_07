@@ -9,7 +9,8 @@ import {appendMeta} from "./init.mjs";
 import path from "path";
 import axios from "axios";
 
-export async function mkDraft(memberId, branch, draftId) {
+// mkDraft 함수
+export async function mkDraft(memberId, branch, draftId, diffId) {
     console.log('🚀 mkDraft started...');
     const from = await getLastRequestChecksum(branch);
     const to = await getLastChecksum(branch);
@@ -21,21 +22,17 @@ export async function mkDraft(memberId, branch, draftId) {
         return null;
     }
 
-    console.log("✅ 최종 draftId:", draftId);
+    console.log("✅ 최종 draftId:", draftId, "diffId:", diffId);
 
-    // ✅ draftId는 index.mjs에서 받은 값 그대로 사용
-    const ok = await sendDiFF(memberId, repositoryId, draftId, to, diff);
+    // ✅ diffId도 서버에 같이 보내주자
+    const ok = await sendDiFF(memberId, repositoryId, draftId, diffId, to, diff);
 
     if (ok) {
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);
-
-        // 👉 zip 업로드 + 분석 실행은 여기서 필요하면 실행
-        // await uploadZip(memberId, repositoryId, draftId, to);
     }
 }
 
-/** 서버에 빈 draft 생성 후 draftId 리턴 */
 export async function createDraft(memberId, repositoryId) {
     try {
         console.log("📤 draft 생성 요청:", { memberId, repositoryId });
@@ -46,8 +43,9 @@ export async function createDraft(memberId, repositoryId) {
         console.log("📥 draft 생성 응답:", data);
 
         if (data.resultCode?.startsWith("S-")) {
-            console.log("✅ draft 생성 성공 → draftId:", data.data);
-            return data.data;
+            const { draftId, diffId } = data.data;  // ✅ 구조분해 할당
+            console.log(`✅ draft 생성 성공 → draftId=${draftId}, diffId=${diffId}`);
+            return { draftId, diffId };            // ✅ 객체 반환
         } else {
             console.log("❌ draft 생성 실패:", data.msg);
             return null;

@@ -34,6 +34,7 @@ export function WriteArticlePage() {
     const [error, setError] = useState('');
     const [repoError, setRepoError] = useState('');
     const [draftId, setDraftId] = useState(sp.get('draftId'));
+    const [diffId, setDiffId] = useState(null);
     // 로그인 체크
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -49,6 +50,12 @@ export function WriteArticlePage() {
                     setTitle(draft.title || '');
                     setBody(draft.body || '');
                     setRepositoryId(draft.repositoryId || null);
+
+                    // ✅ draft 불러올 때 diffId도 세팅 (서버에서 내려줘야 함)
+                    if (draft.diffId) {
+                        setDiffId(draft.diffId);
+                        console.log("📥 draft.diffId 세팅:", draft.diffId);
+                    }
                 } catch (e) {
                     console.error("임시저장 불러오기 실패:", e);
                 }
@@ -107,7 +114,8 @@ export function WriteArticlePage() {
                 body,
                 checksum,
                 repositoryId: Number(repositoryId),
-                draftId: draftId ? Number(draftId) : null
+                draftId: draftId ? Number(draftId) : null,
+                diffId: diffId ? Number(diffId) : null
             };
 
             const res = await writeArticle(data);
@@ -152,19 +160,17 @@ export function WriteArticlePage() {
             const res = await saveDraft(data);
 
             console.log("💾 saveDraft 응답:", res);
-            console.log("💾 resultCode:", res?.resultCode);
-            console.log("💾 msg:", res?.msg);
-            console.log("💾 data1 (draftId):", res?.data1);
 
             if (res && res.resultCode && res.resultCode.startsWith("S-")) {
                 alert("임시저장 완료!");
 
-                // 새 글일 때 draftId 갱신 → update 모드로 전환
                 if (!draftId && res.data1) {
                     setDraftId(res.data1);
                 }
-
-                // 👉 작성 화면 그대로 유지 (router.push 제거)
+                if (res.data2) {
+                    setDiffId(res.data2);
+                    console.log("💾 diffId 세팅:", res.data2);
+                }
             } else {
                 console.error("❌ saveDraft 실패 응답:", res);
                 setError(res?.msg || "임시저장 실패");
@@ -180,9 +186,6 @@ export function WriteArticlePage() {
             setSubmitting(false);
         }
     };
-
-
-
 
     return (
 <>

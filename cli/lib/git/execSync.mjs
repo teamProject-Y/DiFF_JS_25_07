@@ -82,7 +82,7 @@ export async function DiFFinit(memberId, branch) {
 
 /** 코드 분석 **/
 // doAnalysis.js
-export async function doAnalysis(branch, memberId, draftId) {
+export async function doAnalysis(branch, memberId, draftId, diffId) {
     try {
         const lastChecksum = await getLastChecksum(branch);
         const repositoryId = await getRepositoryId(branch);
@@ -128,6 +128,7 @@ export async function doAnalysis(branch, memberId, draftId) {
             memberId,
             repositoryId,
             draftId,       // ✅ 여기 추가
+            diffId,
             lastChecksum,
         }));
 
