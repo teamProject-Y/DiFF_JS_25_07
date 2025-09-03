@@ -169,7 +169,7 @@ function ProfileInner() {
                 </div>
                 <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
 
-                <div className="flex w-full">
+                <div className="flex w-full dark:text-neutral-300">
 
                     <aside className="w-[20%] min-w-[180px] mx-8">
                         <div className="flex flex-col items-start">
@@ -262,17 +262,17 @@ function ProfileInner() {
                                                     }
                                                 }}
                                                 className={`py-1 text-sm rounded-full border transition w-20 
-                                                    ${ member.isFollowing
-                                                        ? hoverUnfollow
-                                                            ? "text-red-500 border hover:border-red-500"
-                                                            : "border text-gray-500 bg-gray-100 " +
-                                                              "dark:bg-neutral-800/40 dark:text-neutral-500 dark:border-neutral-700/80 "
-                                                        : "text-gray-700 border-gray-700 hover:bg-gray-100 " +
-                                                          "dark:hover:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-300"
-                                                    }`}
-                                                aria-label={ member.isFollowing
-                                                        ? (hoverUnfollow ? "Unfollow" : "Following")
-                                                        : "Follow"
+                                                    ${member.isFollowing
+                                                    ? hoverUnfollow
+                                                        ? "text-red-500 border hover:border-red-500"
+                                                        : "border text-gray-500 bg-gray-100 " +
+                                                        "dark:bg-neutral-800/40 dark:text-neutral-500 dark:border-neutral-700/80 "
+                                                    : "text-gray-700 border-gray-700 hover:bg-gray-100 " +
+                                                    "dark:hover:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-300"
+                                                }`}
+                                                aria-label={member.isFollowing
+                                                    ? (hoverUnfollow ? "Unfollow" : "Following")
+                                                    : "Follow"
                                                 }
                                             >
                                                 {member.isFollowing ? (hoverUnfollow ? "Unfollow" : "Following") : "Follow"}
@@ -350,63 +350,103 @@ function ProfileInner() {
                         onClick={() => setOpenModal(null)}
                     >
                         <div
-                            className="w-96 rounded-lg p-3 pb-5 shadow-lg z-[200]
-                            bg-white text-gray-800
-                            dark:bg-neutral-800 dark:text-neutral-300"
+                            className="w-96 rounded-lg border border-neutral-200 bg-white/80 p-3 pb-5 shadow-lg backdrop-blur
+                                     text-neutral-800
+                                     dark:border-neutral-800 dark:bg-neutral-950/40 dark:text-neutral-300"
                             onClick={(e) => e.stopPropagation()}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="connections-title"
                         >
-                            <div className="flex items-start justify-between">
-                                <h2 className="m-2 mb-4 text-lg font-bold">
-                                    {openModal === 'follower' ? 'Followers' : 'Followings'}
-                                </h2>
+                            {/* 헤더 */}
+                            <div className="mb-2 flex items-center justify-between">
+                                <h2 id="connections-title" className="m-2 text-lg font-semibold">Connections</h2>
                                 <button
                                     onClick={() => setOpenModal(null)}
-                                    className="text-gray-800 dark:text-neutral-300"
+                                    className="rounded-lg border border-neutral-300 px-3 py-1.5 text-sm text-neutral-700 transition
+                                        hover:bg-neutral-100/60 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-900/60"
                                 >
-                                    <i className="fa-solid fa-xmark"></i>
+                                    Close
                                 </button>
                             </div>
-                            <ul className="max-h-60 space-y-1 overflow-y-auto rounded
-                            border bg-gray-100 dark:border-neutral-700 dark:bg-neutral-900">
-                                {(openModal === 'follower' ? followerList : followingList)?.length ? (
-                                    (openModal === 'follower' ? followerList : followingList).map((u, idx) => {
-                                        const imgSrc =
-                                            (typeof u?.profileImg === 'string' && u.profileImg.trim()) ||
-                                            (typeof u?.profileUrl === 'string' && u.profileUrl.trim()) ||
-                                            null;
 
-                                        return (
-                                            <li key={u?.id ?? u?.nickName ?? idx}
-                                                className="flex items-center
-                                                            hover:bg-white/60 dark:hover:bg-neutral-800/60">
-                                                <Link
-                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? '')}`}
-                                                    className="w-full flex items-center gap-3 p-4"
+                            {/* 탭 */}
+                            <div className="mb-3 grid grid-cols-2 gap-1 rounded-lg border border-neutral-300 bg-neutral-100/60 p-1
+                                        dark:border-neutral-700 dark:bg-neutral-900/60">
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenModal('follower')}
+                                    className={`rounded-lg px-3 py-2 text-sm transition
+                                        ${openModal === 'follower'
+                                        ? 'bg-gray-900 text-neutral-100 dark:bg-neutral-300 dark:text-neutral-900'
+                                        : 'text-neutral-700 hover:bg-neutral-200/50 dark:text-neutral-300 dark:hover:bg-neutral-800/50'}`}
+                                    aria-pressed={openModal === 'follower'}
+                                >
+                                    Followers
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenModal('following')}
+                                    className={`rounded-lg px-3 py-2 text-sm transition
+                                        ${openModal === 'following'
+                                        ? 'bg-gray-900 text-neutral-100 dark:bg-neutral-300 dark:text-neutral-900'
+                                        : 'text-neutral-700 hover:bg-neutral-200/50 dark:text-neutral-300 dark:hover:bg-neutral-800/50'}`}
+                                    aria-pressed={openModal === 'following'}
+                                >
+                                    Following
+                                </button>
+                            </div>
+
+                            {/* 리스트 */}
+                            {(() => {
+                                const list = (openModal === 'follower' ? followerList : followingList) ?? [];
+
+                                return list.length > 0 ? (
+                                    <ul className="max-h-60 space-y-1 overflow-y-auto rounded-lg border border-neutral-200 bg-white/70
+                                                    dark:border-neutral-700 dark:bg-neutral-900/60">
+                                        {list.map((u, idx) => {
+                                            const imgSrc =
+                                                (typeof u?.profileImg === 'string' && u.profileImg.trim()) ||
+                                                (typeof u?.profileUrl === 'string' && u.profileUrl.trim()) ||
+                                                null;
+
+                                            return (
+                                                <li
+                                                    key={u?.id ?? u?.nickName ?? idx}
+                                                    className="flex items-center hover:bg-neutral-100/70 dark:hover:bg-neutral-800/60"
                                                 >
-                                                    {imgSrc ? (
-                                                        <img
-                                                            src={imgSrc}
-                                                            alt={u?.nickName || 'user'}
-                                                            className="h-8 w-8 rounded-full border object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div
-                                                            className="h-8 w-8 rounded-full border flex items-center justify-center
-                                                            bg-gray-100 border-gray-300
-                                                            dark:text-neutral-500 dark:bg-neutral-600 dark:border-neutral-700">
-                                                            <i className="fa-solid fa-skull"/>
-                                                        </div>
-                                                    )}
+                                                    <Link
+                                                        href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? '')}`}
+                                                        className="w-full flex items-center gap-3 p-4"
+                                                    >
+                                                        {imgSrc ? (
+                                                            <img
+                                                                src={imgSrc}
+                                                                alt={u?.nickName || 'user'}
+                                                                className="h-8 w-8 rounded-full border object-cover dark:border-neutral-700"
+                                                            />
+                                                        ) : (
+                                                            <div
+                                                                className="h-8 w-8 rounded-full border flex items-center justify-center
+                                                                   bg-gray-100 border-gray-300
+                                                                   dark:text-neutral-500 dark:bg-neutral-600 dark:border-neutral-700"
+                                                            >
+                                                                <i className="fa-solid fa-skull" />
+                                                            </div>
+                                                        )}
 
-                                                    <span>{u?.nickName}</span>
-                                                </Link>
-                                            </li>
-                                        );
-                                    })
+                                                        <span className="truncate">{u?.nickName}</span>
+                                                    </Link>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
                                 ) : (
-                                    <p className="text-sm text-gray-500">fasdfasjdlfkjasdlkfasf</p>
-                                )}
-                            </ul>
+                                    <p className="px-3 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                                        {openModal === 'follower' ? 'No followers yet.' : 'Not following anyone yet.'}
+                                    </p>
+                                );
+                            })()}
                         </div>
                     </div>
                 )}

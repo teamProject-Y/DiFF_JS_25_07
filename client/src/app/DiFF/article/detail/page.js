@@ -379,7 +379,7 @@ function ArticleDetailInner() {
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
     return (
-        <div className="w-full min-h-screen pt-6">
+        <div className="w-full min-h-screen pt-6 dark:text-neutral-300">
             <LoadingOverlay show={loading}/>
 
             {errMsg ? (

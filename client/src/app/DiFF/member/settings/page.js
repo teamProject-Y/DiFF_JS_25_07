@@ -43,8 +43,8 @@ function SettingsPage() {
     };
 
     const onClickRemove = () => {
-        setProfileUrl('');
-        setBanner({type: 'info', msg: '프로필 제거 로직 연결 예정'});
+        const res = uploadProfileImg(null);
+        return res === "이미지 제거 완료";
     };
 
     const onClickWithdraw = () => setConfirmOpen(true);
@@ -177,6 +177,7 @@ function SettingsPage() {
 
     const handleInput = (e) => {
         const textarea = textareaRef.current;
+        if (!textarea) return;
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
@@ -394,8 +395,7 @@ function SettingsPage() {
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-between text-xs text-neutral-500">
-                                    <div>⌘/Ctrl + Enter 로 저장</div>
+                                <div className="flex items-center justify-end text-xs text-neutral-500">
                                     <button
                                         type="submit"
                                         disabled={!dirtyIntro}
