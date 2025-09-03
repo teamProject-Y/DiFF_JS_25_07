@@ -12,8 +12,9 @@ import axios from "axios";
 // mkDraft 함수
 export async function mkDraft(memberId, branch, draftId, diffId) {
     console.log('🚀 mkDraft started...');
+
     const from = await getLastRequestChecksum(branch);
-    const to = await getLastChecksum(branch);
+    const to = await getLastChecksum(branch); // ✅ 최종 체크섬
     const diff = await getDiFF(from, to);
     const repositoryId = await getRepositoryId();
 
@@ -22,16 +23,19 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
         return null;
     }
 
-    console.log("✅ 최종 draftId:", draftId, "diffId:", diffId);
+    console.log("✅ 최종 draftId:", draftId, "diffId:", diffId, "checksum:", to);
 
-    // ✅ diffId도 서버에 같이 보내주자
+    // ✅ checksum도 서버에 같이 전송
     const ok = await sendDiFF(memberId, repositoryId, draftId, diffId, to, diff);
 
     if (ok) {
-        await updateMeta(branch, to);
-        await appendLogs(branch, from, to);
+        await updateMeta(branch, to);      // ✅ .DiFF/meta.json 갱신
+        await appendLogs(branch, from, to); // ✅ 로그 기록
     }
+
+    return ok ? { draftId, diffId, checksum: to } : null;
 }
+
 
 export async function createDraft(memberId, repositoryId) {
     try {
@@ -43,9 +47,9 @@ export async function createDraft(memberId, repositoryId) {
         console.log("📥 draft 생성 응답:", data);
 
         if (data.resultCode?.startsWith("S-")) {
-            const { draftId, diffId } = data.data;  // ✅ 구조분해 할당
+            const { draftId, diffId } = data.data1;  // ✅ data1 사용
             console.log(`✅ draft 생성 성공 → draftId=${draftId}, diffId=${diffId}`);
-            return { draftId, diffId };            // ✅ 객체 반환
+            return { draftId, diffId };
         } else {
             console.log("❌ draft 생성 실패:", data.msg);
             return null;

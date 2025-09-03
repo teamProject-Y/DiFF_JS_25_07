@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { createDraft, mkDraft,getRepositoryId } from "../lib/DiFF/draft.mjs";
 import { verifyGitUser } from '../lib/api/api.mjs';
 import {
-    existsGitDirectory, existsDiFF, DiFFinit, branchExists, doAnalysis
+    existsGitDirectory, existsDiFF, DiFFinit, branchExists, doAnalysis, getLastChecksum
 } from '../lib/git/execSync.mjs';
 import { runAnimation } from "../lib/util/interaction.mjs";
 
@@ -92,8 +92,12 @@ program
         }
 
         /** diff + draft 업데이트 **/
-        const draft = await mkDraft(memberId, selectedBranch, draftId, diffId);
+        /** diff + draft 업데이트 **/
+        const lastChecksum = await getLastChecksum(selectedBranch);
+
+        const draft = await mkDraft(memberId, selectedBranch, draftId, diffId, lastChecksum); // ✅ checksum 전달
         console.log(chalk.bgCyanBright(chalk.black("draft 생성 시작")));
+
 
         if (draft === null) {
             console.log(chalk.bgRedBright(chalk.black('fail to make draft.')));

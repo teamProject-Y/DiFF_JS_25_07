@@ -165,9 +165,12 @@ export function WriteArticlePage() {
     const [repositoryId, setRepositoryId] = useState(null);
     const [loadingRepos, setLoadingRepos] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [submittingType, setSubmittingType] = useState(null);
     const [error, setError] = useState('');
     const [repoError, setRepoError] = useState('');
     const [draftId, setDraftId] = useState(sp.get('draftId'));
+    const [diffId, setDiffId] = useState(null);
+
     // 로그인 체크
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -230,9 +233,19 @@ export function WriteArticlePage() {
     }, []);
 
     // 게시물 작성
+    // 게시물 작성
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        console.log("🚀 [handleSubmit] 실행됨");
+        console.log("📌 현재 상태:", {
+            repositoryId,
+            title,
+            bodyLength: body?.length,
+            draftId,
+            diffId
+        });
 
         if (!repositoryId) return setError('repositoryId가 없습니다.');
         if (!title.trim()) return setError('제목을 입력하세요.');
@@ -252,26 +265,43 @@ export function WriteArticlePage() {
                 diffId: diffId ? Number(diffId) : null
             };
 
+            console.log("📤 [handleSubmit] 서버로 보낼 data:", data);
+
             const res = await writeArticle(data);
 
-            console.log('📦 doWrite 응답:', res);
+            console.log("📥 [handleSubmit] 서버 응답 전체:", res);
 
             if (res?.resultCode?.startsWith('S-')) {
+                console.log("✅ [handleSubmit] 글 작성 성공 → 리스트 이동");
                 router.push(`/DiFF/article/list?repositoryId=${repositoryId}`);
             } else {
+                console.error("❌ [handleSubmit] 작성 실패 응답:", res);
                 setError(res?.msg || '작성 실패');
             }
         } catch (err) {
+            console.error("💥 [handleSubmit] 요청 실패", err);
+
+            if (err?.response) {
+                console.error("📥 서버 에러 응답:", err.response);
+                console.error("📥 서버 에러 data:", err.response.data);
+                console.error("📥 서버 에러 status:", err.response.status);
+                console.error("📥 서버 에러 headers:", err.response.headers);
+            } else {
+                console.error("📥 네트워크 에러 or axios 설정 문제:", err.message);
+            }
+
             if (err?.response?.status === 401) {
                 router.replace('/DiFF/member/login');
             } else {
-                setError(err?.response?.data?.msg || '요청 실패');
+                setError(err?.response?.data?.msg || err.message || '요청 실패');
             }
         } finally {
+            console.log("🔚 [handleSubmit] 종료 (submitting=false)");
             setSubmitting(false);
             setSubmittingType(null);
         }
     };
+
 
     const handleSaveDraft = async (e) => {
         e.preventDefault();

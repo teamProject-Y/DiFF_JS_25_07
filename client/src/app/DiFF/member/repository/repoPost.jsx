@@ -30,12 +30,13 @@ function PostCard({article}) {
             <div className="flex gap-6 text-sm text-gray-600 mb-3">
                 <span>view: {article.hits}</span>
                 <span>
-          <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
-        </span>
+        <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
+    </span>
                 <span>
-          <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
-        </span>
+        <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
+    </span>
             </div>
+
 
             {/* ✨ 분석 점수 + 등급 */}
             {analysis && (

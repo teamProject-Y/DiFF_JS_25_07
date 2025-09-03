@@ -68,9 +68,9 @@ export async function mkRepo(memberId, repoName, commitHash){
 
 
 
-export async function sendDiFF(memberId, repositoryId, draftId, diffId, to, diff) {
+export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     try {
-        console.log(chalk.bgCyanBright("sendDiFF 호출"));
+        console.log("🚀 sendDiFF 호출");
 
         const { data } = await axios.post(
             "http://localhost:8080/api/DiFF/draft/receiveDiff",
@@ -78,17 +78,17 @@ export async function sendDiFF(memberId, repositoryId, draftId, diffId, to, diff
                 memberId,
                 repositoryId,
                 draftId,
-                diffId,          // ✅ 추가
-                lastChecksum: to,
+                diffId,
+                lastChecksum: checksum, // ✅ 체크섬 같이 보냄
                 diff,
             }
         );
 
         if (data.resultCode?.startsWith("S-")) {
-            console.log("✅ server에 diff 보내기 성공");
+            console.log("✅ server에 diff 보내기 성공:", data.msg);
             return true;
         } else {
-            console.log("❌ server에 diff 보내기 실패:", data.msg);
+            console.error("❌ server에 diff 보내기 실패:", data.msg);
             return false;
         }
     } catch (error) {
