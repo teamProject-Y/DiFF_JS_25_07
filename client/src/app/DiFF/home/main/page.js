@@ -111,6 +111,7 @@ function parseJwt(token) {
 import BeforeMainPage from './BeforeMainPage';
 import AfterMainPage from './AfterMainPage';
 import removeMd from "remove-markdown";
+import BeforeExplain from "@/common/anime/beforeExplain";
 
 function extractFirstImage(body) {
     if (!body) return null;
@@ -208,6 +209,8 @@ export default function Page() {
 
                 </div>
                 <div className="h-1/2">
+
+                        <BeforeExplain containerId="pageScroll" />
 
                 </div>
             </div>
