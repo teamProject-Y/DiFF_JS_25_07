@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { increaseArticleHits, searchArticles } from '@/lib/ArticleAPI';
-import {searchMembers } from '@/lib/UserAPI';
+import {useEffect, useState} from 'react';
+import {useSearchParams, useRouter} from 'next/navigation';
+import {increaseArticleHits, searchArticles} from '@/lib/ArticleAPI';
+import {searchMembers} from '@/lib/UserAPI';
 import Link from 'next/link';
 
 function extractFirstImage(markdown) {
@@ -67,25 +67,25 @@ export default function SearchPage() {
     }, [keyword]);
 
     return (
-        <div className="w-full min-h-screen overflow-auto">
+        <div className="w-full min-h-full overflow-auto">
             <div className="h-screen">
                 <div className="mx-auto px-32 flex">
                     <main className="flex-grow">
                         {/* 타이틀 */}
-                        <h1 className="text-2xl font-bold mb-4 text-gray-500">
-                            Showing Results for <span className="text-black">"{keyword}"</span>
+                        <h1 className="text-2xl font-bold my-4 text-gray-500 dark:text-neutral-500">
+                            Showing Results for <span className="text-black dark:text-neutral-300">"{keyword}"</span>
                         </h1>
 
                         {/* 탭 버튼 */}
-                        <div className="flex items-center border-b ">
+                        <div className="flex items-center border-b dark:border-neutral-700">
                             {['Article', 'Profile'].map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setActiveTab(t)}
                                     className={`p-4 -mb-px ${
                                         activeTab === t
-                                            ? 'border-b-2 border-black font-semibold'
-                                            : 'text-gray-500'
+                                            ? "border-b-2 font-semibold border-black dark:border-neutral-400 dark:text-neutral-300"
+                                            : "text-gray-500 dark:text-neutral-600"
                                     }`}
                                 >
                                     {t}
@@ -95,7 +95,7 @@ export default function SearchPage() {
 
                         {/* 로딩 상태 */}
                         {loading ? (
-                            <p>검색 중...</p>
+                            <p>Searching...</p>
                         ) : activeTab === 'Article' ? (
                             articles.length > 0 ? (
                                 articles.map((article) => {
@@ -103,21 +103,21 @@ export default function SearchPage() {
                                     return (
                                         <div
                                             key={article.id}
-                                            className="block cursor-pointer"
+                                            className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                             onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
-                                                className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                                {/* 왼쪽: 텍스트 */}
+                                                className="flex h-52 border-b p-4 justify-center items-center transition
+                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm ">
                                                         in Search · by{' '}
                                                         {article.extra__writer ? (
                                                             <Link
                                                                 href={`/DiFF/member/profile?nickName=${encodeURIComponent(
                                                                     article.extra__writer
                                                                 )}`}
-                                                                className="hover:underline hover:text-black cursor-pointer"
+                                                                className="hover:underline cursor-pointer hover:text-black dark:hover:text-neutral-200"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {article.extra__writer}
@@ -126,15 +126,13 @@ export default function SearchPage() {
                                                             'Unknown'
                                                         )}
                                                     </div>
-                                                    <div className="py-2 flex-grow text-black">
-                                                        <h2 className="text-2xl py-2 font-black">
-                                                            {article.title}
-                                                        </h2>
-                                                        <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
-                                                            {article.body ? removeMd(article.body) : ''}
+                                                    <div className="py-2 flex-grow">
+                                                        <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">{article.title}</h2>
+                                                        <p className="clamp-2 text-sm  overflow-hidden">
+                                                            {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                    <div className="flex items-center gap-4 text-sm">
                                                     <span>
                                                         {new Date(article.regDate).toLocaleDateString(
                                                             'en-US',
@@ -153,9 +151,10 @@ export default function SearchPage() {
                                                     </div>
                                                 </div>
 
-                                                {/* 오른쪽: 이미지 */}
+                                                {/* 이미지 */}
                                                 <div
-                                                    className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700
+                                                    rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
                                                         <img
                                                             src={imgSrc}
@@ -163,7 +162,8 @@ export default function SearchPage() {
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <span className="text-gray-400">No Image</span>
+                                                        <span
+                                                            className="dark:text-neutral-400 text-gray-400">No Image</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -177,34 +177,36 @@ export default function SearchPage() {
                             members.map((m) => (
                                 <li
                                     key={m.id}
-                                    className="flex items-center gap-4 p-6 border-b"
+                                    className="border-b dark:border-neutral-700"
                                 >
-                                    {/* 프로필 이미지 */}
-                                    {m.profileUrl ? (
-                                        <img
-                                            src={m.profileUrl}
-                                            alt={m.nickName}
-                                            className="w-16 h-16 rounded-full object-cover border"
-                                        />
-                                    ) : (
-                                        <div
-                                            className="w-16 h-16 rounded-full flex items-center justify-center bg-gray-100 text-4xl">
-                                            <i className="fa-solid fa-skull"></i>
-                                        </div>
-                                    )}
+                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(
+                                            m.nickName)}`}
+                                        className="flex items-center gap-4 p-6">
+                                        {/* 프로필 이미지 */}
+                                        {m.profileUrl ? (
+                                            <img
+                                                src={m.profileUrl}
+                                                alt={m.nickName}
+                                                className="w-16 h-16 rounded-full object-cover border"
+                                            />
+                                        ) : (
+                                            <div
+                                                className="w-16 h-16 rounded-full flex items-center justify-center text-4xl
+                                            bg-gray-100 dark:text-neutral-500 dark:bg-neutral-600 dark:border-neutral-700">
+                                                <i className="fa-solid fa-skull "></i>
+                                            </div>
+                                        )}
 
-                                    {/* 닉네임 + 이메일 */}
-                                    <div className="ml-4">
-                                        <Link
-                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(
-                                                m.nickName
-                                            )}`}
-                                            className="text-xl font-bold"
-                                        >
-                                            {m.nickName}
-                                        </Link>
-                                        <p className="text-sm text-gray-600">{m.email}</p>
-                                    </div>
+                                        {/* 닉네임 + 이메일 */}
+                                        <div className="ml-4">
+                                            <div
+                                                className="text-xl font-bold dark:text-neutral-300"
+                                            >
+                                                {m.nickName}
+                                            </div>
+                                            <p className="text-sm text-gray-600 dark:text-neutral-500">{m.email}</p>
+                                        </div>
+                                    </Link>
                                 </li>
                             ))
                         ) : (

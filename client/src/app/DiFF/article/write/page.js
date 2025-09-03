@@ -1,18 +1,152 @@
 // src/app/DiFF/article/write/page.js
 'use client';
-import {getDraftById, saveDraft} from "@/lib/DraftAPI";
-import {Suspense, useEffect, useState, useCallback, useRef} from 'react';
-import {useRouter, useSearchParams} from 'next/navigation';
-import {writeArticle, getMyRepositories} from '@/lib/ArticleAPI';
+import { getDraftById, saveDraft } from "@/lib/DraftAPI";
+import { Suspense, useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { writeArticle, getMyRepositories } from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
+import clsx from "clsx";
 
-const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
 
+function RepoDropdown({ items = [], value, onChange }) {
+    const [open, setOpen] = useState(false);
+    const btnRef = useRef(null);
+    const menuRef = useRef(null);
+
+    const selected = useMemo(
+        () => items.find((r) => Number(r.id) === Number(value)),
+        [items, value]
+    );
+
+    const label = selected
+        ? (selected.name || selected.repoName || `Repo#${selected.id}`)
+        : "Select a repository";
+
+    // 외부 클릭으로 닫기
+    useEffect(() => {
+        function onDocClick(e) {
+            if (!open) return;
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target) &&
+                btnRef.current &&
+                !btnRef.current.contains(e.target)
+            ) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", onDocClick);
+        return () => document.removeEventListener("mousedown", onDocClick);
+    }, [open]);
+
+    // 키보드 접근성
+    const onKeyDown = useCallback(
+        (e) => {
+            if (!open && (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ")) {
+                e.preventDefault();
+                setOpen(true);
+                return;
+            }
+            if (!open) return;
+
+            const options = Array.from(menuRef.current?.querySelectorAll("[role='option']") || []);
+            const currentIndex = options.findIndex((el) => el === document.activeElement);
+            if (e.key === "Escape") {
+                e.preventDefault();
+                setOpen(false);
+                btnRef.current?.focus();
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                const next = options[Math.min(currentIndex + 1, options.length - 1)] || options[0];
+                next?.focus();
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                const prev = options[Math.max(currentIndex - 1, 0)] || options[options.length - 1];
+                prev?.focus();
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                const id = document.activeElement?.getAttribute("data-value");
+                if (id != null) {
+                    onChange?.(id);
+                    setOpen(false);
+                    btnRef.current?.focus();
+                }
+            }
+        },
+        [open, onChange]
+    );
+
+    return (
+        <div className="relative" onKeyDown={onKeyDown}>
+            {/* 트리거 버튼 */}
+            <button
+                type="button"
+                ref={btnRef}
+                onClick={() => setOpen((v) => !v)}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                className="
+                  w-full rounded border px-4 py-3 text-left text-sm
+                  border-neutral-300 bg-neutral-100/70 text-neutral-900
+                  outline-none transition hover:bg-neutral-100 focus:border-neutral-600
+                  pr-10
+                  dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-100
+                "
+            >
+                {label}
+                <i className="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
+            </button>
+
+            {/* 드롭다운 메뉴 */}
+            {open && (
+                <ul
+                    ref={menuRef}
+                    role="listbox"
+                    className="
+                        absolute right-0 top-full mt-1 w-full
+                        rounded border border-neutral-200 bg-gray-50 backdrop-blur
+                        shadow-lg z-50 max-h-60 overflow-auto
+                        dark:border-neutral-700 dark:bg-neutral-900
+                      "
+                >
+                    {items.map((r) => {
+                        const id = String(r.id);
+                        const text = r.name || r.repoName || `Repo#${r.id}`;
+                        const isSelected = String(value) === id;
+                        return (
+                            <li
+                                key={id}
+                                role="option"
+                                aria-selected={isSelected}
+                                tabIndex={0}
+                                data-value={id}
+                                onClick={() => {
+                                    onChange?.(id);
+                                    setOpen(false);
+                                    btnRef.current?.focus();
+                                }}
+                                className={`
+                                      flex cursor-pointer items-center justify-between px-3 py-2 text-sm
+                                      text-neutral-800 dark:text-neutral-200 
+                                      ${isSelected ? "font-medium bg-neutral-200 dark:bg-neutral-700" 
+                                    : "hover:bg-neutral-100 dark:hover:bg-neutral-800"}
+                                    `}
+                            >
+                                <span className="truncate">{text}</span>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+        </div>
+    );
+}
 
 export default function Page() {
     return (
         <Suspense fallback={<div className="p-4">Loading…</div>}>
-            <WriteArticlePage/>
+            <WriteArticlePage />
         </Suspense>
     );
 }
@@ -31,9 +165,11 @@ export function WriteArticlePage() {
     const [repositoryId, setRepositoryId] = useState(null);
     const [loadingRepos, setLoadingRepos] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [submittingType, setSubmittingType] = useState(null); // 'upload' | 'save' | null
     const [error, setError] = useState('');
     const [repoError, setRepoError] = useState('');
     const [draftId, setDraftId] = useState(sp.get('draftId'));
+
     // 로그인 체크
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -100,6 +236,7 @@ export function WriteArticlePage() {
 
         try {
             setSubmitting(true);
+            setSubmittingType('upload');
             const checksum = await makeChecksum(body);
 
             const data = {
@@ -111,9 +248,6 @@ export function WriteArticlePage() {
             };
 
             const res = await writeArticle(data);
-
-            console.log('📦 doWrite 응답:', res);
-
             if (res?.resultCode?.startsWith('S-')) {
                 router.push(`/DiFF/article/list?repositoryId=${repositoryId}`);
             } else {
@@ -127,6 +261,7 @@ export function WriteArticlePage() {
             }
         } finally {
             setSubmitting(false);
+            setSubmittingType(null);
         }
     };
 
@@ -139,6 +274,7 @@ export function WriteArticlePage() {
 
         try {
             setSubmitting(true);
+            setSubmittingType('save');
             const checksum = await makeChecksum(body);
 
             const data = {
@@ -151,26 +287,13 @@ export function WriteArticlePage() {
 
             const res = await saveDraft(data);
 
-            console.log("💾 saveDraft 응답:", res);
-            console.log("💾 resultCode:", res?.resultCode);
-            console.log("💾 msg:", res?.msg);
-            console.log("💾 data1 (draftId):", res?.data1);
-
             if (res && res.resultCode && res.resultCode.startsWith("S-")) {
-                alert("임시저장 완료!");
-
                 // 새 글일 때 draftId 갱신 → update 모드로 전환
-                if (!draftId && res.data1) {
-                    setDraftId(res.data1);
-                }
-
-                // 👉 작성 화면 그대로 유지 (router.push 제거)
+                if (!draftId && res.data1) setDraftId(res.data1);
             } else {
-                console.error("❌ saveDraft 실패 응답:", res);
                 setError(res?.msg || "임시저장 실패");
             }
         } catch (err) {
-            console.error("💥 saveDraft error:", err);
             if (err?.response?.status === 401) {
                 router.replace("/DiFF/member/login");
             } else {
@@ -178,98 +301,152 @@ export function WriteArticlePage() {
             }
         } finally {
             setSubmitting(false);
+            setSubmittingType(null);
         }
     };
 
-
-
-
     return (
-<>
-        <div>
-            <button
-                onClick={() => router.push('/DiFF/member/repository')}
-            >
-                <i className="fa-solid fa-angle-left"></i>
-            </button>
-        </div>
-
-    <div className="container mx-auto mt-8 p-6 w-4/5 border border-neutral-300 rounded-xl">
-
-
-            {/* 리포지토리 선택 */}
-            <div className="mb-4">
-                <label className="block text-sm text-gray-600 mb-1">작성할 리포지토리</label>
-
-                {loadingRepos ? (
-                    <div className="text-sm text-gray-500">리포지토리 불러오는 중…</div>
-                ) : repoError ? (
-                    <div className="text-sm text-red-600">{repoError}</div>
-                ) : repos.length === 0 ? (
-                    <div className="text-sm text-red-600">내 리포지토리가 없습니다. 먼저 리포지토리를 생성하세요.</div>
-                ) : (
-                    <select
-                        className="w-full border p-2 rounded"
-                        value={repositoryId ?? ''}
-                        onChange={(e) => setRepositoryId(Number(e.target.value))}
-                    >
-                        {repos.map((r) => (
-                            <option key={r.id} value={r.id}>
-                                {r.name || r.repoName || `Repo#${r.id}`}
-                            </option>
-                        ))}
-                    </select>
-                )}
+        <div className="min-h-screen w-full">
+            {/* 상단 바/뒤로가기 */}
+            <div className="mx-auto max-w-5xl px-4 pt-6">
+                <button
+                    onClick={() => router.push('/DiFF/member/repository')}
+                    className="inline-flex items-center gap-2 rounded border border-neutral-300 bg-white/70 px-3 py-2 text-sm text-neutral-700 backdrop-blur transition hover:bg-white/90 dark:border-neutral-700 dark:bg-neutral-950/30 dark:text-neutral-300 dark:hover:bg-neutral-900/60"
+                >
+                    <i className="fa-solid fa-angle-left" />
+                    <span>Back to Repositories</span>
+                </button>
             </div>
 
-            {/* 작성 폼 */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* 카드 */}
+            <div className="mx-auto max-w-5xl px-4 pb-12 pt-6">
+                <div className="rounded-2xl border border-neutral-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/30">
+                    {/* 헤더 */}
+                    <div className="mb-6 flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-semibold tracking-tight">Write Article</h1>
+                            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                Select a repository, then add a title and content.
+                            </p>
+                        </div>
+                        {draftId && (
+                            <span className="rounded-full border border-neutral-300 px-3 py-1 text-xs text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">
+                                Draft #{draftId}
+                            </span>
+                        )}
+                    </div>
 
-                {/* 제목 */}
-                <input
-                    className="w-full border p-2 rounded"
-                    placeholder="제목"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
+                    <div className="mb-5">
+                        <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                            Repository
+                        </label>
 
-                {/* 본문 */}
-                <ToastEditor initialValue={body} onChange={setBody}/>
+                        {loadingRepos ? (
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-full animate-pulse rounded bg-neutral-200/70 dark:bg-neutral-800/70" />
+                                <div className="h-10 w-24 animate-pulse rounded bg-neutral-200/70 dark:bg-neutral-800/70" />
+                            </div>
+                        ) : repoError ? (
+                            <div className="rounded border border-red-300/60 bg-red-50/50 px-3 py-2 text-sm text-red-700 dark:border-red-800/70 dark:bg-red-950/30 dark:text-red-300">
+                                {repoError}
+                            </div>
+                        ) : repos.length === 0 ? (
+                            <div className="rounded border border-yellow-300/60 bg-yellow-50/50 px-3 py-2 text-sm text-yellow-800 dark:border-yellow-800/70 dark:bg-yellow-950/30 dark:text-yellow-300">
+                                You don’t have any repositories. Please create one first.
+                            </div>
+                        ) : (
+                            <RepoDropdown
+                                items={repos}
+                                value={repositoryId}
+                                onChange={(v) => setRepositoryId(Number(v))}
+                            />
+                        )}
+                    </div>
 
-                {repositoryId && <div className="text-sm text-gray-600">repositoryId: {repositoryId}</div>}
-                {error && <div className="text-sm text-red-600">{error}</div>}
+                    {/* 작성 폼 */}
+                    <form onSubmit={handleSubmit} className="space-y-5" aria-live="polite">
+                        {/* 제목 */}
+                        <div>
+                            <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                Title
+                            </label>
+                            <input
+                                className="w-full rounded border border-neutral-300 bg-neutral-100/70 px-4 py-3 text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-600 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-100"
+                                placeholder="제목"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </div>
 
-                {/* 버튼들 */}
-                <div className="flex justify-between text-center">
-                    <button
-                        type="submit"
-                        disabled={submitting || !repositoryId}
-                        className={`px-6 py-2 text-white rounded ${submitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-500'}`}
-                    >
-                        {submitting ? '업로드 중...' : '작성하기'}
-                    </button>
+                        {/* 본문 */}
+                        <div className="space-y-2">
+                            <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                Content
+                            </label>
+                            <div className="rounded border border-neutral-300 bg-neutral-100/50 p-2 dark:border-neutral-700 dark:bg-neutral-900/40">
+                                <ToastEditor initialValue={body} onChange={setBody} />
+                            </div>
+                        </div>
 
-                    <button
-                        type="button"
-                        onClick={handleSaveDraft}
-                        disabled={submitting || !repositoryId}
-                        className={`px-6 py-2 text-white rounded ${
-                            submitting ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-500'
-                        }`}
-                    >
-                        {submitting ? '저장 중...' : '임시저장'}
-                    </button>
+                        {/* 상태 메시지 */}
+                        <div className="min-h-[1rem]">
+                            {error && (
+                                <div className="mt-2 px-3 py-2 text-sm text-red-500">
+                                    {error}
+                                </div>
+                            )}
+                        </div>
 
-                    <button
-                        type="button"
-                        onClick={() => router.push('/DiFF/article/drafts')}
-                        className="px-6 py-2 text-white rounded bg-gray-600 hover:bg-gray-500"
-                    >
-                        임시저장 글로 가기
-                    </button>
+                        {/* 버튼들 */}
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex gap-2">
+                                {/* Upload (Primary) */}
+                                <button
+                                    type="submit"
+                                    disabled={submitting || !repositoryId}
+                                    className={clsx(
+                                        "group relative inline-flex items-center justify-center gap-2 rounded border px-5 py-2.5 text-sm font-medium transition-all",
+                                        "border-neutral-300 bg-neutral-900 text-neutral-100 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]",
+                                        "disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-100 dark:text-neutral-900"
+                                    )}
+                                >
+                                    {submitting && submittingType === 'upload' && (
+                                        <span className="inline-block h-4 w-4 animate-spin rounded-full border border-neutral-500 border-t-transparent dark:border-neutral-400 dark:border-t-transparent" />
+                                    )}
+                                    {submitting && submittingType === 'upload' ? 'Uploading…' : 'Upload'}
+                                </button>
+
+                                {/* Save Draft (Outline) */}
+                                <button
+                                    type="button"
+                                    onClick={handleSaveDraft}
+                                    disabled={submitting || !repositoryId}
+                                    className={clsx(
+                                        "relative inline-flex items-center justify-center gap-2 rounded border px-5 py-2.5 text-sm font-medium transition-all",
+                                        "border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100/60",
+                                        "disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-900/60"
+                                    )}
+                                >
+                                    {submitting && submittingType === 'save' && (
+                                        <span className="inline-block h-4 w-4 animate-spin rounded-full border border-neutral-500 border-t-transparent dark:border-neutral-400 dark:border-t-transparent" />
+                                    )}
+                                    {submitting && submittingType === 'save' ? 'Saving…' : 'Save'}
+                                </button>
+                            </div>
+
+                            {/* Go to drafts (Ghost) */}
+                            <button
+                                type="button"
+                                onClick={() => router.push('/DiFF/article/drafts')}
+                                className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm text-neutral-600 hover:text-neutral-800 hover:underline dark:text-neutral-400 dark:hover:text-neutral-200"
+                            >
+                                <i className="fa-regular fa-file-lines" />
+                                Drafts
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
-</>
     );
 }
