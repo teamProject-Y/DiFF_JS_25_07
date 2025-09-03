@@ -222,18 +222,15 @@ export default function RepositoriesPage() {
     return (
         <LayoutGroup>
             <section className="px-4">
-
                 <div className="mx-auto max-w-6xl h-full">
-                    <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
-
-                        <Link href={profileHref} className="text-gray-400 hover:text-gray-700">Profile</Link>
-                        <span>Repositories</span>
+                    <div className="flex items-center text-gray-500">
+                        <Link href={profileHref} className="p-4 -mb-px">Profile</Link>
+                        <span className="text-black p-4 -mb-px font-semibold border-b-2 border-black">Repositories</span>
                         {isMyRepos &&
-                            <Link href="/DiFF/member/settings" className="text-gray-400 hover:text-gray-700">
+                            <Link href="/DiFF/member/settings" className="p-4 -mb-px">
                                 Settings
                             </Link>
                         }
-
                     </div>
                     <div className="h-px w-full bg-gray-300 mb-8"/>
 

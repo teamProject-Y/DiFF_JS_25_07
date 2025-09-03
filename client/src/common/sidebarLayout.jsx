@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 export default function SidebarLayout({ children }) {
-    const [show, setShow] = useState(false); // 기본 숨김(깜빡임 방지)
+    const [show, setShow] = useState(false);
 
     useEffect(() => {
         try {
@@ -16,8 +16,8 @@ export default function SidebarLayout({ children }) {
     if (!show) return null;
     return <aside className="
         w-56 shrink-0
-        border-r bg-white/90 backdrop-blur
-        sticky top-20
+        border-r bg-white/90 backdrop-blur sticky top-20
+        dark:border-neutral-700 dark:bg-neutral-900/90
         h-[calc(100vh-80px)]
       ">{children}</aside>;
 }

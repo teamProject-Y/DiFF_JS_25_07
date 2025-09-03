@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require("tailwindcss");
 module.exports = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",  // ← app/ 포함
@@ -7,7 +8,10 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require("daisyui")],       // ← daisyUI 활성화
-  // optional: daisyUI 테마 고정 원하면
-  // daisyui: { themes: ["light"] },
+  plugins: [
+      require("daisyui"),
+    plugin(function ({ addVariant, e }) {
+      addVariant('autofill', '&:-webkit-autofill')
+      addVariant('dark-autofill', '.dark &:-webkit-autofill')
+    }),],
 };

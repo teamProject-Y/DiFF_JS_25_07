@@ -3,10 +3,13 @@ import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getFollowingList } from "@/lib/UserAPI";
+import { useRouter } from "next/navigation"
+
 
 export default function LayMenu() {
     const [following, setFollowing] = useState([]);
     const pathname = usePathname();
+    const router = useRouter();
 
     useEffect(() => {
         getFollowingList()
@@ -30,8 +33,8 @@ export default function LayMenu() {
     return (
         <nav className="top-20 h-[calc(100vh-80px)] mx-auto max-w-7xl flex justify-around">
             {/* 왼쪽 메뉴 */}
-            <aside className="py-3 px-8 w-64">
-                <nav className="space-y-2 text-gray-600 mb-6">
+            <aside className="py-3 w-64">
+                <nav className=" text-gray-600 mb-6">
                     {menuItems.map(({ href, label }) => {
                         const isActive =
                             pathname === href || pathname?.startsWith(href + "/");
@@ -41,10 +44,10 @@ export default function LayMenu() {
                                 key={href}
                                 href={href}
                                 className={[
-                                    "block py-2 transition-colors hover:bg-gray-100",
+                                    "block py-3 px-8 transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800",
                                     isActive
-                                        ? "text-black font-semibold"
-                                        : ""
+                                        ? "font-semibold text-black dark:text-neutral-200"
+                                        : "dark:text-neutral-500"
                                 ].join(" ")}
                             >
                                 {label}
@@ -52,21 +55,22 @@ export default function LayMenu() {
                         );
                     })}
                 </nav>
-                <hr/>
+                <hr className="dark:border-neutral-700 mx-5" />
 
                 {/* Following 목록 */}
                 <div className="pt-6 text-sm text-gray-500">
-                    <div className="font-semibold mb-3 text-gray-600">Following</div>
+                    <div className="font-semibold mb-3 px-8 text-gray-600 dark:text-neutral-200">Following</div>
                     {following.length > 0 ? (
-                        <ul className="space-y-2">
+                        <ul className="">
                             {following.map((f, idx) => (
-                                <li key={idx}>
-                                    <Link
-                                        href={`/DiFF/member/profile?nickName=${encodeURIComponent(f.nickName)}`}
-                                        className="hover:underline"
-                                    >
+                                <li key={idx}
+                                    role="link"
+                                    tabIndex={0}
+                                    onClick={() => router.push(`/DiFF/member/profile?nickName=${f.nickName}`)}
+                                    onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(href)}
+                                    className="px-9 py-1 hover:underline dark:text-neutral-300
+                                    cursor-pointer">
                                         {f.nickName}
-                                    </Link>
                                 </li>
                             ))}
                         </ul>

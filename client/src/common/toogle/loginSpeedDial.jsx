@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "@/common/thema";
 
 /**
  * 라이브러리 없는 FAB Speed-Dial
@@ -82,7 +83,7 @@ export default function LoginSpeedDial ({
                                     setOpen(false);
                                 }}
                                 bgClass="bg-indigo-500 hover:bg-indigo-600"
-                                icon={<i className="fa-solid fa-moon text-white" aria-hidden="true" />}
+                                icon={<ThemeToggle />}
                             />
                         </motion.ul>
                     )}

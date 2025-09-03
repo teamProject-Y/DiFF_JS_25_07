@@ -72,20 +72,20 @@ export default function AfterMainPage({me, trendingArticles}) {
     };
 
     return (
-        <div className="w-full min-h-screen bg-white text-black">
-            <div className="h-screen">
-                <div className="mx-auto px-36 flex">
+        <div className="w-full min-h-screen bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">
+            <div className="pb-20">
+                <div className="mx-auto px-32 flex">
                     <main className="flex-grow">
                         {/* 탭 버튼 */}
-                        <div className="flex items-center border-b">
+                        <div className="flex items-center border-b dark:border-neutral-700">
                             {["Trending", "Following"].map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setActiveTab(t)}
                                     className={`p-4 -mb-px ${
                                         activeTab === t
-                                            ? "border-b-2 border-black font-semibold"
-                                            : "text-gray-500"
+                                            ? "border-b-2 font-semibold border-black dark:border-neutral-400"
+                                            : "text-gray-500 dark:text-neutral-600"
                                     }`}
                                 >
                                     {t}
@@ -101,18 +101,19 @@ export default function AfterMainPage({me, trendingArticles}) {
                                     return (
                                         <div
                                             key={idx}
-                                            className="block cursor-pointer"
+                                            className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                             onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
-                                                className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
+                                                className="flex h-52 border-b p-4 justify-center items-center transition
+                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm ">
                                                         in Trending · by{" "}
                                                         {article.extra__writer ? (
                                                             <Link
                                                                 href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                                className="hover:underline hover:text-black cursor-pointer"
+                                                                className="hover:underline cursor-pointer hover:text-black dark:hover:text-neutral-200"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {article.extra__writer}
@@ -122,12 +123,12 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                         )}
                                                     </div>
                                                     <div className="py-2 flex-grow">
-                                                        <h2 className="text-2xl py-2 font-black">{article.title}</h2>
-                                                        <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
+                                                        <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">{article.title}</h2>
+                                                        <p className="clamp-2 text-sm  overflow-hidden">
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                    <div className="flex items-center gap-4 text-sm ">
                                                             <span>{new Date(article.regDate).toLocaleDateString("en-US", {
                                                                 year: "numeric",
                                                                 month: "short",
@@ -141,7 +142,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                     </div>
                                                 </div>
                                                 <div
-                                                    className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700
+                                                    rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
                                                         <img
                                                             src={imgSrc}
@@ -149,7 +151,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <span className="text-gray-400">No Image</span>
+                                                        <span className="dark:text-neutral-400 text-gray-400">No Image</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -157,7 +159,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                     );
                                 })
                             ) : (
-                                <div>트렌딩 게시물이 없습니다.</div>
+                                <div>No trending posts.</div>
                             )
                         )}
 
@@ -171,18 +173,19 @@ export default function AfterMainPage({me, trendingArticles}) {
                                     return (
                                         <div
                                             key={idx}
-                                            className="block cursor-pointer"
+                                            className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                             onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
-                                                className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
+                                                className="flex h-52 border-b p-4 justify-center items-center transition
+                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm ">
                                                         in Following · by{" "}
                                                         {article.extra__writer ? (
                                                             <Link
                                                                 href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                                className="hover:underline hover:text-black cursor-pointer"
+                                                                className="hover:underline cursor-pointer hover:text-black dark:hover:text-neutral-200"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {article.extra__writer}
@@ -192,12 +195,12 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                         )}
                                                     </div>
                                                     <div className="py-2 flex-grow">
-                                                        <h2 className="text-2xl py-2 font-black">{article.title}</h2>
-                                                        <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
+                                                        <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">{article.title}</h2>
+                                                        <p className="clamp-2 text-sm  overflow-hidden">
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                    <div className="flex items-center gap-4 text-sm ">
                                                             <span>{new Date(article.regDate).toLocaleDateString("en-US", {
                                                                 year: "numeric",
                                                                 month: "short",
@@ -211,7 +214,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                     </div>
                                                 </div>
                                                 <div
-                                                    className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700
+                                                    rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
                                                         <img
                                                             src={imgSrc}
@@ -219,7 +223,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <span className="text-gray-400">No Image</span>
+                                                        <span className="dark:text-neutral-400 text-gray-400">No Image</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -227,16 +231,14 @@ export default function AfterMainPage({me, trendingArticles}) {
                                     );
                                 })
                             ) : (
-                                <div>팔로잉한 사람이 작성한 게시물이 없습니다.</div>
+                                <div>No posts from people you follow.</div>
                             )
                         )}
 
-                        {/* toogle menu (로그인 후 전용) */}
                         <LoginSpeedDial
                             writeHref="/DiFF/article/write"
                             draftsHref="/DiFF/article/drafts"
                             onToggleTheme={() => {
-                                // 다크모드 토글 로직 연결
                                 document.documentElement.classList.toggle("dark");
                                 localStorage.theme =
                                     document.documentElement.classList.contains("dark")

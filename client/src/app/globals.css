@@ -338,4 +338,16 @@ li {
     .scrollbar-none::-webkit-scrollbar {
         display: none; /* Chrome, Safari */
     }
+    /*.autofill-fix:-webkit-autofill {*/
+    /*    -webkit-text-fill-color: rgb(17,24,39);*/
+    /*    -webkit-box-shadow: 0 0 0 9999px rgb(250,250,250) inset;*/
+    /*}*/
+    /*@media (prefers-color-scheme: dark) {*/
+    /*    .dark\:autofill-fix:-webkit-autofill {*/
+    /*        -webkit-text-fill-color: #fff;*/
+    /*        -webkit-box-shadow: 0 0 0 9999px rgb(66,66,66) inset;*/
+    /*    }*/
+    /*}*/
 }
+
+

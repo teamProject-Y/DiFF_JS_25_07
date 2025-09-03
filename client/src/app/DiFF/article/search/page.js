@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { increaseArticleHits, searchArticles } from '@/lib/ArticleAPI';
-import { followMember, unfollowMember, searchMembers, getFollowingList } from '@/lib/UserAPI';
+import {useEffect, useState} from 'react';
+import {useSearchParams, useRouter} from 'next/navigation';
+import {increaseArticleHits, searchArticles} from '@/lib/ArticleAPI';
+import {searchMembers} from '@/lib/UserAPI';
 import Link from 'next/link';
 
 function extractFirstImage(markdown) {
@@ -31,6 +31,7 @@ export default function SearchPage() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Article');
 
+
     const handleArticleClick = async (id) => {
         try {
             await increaseArticleHits(id);
@@ -46,8 +47,6 @@ export default function SearchPage() {
         (async () => {
             setLoading(true);
             try {
-                console.log("🔍 검색 시작, keyword =", keyword);
-
                 // 게시글 검색
                 const articleRes = await searchArticles(keyword);
                 if (articleRes?.resultCode?.startsWith('S-')) {
@@ -57,28 +56,10 @@ export default function SearchPage() {
                 // 멤버 검색
                 const memberRes = await searchMembers(keyword);
                 if (memberRes?.resultCode?.startsWith('S-')) {
-                    const rawMembers = memberRes.data1 || [];
-                    console.log("✅ Member 검색 성공, 원본:", rawMembers);
-
-                    // 🔑 로그인 유저 닉네임
-                    const myNick = localStorage.getItem('nickName');
-
-                    // 🔑 내 팔로잉 목록 한 번만 호출
-                    const followingRes = await getFollowingList(myNick);
-                    const followingList = followingRes.data1 || [];
-                    console.log("📌 내 팔로잉 리스트:", followingList);
-
-                    // 🔑 각 멤버에 대해 isFollowing 채우기
-                    const membersWithFollow = rawMembers.map((m) => {
-                        const isFollowing = followingList.some(f => f.id === m.id);
-                        return {...m, isFollowing};
-                    });
-
-                    console.log("🏁 최종 Member 리스트:", membersWithFollow);
-                    setMembers(membersWithFollow);
+                    setMembers(memberRes.data1 || []);
                 }
             } catch (err) {
-                console.error('🚨 전체 검색 실패:', err);
+                console.error('검색 실패:', err);
             } finally {
                 setLoading(false);
             }
@@ -86,25 +67,25 @@ export default function SearchPage() {
     }, [keyword]);
 
     return (
-        <div className="w-full min-h-screen bg-white text-black">
+        <div className="w-full min-h-full overflow-auto">
             <div className="h-screen">
-                <div className="mx-auto px-36 flex">
+                <div className="mx-auto px-32 flex">
                     <main className="flex-grow">
                         {/* 타이틀 */}
-                        <h1 className="text-2xl font-bold mb-4">
-                            Showing Results for "{keyword}"
+                        <h1 className="text-2xl font-bold my-4 text-gray-500 dark:text-neutral-500">
+                            Showing Results for <span className="text-black dark:text-neutral-300">"{keyword}"</span>
                         </h1>
 
                         {/* 탭 버튼 */}
-                        <div className="flex items-center border-b mb-4">
-                            {["Article", "Profile"].map((t) => (
+                        <div className="flex items-center border-b dark:border-neutral-700">
+                            {['Article', 'Profile'].map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setActiveTab(t)}
                                     className={`p-4 -mb-px ${
                                         activeTab === t
-                                            ? "border-b-2 border-black font-semibold"
-                                            : "text-gray-500"
+                                            ? "border-b-2 font-semibold border-black dark:border-neutral-400 dark:text-neutral-300"
+                                            : "text-gray-500 dark:text-neutral-600"
                                     }`}
                                 >
                                     {t}
@@ -114,52 +95,75 @@ export default function SearchPage() {
 
                         {/* 로딩 상태 */}
                         {loading ? (
-                            <p>검색 중...</p>
-                        ) : activeTab === "Article" ? (
+                            <p>Searching...</p>
+                        ) : activeTab === 'Article' ? (
                             articles.length > 0 ? (
                                 articles.map((article) => {
                                     const imgSrc = extractFirstImage(article.body);
                                     return (
                                         <div
                                             key={article.id}
-                                            className="block cursor-pointer"
+                                            className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                             onClick={() => handleArticleClick(article.id)}
                                         >
                                             <div
-                                                className="flex h-52 border-b p-4 justify-center items-center hover:bg-gray-50 transition">
-                                                {/* 왼쪽 */}
+                                                className="flex h-52 border-b p-4 justify-center items-center transition
+                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
-                                                    <div className="text-sm text-gray-500">
-                                                        in Search · by{" "}
+                                                    <div className="text-sm ">
+                                                        in Search · by{' '}
                                                         {article.extra__writer ? (
                                                             <Link
                                                                 href={`/DiFF/member/profile?nickName=${encodeURIComponent(
                                                                     article.extra__writer
                                                                 )}`}
-                                                                className="hover:underline hover:text-black cursor-pointer"
+                                                                className="hover:underline cursor-pointer hover:text-black dark:hover:text-neutral-200"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {article.extra__writer}
                                                             </Link>
                                                         ) : (
-                                                            "Unknown"
+                                                            'Unknown'
                                                         )}
                                                     </div>
                                                     <div className="py-2 flex-grow">
-                                                        <h2 className="text-2xl py-2 font-black">{article.title}</h2>
-                                                        <p className="clamp-2 text-sm text-gray-600 overflow-hidden">
+                                                        <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">{article.title}</h2>
+                                                        <p className="clamp-2 text-sm  overflow-hidden">
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                     </div>
+                                                    <div className="flex items-center gap-4 text-sm">
+                                                    <span>
+                                                        {new Date(article.regDate).toLocaleDateString(
+                                                            'en-US',
+                                                            {year: 'numeric', month: 'short', day: 'numeric'}
+                                                        )}
+                                                    </span>
+                                                        <span>view: {article.hits}</span>
+                                                        <span>
+                                                        <i className="fa-solid fa-comments"></i>{' '}
+                                                            {article.extra__sumReplies}
+                                                    </span>
+                                                        <span>
+                                                        <i className="fa-solid fa-heart"></i>{' '}
+                                                            {article.extra__sumReaction}
+                                                    </span>
+                                                    </div>
                                                 </div>
-                                                {/* 오른쪽 */}
+
+                                                {/* 이미지 */}
                                                 <div
-                                                    className="w-[30%] h-[100%] bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700
+                                                    rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
-                                                        <img src={imgSrc} alt="thumbnail"
-                                                             className="w-full h-full object-cover"/>
+                                                        <img
+                                                            src={imgSrc}
+                                                            alt="thumbnail"
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     ) : (
-                                                        <span className="text-gray-400">No Image</span>
+                                                        <span
+                                                            className="dark:text-neutral-400 text-gray-400">No Image</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -170,65 +174,41 @@ export default function SearchPage() {
                                 <div>게시글 검색 결과가 없습니다.</div>
                             )
                         ) : members.length > 0 ? (
-                            <ul className="space-y-4">
-                                {members.map((m) => (
-                                    <li key={m.id}
-                                        className="flex items-center justify-between gap-4 border p-4 rounded-md">
-                                        {/* 프로필 이미지 + 정보 */}
-                                        <div className="flex items-center gap-4">
-                                            {m.profileUrl ? (
-                                                <img src={m.profileUrl} alt={m.nickName}
-                                                     className="w-12 h-12 rounded-full object-cover border"/>
-                                            ) : (
-                                                <div
-                                                    className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-200 text-gray-500">
-                                                    <i className="fa-solid fa-skull"></i>
-                                                </div>
-                                            )}
-                                            <div>
-                                                <Link
-                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(m.nickName)}`}
-                                                    className="text-lg font-semibold hover:underline"
-                                                >
-                                                    {m.nickName}
-                                                </Link>
-                                                <p className="text-sm text-gray-600">{m.email}</p>
+                            members.map((m) => (
+                                <li
+                                    key={m.id}
+                                    className="border-b dark:border-neutral-700"
+                                >
+                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(
+                                            m.nickName)}`}
+                                        className="flex items-center gap-4 p-6">
+                                        {/* 프로필 이미지 */}
+                                        {m.profileUrl ? (
+                                            <img
+                                                src={m.profileUrl}
+                                                alt={m.nickName}
+                                                className="w-16 h-16 rounded-full object-cover border"
+                                            />
+                                        ) : (
+                                            <div
+                                                className="w-16 h-16 rounded-full flex items-center justify-center text-4xl
+                                            bg-gray-100 dark:text-neutral-500 dark:bg-neutral-600 dark:border-neutral-700">
+                                                <i className="fa-solid fa-skull "></i>
                                             </div>
+                                        )}
+
+                                        {/* 닉네임 + 이메일 */}
+                                        <div className="ml-4">
+                                            <div
+                                                className="text-xl font-bold dark:text-neutral-300"
+                                            >
+                                                {m.nickName}
+                                            </div>
+                                            <p className="text-sm text-gray-600 dark:text-neutral-500">{m.email}</p>
                                         </div>
-                                        {/* 버튼 */}
-                                        <button
-                                            onClick={async () => {
-                                                try {
-                                                    if (m.isFollowing) {
-                                                        await unfollowMember(m.id);
-                                                        setMembers((prev) =>
-                                                            prev.map((mem) =>
-                                                                mem.id === m.id ? {...mem, isFollowing: true} : mem
-                                                            )
-                                                        );
-                                                    } else {
-                                                        await followMember(m.id);
-                                                        setMembers((prev) =>
-                                                            prev.map((mem) =>
-                                                                mem.id === m.id ? {...mem, isFollowing: false} : mem
-                                                            )
-                                                        );
-                                                    }
-                                                } catch (err) {
-                                                    console.error("❌ 팔로우/언팔로우 실패:", err);
-                                                }
-                                            }}
-                                            className={`w-24 px-4 py-2 rounded-xl font-semibold transition-colors duration-200 shadow-md
-                                                    ${m.isFollowing
-                                                ? "bg-black text-white hover:bg-white hover:text-red-500 border-red-500"
-                                                : "bg-green-500 text-white hover:bg-white hover:text-green-500 hover:border-green-500 border border-green-500"
-                                            }`}
-                                        >
-                                            {m.isFollowing ? "언팔로우" : "팔로우"}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
+                                    </Link>
+                                </li>
+                            ))
                         ) : (
                             <div>프로필 검색 결과가 없습니다.</div>
                         )}
