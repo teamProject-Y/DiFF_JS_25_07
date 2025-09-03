@@ -9,6 +9,7 @@ import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
 import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
+import ThemeToggle from "@/common/thema";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -43,7 +44,7 @@ export default function Header() {
     const [hide, setHide] = useState(false);
 
     const y = useMotionValue(0);
-    const background = useTransform(y, [0, 100], ['rgba(0,183,255,0)', 'rgba(0,183,255,1)']);
+    const background = useTransform(y, [0, 100], ['rgba(0,183,255,0)', 'rgba(0,0,0,0)']);
     const height = useTransform(y, [0, 100], [120, 60]);
     const [keyword, setKeyword] = useState('');
     const [results, setResults] = useState([]);
@@ -57,6 +58,7 @@ export default function Header() {
     const [notifications, setNotifications] = useState([]);
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
+
     useEffect(() => {
         const isScrollable = (el) => {
             if (!el || el === window) return false;
@@ -65,8 +67,8 @@ export default function Header() {
         };
 
         const findRoot = () =>
-            document.getElementById('pageScroll') ||                 // 페이지가 우선
-            document.getElementById('appScroll') ||                 // 레이아웃 래퍼
+            document.getElementById('pageScroll') ||
+            document.getElementById('appScroll') ||
             Array.from(document.querySelectorAll('*')).find(isScrollable) ||
             window;
 
@@ -77,8 +79,8 @@ export default function Header() {
 
         const onScroll = () => {
             const cur = getTop();
-            y.set(cur);                      // 배경/높이 보간
-            setHide(cur > last && cur > 60); // 내릴 때 숨김
+            y.set(cur);
+            setHide(cur > last && cur > 60);
             last = cur;
         };
 
@@ -92,10 +94,8 @@ export default function Header() {
             target.addEventListener('scroll', onScroll, {passive: true});
         };
 
-        // 최초 연결
         retarget(findRoot());
 
-        // DOM/라우트 변경 시 새 루트로 갈아타기
         const mo = new MutationObserver(() => {
             const next = findRoot();
             if (next !== target) retarget(next);
@@ -109,8 +109,6 @@ export default function Header() {
         };
     }, [y]);
 
-
-    // ▼ 토큰/유저 로직 (그대로)
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const url = new URL(window.location.href);
@@ -172,13 +170,11 @@ export default function Header() {
     }, [keyword]);
 
     useEffect(() => {
-        // 검색 페이지가 아니면 비움 → placeholder 노출
         if (!pathname?.startsWith('/DiFF/article/search')) {
             setKeyword('');
             setResults([]);
             return;
         }
-        // 검색 페이지면 URL 쿼리(keyword)로 입력창 채움 (없으면 빈 값)
         const q = searchParams.get('keyword') ?? '';
         setKeyword(q);
     }, [pathname, searchParams]);
@@ -202,8 +198,8 @@ export default function Header() {
             try {
                 const list = await getNotifications();
                 setNotifications(list);
-                await markAllAsRead();  // 읽음 처리
-                setUnread(false);       // 빨간 점 제거
+                await markAllAsRead();
+                setUnread(false);
             } catch (err) {
                 console.error("알림 목록 가져오기 실패:", err);
             }
@@ -224,26 +220,25 @@ export default function Header() {
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
-                        bg-[${background}] h-[${height}]
-                        dark:text-white
                         `}
-        >
+                    style={{backgroundColor: background, height}}>
 
             <div className="pl-4">
-                <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold">DiFF</Link>
+                <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold dark:text-neutral-300">DiFF</Link>
             </div>
 
             {/* 검색창 */}
             {accessToken &&
                 <form onSubmit={handleSearch} className="relative flex items-center gap-2">
-                    <div className="px-3 flex rounded-full border text-neutral-500 overflow-hidden">
+                    <div className="px-3 flex rounded-full border overflow-hidden text-neutral-500
+                     dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500">
                         <input
                             type="text"
                             placeholder="Search anything"
                             value={keyword}
                             autoComplete="on"
                             onChange={(e) => setKeyword(e.target.value)}
-                            className="p-2 w-64 focus:outline-none"
+                            className="p-2 w-64 focus:outline-none dark:bg-neutral-800 dark:placeholder-neutral-500"
                         />
                         <button type="submit" className="">
                             <i className="fa-solid fa-magnifying-glass"></i>
@@ -251,15 +246,16 @@ export default function Header() {
                     </div>
                 </form>
             }
+            <ThemeToggle/>
 
-            <ul className="flex gap-8 text-xl font-semibold pr-8">
+            <ul className="flex gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
                 {accessToken ? (
                     <>
                         <li className="relative" ref={dropdownRef}>
                             <button onClick={handleBellClick} className="relative">
                                 <i className="fa-solid fa-bell"></i>
                                 {unread && (
-                                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                                 )}
                             </button>
 

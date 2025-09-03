@@ -27,7 +27,7 @@ export default function DocsSidebar({ className = '', activeKey }) {
             }
         >
             <nav>
-                <div className="px-4 pb-10 font-black text-2xl">About DiFF</div>
+                <div className="px-4 py-10 font-black text-2xl ">About DiFF</div>
                 <ul className="space-y-1">
                     {NAV_ITEMS.map((item) => {
                         const href = normalize(item.href);
@@ -42,7 +42,8 @@ export default function DocsSidebar({ className = '', activeKey }) {
                                     aria-current={isActive ? 'page' : undefined}
                                     className={
                                         'block py-2 pl-5 ' +
-                                        (isActive ? 'border-l-4 border-black font-bold' : 'hover:font-bold text-gray-500')
+                                        (isActive ? 'border-l-4 font-bold border-black dark:border-neutral-200'
+                                            : 'hover:font-bold text-gray-500 dark:text-neutral-500')
                                     }
                                 >
                                     {item.label}

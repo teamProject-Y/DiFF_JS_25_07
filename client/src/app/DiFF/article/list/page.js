@@ -52,7 +52,7 @@ function ArticleListInner() {
         <>
         <LoadingOverlay show={loading} />
 
-        <div className="mt-20 p-6 max-w-3xl mx-auto">
+        <div className="px-32 py-10">
             <h1 className="text-2xl font-bold mb-4">게시글 목록</h1>
             <ul className="space-y-4">
                 {articles.map((article) => (
@@ -86,7 +86,7 @@ function ArticleListInner() {
 
 export default function Page() {
     return (
-        <Suspense fallback={<p>불러오는 중...</p>}>
+        <Suspense fallback={<p>Loading...</p>}>
             <ArticleListInner />
         </Suspense>
     );

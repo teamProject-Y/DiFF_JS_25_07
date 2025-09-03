@@ -159,7 +159,7 @@ export const writeArticle = async (data) => {
 export const getMyRepositories = async () => {
     const res = await ArticleAPI.get('/api/DiFF/repository/my');
     const repos =
-        res.data?.data?.repositories ??
+        res.data?.data1?.repositories ??
         res.data?.repositories ??
         [];
     // 타입 보정

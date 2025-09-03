@@ -156,8 +156,6 @@ export const getFollowerList = async (nickName) => {
     return response.data;
 };
 
-
-
 // 상대방을 팔로우
 export const followMember = async (fromMemberId) => {
     const response = await UserAPI.post(`/api/DiFF/member/follow`, null, {
@@ -173,12 +171,6 @@ export const unfollowMember = async (fromMemberId) => {
     });
     return response.data;
 };
-
-// 5-6. 로그아웃 (필요하면 추가 구현)
-// export const logout = async () => { ... };
-
-// 5-7. 토큰 수동 갱신 (필요하면 직접 사용)
-// export const manualRefreshToken = refreshAccessToken;
 
 export const uploadProfileImg = async (file) => {
     const formData = new FormData();

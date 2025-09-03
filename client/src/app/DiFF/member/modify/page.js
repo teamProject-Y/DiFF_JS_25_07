@@ -56,7 +56,7 @@ export default function ModifyPage({ initialMember }) {
         }
     };
 
-    if (!member) return <div>로딩...</div>;
+    if (!member) return <div>Loading...</div>;
 
     return (
         <div className="container mx-auto mt-10">
@@ -66,7 +66,6 @@ export default function ModifyPage({ initialMember }) {
             >
                 <i className="fa-solid fa-angle-left"></i>
             </button>
-
 
             <div className="mx-auto max-w-min p-8 bg-neutral-200 border border-neutral-300 rounded-lg">
                 <h2 className="text-2xl font-semibold text-center mb-6">회원 정보 수정</h2>
