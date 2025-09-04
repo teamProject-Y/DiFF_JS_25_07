@@ -166,8 +166,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                                 })}
                                                             </span>
                                                             <span>view: {article.hits}</span>
-                                                            <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                            <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                            <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                            <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                         </div>
                                                     </div>
                                                     <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
@@ -228,8 +228,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                             })}
                                                         </span>
                                                         <span>view: {article.hits}</span>
-                                                        <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                        <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                        <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                        <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                     </div>
                                                 </div>
                                                 <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
