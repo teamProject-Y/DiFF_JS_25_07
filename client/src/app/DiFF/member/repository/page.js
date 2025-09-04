@@ -8,7 +8,7 @@ import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
 import RepoPost from "./RepoPost";
 import {AddRepoModal} from './addRepoModal';
-import {RepoInfo} from './repoInfo';
+import RepoInfo from './repoInfo';
 import GhostBar from './sideBar';
 import Link from "next/link";
 
@@ -117,7 +117,7 @@ export default function RepositoriesPage() {
     );
 
     useEffect(() => {
-        if (selectedRepo) setTab('info');
+        if (selectedRepo) setTab('posts');
     }, [selectedRepo?.id]);
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
@@ -207,7 +207,7 @@ export default function RepositoriesPage() {
         }
     };
 
-    if (loading) return <div className="text-center">로딩...</div>;
+    if (loading) return <div className="text-center">loading...</div>;
 
     const profileHref =
         isMyRepos ? '/DiFF/member/profile'
@@ -240,8 +240,8 @@ export default function RepositoriesPage() {
                         {/* 탭 */}
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
+                                {key: 'posts', label: 'Posts'},
                                 {key: 'info', label: 'Info'},
-                                {key: 'posts', label: 'Posts'}
                             ].map((t) => (
                                 <button
                                     key={t.key}
@@ -330,7 +330,7 @@ export default function RepositoriesPage() {
                                         {tab === 'info' && selectedRepo ? (
                                             <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
-                                                repo={selectedRepo}
+                                                repo={selectedRepo}   // ✅ 여기서 repo.id 전달됨
                                                 repositories={repositories}
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}

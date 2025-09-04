@@ -3,7 +3,6 @@
 import {useRouter} from 'next/navigation';
 import {saveInquiry} from '@/lib/NotionAPI';
 import {useState, useEffect, useRef, useMemo} from 'react';
-import {useTheme} from "@/common/thema";
 
 export default function InquiryForm() {
     const router = useRouter();
@@ -176,7 +175,6 @@ export default function InquiryForm() {
                             </label>
                             {showError('email') && <span className="text-sm text-red-600">{errors.email}</span>}
                         </div>
-                        {/*<input type="email" placeholder="email"/>*/}
                         <div className="relative dark">
                             <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                 <svg className="w-4 h-4 text-gray-500 dark:text-neutral-400" aria-hidden="true"
@@ -199,11 +197,8 @@ export default function InquiryForm() {
                                  ${showError('email')
                                     ? 'focus:ring-1 border-red-500 focus:ring-red-500 focus:border-red-500 '
                                     : 'border-gray-300 focus:outline-none focus:ring-0 focus-visible:outline-none'}
-                                    autofill:shadow-[inset_0_0_0_9999px_rgba(0_0_0_0)]
-                                    autofill:[-webkit-text-fill-color:rgba(0_0_0_0)]
-                                    autofill:caret-[rgba(0_0_0_0)]
-                                    ${useTheme() === 'light' ? '' : 'dark:bg-neutral-800 dark:border-neutral-700  dark:placeholder-neutral-500 dark:text-neutral-300'}
-                                    `}/>
+                            dark:bg-neutral-800 dark:border-neutral-700  dark:placeholder-neutral-500 dark:text-neutral-300`}
+                            />
                         </div>
                     </div>
                 </div>

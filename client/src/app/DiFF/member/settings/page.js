@@ -6,6 +6,8 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import {fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce} from "@/lib/UserAPI";
 import ThemeToggle from "@/common/thema";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 export default function SettingsTab() {
     return (
@@ -43,8 +45,8 @@ function SettingsPage() {
     };
 
     const onClickRemove = () => {
-        const res = uploadProfileImg(null);
-        return res === "이미지 제거 완료";
+        setProfileUrl('');
+        setBanner({type: 'info', msg: '프로필 제거 로직 연결 예정'});
     };
 
     const onClickWithdraw = () => setConfirmOpen(true);
@@ -177,7 +179,6 @@ function SettingsPage() {
 
     const handleInput = (e) => {
         const textarea = textareaRef.current;
-        if (!textarea) return;
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
@@ -349,14 +350,13 @@ function SettingsPage() {
                                 <h3 className="text-2xl font-bold">Profile README</h3>
 
                                 {/* Write / Preview 탭 */}
-                                <div
-                                    className="flex items-center rounded-lg border border-neutral-300 dark:border-neutral-700 overflow-hidden">
+                                <div className="flex items-center rounded-lg border border-neutral-300 dark:border-neutral-700 overflow-hidden">
                                     <button
                                         type="button"
-                                        onClick={() => setActiveMdTab('write')}
+                                        onClick={() => setActiveMdTab("write")}
                                         className={
                                             "px-3 py-1 text-sm " +
-                                            (activeMdTab === 'write'
+                                            (activeMdTab === "write"
                                                 ? "bg-neutral-800 text-neutral-100"
                                                 : "text-neutral-500 dark:text-neutral-300")
                                         }
@@ -365,10 +365,10 @@ function SettingsPage() {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => setActiveMdTab('preview')}
+                                        onClick={() => setActiveMdTab("preview")}
                                         className={
                                             "px-3 py-1 text-sm " +
-                                            (activeMdTab === 'preview'
+                                            (activeMdTab === "preview"
                                                 ? "bg-neutral-800 text-neutral-100"
                                                 : "text-neutral-500 dark:text-neutral-300")
                                         }
@@ -379,23 +379,31 @@ function SettingsPage() {
                             </div>
 
                             <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3">
-                                {activeMdTab === 'write' ? (
+                                {activeMdTab === "write" ? (
+                                    // ✍️ 작성 모드
                                     <textarea
                                         name="introduce"
                                         value={form.introduce ?? ""}
                                         onChange={handleChange}
                                         onInput={handleInput}
                                         className="min-h-[220px] rounded-md border border-neutral-300 bg-white p-4 text-neutral-800 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
-                                        placeholder={`마크다운 형식으로 기술/자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
+                                        placeholder={`마크다운 형식으로 자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
                                     />
                                 ) : (
-                                    <div
-                                        className="min-h-[220px] rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
-                                        <ReactMarkdown>{form.introduce || '*미리보기 내용이 없습니다.*'}</ReactMarkdown>
+                                    // 👀 미리보기 모드
+                                    <div className="markdown min-h-[220px] rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            rehypePlugins={[rehypeRaw]}
+                                        >
+                                            {form.introduce || "*미리보기 내용이 없습니다.*"}
+                                        </ReactMarkdown>
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-end text-xs text-neutral-500">
+                                {/* 하단 Save 버튼 */}
+                                <div className="flex items-center justify-between text-xs text-neutral-500">
+                                    <div>⌘/Ctrl + Enter 로 저장</div>
                                     <button
                                         type="submit"
                                         disabled={!dirtyIntro}
@@ -409,6 +417,7 @@ function SettingsPage() {
                                 </div>
                             </form>
                         </Card>
+
 
                         {/* 회원탈퇴 */}
                         <Card>

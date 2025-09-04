@@ -81,7 +81,8 @@ export async function DiFFinit(memberId, branch) {
 }
 
 /** 코드 분석 **/
-export async function doAnalysis(branch, memberId) {
+// doAnalysis.js
+export async function doAnalysis(branch, memberId, draftId, diffId) {
     try {
         const lastChecksum = await getLastChecksum(branch);
         const repositoryId = await getRepositoryId(branch);
@@ -122,12 +123,13 @@ export async function doAnalysis(branch, memberId) {
 
         // FormData 생성 및 전송
         const form = new FormData();
-
         form.append('file', fs.createReadStream('difftest.zip'));
         form.append('meta', JSON.stringify({
             memberId,
             repositoryId,
-            lastChecksum
+            draftId,       // ✅ 여기 추가
+            diffId,
+            lastChecksum,
         }));
 
         const res = await axios.post('http://localhost:8080/upload', form, {
