@@ -228,6 +228,21 @@ export default function Header() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    function getNotificationLink(n) {
+        switch (n.type) {
+            case "ARTICLE":
+                return `/DiFF/article/detail?id=${n.relId}`;
+            case "FOLLOW":
+                return `/DiFF/member/profile?nickName=${(n.extra__nickName)}`;
+            case "DRAFT":
+                return `/DiFF/draft/detail?id=${n.relId}`;
+            default:
+                return "#";
+        }
+    }
+
+
+
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
@@ -298,30 +313,41 @@ export default function Header() {
                                         {/* 리스트 */}
                                         {notifications && notifications.length > 0 ? (
                                             <ul className="max-h-80 overflow-y-auto">
-                                                {notifications.map((n) => (
-                                                    <li
-                                                        key={n.id}
-                                                        className="group flex items-start gap-3 rounded-xl px-3 py-2 transition
-                                                                    hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
-                                                    >
-                                                        <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
-                                                             border border-neutral-300 bg-neutral-100 text-neutral-600
-                                                             dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
-                                                          <i className={iconFor(n.type)} aria-hidden />
-                                                        </span>
+                                                {notifications.map((n) => {
+                                                    console.log("📌 알림 데이터:", n);
+                                                    const link = getNotificationLink(n);
 
-                                                        <div className="min-w-0 flex-1">
-                                                            <div className="truncate text-sm text-neutral-800 dark:text-neutral-200" title={n.message}>
-                                                                {n.message}
-                                                            </div>
-                                                            {n.type && (
-                                                                <div className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                                                                    {n.type}
+                                                    return (
+                                                        <li
+                                                            key={n.id}
+                                                            onClick={() => (window.location.href = link)}
+                                                            className="group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 transition
+                                                                       hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
+                                                                                                            >
+                                                            <span
+                                                                className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
+                                                                         border border-neutral-300 bg-neutral-100 text-neutral-600
+                                                                         dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+                                                            >
+                                                              <i className={iconFor(n.type)} aria-hidden />
+                                                            </span>
+
+                                                            <div className="min-w-0 flex-1">
+                                                                <div
+                                                                    className="truncate text-sm text-neutral-800 dark:text-neutral-200"
+                                                                    title={n.message}
+                                                                >
+                                                                    {n.message}
                                                                 </div>
-                                                            )}
-                                                        </div>
-                                                    </li>
-                                                ))}
+                                                                {n.type && (
+                                                                    <div className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                                                        {n.type}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </li>
+                                                    );
+                                                })}
                                             </ul>
                                         ) : (
                                             <div className="px-3 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
