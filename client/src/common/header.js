@@ -236,6 +236,8 @@ export default function Header() {
                 return `/DiFF/member/profile?nickName=${(n.extra__nickName)}`;
             case "DRAFT":
                 return `/DiFF/draft/detail?id=${n.relId}`;
+            case "REPLY":
+                return `/DiFF/article/detail?id=${n.relId}`;
             default:
                 return "#";
         }

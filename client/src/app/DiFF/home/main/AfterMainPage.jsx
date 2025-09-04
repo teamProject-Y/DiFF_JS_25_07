@@ -82,18 +82,14 @@ export default function AfterMainPage({me, trendingArticles}) {
         try {
             console.log("🖱️ 클릭한 articleId:", id);
 
-            // 로컬스토리지에 저장 시도
             markAsViewed(id);
 
-            // 디테일 페이지 이동
             window.location.href = `/DiFF/article/detail?id=${id}`;
         } catch (err) {
             console.error("❌ 로컬스토리지 저장 실패:", err);
             window.location.href = `/DiFF/article/detail?id=${id}`;
         }
     };
-
-
     // const handleArticleClick = async (id) => {
     //     try {
     //         await increaseArticleHits(id);

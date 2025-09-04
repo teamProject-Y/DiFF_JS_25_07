@@ -107,7 +107,6 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
 
             {/* 추가 메뉴 */}
             <div className="text-center my-6 flex justify-center gap-6 text-black">
-                <a href="/DiFF/member/join" className="hover:underline">Join</a>
                 <a href="/DiFF/member/findLoginId" className="hover:underline">Find ID</a>
                 <a href="/DiFF/member/findLoginPw" className="hover:underline">Find PW</a>
             </div>
