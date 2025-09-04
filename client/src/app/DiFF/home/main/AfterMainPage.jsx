@@ -93,7 +93,6 @@ export default function AfterMainPage({me, trendingArticles}) {
                             ))}
                         </div>
 
-                        {/* 리스트: 스크롤 영역 */}
                         <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none">
                             {activeTab === "Trending" ? (
                                 trendingArticles && trendingArticles.length > 0 ? (
@@ -130,13 +129,13 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                             </p>
                                                         </div>
                                                         <div className="flex items-center gap-4 text-sm ">
-                            <span>
-                              {new Date(article.regDate).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                              })}
-                            </span>
+                                                            <span>
+                                                                {new Date(article.regDate).toLocaleDateString("en-US", {
+                                                                      year: "numeric",
+                                                                    month: "short",
+                                                                    day: "numeric",
+                                                                })}
+                                                            </span>
                                                             <span>view: {article.hits}</span>
                                                             <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
                                                             <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
@@ -192,13 +191,13 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-4 text-sm ">
-                          <span>
-                            {new Date(article.regDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                            })}
-                          </span>
+                                                        <span>
+                                                            {new Date(article.regDate).toLocaleDateString("en-US", {
+                                                             year: "numeric",
+                                                             month: "short",
+                                                             day: "numeric",
+                                                            })}
+                                                        </span>
                                                         <span>view: {article.hits}</span>
                                                         <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
                                                         <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
@@ -220,7 +219,6 @@ export default function AfterMainPage({me, trendingArticles}) {
                             )}
                         </div>
 
-                        {/* 플로팅/기타 UI는 탭 옆에 그대로 */}
                         <LoginSpeedDial
                             writeHref="/DiFF/article/write"
                             draftsHref="/DiFF/article/drafts"
