@@ -63,7 +63,7 @@ export default function AfterMainPage({me, trendingArticles}) {
 
     const handleArticleClick = async (id) => {
         try {
-            await increaseArticleHits(id);  // ✅ 조회수 증가 요청
+            await increaseArticleHits(id);
             window.location.href = `/DiFF/article/detail?id=${id}`;
         } catch (err) {
             console.error("조회수 증가 실패:", err);

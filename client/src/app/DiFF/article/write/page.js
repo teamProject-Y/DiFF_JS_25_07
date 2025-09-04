@@ -187,7 +187,6 @@ export function WriteArticlePage() {
                     setBody(draft.body || '');
                     setRepositoryId(draft.repositoryId || null);
 
-                    // ✅ draft 불러올 때 diffId도 세팅 (서버에서 내려줘야 함)
                     if (draft.diffId) {
                         setDiffId(draft.diffId);
                         console.log("📥 draft.diffId 세팅:", draft.diffId);
@@ -272,9 +271,10 @@ export function WriteArticlePage() {
             console.log("📥 [handleSubmit] 서버 응답 전체:", res);
 
             if (res?.resultCode?.startsWith('S-')) {
-                console.log("✅ [handleSubmit] 글 작성 성공 → 리스트 이동");
-                router.push(`/DiFF/article/list?repositoryId=${repositoryId}`);
-            } else {
+                const articleId = res.data1; // 서버가 반환한 id
+                router.push(`/DiFF/article/detail?id=${articleId}`);
+            }
+            else {
                 console.error("❌ [handleSubmit] 작성 실패 응답:", res);
                 setError(res?.msg || '작성 실패');
             }

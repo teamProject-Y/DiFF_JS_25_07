@@ -150,11 +150,7 @@ export const writeArticle = async (data) => {
     const result = res.data;
 
     // (디버깅 로그)
-    console.log('📦 doWrite 응답:', result);
-    console.log('📦 repository:', result?.data1?.repository);
-    console.log('📦 draft:', result?.data1?.draft);
-    console.log('📦 articleId:', result?.data1?.articleId);
-
+    console.log('📦 articleId:', result?.data1);
     return result; // ResultData
 };
 
