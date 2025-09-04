@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import LanguageChart from "./languageChart";
-
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {getAnalysisHistory, getLanguageDistribution} from "@/lib/RepositoryAPI";
 
@@ -66,11 +65,11 @@ export default function RepoInfo({
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (repo?.id) {
-            console.log("[RepoInfo] repo.id =", repo.id); // ✅ repo id 확인
+            console.log("[RepoInfo] repo.id =", repo.id); // repo id 확인
 
             getLanguageDistribution(repo.id)
                 .then((data) => {
-                    console.log("[RepoInfo] getLanguageDistribution result =", data); // ✅ API 결과 확인
+                    console.log("[RepoInfo] getLanguageDistribution result =", data); // API 결과 확인
                     setLanguages(data);
                 })
                 .catch((err) => {
