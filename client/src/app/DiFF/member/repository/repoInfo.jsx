@@ -2,40 +2,16 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
-import {getAnalysisHistory, getLanguageDistribution} from "@/lib/RepositoryAPI";
-
-// 애니메이션
-const container = {
-    hidden: { x: -40, opacity: 0 },
-    show: {
-        x: 0,
-        opacity: 1,
-        transition: {
-            type: 'spring',
-            stiffness: 120,
-            damping: 20,
-            when: 'beforeChildren',
-            staggerChildren: 0.08,
-            delayChildren: 0.02,
-        },
-    },
-    exit: {
-        x: -40,
-        opacity: 0,
-        transition: { type: 'spring', stiffness: 120, damping: 20 },
-    },
-};
+import {getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
+import CommitList from "@/app/DiFF/member/repository/commitList";
 
 export default function RepoInfo({
                                      repo,
-                                     repositories = [],
                                      onClose,
                                      useExternalSidebar = false,
                                  }) {
-    const router = useRouter();
 
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
@@ -52,8 +28,7 @@ export default function RepoInfo({
 
     const onSaveName = async () => {
         try {
-            // TODO: 저장 엔드포인트 연결
-            // await api.updateRepoName({ id: repo.id, name: nameInput });
+            const response = await renameRepository(); ////////////// 이거 아직 안햇음 파라미터 넣어야됨
             setEditingName(false);
         } catch (e) {
             console.error(e);
@@ -69,7 +44,7 @@ export default function RepoInfo({
 
             getLanguageDistribution(repo.id)
                 .then((data) => {
-                    console.log("[RepoInfo] getLanguageDistribution result =", data); // API 결과 확인
+                    // console.log("[RepoInfo] getLanguageDistribution result =", data); // API 결과 확인
                     setLanguages(data);
                 })
                 .catch((err) => {
@@ -78,15 +53,7 @@ export default function RepoInfo({
         }
     }, [repo?.id]);
 
-    // 추천 표시 정보
-    const defaultBranch = repo?.defaultBranch || 'main';
     const visibility = repo?.aprivate ? 'private' : 'public';
-    const stats = {
-        stars: repo?.stargazersCount || repo?.stars || 0,
-        forks: repo?.forksCount || repo?.forks || 0,
-        issues: repo?.openIssuesCount || repo?.issues || 0,
-        watchers: repo?.subscribersCount || repo?.watchers || 0,
-    };
 
     const nameRef = useRef(null);
     const enterEdit = () => {
@@ -105,11 +72,11 @@ export default function RepoInfo({
     return (
         <motion.div
             key={`detail-${repo?.id ?? 'none'}`}
-            variants={container}
+            // variants={container}
             initial="hidden"
             animate="show"
             exit="hidden"
-            className={`absolute inset-0 p-6 overflow-y-auto`}
+            className={`absolute inset-0 p-4 overflow-y-auto`}
         >
             {/* 왼쪽 레일 */}
             {!useExternalSidebar && (
@@ -126,38 +93,36 @@ export default function RepoInfo({
             )}
 
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
-                {/* 중앙 메인(Info) */}
                 <div className="flex-grow flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col">
-                        {/* 상단 카드 */}
                         <div
-                            className="h-[35%] rounded-xl border shadow-sm p-4 mb-3 mr-3
+                            className="h-[35%] rounded-xl border shadow-sm p-4 mb-3
                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                             <AnalysisHistoryChart history={history} />
                         </div>
 
                         {/* 하단 박스 */}
                         <div
-                            className="flex-grow p-4 mr-3 overflow-y-scroll rounded-xl border shadow-sm
+                            className="flex-grow p-4 overflow-y-scroll rounded-xl border shadow-sm
                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                             {repo.url ?
                                 <>
-                                    깃허브 커밋들 가져오기
+                                    <CommitList repo={repo}/>
                                 </>
                                 :
                                 <>
-                                    깃허브 연결할래?
+                                    연결 안되어 있음
                                 </>
                             }
                         </div>
                     </div>
                 </div>
 
-                <div className="w-[30%] space-y-3 flex flex-col">
-                    <div className="rounded-xl border  shadow-sm p-4
+                <div className="w-[30%] flex flex-col gap-3">
+                    <div className="rounded-xl border shadow-sm p-4
                      bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center min-w-0 flex-grow">
+                            <div className="flex items-center min-w-0 flex-grow h-11">
                                 {editingName ? (
                                     <>
                                         <input
@@ -165,7 +130,7 @@ export default function RepoInfo({
                                             value={nameInput}
                                             onChange={(e) => setNameInput(e.target.value)}
                                             onKeyDown={onKeyDownName}
-                                            className="flex-grow min-w-0 px-1 py-2 rounded-md border
+                                            className="flex-grow min-w-0 px-1 py-2 mr-2rounded-md border
                                             focus:outline-none focus:ring-1 focus:ring-blue-400"
                                             placeholder="Repository name"
                                         />
@@ -206,7 +171,7 @@ export default function RepoInfo({
                         </div>
 
                         <div className="mt-2 flex w-full text-sm justify-between items-center">
-                            <div className="py-2"><i
+                            <div className=""><i
                                 className="fa-solid fa-calendar text-neutral-400"></i> {repo.regDate}</div>
                             <span className="ml-auto text-xs px-2 py-1 rounded-full border
                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
@@ -232,19 +197,19 @@ export default function RepoInfo({
                         <div className="grid grid-cols-4 gap-4 text-center">
                             <div>
                                 <div className="text-neutral-500 text-xs">Stars</div>
-                                <div className="text-lg font-semibold mt-0.5">{stats.stars}</div>
+                                <div className="text-lg font-semibold mt-0.5">0</div>
                             </div>
                             <div>
                                 <div className="text-neutral-500 text-xs">Forks</div>
-                                <div className="text-lg font-semibold mt-0.5">{stats.forks}</div>
+                                <div className="text-lg font-semibold mt-0.5">0</div>
                             </div>
                             <div>
                                 <div className="text-neutral-500 text-xs">Issues</div>
-                                <div className="text-lg font-semibold mt-0.5">{stats.issues}</div>
+                                <div className="text-lg font-semibold mt-0.5">0</div>
                             </div>
                             <div>
                                 <div className="text-neutral-500 text-xs">Watchers</div>
-                                <div className="text-lg font-semibold mt-0.5">{stats.watchers}</div>
+                                <div className="text-lg font-semibold mt-0.5">0</div>
                             </div>
                         </div>
                     </div>

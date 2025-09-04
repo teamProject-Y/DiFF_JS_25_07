@@ -138,17 +138,13 @@ export default function RepoPost({repoId, isMyRepo}) {
     let theme = useTheme();
 
     const mapArticles = (payload) => {
-        console.log("📦 [mapArticles] payload:", payload);
 
         const root = payload ?? {};
         const list = root?.data?.articles ?? root?.articles ?? root?.data ?? [];
 
-        console.log("📋 [mapArticles] list:", list);
-
         if (!Array.isArray(list)) return [];
 
         return list.map((a) => {
-            console.log("📝 [mapArticles] single article:", a);
 
             return {
                 id: a?.id ?? a?.articleId ?? crypto.randomUUID(),
