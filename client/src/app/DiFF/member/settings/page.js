@@ -4,6 +4,7 @@ import {useEffect, useMemo, useRef, useState, Suspense} from 'react';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce} from "@/lib/UserAPI";
+import { updateNotificationSetting } from "@/lib/NotificationAPI";
 import ThemeToggle from "@/common/thema";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -40,6 +41,53 @@ function SettingsPage() {
     const fileInputRef = useRef(null);
     const textareaRef = useRef(null);
 
+    const [settings, setSettings] = useState({
+        reply: member?.allowReplyNotification ?? false,
+        follow: member?.allowFollowNotification ?? false,
+        article: member?.allowArticleNotification ?? false,
+        draft: member?.allowDraftNotification ?? false,
+    });
+
+//  알림 아이템
+    const items = [
+        {
+            key: "reply",
+            title: "Comment Notification",
+            desc: "Get notified when someone comments on your post.",
+        },
+        {
+            key: "follow",
+            title: "Follow Notification",
+            desc: "Get notified when someone follows you.",
+        },
+        {
+            key: "article",
+            title: "New Article Notification",
+            desc: "Get notified when someone you follow publishes a new article.",
+        },
+        {
+            key: "draft",
+            title: "Draft Notification",
+            desc: "Get notified when your post is saved as a draft.",
+        },
+    ];
+
+
+    //  토글 핸들러
+    const handleToggle = async (type) => {
+        const newValue = !settings[type];
+        setSettings((prev) => ({ ...prev, [type]: newValue }));
+
+        try {
+            await updateNotificationSetting(type, newValue);
+            console.log(`✅ ${type} 알림 변경:`, newValue);
+        } catch (err) {
+            console.error("❌ 알림 설정 실패:", err);
+            // 실패 시 롤백
+            setSettings((prev) => ({ ...prev, [type]: !newValue }));
+        }
+    };
+
     // 소셜 로그인 연동
     const startLink = (provider) => {
         if (provider !== 'google' && provider !== 'github') return;
@@ -73,6 +121,12 @@ function SettingsPage() {
                 setForm({
                     nickName: fetchedMember?.nickName || "",
                     introduce: fetchedMember?.introduce || "",
+                });
+                setSettings({
+                    reply: fetchedMember.allowReplyNotification,
+                    follow: fetchedMember.allowFollowNotification,
+                    article: fetchedMember.allowArticleNotification,
+                    draft: fetchedMember.allowDraftNotification,
                 });
                 setLoading(false);
 
@@ -198,7 +252,7 @@ function SettingsPage() {
                     <TopTab href="/DiFF/member/repository" label="Repositories"/>
                     <TopTab active href="#" label="Settings"/>
                 </div>
-                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700 mb-10"/>
+                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
 
                 {/* 배너 */}
                 {banner && (
@@ -322,6 +376,34 @@ function SettingsPage() {
                                     UPDATE
                                 </button>
                             </form>
+                        </Card>
+
+                        <Card className="p-4 space-y-4">
+                            <h2 className="text-lg font-semibold mb-2">Notification Settings</h2>
+
+                            {items.map((item) => (
+                                <div
+                                    key={item.key}
+                                    className="flex items-center justify-between border-b pb-3 last:border-0"
+                                >
+                                    <div className="pr-2">
+                                        <div className="mb-1 text-base font-medium">{item.title}</div>
+                                        <p className="text-sm text-neutral-500">{item.desc}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleToggle(item.key)}
+                                        className={`rounded px-3 py-1.5 text-sm self-end border transition-colors
+              ${
+                                            settings[item.key]
+                                                ? "border-black text-black dark:border-black"
+                                                : "border-red-500 text-red-500"
+                                        }`}
+                                    >
+                                        {settings[item.key] ? "ON" : "OFF"}
+                                    </button>
+                                </div>
+                            ))}
                         </Card>
 
                         <Card>
@@ -457,64 +539,64 @@ function SettingsPage() {
             {/*회원 탈퇴 모달*/}
             {confirmOpen && (
                 <div className="fixed inset-0 z-50 grid place-items-center p-4">
-            {/* overlay */}
-            <button
-                aria-hidden
-                className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-                onClick={() => setConfirmOpen(false)}
-            />
-            {/* dialog */}
-            <div
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="confirm-title"
-                className="
+                    {/* overlay */}
+                    <button
+                        aria-hidden
+                        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                        onClick={() => setConfirmOpen(false)}
+                    />
+                    {/* dialog */}
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="confirm-title"
+                        className="
                   relative w-full max-w-md rounded-lg
                   border bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5
                   dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700 dark:ring-0
                   transition-transform duration-200
                 "
-            >
-                <div className="p-5">
-                    <div id="confirm-title" className="text-lg font-semibold">
-                        Are you sure you want to delete your account?
-                    </div>
-                    <p className="mt-1 px-1 text-sm text-neutral-500 dark:text-neutral-400">
-                        This action cannot be undone.
-                    </p>
+                    >
+                        <div className="p-5">
+                            <div id="confirm-title" className="text-lg font-semibold">
+                                Are you sure you want to delete your account?
+                            </div>
+                            <p className="mt-1 px-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                This action cannot be undone.
+                            </p>
 
-                    <div className="mt-6 flex justify-end gap-2">
-                        <button
-                            onClick={() => setConfirmOpen(false)}
-                            className="
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button
+                                    onClick={() => setConfirmOpen(false)}
+                                    className="
                                 rounded-md px-4 py-2 text-sm
                                 border border-neutral-200 bg-neutral-100 text-neutral-900 hover:bg-neutral-200
                                 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400
                                 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
                                 dark:focus-visible:outline-neutral-500
                               "
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={() => {
-                                setConfirmOpen(false);
-                                alert('회원탈퇴 로직 연결 예정');
-                            }}
-                            className="
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setConfirmOpen(false);
+                                        alert('회원탈퇴 로직 연결 예정');
+                                    }}
+                                    className="
                                 rounded-md px-4 py-2 text-sm
                                 bg-red-600 text-white hover:bg-red-500
                                 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500
                               "
-                        >
-                            Confirm
-                        </button>
+                                >
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-    )}
+            )}
         </section>
     );
 }
