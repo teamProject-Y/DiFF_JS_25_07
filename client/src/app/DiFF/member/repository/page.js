@@ -9,7 +9,6 @@ import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 import RepoPost from "./RepoPost";
 import {AddRepoModal} from './addRepoModal';
 import RepoInfo from './repoInfo';
-import GhostBar from './sideBar';
 import Link from "next/link";
 
 const getAccessToken = () =>
@@ -330,7 +329,7 @@ export default function RepositoriesPage() {
                                         {tab === 'info' && selectedRepo ? (
                                             <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
-                                                repo={selectedRepo}   // ✅ 여기서 repo.id 전달됨
+                                                repo={selectedRepo}   // repoId 전달
                                                 repositories={repositories}
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}
@@ -350,30 +349,6 @@ export default function RepositoriesPage() {
                             </div>
                         </div>
                     </div>
-
-                    {/* 하단 버튼들 */}
-                    {/*<div className="text-center mt-6 space-y-4">*/}
-                    {/*    <button*/}
-                    {/*        onClick={() => router.push('/DiFF/member/profile')}*/}
-                    {/*        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"*/}
-                    {/*    >*/}
-                    {/*        내 프로필 보기*/}
-                    {/*    </button>*/}
-
-                    {/*    <button*/}
-                    {/*        onClick={() => router.push('/DiFF/article/drafts')}*/}
-                    {/*        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"*/}
-                    {/*    >*/}
-                    {/*        임시저장*/}
-                    {/*    </button>*/}
-
-                    {/*    <button*/}
-                    {/*        onClick={() => router.push('/DiFF/article/write')}*/}
-                    {/*        className="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-500"*/}
-                    {/*    >*/}
-                    {/*        글 작성하기*/}
-                    {/*    </button>*/}
-                    {/*</div>*/}
                 </div>
             </section>
             {isMyRepos && (

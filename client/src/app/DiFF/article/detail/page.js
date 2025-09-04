@@ -15,7 +15,7 @@ import {
     unfollowMember,
     getFollowingList
 } from '@/lib/UserAPI';
-import LoadingOverlay from "@/common/LoadingOverlay";
+import LoadingOverlay from "@/common/loadingOverlay";
 import ToastViewer from "@/common/toastViewer";
 
 function ArticleDetailInner() {
