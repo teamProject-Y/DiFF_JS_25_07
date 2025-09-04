@@ -246,8 +246,10 @@ export default function Header() {
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
+                        bg-[${background}] h-[${height}]
+                        dark:text-white
                         `}
-                    style={{backgroundColor: background, height}}>
+        >
 
             <div className="pl-4">
                 <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold dark:text-neutral-300">DiFF</Link>
