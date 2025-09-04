@@ -52,23 +52,19 @@ function SettingsPage() {
     const items = [
         {
             key: "reply",
-            title: "Comment Notification",
-            desc: "Get notified when someone comments on your post.",
+            desc: "when someone comments on your post.",
         },
         {
             key: "follow",
-            title: "Follow Notification",
-            desc: "Get notified when someone follows you.",
+            desc: "when someone follows you.",
         },
         {
             key: "article",
-            title: "New Article Notification",
-            desc: "Get notified when someone you follow publishes a new article.",
+            desc: "when someone you follow publishes a new article.",
         },
         {
             key: "draft",
-            title: "Draft Notification",
-            desc: "Get notified when your post is saved as a draft.",
+            desc: "when your post is saved as a draft.",
         },
     ];
 
@@ -381,30 +377,36 @@ function SettingsPage() {
                         <Card className="p-4 space-y-4">
                             <h2 className="text-lg font-semibold mb-2">Notification Settings</h2>
 
-                            {items.map((item) => (
-                                <div
-                                    key={item.key}
-                                    className="flex items-center justify-between border-b pb-3 last:border-0"
-                                >
-                                    <div className="pr-2">
-                                        <div className="mb-1 text-base font-medium">{item.title}</div>
-                                        <p className="text-sm text-neutral-500">{item.desc}</p>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleToggle(item.key)}
-                                        className={`rounded px-3 py-1.5 text-sm self-end border transition-colors
-              ${
-                                            settings[item.key]
-                                                ? "border-black text-black dark:border-black"
-                                                : "border-red-500 text-red-500"
-                                        }`}
-                                    >
-                                        {settings[item.key] ? "ON" : "OFF"}
-                                    </button>
-                                </div>
-                            ))}
+                            <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
+                                {items.map((item) => {
+                                    const isOn = settings[item.key];
+                                    return (
+                                        <div
+                                            key={item.key}
+                                            className="flex items-center justify-between py-3"
+                                        >
+                                            <div className="pr-2">
+                                                <div className="mb-1 text-base font-medium">{item.title}</div>
+                                                <p className="text-sm text-neutral-500">{item.desc}</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggle(item.key)}
+                                                className={`w-16 rounded px-3 py-1.5 text-sm font-medium transition-colors
+                                                          border
+                                                          ${isOn
+                                                    ? "border-neutral-700 text-neutral-300 bg-neutral-900 hover:bg-neutral-800"
+                                                    : "border-red-600 text-red-300 bg-red-700 hover:bg-red-800"
+                                                }`}
+                                            >
+                                                {isOn ? "ON" : "OFF"}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </Card>
+
 
                         <Card>
                             <div className="flex items-center justify-between">
