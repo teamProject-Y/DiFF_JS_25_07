@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import HamburgerButton from "@/common/HamMenu";
+import HamburgerButton from "@/common/hamMenu";
 import OverlayMenu from "@/common/overlayMenu";
 
 export default function MenusWrapper({ userEmail, blogName }) {
