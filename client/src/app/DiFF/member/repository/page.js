@@ -220,18 +220,18 @@ export default function RepositoriesPage() {
 
     return (
         <LayoutGroup>
-            <section className="px-4">
+            <section className="px-4 dark:text-neutral-300">
                 <div className="mx-auto max-w-6xl h-full">
-                    <div className="flex items-center text-gray-500">
-                        <Link href={profileHref} className="p-4 -mb-px">Profile</Link>
-                        <span className="text-black p-4 -mb-px font-semibold border-b-2 border-black">Repositories</span>
-                        {isMyRepos &&
-                            <Link href="/DiFF/member/settings" className="p-4 -mb-px">
-                                Settings
-                            </Link>
-                        }
+
+                    {/* Tabs */}
+                    <div className="flex items-center text-neutral-500">
+                        <TopTab href={profileHref} label="Profile"/>
+                        <TopTab active href="#" label="Repositories"/>
+                        <TopTab href="/DiFF/member/settings" label="Settings"
+                                visible={isMyRepos}/>
                     </div>
-                    <div className="h-px w-full bg-gray-300 mb-8"/>
+
+                    <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700 mb-10"/>
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
@@ -245,9 +245,11 @@ export default function RepositoriesPage() {
                                 <button
                                     key={t.key}
                                     onClick={() => setTab(t.key)}
-                                    className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition
-                                        ${tab === t.key ? 'bg-white text-gray-900 -mb-px z-50' :
-                                        'bg-gray-100  text-gray-500 hover:bg-gray-100'}`}
+                                    className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition dark:border-neutral-700
+                                        ${tab === t.key ?
+                                        '-mb-px z-50 bg-gray-50 text-gray-900 dark:bg-neutral-800 dark:text-neutral-300'
+                                        : 'bg-gray-200 text-gray-400 dark:bg-neutral-600 dark:text-neutral-300' +
+                                        'dark:bg-neutral-800 dark:text-neutral-400'}`}
                                 >
                                     {t.label}
                                 </button>
@@ -257,11 +259,13 @@ export default function RepositoriesPage() {
                         <div className="grid grid-cols-[230px_1fr] items-start">
                             {/* 왼쪽 사이드바 */}
                             <aside
-                                className="h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-50">
+                                className="h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b
+                                bg-gray-100 dark:bg-neutral-800/50 dark:border-neutral-700">
                                 <ul className="p-4 space-y-2">
                                     {isMyRepos &&
                                         <li onClick={openModal}
-                                            className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 text-gray-700">
+                                            className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
+                                            hover:bg-gray-100 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400">
                                             <i className="fa-solid fa-folder-plus text-neutral-400"/>
                                             <span className="truncate">add repository</span>
                                         </li>
@@ -272,10 +276,13 @@ export default function RepositoriesPage() {
                                             <li
                                                 key={r.id}
                                                 onClick={() => setSelectedRepoId(r.id)}
-                                                className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${sel ? 'bg-gray-200 text-gray-900' : 'hover:bg-gray-100 text-gray-700'}`}
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer 
+                                                ${sel ? 'bg-gray-200 text-gray-900 dark:bg-neutral-800/80 dark:text-neutral-300'
+                                                    : 'hover:bg-gray-100 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400'}`}
                                                 title={r.name}
                                             >
-                                                <i className={`fa-solid ${sel ? 'fa-folder-open text-[#4E94F8]' : 'fa-folder text-blue-300'}`}/>
+                                                <i className={`fa-solid ${sel ? 'fa-folder-open text-blue-400'
+                                                    : 'fa-folder text-blue-300/60'}`}/>
 
                                                 <span className="truncate">{r.name}</span>
                                             </li>
@@ -286,36 +293,42 @@ export default function RepositoriesPage() {
 
                             {/* 메인 컨텐츠 */}
                             <div
-                                className="relative border border-gray-300 rounded-r-lg bg-white pt-8 h-[calc(100vh-220px)] overflow-hidden">
-                                {/*<GhostBar repositories={repositories}/>*/}
+                                className="relative border rounded-r-lg pt-8 h-[calc(100vh-220px)] overflow-hidden
+                                 bg-gray-50 border-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700">
 
                                 {/* 리포 없을 때 */}
                                 {repositories.length === 0 ? (
                                     <div className="absolute inset-0 flex items-center justify-center p-8">
                                         <div
-                                            className="relative w-full max-w-lg rounded-2xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-white p-12 text-center shadow-sm transition-all">
+                                            className="relative w-full max-w-lg rounded-2xl border-2 border-dashed p-12 text-center shadow-sm transition-all
+                                            border-gray-200 bg-white dark:bg-neutral-900 dark:border-neutral-700">
                                             <div
-                                                className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-blue-50 ring-1 ring-blue-100">
-                                                <i className="fa-regular fa-folder-open text-3xl text-blue-500"/>
+                                                className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full
+                                                bg-blue-200/50">
+                                                <i className="fa-regular fa-folder-open text-3xl text-blue-500 dark:text-blue-300"/>
                                             </div>
 
-                                            <h3 className="text-2xl font-semibold tracking-tight text-gray-900">
+                                            <h3 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-neutral-300">
                                                 No repositories yet
                                             </h3>
-                                            <p className="mt-2 text-sm text-gray-500">
-                                                Create a new repository or import one from GitHub to get started.
-                                            </p>
 
                                             {isMyRepos ? (
-                                                <div className="mt-6 flex items-center justify-center gap-3">
-                                                    <button
-                                                        onClick={openModal}
-                                                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50"
-                                                    >
-                                                        <i className="fa-solid fa-plus"/>
-                                                        Create / Import Repository
-                                                    </button>
-                                                </div>
+                                                <>
+                                                    <p className="mt-2 text-sm text-gray-500 dark:text-neutral-500">
+                                                        Create a new repository or import one from GitHub to get
+                                                        started.
+                                                    </p>
+
+                                                    <div className="mt-6 flex items-center justify-center gap-3">
+                                                        <button
+                                                            onClick={openModal}
+                                                            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50"
+                                                        >
+                                                            <i className="fa-solid fa-plus"/>
+                                                            Create / Import Repository
+                                                        </button>
+                                                    </div>
+                                                </>
                                             ) : (
                                                 <div className="mt-6 text-sm text-gray-400">
                                                     No repositories available.
@@ -342,6 +355,7 @@ export default function RepositoriesPage() {
                                                 key={`posts-${selectedRepoId ?? 'none'}`}
                                                 repoId={selectedRepo.id}
                                                 repoName={selectedRepo.name}
+                                                isMyRepo={isMyRepos}
                                             />
                                         ) : null}
                                     </>
@@ -362,5 +376,23 @@ export default function RepositoriesPage() {
                 />
             )}
         </LayoutGroup>
+    );
+}
+
+function TopTab({visible = true, href, label, active}) {
+    if (!visible) return null;
+
+    return active ? (
+        <span
+            className="p-4 -mb-px font-semibold text-black dark:text-neutral-300 border-b-2 border-black dark:border-neutral-300">
+      {label}
+    </span>
+    ) : (
+        <Link
+            href={href}
+            className="p-4 -mb-px hover:text-neutral-700 dark:hover:text-neutral-300"
+        >
+            {label}
+        </Link>
     );
 }

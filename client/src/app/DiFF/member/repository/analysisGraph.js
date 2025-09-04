@@ -1,27 +1,52 @@
 'use client';
 
 import '@/common/registerChart';
-import { Doughnut } from "react-chartjs-2";
+import {Doughnut} from "react-chartjs-2";
 
-// Circle 컴포넌트
-const Circle = ({ grade, color }) => (
-    <div
-        className="flex items-center justify-center w-8 h-8 rounde-full font-bold text-white"
-        style={{ backgroundColor: color }}
-    >
-        {grade}
-    </div>
-);
+const gradeBaseColor = (key) => {
+    switch (String(key || '').toUpperCase()) {
+        case 'A': return 'rgb(176, 255, 194)';
+        case 'B': return 'rgb(224, 255, 142)';
+        case 'C': return 'rgb(255, 250, 134)';
+        case 'D': return 'rgb(255, 213, 157)';
+        case 'E': return 'rgb(255, 196, 196)';
+        default:  return 'rgb(218, 218, 218)';
+    }
+};
 
-export default function AnalysisGraph({ analysis }) {
+export const Circle = ({ grade = 'E' }) => {
+    const key = String(grade).toUpperCase();
+    return (
+        <div
+            className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-neutral-900/60"
+            style={{ backgroundColor: gradeBaseColor(key) }}
+            aria-label={`Grade ${key}`}
+            title={`Grade ${key}`}
+        >
+            {key}
+        </div>
+    );
+};
+
+export default function AnalysisGraph({analysis}) {
     if (!analysis) return null;
 
-    // Duplication donut 데이터
+    function getDuplicationColor(d) {
+        const v = Math.max(0, Math.min(100, Number(d) || 0));
+        if (v < 5) return "rgb(61,191,67)";
+        if (v < 10) return "rgb(187,211,36)";
+        if (v < 15) return "rgb(230,201,13)";
+        if (v < 20) return "rgb(255,171,59)";
+        return "rgb(232,104,104)";
+    }
+
+    const density = Math.max(0, Math.min(100, Number(analysis.duplicatedLinesDensity) || 0));
+
     const duplicationData = {
         datasets: [
             {
-                data: [analysis.duplicatedLinesDensity, 100 - analysis.duplicatedLinesDensity],
-                backgroundColor: ["#f97316", "#f3f4f6"], // 주황, 회색
+                data: [density, 100 - density],
+                backgroundColor: [getDuplicationColor(density), gradeBaseColor()],
                 borderWidth: 0,
             },
         ],
@@ -29,47 +54,56 @@ export default function AnalysisGraph({ analysis }) {
 
     const duplicationOptions = {
         cutout: "70%",
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        plugins: {legend: {display: false}, tooltip: {enabled: false}},
     };
 
     return (
-        <div className="flex items-center gap-8 text-sm flex-nowrap">
+        <div className="p-1 flex items-center justify-around text-sm flex-nowrap font-bold">
+
             {/* Security */}
-            <div className="flex items-center gap-2">
-                <Circle grade={analysis.gradeSecurity} color="#fca5a5" />
-                <span>Security: {analysis.vulnerabilities}</span>
+            <div className="flex flex-col jusitify-center items-center gap-3">
+                <div className="flex items-center gap-3"><Circle
+                    grade={analysis.gradeSecurity}/> {analysis.vulnerabilities}</div>
+                <span className="font-medium text-xs">Security</span>
             </div>
 
             {/* Reliability */}
-            <div className="flex items-center gap-2">
-                <Circle grade={analysis.gradeReliability} color="#fde047" />
-                <span>Reliability: {analysis.bugs}</span>
+            <div className="flex flex-col jusitify-center items-center gap-3">
+                <div className="flex items-center gap-3"><Circle grade={analysis.gradeReliability}/> {analysis.bugs}
+                </div>
+                <span className="font-medium text-xs">Reliability</span>
             </div>
 
             {/* Maintainability */}
-            <div className="flex items-center gap-2">
-                <Circle grade={analysis.gradeMaintainability} color="#86efac" />
-                <span>Maintainability: {analysis.codeSmells}</span>
+            <div className="flex flex-col jusitify-center items-center gap-3">
+                <div className="flex items-center gap-3"><Circle
+                    grade={analysis.gradeMaintainability}/>{analysis.codeSmells}</div>
+                <span className="font-medium text-xs">Maintainability</span>
             </div>
 
             {/* Complexity */}
-            <div className="flex items-center gap-2">
-                <Circle grade={analysis.gradeComplexity} color="#d8b4fe" />
-                <span>Complexity: {analysis.complexity}</span>
+            <div className="flex flex-col jusitify-center items-center gap-3">
+                <div className="flex items-center gap-3"><Circle
+                    grade={analysis.gradeComplexity}/> {analysis.complexity}</div>
+                <span className="font-medium text-xs">Complexity</span>
             </div>
 
             {/* Coverage */}
-            <div className="flex items-center gap-2">
-                <Circle grade={analysis.gradeCoverage} color="#9ca3af" />
-                <span>Coverage: {analysis.coverage}%</span>
+            <div className="flex flex-col jusitify-center items-center gap-3">
+                <div className="flex items-center gap-3"><Circle grade={analysis.gradeCoverage}/> {analysis.coverage} %
+                </div>
+                <span className="font-medium text-xs">Coverage</span>
             </div>
 
             {/* Duplications */}
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10">
-                    <Doughnut data={duplicationData} options={duplicationOptions} />
+            <div className="flex flex-col jusitify-center items-center gap-3">
+                <div className="flex justify-center items-center gap-3">
+                    <div className="w-7 h-7">
+                        <Doughnut data={duplicationData} options={duplicationOptions}/>
+                    </div>
+                    {analysis.duplicatedLinesDensity} %
                 </div>
-                <span>Duplications: {analysis.duplicatedLinesDensity}%</span>
+                <span className="font-medium text-xs">Duplications</span>
             </div>
         </div>
     );

@@ -198,7 +198,7 @@ function SettingsPage() {
                     <TopTab href="/DiFF/member/repository" label="Repositories"/>
                     <TopTab active href="#" label="Settings"/>
                 </div>
-                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
+                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700 mb-10"/>
 
                 {/* 배너 */}
                 {banner && (

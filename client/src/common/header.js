@@ -9,6 +9,7 @@ import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
 import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
+import ThemeToggle from "@/common/thema";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -231,10 +232,8 @@ export default function Header() {
     return (
         <HeaderWrap className={`
                         ${hide ? 'hide' : ''}
-                        bg-[${background}] h-[${height}]
-                        dark:text-white
                         `}
-        >
+                    style={{backgroundColor: background, height}}>
 
             <div className="pl-4">
                 <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold dark:text-neutral-300">DiFF</Link>
@@ -259,6 +258,7 @@ export default function Header() {
                     </div>
                 </form>
             }
+            <ThemeToggle/>
 
             <ul className="flex items-center gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
                 {accessToken ? (
@@ -278,20 +278,20 @@ export default function Header() {
                                     className="absolute right-0 mt-2 w-80 z-50"
                                 >
                                     {/* 말풍선 꼬리 */}
-                                    <span className="pointer-events-none absolute right-4 -top-1.5 h-3 w-3 rotate-45 rounded-sm
-                                       border border-neutral-200 bg-white/80
-                                       dark:border-neutral-700 dark:bg-neutral-950/40"></span>
+                                    <span className="pointer-events-none absolute right-4 -top-1.5 h-3 w-3 rotate-45 rounded-sm z-20
+                                       border border-neutral-200 bg-white
+                                       dark:border-neutral-700 dark:bg-neutral-800"></span>
 
                                     {/* 카드 */}
-                                    <div className="rounded-2xl border border-neutral-200 bg-white/80 p-2 shadow-lg backdrop-blur
-                                                    dark:border-neutral-700 dark:bg-neutral-950/40">
+                                    <div className="rounded-2xl border border-neutral-200 bg-white p-2 shadow z-30
+                                                    dark:border-neutral-700 dark:bg-neutral-800">
                                         {/* 헤더 */}
-                                        <div className="mb-1 flex items-center justify-between px-2">
+                                        <div className="mb-2 flex items-center justify-between px-2">
                                             <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Notifications</span>
                                             <button
                                                 onClick={() => setOpen(false)}
                                                 className="text-xs rounded-lg border border-neutral-300 px-2 py-1 text-neutral-600 transition
-                                                            hover:bg-neutral-100/70 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-900/60"
+                                                            hover:bg-neutral-200 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-950"
                                             >
                                                 Close
                                             </button>
@@ -303,8 +303,8 @@ export default function Header() {
                                                 {notifications.map((n) => (
                                                     <li
                                                         key={n.id}
-                                                        className="group flex items-start gap-3 rounded-xl px-3 py-2 transition
-                                                                    hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
+                                                        className="group flex items-start gap-3 rounded-xl px-3 py-3 transition
+                                                                    hover:bg-neutral-100 dark:hover:bg-neutral-900/50"
                                                     >
                                                         <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
                                                              border border-neutral-300 bg-neutral-100 text-neutral-600
