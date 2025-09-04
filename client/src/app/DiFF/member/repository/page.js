@@ -222,16 +222,16 @@ export default function RepositoriesPage() {
         <LayoutGroup>
             <section className="px-4">
                 <div className="mx-auto max-w-6xl h-full">
-                    <div className="flex items-center text-gray-500">
-                        <Link href={profileHref} className="p-4 -mb-px">Profile</Link>
-                        <span className="text-black p-4 -mb-px font-semibold border-b-2 border-black">Repositories</span>
-                        {isMyRepos &&
-                            <Link href="/DiFF/member/settings" className="p-4 -mb-px">
-                                Settings
-                            </Link>
-                        }
+
+                    {/* Tabs */}
+                    <div className="flex items-center text-neutral-500">
+                        <TopTab href={profileHref} label="Profile"/>
+                        <TopTab active href="#" label="Repositories"/>
+                        <TopTab href="/DiFF/member/settings" label="Settings"
+                                visible={isMyRepos}/>
                     </div>
-                    <div className="h-px w-full bg-gray-300 mb-8"/>
+
+                    <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
@@ -362,5 +362,23 @@ export default function RepositoriesPage() {
                 />
             )}
         </LayoutGroup>
+    );
+}
+
+function TopTab({visible = true, href, label, active}) {
+    if (!visible) return null;
+
+    return active ? (
+        <span
+            className="p-4 -mb-px font-semibold text-black dark:text-neutral-300 border-b-2 border-black dark:border-neutral-300">
+      {label}
+    </span>
+    ) : (
+        <Link
+            href={href}
+            className="p-4 -mb-px hover:text-neutral-700 dark:hover:text-neutral-300"
+        >
+            {label}
+        </Link>
     );
 }

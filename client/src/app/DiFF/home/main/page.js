@@ -303,9 +303,9 @@ export default function Page() {
                                                                     day: "numeric"
                                                                 })}</div>
                                                                 <div className="text-sm text-gray-600">
-                                                                    <i className="fa-solid fa-heart"></i> {article.extra__sumReaction}
+                                                                    <i className="fa-regular fa-comment"></i> {article.extra__sumReplies}
                                                                     &nbsp;&nbsp;&nbsp;&nbsp;
-                                                                    <i className="fa-solid fa-comments"></i> {article.extra__sumReplies}
+                                                                    <i className="fa-regular fa-heart"></i> {article.extra__sumReaction}
                                                                 </div>
                                                             </div>
                                                         </div>

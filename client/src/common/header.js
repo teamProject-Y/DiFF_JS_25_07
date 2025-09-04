@@ -9,6 +9,7 @@ import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
 import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
+import ThemeToggle from "@/common/thema";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -257,6 +258,7 @@ export default function Header() {
                     </div>
                 </form>
             }
+            <ThemeToggle/>
 
             <ul className="flex items-center gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
                 {accessToken ? (

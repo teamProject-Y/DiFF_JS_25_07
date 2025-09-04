@@ -7,8 +7,8 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
+import {oneDark} from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 import {
     fetchUser,
@@ -171,6 +171,7 @@ function ProfileInner() {
                     <TopTab href="/DiFF/member/settings" label="Settings"
                             visible={isMyProfile}/>
                 </div>
+
                 <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
 
                 <div className="flex w-full">
@@ -266,17 +267,17 @@ function ProfileInner() {
                                                     }
                                                 }}
                                                 className={`py-1 text-sm rounded-full border transition w-20 
-                                                    ${ member.isFollowing
-                                                        ? hoverUnfollow
-                                                            ? "text-red-500 border hover:border-red-500"
-                                                            : "border text-gray-500 bg-gray-100 " +
-                                                              "dark:bg-neutral-800/40 dark:text-neutral-500 dark:border-neutral-700/80 "
-                                                        : "text-gray-700 border-gray-700 hover:bg-gray-100 " +
-                                                          "dark:hover:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-300"
-                                                    }`}
-                                                aria-label={ member.isFollowing
-                                                        ? (hoverUnfollow ? "Unfollow" : "Following")
-                                                        : "Follow"
+                                                    ${member.isFollowing
+                                                    ? hoverUnfollow
+                                                        ? "text-red-500 border hover:border-red-500"
+                                                        : "border text-gray-500 bg-gray-100 " +
+                                                        "dark:bg-neutral-800/40 dark:text-neutral-500 dark:border-neutral-700/80 "
+                                                    : "text-gray-700 border-gray-700 hover:bg-gray-100 " +
+                                                    "dark:hover:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-300"
+                                                }`}
+                                                aria-label={member.isFollowing
+                                                    ? (hoverUnfollow ? "Unfollow" : "Following")
+                                                    : "Follow"
                                                 }
                                             >
                                                 {member.isFollowing ? (hoverUnfollow ? "Unfollow" : "Following") : "Follow"}
@@ -342,7 +343,7 @@ function ProfileInner() {
                                         remarkPlugins={[remarkGfm]}
                                         rehypePlugins={[rehypeRaw]}
                                         components={{
-                                            code({ node, inline, className, children, ...props }) {
+                                            code({node, inline, className, children, ...props}) {
                                                 const match = /language-(\w+)/.exec(className || "");
                                                 return !inline && match ? (
                                                     <SyntaxHighlighter
@@ -359,10 +360,10 @@ function ProfileInner() {
                                                     </code>
                                                 );
                                             },
-                                            ul: ({ node, ...props }) => (
+                                            ul: ({node, ...props}) => (
                                                 <ul className="list-disc pl-6" {...props} />
                                             ),
-                                            ol: ({ node, ...props }) => (
+                                            ol: ({node, ...props}) => (
                                                 <ol className="list-decimal pl-6" {...props} />
                                             ),
                                         }}

@@ -141,11 +141,11 @@ export default function SearchPage() {
                                                     </span>
                                                         <span>view: {article.hits}</span>
                                                         <span>
-                                                        <i className="fa-solid fa-comments"></i>{' '}
+                                                        <i className="fa-regular fa-comment"></i>{' '}
                                                             {article.extra__sumReplies}
                                                     </span>
                                                         <span>
-                                                        <i className="fa-solid fa-heart"></i>{' '}
+                                                        <i className="fa-regular fa-heart"></i>{' '}
                                                             {article.extra__sumReaction}
                                                     </span>
                                                     </div>
