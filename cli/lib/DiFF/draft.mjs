@@ -7,8 +7,11 @@ import {DateTime} from "luxon";
 import chalk from "chalk";
 import {appendMeta} from "./init.mjs";
 import path from "path";
+import axios from "axios";
 
-export async function mkDraft(memberId, branch) {
+// mkDraft 함수
+export async function mkDraft(memberId, branch, draftId, diffId) {
+    console.log('🚀 mkDraft started...');
 
     const from = await getLastRequestChecksum(branch);
     const to = await getLastChecksum(branch);
@@ -20,12 +23,39 @@ export async function mkDraft(memberId, branch) {
         return null;
     }
 
-    const getDraft = await sendDiFF(memberId, repositoryId, to, diff);
+    // console.log("✅ 최종 draftId:", draftId, "diffId:", diffId, "checksum:", to);
 
-    if(getDraft){
+    const ok = await sendDiFF(memberId, repositoryId, draftId, diffId, to, diff);
+
+    if (ok) {
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);
+    }
 
+    return ok ? { draftId, diffId, checksum: to } : null;
+}
+
+
+export async function createDraft(memberId, repositoryId) {
+    try {
+        console.log("📤 draft 생성 요청:", { memberId, repositoryId });
+        const { data } = await axios.post(
+            "http://localhost:8080/api/DiFF/draft/mkDraft",
+            { memberId, repositoryId }
+        );
+        console.log("📥 draft 생성 응답:", data);
+
+        if (data.resultCode?.startsWith("S-")) {
+            const { draftId, diffId } = data.data1;
+            // console.log(`✅ draft 생성 성공 → draftId=${draftId}, diffId=${diffId}`);
+            return { draftId, diffId };
+        } else {
+            console.log("❌ draft 생성 실패:", data.msg);
+            return null;
+        }
+    } catch (err) {
+        console.error("⚠️ draft 생성 중 오류:", err.message);
+        return null;
     }
 }
 
