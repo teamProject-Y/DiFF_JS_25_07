@@ -436,10 +436,13 @@ export function WriteArticlePage() {
                                 Content
                             </label>
                             <div className="rounded border border-neutral-300 bg-neutral-100/50 p-2 dark:border-neutral-700 dark:bg-neutral-900/40">
-                                <ToastEditor initialValue={body} onChange={setBody} />
+                                {/* ✅ ToastEditor 연결 */}
+                                <ToastEditor
+                                    initialValue={body}
+                                    onChange={(value) => setBody(value)}
+                                />
                             </div>
                         </div>
-
                         {/* 상태 메시지 */}
                         <div className="min-h-[1rem]">
                             {error && (
