@@ -2,6 +2,7 @@
 import axios from "axios";
 import {DraftAPI} from "@/lib/DraftAPI";
 import { UserAPI } from "@/lib/UserAPI";
+import {ReflectAdapter as RepositoryAPI} from "next/dist/server/web/spec-extension/adapters/reflect";
 
 /** 커스텀 Axios 인스턴스 */
 export const ArticleAPI = axios.create({
@@ -135,6 +136,7 @@ export const trendingArticle = async ({ count, days }) => {
 
 // lib/ArticleAPI.js
 export const writeArticle = async (data) => {
+    console.log('📦 doWrite 호출, payload:', data);
     // repositoryId 숫자 변환
     if (data?.repositoryId != null) {
         data = { ...data, repositoryId: Number(data.repositoryId) };
@@ -150,8 +152,8 @@ export const writeArticle = async (data) => {
     // (디버깅 로그)
     console.log('📦 doWrite 응답:', result);
     console.log('📦 repository:', result?.data?.repository);
-    console.log('📦 draft:', result?.data?.draft);
-    console.log('📦 articleId:', result?.data?.articleId);
+    console.log('📦 draft:', result?.data1?.draft);
+    console.log('📦 articleId:', result?.data1?.articleId);
 
     return result; // ResultData
 };

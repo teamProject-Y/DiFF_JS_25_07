@@ -7,7 +7,7 @@ import { writeArticle, getMyRepositories } from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
 import clsx from "clsx";
 
-const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
 function RepoDropdown({ items = [], value, onChange }) {
     const [open, setOpen] = useState(false);
@@ -146,7 +146,7 @@ function RepoDropdown({ items = [], value, onChange }) {
 export default function Page() {
     return (
         <Suspense fallback={<div className="p-4">Loading…</div>}>
-            <WriteArticlePage />
+            <WriteArticlePage/>
         </Suspense>
     );
 }
@@ -165,10 +165,11 @@ export function WriteArticlePage() {
     const [repositoryId, setRepositoryId] = useState(null);
     const [loadingRepos, setLoadingRepos] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [submittingType, setSubmittingType] = useState(null); // 'upload' | 'save' | null
+    const [submittingType, setSubmittingType] = useState(null);
     const [error, setError] = useState('');
     const [repoError, setRepoError] = useState('');
     const [draftId, setDraftId] = useState(sp.get('draftId'));
+    const [diffId, setDiffId] = useState(null);
 
     // 로그인 체크
     useEffect(() => {
@@ -185,6 +186,12 @@ export function WriteArticlePage() {
                     setTitle(draft.title || '');
                     setBody(draft.body || '');
                     setRepositoryId(draft.repositoryId || null);
+
+                    // ✅ draft 불러올 때 diffId도 세팅 (서버에서 내려줘야 함)
+                    if (draft.diffId) {
+                        setDiffId(draft.diffId);
+                        console.log("📥 draft.diffId 세팅:", draft.diffId);
+                    }
                 } catch (e) {
                     console.error("임시저장 불러오기 실패:", e);
                 }
@@ -226,9 +233,19 @@ export function WriteArticlePage() {
     }, []);
 
     // 게시물 작성
+    // 게시물 작성
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        console.log("🚀 [handleSubmit] 실행됨");
+        console.log("📌 현재 상태:", {
+            repositoryId,
+            title,
+            bodyLength: body?.length,
+            draftId,
+            diffId
+        });
 
         if (!repositoryId) return setError('repositoryId가 없습니다.');
         if (!title.trim()) return setError('제목을 입력하세요.');
@@ -244,26 +261,47 @@ export function WriteArticlePage() {
                 body,
                 checksum,
                 repositoryId: Number(repositoryId),
-                draftId: draftId ? Number(draftId) : null
+                draftId: draftId ? Number(draftId) : null,
+                diffId: diffId ? Number(diffId) : null
             };
 
+            console.log("📤 [handleSubmit] 서버로 보낼 data:", data);
+
             const res = await writeArticle(data);
+
+            console.log("📥 [handleSubmit] 서버 응답 전체:", res);
+
             if (res?.resultCode?.startsWith('S-')) {
+                console.log("✅ [handleSubmit] 글 작성 성공 → 리스트 이동");
                 router.push(`/DiFF/article/list?repositoryId=${repositoryId}`);
             } else {
+                console.error("❌ [handleSubmit] 작성 실패 응답:", res);
                 setError(res?.msg || '작성 실패');
             }
         } catch (err) {
+            console.error("💥 [handleSubmit] 요청 실패", err);
+
+            if (err?.response) {
+                console.error("📥 서버 에러 응답:", err.response);
+                console.error("📥 서버 에러 data:", err.response.data);
+                console.error("📥 서버 에러 status:", err.response.status);
+                console.error("📥 서버 에러 headers:", err.response.headers);
+            } else {
+                console.error("📥 네트워크 에러 or axios 설정 문제:", err.message);
+            }
+
             if (err?.response?.status === 401) {
                 router.replace('/DiFF/member/login');
             } else {
-                setError(err?.response?.data?.msg || '요청 실패');
+                setError(err?.response?.data?.msg || err.message || '요청 실패');
             }
         } finally {
+            console.log("🔚 [handleSubmit] 종료 (submitting=false)");
             setSubmitting(false);
             setSubmittingType(null);
         }
     };
+
 
     const handleSaveDraft = async (e) => {
         e.preventDefault();
@@ -287,13 +325,24 @@ export function WriteArticlePage() {
 
             const res = await saveDraft(data);
 
+            console.log("💾 saveDraft 응답:", res);
+
             if (res && res.resultCode && res.resultCode.startsWith("S-")) {
-                // 새 글일 때 draftId 갱신 → update 모드로 전환
-                if (!draftId && res.data1) setDraftId(res.data1);
+                alert("임시저장 완료!");
+
+                if (!draftId && res.data1) {
+                    setDraftId(res.data1);
+                }
+                if (res.data2) {
+                    setDiffId(res.data2);
+                    console.log("💾 diffId 세팅:", res.data2);
+                }
             } else {
+                console.error("❌ saveDraft 실패 응답:", res);
                 setError(res?.msg || "임시저장 실패");
             }
         } catch (err) {
+            console.error("💥 saveDraft error:", err);
             if (err?.response?.status === 401) {
                 router.replace("/DiFF/member/login");
             } else {
@@ -304,6 +353,9 @@ export function WriteArticlePage() {
             setSubmittingType(null);
         }
     };
+
+
+
 
     return (
         <div className="min-h-screen w-full">

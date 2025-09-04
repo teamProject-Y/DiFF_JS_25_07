@@ -5,7 +5,7 @@ import {getGitEmail} from "../git/simpleGit.mjs";
 
 /** diff member check **/
 export async function verifyGitUser() {
-
+    console.log('🚀 Verifying Git user...');
     const email = await getGitEmail();
 
     if(email === null) {
@@ -57,55 +57,40 @@ export async function mkRepo(memberId, repoName, commitHash){
             firstCommit: commitHash
         });
 
-    if (data.resultCode.startsWith('S-')) { // 인증 성공
-        return data.data1; // memberId 리턴
+    if (data.resultCode.startsWith('S-')) {
+        return data.data1;
 
-    } else { // 인증 실패
+    } else {
         console.log("This repository name is already in use.");
         return null;
     }
 }
 
 
-/** 서버에 diff 보내기 **/
-export async function sendDiFF(memberId, repositoryId, to, diff) {
+
+export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     try {
-        console.log(chalk.bgCyanBright("sendDiFF"));
         const { data } = await axios.post(
-            'http://localhost:8080/api/DiFF/draft/mkDraft',
+            "http://localhost:8080/api/DiFF/draft/receiveDiff",
             {
                 memberId,
                 repositoryId,
-                lastChecksum: to,
-                diff
+                draftId,
+                diffId,
+                lastChecksum: checksum,
+                diff,
             }
         );
 
-        if (data.resultCode?.startsWith('S-')) {
-
-            console.log(chalk.bgCyanBright(chalk.black("server에 diff 보내기 성공")));
-
+        if (data.resultCode?.startsWith("S-")) {
+            console.log("✅ server에 diff 보내기 성공:", data.msg);
             return true;
         } else {
-            console.log(chalk.bgRedBright(chalk.white(data.msg)));
-            console.log('서버 응답 데이터:', data);
+            console.error("❌ server에 diff 보내기 실패:", data.msg);
             return false;
         }
-
     } catch (error) {
-        console.log(chalk.bgRedBright(chalk.white("server에 diff 전달 중 오류 발생")));
-
-        if (error.response) {
-            console.error('📡 status:', error.response.status);
-            console.error('📄 data:', error.response.data);
-        } else if (error.request) {
-            console.error('❓ no response received');
-            console.error(error.request);
-        } else {
-            // 요청 자체 세팅 중 오류
-            console.error('⚠️ axios 설정 문제:', error.message);
-        }
-
+        console.error("⚠️ sendDiFF 중 오류:", error.message);
         return false;
     }
 }
