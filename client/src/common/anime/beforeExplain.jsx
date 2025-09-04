@@ -37,48 +37,60 @@ const BeforeExplain = () => {
         const enableSmooth = () => scrollContainer?.classList.remove('no-smooth');
 
         // 초기 상태
-        gsap.set([text2, text3], {opacity: 0, y: 40, force3D: true, willChange: 'transform'});
 
         const q1 = gsap.utils.selector(text1);
-        const bullet = q1('.dot')[0];
+        const q2 = gsap.utils.selector(text2);
+        const q3 = gsap.utils.selector(text3);
 
-        const textTargets = q1('span:not(.dot), li');
+        const bullet1 = q1('.dot')[0];
+        const text1Targets = q1('span:not(.dot), li');
+        const initialText1Color = text1Targets[0] ? getComputedStyle(text1Targets[0]).color : 'black';
+        const initialBullet1Bg  = bullet1 ? getComputedStyle(bullet1).backgroundColor : '#000';
 
-        const initialTextColor  = textTargets[0] ? getComputedStyle(textTargets[0]).color : 'black'; // tailwind gray-900 대체값
-        const initialBulletBg   = bullet ? getComputedStyle(bullet).backgroundColor : '#000';
+        const bullet2 = q2('.dot2')[0];
+        const text2Targets = q2('span:not(.dot2), li');
+        const initialText2Color = text2Targets[0] ? getComputedStyle(text2Targets[0]).color : 'black';
+        const initialBullet2Bg  = bullet2 ? getComputedStyle(bullet2).backgroundColor : '#000';
 
-        gsap.set(textTargets, { willChange: 'color' });
-        gsap.set(bullet,      { willChange: 'background-color' });
+        const bullet3 = q3('.dot3')[0];
+        const text3Targets = q3('span:not(.dot3), li');
+        const initialText3Color = text3Targets[0] ? getComputedStyle(text3Targets[0]).color : 'black';
+        const initialBullet3Bg  = bullet3 ? getComputedStyle(bullet3).backgroundColor : '#000';
+
+        gsap.set([text1Targets, text2Targets, text3Targets].filter(el => el && el.nodeType === 1),  { willChange: 'color' });
+        gsap.set([bullet1, bullet2, bullet3],      { willChange: 'background-color' });
 
         // 메인 타임라인 (pin + 텍스트 시퀀스만)
         const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: container,
                 start: 'top top',
-                end: '+=300%',       // 카드 구간 삭제했으니 스크롤 길이 축소
+                end: '+=500%',       // 카드 구간 삭제했으니 스크롤 길이 축소
                 pin: true,
                 scrub: 0.5,
                 pinSpacing: true,
                 scroller: scrollContainer || undefined,
                 anticipatePin: 2,
                 invalidateOnRefresh: true,
+                markers: true,
                 onToggle: (self) => self.isActive ? (disableSnap(), disableSmooth()) : (enableSnap(), enableSmooth()),
                 onRefresh: (self) => self.isActive ? (disableSnap(), disableSmooth()) : (enableSnap(), enableSmooth()),
             }
         });
 
-        const HOLD = 0.7;
+        const HOLD1 = 0.5;
+        const HOLD2 = 0.5;
 
         tl
             // ✅ text1 색 변경과 오른쪽 텍스트 등장 동기화
-            .add('text1Focus', '+=0.3')
+            .add('text1Focus', '+=0.1')
             .to(q1('span, li'), {
                 color: '#3b82f6',
-                duration: 1.2,
+                duration: 1.0,
                 ease: 'power3.inOut',
                 stagger: 0.06
             }, 'text1Focus')
-            .to(bullet, {
+            .to(bullet1, {
                 backgroundColor: '#3b82f6',
                 duration: 1.2,
                 ease: 'power3.inOut'
@@ -89,29 +101,58 @@ const BeforeExplain = () => {
                 'text1Focus'
             )
 
-
             // 2) 조금 더 스크롤(HOLD) 후 원래색으로 복귀
-            .add('revert', `+=${HOLD}`)
-            .to(textTargets, {
-                color: initialTextColor,
+            .add('revert1', `+=${HOLD1}`)
+            .to(text1Targets, {
+                color: initialText1Color,
                 duration: 1.0,
                 ease: 'power2.inOut'
-            }, 'revert')
-            .to(bullet, {
-                backgroundColor: initialBulletBg,
+            }, 'revert1')
+            .to(bullet1, {
+                backgroundColor: initialBullet1Bg,
                 duration: 1.0,
                 ease: 'power2.inOut'
-            }, 'revert')
+            }, 'revert1')
             .to(rightText, {             // 오른쪽 텍스트는 서서히 사라지게(원하면 지워도 됨)
                 opacity: 0, y: -20, duration: 0.8, ease: 'power2.inOut'
-            }, 'revert+=0.2')
+            }, 'revert1+=0.2')
 
-            // 2) 등장 → 퇴장
-            .to(text2, {opacity: 1, y: 0, snap: {y: 1}, duration: 1.5, ease: 'power3.out'}, '-=0.6')
-            .to(text2, {opacity: 0, y: -40, duration: 1.2, ease: 'power3.inOut'}, '+=0.3')
+            // 2번째
+            .add('text2Focus', '+=0.3')
+            .to(text2Targets, { color: '#3b82f6', duration: 0.9, ease: 'power3.inOut' }, 'revert1')
+            .to(bullet2, {
+                backgroundColor: '#3b82f6',
+                duration: 1.2,
+                ease: 'power3.inOut'
+            }, 'revert1')
+            .fromTo(rightText2,                           // ✅ 동시에 오른쪽 텍스트 등장
+                { opacity: 0, x: 30 },
+                { opacity: 1, x: 0, duration: 1.0, ease: 'power3.out' },
+                'text2Focus'
+            )
 
-            // 3) 등장 (마지막은 남겨도 되고)
-            .to(text3, {opacity: 1, y: 0, snap: {y: 1}, duration: 1.5, ease: 'power3.out'}, '-=0.6');
+            // 2번째 사라짐
+            .add('revert2', `+=${HOLD2}`)
+            .to(text2Targets, { color: initialText2Color, duration: 1.0, ease: 'power2.inOut' }, 'revert2')
+            .to(bullet2, {
+                backgroundColor: initialBullet2Bg,
+                duration: 1.0,
+                ease: 'power2.inOut'
+            }, 'revert2')
+            .to(rightText2, {             // 오른쪽 텍스트는 서서히 사라지게(원하면 지워도 됨)
+                opacity: 0, y: -20, duration: 0.8, ease: 'power2.inOut'
+            }, 'revert2+=0.2')
+
+            // 3번째
+            .add('text3Focus', '+=${HOLD2}')
+            .to(text3Targets, { color: '#3b82f6', duration: 0.9, ease: 'power3.inOut' }, 'revert2')
+            .to(bullet3, {
+                backgroundColor: '#3b82f6',
+                duration: 1.2,
+                ease: 'power3.inOut'
+            }, 'revert2')
+            .to({}, { duration: HOLD2 });
+
 
         return () => {
             tl.scrollTrigger && tl.scrollTrigger.kill();
@@ -166,23 +207,27 @@ const BeforeExplain = () => {
                     {/* 불릿 리스트 (text2) */}
                     <div ref={text2Ref} className="space-y-4">
                         <div className="flex items-center gap-3">
-                            <span className="w-2.5 h-2.5 rounded-full bg-blue-600"/>
-                            <span className="text-blue-700 font-semibold">
+                            <span className="dot2 w-2.5 h-2.5 rounded-full bg-black"/>
+                            <span className="text-black font-semibold">
                                 수준과 목적에 따른 커리큘럼
                             </span>
                         </div>
-                        <ul className="pl-6 text-gray-600 space-y-2">
-                            <li className="list-disc">Short / Long 교육기간 및 시간</li>
-                            <li className="list-disc">방문 또는 집합형 교육형태</li>
-                            <li className="list-disc">교구, 교재, SW, Total 컨텐츠 제공</li>
-                        </ul>
+                    </div>
+
+                    <div ref={text3Ref} className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <span className="dot3 w-2.5 h-2.5 rounded-full bg-black"/>
+                            <span className="text-black font-semibold">
+                                수준과 목적에 따른 커리큘럼
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 {/* RIGHT */}
                 <div className="relative md:pl-12">
                     {/* 거대 해시 타이틀 (text3) */}
-                    <div ref={text3Ref} className="leading-none">
+                    <div className="leading-none">
                         <p className="font-black tracking-tight text-gray-900 text-[clamp(40px,8vw,120px)]">
                             # 수준과 목적에 따른
                         </p>
