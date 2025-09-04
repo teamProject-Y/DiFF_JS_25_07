@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import LanguageChart from "./langaugeChart";
+import LanguageChart from "./languageChart";
+
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {getAnalysisHistory, getLanguageDistribution} from "@/lib/RepositoryAPI";
 

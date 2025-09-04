@@ -21,7 +21,7 @@ SwiperSlide.displayName = 'SwiperSlide';
 
 // 외부 컴포넌트
 const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), {ssr: false});
-const HamburgerButton = dynamic(() => import('@/common/HamMenu'), {ssr: false});
+const HamburgerButton = dynamic(() => import('@/common/hamMenu'), {ssr: false});
 
 // background
 const sections = [
