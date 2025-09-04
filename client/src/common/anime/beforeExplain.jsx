@@ -188,9 +188,9 @@ const BeforeExplain = () => {
                     {/* 큰 문장 (text1) */}
                     <div className="mb-10">
                         <h1 className="text-5xl md:text-5xl font-semibold leading-tight text-gray-900">
-                            원하시는 조건과 교육 현장의 여건에 따라
+                            당신의 개발 기록을
                             <br className="hidden md:block"/>
-                            맞춤화 교육 설계 및 운영이 가능합니다.
+                            콘텐츠로 바꿔주는 스마트 워크플로우
                         </h1>
                     </div>
 
@@ -229,10 +229,8 @@ const BeforeExplain = () => {
                     {/* 거대 해시 타이틀 (text3) */}
                     <div className="leading-none">
                         <p className="font-black tracking-tight text-gray-900 text-[clamp(40px,8vw,120px)]">
-                            # 수준과 목적에 따른
                         </p>
                         <p className="font-black tracking-tight text-gray-900 text-[clamp(48px,9vw,140px)]">
-                            커리큘럼
                         </p>
                     </div>
 
@@ -242,7 +240,7 @@ const BeforeExplain = () => {
                         aria-hidden="true"
                     >
                         <p className="text-black font-semibold text-lg md:text-8xl">
-                            커밋 요약이 자동으로 생성
+                            # 커밋 요약이 자동으로 생성
                         </p>
                         <p className="text-black text-5xl md:text-3xl mt-1">
                             PR 설명·체인지로그를 더 빨리, 더 일관되게.
