@@ -84,7 +84,7 @@ export default function AnalysisHistoryChart({ history = [] }) {
     };
 
     return (
-        <div className="h-64 w-full">
+        <div className="h-64 w-full text-gray-900 dark:text-neutral-400">
             <Line data={data} options={options} />
         </div>
     );

@@ -1,69 +1,68 @@
 'use client';
 
 import AnalysisGraph from "./analysisGraph";
-import { useEffect, useState } from 'react';
-import { fetchArticles, increaseArticleHits } from '@/lib/ArticleAPI';
-import { useRouter } from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {fetchArticles, increaseArticleHits} from '@/lib/ArticleAPI';
+import {useRouter} from 'next/navigation';
 import Link from "next/link";
+import {useTheme} from "@/common/thema";
 
 // --- Minimal monochrome skeleton while loading ---
 function PostSkeleton() {
     return (
-        <div className="rounded-xl border border-neutral-200 p-4">
-            <div className="h-5 w-2/5 rounded bg-neutral-200 animate-pulse" />
+        <div className="rounded-xl border p-4 border-neutral-200 dark:border-neutral-700">
+            <div className="h-5 w-2/5 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
             <div className="mt-3 flex gap-6">
-                <div className="h-3 w-16 rounded bg-neutral-200 animate-pulse" />
-                <div className="h-3 w-16 rounded bg-neutral-200 animate-pulse" />
-                <div className="h-3 w-16 rounded bg-neutral-200 animate-pulse" />
+                <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
+                <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
+                <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
             </div>
-            <div className="mt-5 h-28 rounded-lg bg-neutral-100" />
+            <div className="mt-5 h-28 rounded-lg bg-neutral-100 dark:bg-neutral-700"/>
         </div>
     );
 }
 
 // --- Chic empty state ---
-function EmptyState() {
+function EmptyState(isMyRepo) {
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-10 text-center shadow-sm">
-            {/* subtle background vibe */}
-            <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(60%_60%_at_50%_30%,white,transparent)]">
-                <div className="absolute -inset-[1px] bg-gradient-to-b from-neutral-50 to-white" />
-            </div>
+        <div
+            className="h-full flex flex-col justify-around relative overflow-hidden rounded-lg border p-10 text-center shadow-sm
+            border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
 
             <div className="relative mx-auto flex w-full max-w-md flex-col items-center gap-6">
-                <div className="flex w-40 flex-col gap-2">
-                    <div className="h-2 w-24 self-center rounded-full bg-neutral-300" />
-                    <div className="h-16 rounded-lg border border-dashed border-neutral-300" />
-                    <div className="grid grid-cols-3 gap-1">
-                        <div className="h-1.5 rounded bg-neutral-200" />
-                        <div className="h-1.5 rounded bg-neutral-200" />
-                        <div className="h-1.5 rounded bg-neutral-200" />
+
+                {isMyRepo ?
+                        <>
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Nothing
+                                    here yet.</h3>
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400">Start your first post and keep
+                                    it
+                                    clean, bold, and yours.</p>
+                            </div>
+                            <Link
+                                href="/DiFF/article/write"
+                                className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5
+                                        hover:text-white hover:bg-neutral-700 border-neutral-700 text-neutral-700
+                                        dark:border-neutral-300 dark:text-neutral-300 dark:hover:bg-neutral-300 dark:hover:text-neutral-900"
+                            >
+                                Start a new post →
+                            </Link>
+                        </>
+                    :
+                    <div className="space-y-2">
+                        <h3 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Nothing
+                            here yet.</h3>
                     </div>
-                </div>
-
-                <div className="space-y-2">
-                    <h3 className="text-xl font-semibold tracking-tight text-neutral-900">Nothing here yet.</h3>
-                    <p className="text-sm text-neutral-500">Start your first post and keep it clean, bold, and yours.</p>
-                </div>
-
-                <Link
-                    href="/DiFF/article/write"
-                    className="inline-flex items-center gap-2 rounded-full border border-neutral-900 px-4 py-2 text-sm font-medium text-neutral-900 transition hover:-translate-y-0.5 hover:bg-neutral-900 hover:text-white"
-                >
-                    Start a new post
-                    <span aria-hidden>→</span>
-                </Link>
-
-                {/* tiny helper line */}
-                <p className="text-xs text-neutral-400">No clutter. Just your work.</p>
+                }
             </div>
         </div>
     );
 }
 
 // --- Individual post card ---
-function PostCard({ article }) {
-    const { analysis } = article;
+function PostCard({article}) {
+    const {analysis} = article;
 
     const handleArticleClick = async (id) => {
         try {
@@ -78,22 +77,38 @@ function PostCard({ article }) {
     return (
         <div
             onClick={() => handleArticleClick(article.id)}
-            className="cursor-pointer rounded-lg border border-neutral-200 p-4 transition hover:bg-neutral-50"
+            className="group cursor-pointer rounded-lg border transition-transform duration-200
+            border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900/50"
         >
-            <h2 className="text-lg font-bold text-neutral-900">{article.title}</h2>
-            <div className="my-2 flex gap-6 text-sm text-neutral-600">
-                <span>view: {article.hits}</span>
+            <div className="p-3">
+                <div className="flex items-start justify-between gap-4">
+                    <h2 className="line-clamp-2 text-base font-semibold tracking-tight
+                    text-neutral-900 dark:text-neutral-300">
+                        {article.title || 'Untitled'}
+                    </h2>
+                </div>
+
+                <div className="ml-1 my-2 flex flex-wrap items-center gap-8 text-xs
+                text-gray-500 dark:text-neutral-400">
                 <span>
-                    <i className="fa-regular fa-comment" /> {article.extra__sumReplies}
+                    view {article.hits}
                 </span>
-                <span>
-                  <i className="fa-regular fa-heart" /> {article.extra__sumReaction}
+                    <span className="flex gap-2">
+                    <i className="fa-regular fa-comment" aria-hidden/>
+                        {article.extra__sumReplies}
+                        <span className="sr-only">comments</span>
                 </span>
+                    <span className="flex gap-2">
+                    <i className="fa-regular fa-heart" aria-hidden/>
+                        {article.extra__sumReaction}
+                        <span className="sr-only">reactions</span>
+                 </span>
+                </div>
             </div>
 
             {analysis && (
-                <div className="mt-5 p-1 bg-red-300">
-                    <AnalysisGraph analysis={analysis} />
+                <div className="mt-2 p-3 border-t border-neutral-200 dark:border-neutral-700">
+                    <AnalysisGraph analysis={analysis}/>
                 </div>
             )}
         </div>
@@ -101,10 +116,12 @@ function PostCard({ article }) {
 }
 
 // --- Post list ---
-export default function RepoPost({ repoId }) {
+export default function RepoPost({repoId, isMyRepo}) {
     const [loading, setLoading] = useState(true);
     const [articles, setArticles] = useState([]);
     const [error, setError] = useState('');
+
+    let theme = useTheme();
 
     const mapArticles = (payload) => {
         console.log("📦 [mapArticles] payload:", payload);
@@ -173,34 +190,24 @@ export default function RepoPost({ repoId }) {
         <div className="absolute inset-0 overflow-y-auto p-6">
             {loading && (
                 <div className="grid grid-cols-1 gap-6">
-                    <PostSkeleton />
-                    <PostSkeleton />
-                    <PostSkeleton />
+                    <PostSkeleton/>
+                    <PostSkeleton/>
+                    <PostSkeleton/>
                 </div>
             )}
 
             {!loading && error && (
-                <div className="mb-4 rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-700">
+                <div className="mb-4 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-700">
                     Couldn't load posts. Showing a demo card. <span className="text-neutral-400">({error})</span>
                 </div>
             )}
 
-            {!loading && !articles.length && <EmptyState />}
-
-            <div className="rounded-xl border border-neutral-200 p-4">
-                <div className="h-5 w-2/5 rounded bg-neutral-200 animate-pulse" />
-                <div className="mt-3 flex gap-6">
-                    <div className="h-3 w-16 rounded bg-neutral-200 animate-pulse" />
-                    <div className="h-3 w-16 rounded bg-neutral-200 animate-pulse" />
-                    <div className="h-3 w-16 rounded bg-neutral-200 animate-pulse" />
-                </div>
-                <div className="mt-5 h-28 rounded-lg bg-neutral-100" />
-            </div>
+            {!loading && !articles.length && <EmptyState isMyRepo={isMyRepo}/>}
 
             {!loading && articles.length > 0 && (
                 <div className="grid grid-cols-1 gap-5">
                     {articles.map((a) => (
-                        <PostCard key={a.id} article={a} />
+                        <PostCard key={a.id} article={a} isMyRepo={isMyRepo}/>
                     ))}
                 </div>
             )}

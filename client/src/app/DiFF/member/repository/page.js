@@ -220,7 +220,7 @@ export default function RepositoriesPage() {
 
     return (
         <LayoutGroup>
-            <section className="px-4">
+            <section className="px-4 dark:text-neutral-300">
                 <div className="mx-auto max-w-6xl h-full">
 
                     {/* Tabs */}
@@ -231,7 +231,7 @@ export default function RepositoriesPage() {
                                 visible={isMyRepos}/>
                     </div>
 
-                    <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
+                    <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700 mb-10"/>
 
                     {error && <p className="mb-3 text-sm text-red-500">에러: {error}</p>}
 
@@ -245,9 +245,11 @@ export default function RepositoriesPage() {
                                 <button
                                     key={t.key}
                                     onClick={() => setTab(t.key)}
-                                    className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition
-                                        ${tab === t.key ? 'bg-white text-gray-900 -mb-px z-50' :
-                                        'bg-gray-100  text-gray-500 hover:bg-gray-100'}`}
+                                    className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition dark:border-neutral-700
+                                        ${tab === t.key ? 
+                                        '-mb-px z-50 bg-gray-50 text-gray-900 dark:bg-neutral-800 dark:text-neutral-300' 
+                                        : 'bg-gray-200 text-gray-400 dark:bg-neutral-600 dark:text-neutral-300' +
+                                        'dark:bg-neutral-800 dark:text-neutral-400'}`}
                                 >
                                     {t.label}
                                 </button>
@@ -257,11 +259,13 @@ export default function RepositoriesPage() {
                         <div className="grid grid-cols-[230px_1fr] items-start">
                             {/* 왼쪽 사이드바 */}
                             <aside
-                                className="h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-50">
+                                className="h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b
+                                bg-gray-100 dark:bg-neutral-800/50 dark:border-neutral-700">
                                 <ul className="p-4 space-y-2">
                                     {isMyRepos &&
                                         <li onClick={openModal}
-                                            className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 text-gray-700">
+                                            className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
+                                            hover:bg-gray-100 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400">
                                             <i className="fa-solid fa-folder-plus text-neutral-400"/>
                                             <span className="truncate">add repository</span>
                                         </li>
@@ -272,10 +276,13 @@ export default function RepositoriesPage() {
                                             <li
                                                 key={r.id}
                                                 onClick={() => setSelectedRepoId(r.id)}
-                                                className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${sel ? 'bg-gray-200 text-gray-900' : 'hover:bg-gray-100 text-gray-700'}`}
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer 
+                                                ${sel ? 'bg-gray-200 text-gray-900 dark:bg-neutral-800/80 dark:text-neutral-300' 
+                                                    : 'hover:bg-gray-100 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400'}`}
                                                 title={r.name}
                                             >
-                                                <i className={`fa-solid ${sel ? 'fa-folder-open text-[#4E94F8]' : 'fa-folder text-blue-300'}`}/>
+                                                <i className={`fa-solid ${sel ? 'fa-folder-open text-blue-400' 
+                                                    : 'fa-folder text-blue-300/60'}`}/>
 
                                                 <span className="truncate">{r.name}</span>
                                             </li>
@@ -286,8 +293,8 @@ export default function RepositoriesPage() {
 
                             {/* 메인 컨텐츠 */}
                             <div
-                                className="relative border border-gray-300 rounded-r-lg bg-white pt-8 h-[calc(100vh-220px)] overflow-hidden">
-                                {/*<GhostBar repositories={repositories}/>*/}
+                                className="relative border rounded-r-lg pt-8 h-[calc(100vh-220px)] overflow-hidden
+                                 bg-gray-50 border-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700">
 
                                 {/* 리포 없을 때 */}
                                 {repositories.length === 0 ? (
@@ -342,6 +349,7 @@ export default function RepositoriesPage() {
                                                 key={`posts-${selectedRepoId ?? 'none'}`}
                                                 repoId={selectedRepo.id}
                                                 repoName={selectedRepo.name}
+                                                isMyRepo={isMyRepos}
                                             />
                                         ) : null}
                                     </>
