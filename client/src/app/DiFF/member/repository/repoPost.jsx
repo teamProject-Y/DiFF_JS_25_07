@@ -7,17 +7,29 @@ import {useRouter} from 'next/navigation';
 import Link from "next/link";
 import {useTheme} from "@/common/thema";
 
-// --- Minimal monochrome skeleton while loading ---
 function PostSkeleton() {
     return (
-        <div className="rounded-xl border p-4 border-neutral-200 dark:border-neutral-700">
-            <div className="h-5 w-2/5 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
-            <div className="mt-3 flex gap-6">
-                <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
-                <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
-                <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700"/>
+        <div
+            className="group cursor-pointer rounded-xl border transition-transform duration-200
+            border-neutral-200 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-900/50"
+            role="status"
+            aria-busy="true"
+        >
+            <div className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="h-5 w-2/5 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700" />
+                </div>
+
+                <div className="ml-1 my-2 flex flex-wrap items-center gap-3 text-xs">
+                    <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700" />
+                    <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700" />
+                    <div className="h-3 w-16 rounded animate-pulse bg-neutral-200 dark:bg-neutral-700" />
+                </div>
             </div>
-            <div className="mt-5 h-28 rounded-lg bg-neutral-100 dark:bg-neutral-700"/>
+
+            <div className="p-3 border-t border-neutral-200 dark:border-neutral-700">
+                <div className="h-20 rounded-lg animate-pulse bg-neutral-100 dark:bg-neutral-700" />
+            </div>
         </div>
     );
 }
@@ -32,23 +44,23 @@ function EmptyState(isMyRepo) {
             <div className="relative mx-auto flex w-full max-w-md flex-col items-center gap-6">
 
                 {isMyRepo ?
-                        <>
-                            <div className="space-y-2">
-                                <h3 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Nothing
-                                    here yet.</h3>
-                                <p className="text-sm text-neutral-500 dark:text-neutral-400">Start your first post and keep
-                                    it
-                                    clean, bold, and yours.</p>
-                            </div>
-                            <Link
-                                href="/DiFF/article/write"
-                                className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5
+                    <>
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Nothing
+                                here yet.</h3>
+                            <p className="text-sm text-neutral-500 dark:text-neutral-400">Start your first post and keep
+                                it
+                                clean, bold, and yours.</p>
+                        </div>
+                        <Link
+                            href="/DiFF/article/write"
+                            className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5
                                         hover:text-white hover:bg-neutral-700 border-neutral-700 text-neutral-700
                                         dark:border-neutral-300 dark:text-neutral-300 dark:hover:bg-neutral-300 dark:hover:text-neutral-900"
-                            >
-                                Start a new post →
-                            </Link>
-                        </>
+                        >
+                            Start a new post →
+                        </Link>
+                    </>
                     :
                     <div className="space-y-2">
                         <h3 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Nothing
@@ -88,18 +100,20 @@ function PostCard({article}) {
                     </h2>
                 </div>
 
-                <div className="ml-1 my-2 flex flex-wrap items-center gap-8 text-xs
+                <div className="ml-1 my-2 flex flex-wrap items-center gap-3 text-xs
                 text-gray-500 dark:text-neutral-400">
-                <span>
-                    view {article.hits}
-                </span>
-                    <span className="flex gap-2">
-                    <i className="fa-regular fa-comment" aria-hidden/>
+                    <span>
+                        view {article.hits}
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                        <i className="fa-regular fa-comment" aria-hidden/>
                         {article.extra__sumReplies}
                         <span className="sr-only">comments</span>
-                </span>
-                    <span className="flex gap-2">
-                    <i className="fa-regular fa-heart" aria-hidden/>
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                        <i className="fa-regular fa-heart" aria-hidden/>
                         {article.extra__sumReaction}
                         <span className="sr-only">reactions</span>
                  </span>

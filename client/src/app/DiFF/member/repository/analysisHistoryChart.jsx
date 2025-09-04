@@ -3,58 +3,67 @@
 
 import '@/common/registerChart';
 import { Line } from 'react-chartjs-2';
+import {useTheme} from "@/common/thema";
 
 export default function AnalysisHistoryChart({ history = [] }) {
+
+    const theme = useTheme() === 'dark' ? 'rgb(100,100,100)' : 'rgb(200,200,200)';
+
     if (!history.length) {
         return <p className="text-gray-500 text-center">분석 데이터 없음</p>;
     }
 
-    // 안전하게 숫자 변환
     const num = (v) => (v == null || v === '' ? null : Number(v));
     const pt  = (h, key) => ({ x: new Date(h.analyzeDate), y: num(h[key]) });
 
     const data = {
         datasets: [
             {
-                label: 'Coverage (%)',
-                data: history.map((h) => pt(h, 'coverage')),
-                borderColor: 'green',
-                backgroundColor: 'rgba(0, 128, 0, 0.2)',
-                tension: 0.3,
-            },
-            {
                 label: 'Bugs',
-                data: history.map((h) => pt(h, 'bugs')),
-                borderColor: 'red',
-                backgroundColor: 'rgba(255, 0, 0, 0.2)',
-                tension: 0.3,
-            },
-            {
-                label: 'Complexity',
-                data: history.map((h) => pt(h, 'complexity')),
-                borderColor: 'blue',
-                backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                data: history.map(h => pt(h, 'bugs')),
+                borderColor: theme,
+                borderWidth: 1,
+                backgroundColor: 'rgb(255, 99, 132)',
                 tension: 0.3,
             },
             {
                 label: 'Code Smells',
-                data: history.map((h) => pt(h, 'codeSmells')),
-                borderColor: 'orange',
-                backgroundColor: 'rgba(255, 165, 0, 0.2)',
+                data: history.map(h => pt(h, 'codeSmells')),
+                borderColor: theme,
+                borderWidth: 1,
+                backgroundColor: 'rgb(255, 159, 64)',
+                tension: 0.3,
+            },
+            {
+                label: 'Complexity',
+                data: history.map(h => pt(h, 'complexity')),
+                borderColor: theme,
+                borderWidth: 1,
+                backgroundColor: 'rgb(255, 205, 86)',
+                tension: 0.3,
+            },
+            {
+                label: 'Coverage (%)',
+                data: history.map(h => pt(h, 'coverage')),
+                borderColor: theme,
+                borderWidth: 1,
+                backgroundColor: 'rgb(34, 197, 94)',
                 tension: 0.3,
             },
             {
                 label: 'Duplications (%)',
-                data: history.map((h) => pt(h, 'duplicatedLinesDensity')),
-                borderColor: 'purple',
-                backgroundColor: 'rgba(128, 0, 128, 0.2)',
+                data: history.map(h => pt(h, 'duplicatedLinesDensity')),
+                borderColor: theme,
+                borderWidth: 1,
+                backgroundColor: 'rgb(59, 130, 246)',
                 tension: 0.3,
             },
             {
                 label: 'Vulnerabilities',
-                data: history.map((h) => pt(h, 'vulnerabilities')),
-                borderColor: 'black',
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                data: history.map(h => pt(h, 'vulnerabilities')),
+                borderColor: theme,
+                borderWidth: 1,
+                backgroundColor: 'rgb(168, 85, 247)',
                 tension: 0.3,
             },
         ],
@@ -62,7 +71,7 @@ export default function AnalysisHistoryChart({ history = [] }) {
 
     const options = {
         responsive: true,
-        maintainAspectRatio: false, // 부모 높이 따라가게 (원하면 삭제)
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'right',
@@ -77,14 +86,14 @@ export default function AnalysisHistoryChart({ history = [] }) {
         scales: {
             x: {
                 type: 'time',
-                time: { unit: 'day' }, // 필요시 'month' 등으로 변경
+                time: { unit: 'day' },
             },
             y: { beginAtZero: true },
         },
     };
 
     return (
-        <div className="h-64 w-full text-gray-900 dark:text-neutral-400">
+        <div className="h-full w-full text-gray-900 dark:text-neutral-400">
             <Line data={data} options={options} />
         </div>
     );

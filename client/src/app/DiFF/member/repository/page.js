@@ -246,8 +246,8 @@ export default function RepositoriesPage() {
                                     key={t.key}
                                     onClick={() => setTab(t.key)}
                                     className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition dark:border-neutral-700
-                                        ${tab === t.key ? 
-                                        '-mb-px z-50 bg-gray-50 text-gray-900 dark:bg-neutral-800 dark:text-neutral-300' 
+                                        ${tab === t.key ?
+                                        '-mb-px z-50 bg-gray-50 text-gray-900 dark:bg-neutral-800 dark:text-neutral-300'
                                         : 'bg-gray-200 text-gray-400 dark:bg-neutral-600 dark:text-neutral-300' +
                                         'dark:bg-neutral-800 dark:text-neutral-400'}`}
                                 >
@@ -277,11 +277,11 @@ export default function RepositoriesPage() {
                                                 key={r.id}
                                                 onClick={() => setSelectedRepoId(r.id)}
                                                 className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer 
-                                                ${sel ? 'bg-gray-200 text-gray-900 dark:bg-neutral-800/80 dark:text-neutral-300' 
+                                                ${sel ? 'bg-gray-200 text-gray-900 dark:bg-neutral-800/80 dark:text-neutral-300'
                                                     : 'hover:bg-gray-100 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400'}`}
                                                 title={r.name}
                                             >
-                                                <i className={`fa-solid ${sel ? 'fa-folder-open text-blue-400' 
+                                                <i className={`fa-solid ${sel ? 'fa-folder-open text-blue-400'
                                                     : 'fa-folder text-blue-300/60'}`}/>
 
                                                 <span className="truncate">{r.name}</span>
@@ -297,32 +297,38 @@ export default function RepositoriesPage() {
                                  bg-gray-50 border-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700">
 
                                 {/* 리포 없을 때 */}
-                                {repositories.length === 0 && isMyRepos ? (
+                                {repositories.length === 0 ? (
                                     <div className="absolute inset-0 flex items-center justify-center p-8">
                                         <div
-                                            className="relative w-full max-w-lg rounded-2xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-white p-12 text-center shadow-sm transition-all">
+                                            className="relative w-full max-w-lg rounded-2xl border-2 border-dashed p-12 text-center shadow-sm transition-all
+                                            border-gray-200 bg-white dark:bg-neutral-900 dark:border-neutral-700">
                                             <div
-                                                className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-blue-50 ring-1 ring-blue-100">
-                                                <i className="fa-regular fa-folder-open text-3xl text-blue-500"/>
+                                                className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full
+                                                bg-blue-200/50">
+                                                <i className="fa-regular fa-folder-open text-3xl text-blue-500 dark:text-blue-300"/>
                                             </div>
 
-                                            <h3 className="text-2xl font-semibold tracking-tight text-gray-900">
+                                            <h3 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-neutral-300">
                                                 No repositories yet
                                             </h3>
-                                            <p className="mt-2 text-sm text-gray-500">
-                                                Create a new repository or import one from GitHub to get started.
-                                            </p>
 
                                             {isMyRepos ? (
-                                                <div className="mt-6 flex items-center justify-center gap-3">
-                                                    <button
-                                                        onClick={openModal}
-                                                        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50"
-                                                    >
-                                                        <i className="fa-solid fa-plus"/>
-                                                        Create / Import Repository
-                                                    </button>
-                                                </div>
+                                                <>
+                                                    <p className="mt-2 text-sm text-gray-500 dark:text-neutral-500">
+                                                        Create a new repository or import one from GitHub to get
+                                                        started.
+                                                    </p>
+
+                                                    <div className="mt-6 flex items-center justify-center gap-3">
+                                                        <button
+                                                            onClick={openModal}
+                                                            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50"
+                                                        >
+                                                            <i className="fa-solid fa-plus"/>
+                                                            Create / Import Repository
+                                                        </button>
+                                                    </div>
+                                                </>
                                             ) : (
                                                 <div className="mt-6 text-sm text-gray-400">
                                                     No repositories available.
