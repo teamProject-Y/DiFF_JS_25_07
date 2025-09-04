@@ -1,15 +1,9 @@
 'use client';
+
+import '@/common/registerChart';
 import { Doughnut } from "react-chartjs-2";
-import {
-    Chart as ChartJS,
-    ArcElement,
-    Tooltip,
-    Legend,
-} from "chart.js";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-// ✅ Circle 컴포넌트
+// Circle 컴포넌트
 const Circle = ({ grade, color }) => (
     <div
         className="flex items-center justify-center w-8 h-8 rounde-full font-bold text-white"
@@ -22,7 +16,7 @@ const Circle = ({ grade, color }) => (
 export default function AnalysisGraph({ analysis }) {
     if (!analysis) return null;
 
-    // ✅ Duplication donut 데이터
+    // Duplication donut 데이터
     const duplicationData = {
         datasets: [
             {

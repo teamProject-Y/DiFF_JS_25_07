@@ -9,7 +9,6 @@ import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
 import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
-import ThemeToggle from "@/common/thema";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -207,6 +206,18 @@ export default function Header() {
         setOpen(!open);
     };
 
+    const iconFor = (t) => {
+        switch ((t || '').toLowerCase()) {
+            case 'comment': return 'fa-regular fa-comment';
+            case 'like':    return 'fa-regular fa-thumbs-up';
+            case 'follow':  return 'fa-solid fa-user-plus';
+            case 'system':  return 'fa-regular fa-bell';
+            case 'draft':  return 'fa-solid fa-pen';
+            default:        return 'fa-regular fa-bell';
+        }
+    };
+
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -246,32 +257,78 @@ export default function Header() {
                     </div>
                 </form>
             }
-            <ThemeToggle/>
 
-            <ul className="flex gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
+            <ul className="flex items-center gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
                 {accessToken ? (
                     <>
                         <li className="relative" ref={dropdownRef}>
-                            <button onClick={handleBellClick} className="relative">
-                                <i className="fa-solid fa-bell"></i>
-                                {unread && (
-                                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                                )}
+
+                            <button onClick={handleBellClick} className="relative rounded-full p-2 hover:bg-neutral-100/60 dark:hover:bg-neutral-800/60">
+                                <i className="fa-solid fa-bell" />
+                                {unread && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />}
                             </button>
 
+                            {/* 드롭다운 */}
                             {open && (
-                                <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-2 z-50">
-                                    {notifications.length > 0 ? (
-                                        <div className="max-h-60 overflow-y-auto"> {/* ✅ 스크롤 영역 */}
-                                            {notifications.map((n) => (
-                                                <div key={n.id} className="border-b py-2 text-sm">
-                                                    <span className="font-medium">{n.type}</span> - {n.message}
-                                                </div>
-                                            ))}
+                                <div
+                                    role="menu"
+                                    aria-label="Notifications"
+                                    className="absolute right-0 mt-2 w-80 z-50"
+                                >
+                                    {/* 말풍선 꼬리 */}
+                                    <span className="pointer-events-none absolute right-4 -top-1.5 h-3 w-3 rotate-45 rounded-sm
+                                       border border-neutral-200 bg-white/80
+                                       dark:border-neutral-700 dark:bg-neutral-950/40"></span>
+
+                                    {/* 카드 */}
+                                    <div className="rounded-2xl border border-neutral-200 bg-white/80 p-2 shadow-lg backdrop-blur
+                                                    dark:border-neutral-700 dark:bg-neutral-950/40">
+                                        {/* 헤더 */}
+                                        <div className="mb-1 flex items-center justify-between px-2">
+                                            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Notifications</span>
+                                            <button
+                                                onClick={() => setOpen(false)}
+                                                className="text-xs rounded-lg border border-neutral-300 px-2 py-1 text-neutral-600 transition
+                                                            hover:bg-neutral-100/70 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-900/60"
+                                            >
+                                                Close
+                                            </button>
                                         </div>
-                                    ) : (
-                                        <p className="text-sm text-gray-500">알림이 없습니다.</p>
-                                    )}
+
+                                        {/* 리스트 */}
+                                        {notifications && notifications.length > 0 ? (
+                                            <ul className="max-h-80 overflow-y-auto">
+                                                {notifications.map((n) => (
+                                                    <li
+                                                        key={n.id}
+                                                        className="group flex items-start gap-3 rounded-xl px-3 py-2 transition
+                                                                    hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
+                                                    >
+                                                        <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
+                                                             border border-neutral-300 bg-neutral-100 text-neutral-600
+                                                             dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                                                          <i className={iconFor(n.type)} aria-hidden />
+                                                        </span>
+
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="truncate text-sm text-neutral-800 dark:text-neutral-200" title={n.message}>
+                                                                {n.message}
+                                                            </div>
+                                                            {n.type && (
+                                                                <div className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                                                    {n.type}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <div className="px-3 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                                                No notifications yet.
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </li>

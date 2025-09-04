@@ -1,4 +1,4 @@
-import {UserAPI} from "@/lib/userAPI";
+import {UserAPI} from "@/lib/UserAPI";
 import {ArticleAPI} from "@/lib/ArticleAPI";
 
 // fetch github repository
