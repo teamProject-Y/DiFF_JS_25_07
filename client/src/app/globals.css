@@ -350,44 +350,75 @@ li {
     /*}*/
 }
 
+.markdown {
+    line-height: 1.7;
+    color: #333;
+}
+
+/* 제목 */
 .markdown h1 {
-    font-size: 1.75rem; /* 28px */
+    font-size: 2rem;
     font-weight: bold;
+    margin: 1rem 0;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.3rem;
 }
-
 .markdown h2 {
-    font-size: 1.5rem; /* 24px */
+    font-size: 1.75rem;
     font-weight: bold;
+    margin: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
 }
-
 .markdown h3 {
-    font-size: 1.25rem; /* 20px */
+    font-size: 1.5rem;
     font-weight: bold;
+    margin: 0.75rem 0;
+}
+.markdown h4 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
 }
 
+/* 문단 */
 .markdown p {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.6;
+    margin: 0.5rem 0;
 }
 
+/* 목록 */
 .markdown ul {
-    list-style-type: disc;
+    list-style-type: disc !important;
     padding-left: 1.5rem;
 }
-
 .markdown ol {
-    list-style-type: decimal;
+    list-style-type: decimal !important;
     padding-left: 1.5rem;
 }
+.markdown li {
+    list-style: inherit !important;
+}
 
+/* 체크박스 (GFM) */
+.markdown input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+/* 링크 */
+.markdown a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+.markdown a:hover {
+    color: #1e40af;
+}
+
+/* 코드 */
 .markdown code {
     background-color: #f4f4f5;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-family: monospace;
 }
-
 .markdown pre {
     background-color: #1e1e1e;
     color: #f5f5f5;
@@ -397,3 +428,27 @@ li {
     font-size: 0.9rem;
 }
 
+/* 인용구 */
+.markdown blockquote {
+    border-left: 4px solid #ddd;
+    padding-left: 1rem;
+    color: #555;
+    margin: 1rem 0;
+    font-style: italic;
+}
+
+/* 표 (GFM) */
+.markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+.markdown th,
+.markdown td {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+}
+.markdown th {
+    background-color: #f9fafb;
+    font-weight: bold;
+}
