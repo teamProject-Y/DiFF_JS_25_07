@@ -297,7 +297,7 @@ export default function RepositoriesPage() {
                                  bg-gray-50 border-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700">
 
                                 {/* 리포 없을 때 */}
-                                {repositories.length === 0 ? (
+                                {repositories.length === 0 && isMyRepos ? (
                                     <div className="absolute inset-0 flex items-center justify-center p-8">
                                         <div
                                             className="relative w-full max-w-lg rounded-2xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-white p-12 text-center shadow-sm transition-all">

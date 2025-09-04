@@ -78,9 +78,9 @@ function PostCard({article}) {
         <div
             onClick={() => handleArticleClick(article.id)}
             className="group cursor-pointer rounded-lg border transition-transform duration-200
-            border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900/50"
+            border-gray-200 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-900/50"
         >
-            <div className="p-3">
+            <div className="p-4">
                 <div className="flex items-start justify-between gap-4">
                     <h2 className="line-clamp-2 text-base font-semibold tracking-tight
                     text-neutral-900 dark:text-neutral-300">
@@ -107,7 +107,7 @@ function PostCard({article}) {
             </div>
 
             {analysis && (
-                <div className="mt-2 p-3 border-t border-neutral-200 dark:border-neutral-700">
+                <div className="p-3 border-t border-neutral-200 dark:border-neutral-700">
                     <AnalysisGraph analysis={analysis}/>
                 </div>
             )}
@@ -205,7 +205,7 @@ export default function RepoPost({repoId, isMyRepo}) {
             {!loading && !articles.length && <EmptyState isMyRepo={isMyRepo}/>}
 
             {!loading && articles.length > 0 && (
-                <div className="grid grid-cols-1 gap-5">
+                <div className="grid grid-cols-1 gap-4">
                     {articles.map((a) => (
                         <PostCard key={a.id} article={a} isMyRepo={isMyRepo}/>
                     ))}
