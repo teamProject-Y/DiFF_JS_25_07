@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import {useEffect, useMemo, useRef, useState, Suspense} from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce } from "@/lib/UserAPI";
+import {useRouter, useSearchParams} from 'next/navigation';
+import {fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce} from "@/lib/UserAPI";
 import ThemeToggle from "@/common/thema";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 export default function SettingsTab() {
     return (
-        <Suspense fallback={<div className="p-8 text-sm">로딩...</div>}>
-            <SettingsPage />
+        <Suspense fallback={<div className="p-8 text-sm">Loading...</div>}>
+            <SettingsPage/>
         </Suspense>
     );
 }
@@ -24,11 +26,16 @@ function SettingsPage() {
     const [isMySetting, setIsMySetting] = useState(false);
     const [profileUrl, setProfileUrl] = useState('');
     const [linked, setLinked] = useState({google: false, github: false});
-    const [form, setForm] = useState({
-        nickName: '',
-        introduce: '',   // introduce = README 형식
-    });
-    const [error, setError] = useState("");
+    const [form, setForm] = useState({nickName: '', introduce: ''});
+
+    const [banner, setBanner] = useState(null);
+    const [activeMdTab, setActiveMdTab] = useState('write');
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const [removing, setRemoving] = useState(false);
+
+    const fileInputRef = useRef(null);
+    const textareaRef = useRef(null);
 
     // 소셜 로그인 연동
     const startLink = (provider) => {
@@ -39,12 +46,10 @@ function SettingsPage() {
 
     const onClickRemove = () => {
         setProfileUrl('');
-        alert('프로필 제거 로직 연결 예정');
+        setBanner({type: 'info', msg: '프로필 제거 로직 연결 예정'});
     };
 
-    const onClickWithdraw = () => {
-        alert('회원탈퇴 로직 연결 예정');
-    };
+    const onClickWithdraw = () => setConfirmOpen(true);
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -58,21 +63,17 @@ function SettingsPage() {
         const nickName = searchParams.get("nickName");
 
         fetchUser(nickName)
-            .then(async (res) => {
+            .then((res) => {
                 const fetchedMember = res.member;
                 setMember(fetchedMember);
                 setProfileUrl(fetchedMember?.profileUrl || "");
-                setLoading(false);
                 setForm({
                     nickName: fetchedMember?.nickName || "",
                     introduce: fetchedMember?.introduce || "",
                 });
+                setLoading(false);
 
-                if (!nickName || nickName === myNickName) {
-                    setIsMySetting(true);
-                } else {
-                    setIsMySetting(false);
-                }
+                setIsMySetting(!nickName || nickName === myNickName);
             })
             .catch(err => {
                 console.error("마이페이지 오류:", err);
@@ -86,37 +87,56 @@ function SettingsPage() {
             credentials: 'include',
         })
             .then(res => res.ok ? res.json() : Promise.reject(res))
-            .then(data => {
-                setLinked({
-                    google: !!data.google,
-                    github: !!data.github,
-                });
-            })
+            .then(data => setLinked({google: !!data.google, github: !!data.github}))
             .catch(() => {
             });
     }, [router, searchParams]);
 
-    // 폼 변경 핸들러
-    const handleChange = e => {
-        setForm({...form, [e.target.name]: e.target.value});
+    const handleChange = (e) => setForm({...form, [e.target.name]: e.target.value});
+
+    const handleRemoveAvatar = async () => {
+        if (!isMySetting || !profileUrl) return;
+        if (!confirm("프로필 사진을 삭제할까요?")) return;
+
+        setRemoving(true);
+        setBanner(null);
+        try {
+            await uploadProfileImg(null);
+            setProfileUrl('');
+            setMember((prev) => ({...prev, profileUrl: ''}));
+            setBanner({type: 'success', msg: '프로필 사진을 삭제했습니다'});
+        } catch (e) {
+            setBanner({type: 'error', msg: e.message || '삭제에 실패했습니다'});
+        } finally {
+            setRemoving(false);
+        }
     };
+
+    const dirtyNick = useMemo(
+        () => form.nickName !== (member?.nickName || ''),
+        [form.nickName, member?.nickName]
+    );
+
+    const dirtyIntro = useMemo(
+        () => form.introduce !== (member?.introduce || ''),
+        [form.introduce, member?.introduce]
+    );
 
     // 닉네임 수정
     const handleSubmitNickName = async (e) => {
         e.preventDefault();
-        setError("");
-
+        setBanner(null);
         try {
             const res = await modifyNickName({nickName: form.nickName});
-            setError(res.msg || "닉네임이 수정되었습니다 ✅");
             localStorage.setItem("nickName", form.nickName);
             setMember((prev) => ({...prev, nickName: form.nickName}));
+            setBanner({type: 'success', msg: res.msg || "닉네임이 수정되었습니다"});
         } catch (err) {
             console.error("닉네임 수정 실패:", err);
             if (err.response) {
-                setError(err.response.data?.msg || "닉네임 수정에 실패했습니다 ❌");
+                setBanner({type: 'error', msg: err.response.data?.msg || "닉네임 수정에 실패했습니다"});
             } else {
-                setError("서버와 연결할 수 없습니다 ❌");
+                setBanner({type: 'error', msg: "서버와 연결할 수 없습니다"});
             }
         }
     };
@@ -124,195 +144,435 @@ function SettingsPage() {
     // introduce 수정 (README 형식)
     const handleSubmitIntroduce = async (e) => {
         e.preventDefault();
-        setError("");
+        if (!dirtyIntro) return;
+        setBanner(null);
 
         try {
             const res = await modifyIntroduce({introduce: form.introduce});
             setMember((prev) => ({...prev, introduce: form.introduce}));
-            setError(res.msg || "프로필이 저장되었습니다 ✅");
+            setBanner({type: 'success', msg: res.msg || "프로필이 저장되었습니다"});
         } catch (err) {
             console.error("introduce 수정 실패:", err);
             if (err.response) {
-                setError(err.response.data?.msg || "자기소개 수정에 실패했습니다 ❌");
+                setBanner({type: 'error', msg: err.response.data?.msg || "자기소개 수정에 실패했습니다"});
             } else {
-                setError("서버와 연결할 수 없습니다 ❌");
+                setBanner({type: 'error', msg: "서버와 연결할 수 없습니다"});
             }
         }
     };
 
+    // README 저장 단축키: ⌘/Ctrl + Enter
+    useEffect(() => {
+        const handler = (e) => {
+            const cmd = e.metaKey || e.ctrlKey;
+            if (cmd && e.key === 'Enter') {
+                const formEl = document.getElementById('introduceForm');
+                if (formEl) {
+                    e.preventDefault();
+                    formEl.requestSubmit();
+                }
+            }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, []);
+
+    const handleInput = (e) => {
+        const textarea = textareaRef.current;
+        textarea.style.height = "auto";
+        textarea.style.height = textarea.scrollHeight + "px";
+    };
+
+    if (loading) return <PageSkeleton/>;
+
     return (
-        <section className="px-4 dark:bg-gray-900 dark:text-white">
+        <section className="min-h-full px-4 pb-16">
             <div className="mx-auto max-w-6xl">
 
                 {/* 상단 탭 타이틀 */}
-                <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
-                    <Link href="/DiFF/member/profile" className="text-gray-400 hover:text-gray-700">Profile</Link>
-                    <Link href="/DiFF/member/repository" className="text-gray-400 hover:text-gray-700">Repositories</Link>
-                    <span className=" hover:text-gray-700">Settings</span>
+                <div className="flex items-center text-neutral-500">
+                    <TopTab href="/DiFF/member/profile" label="Profile"/>
+                    <TopTab href="/DiFF/member/repository" label="Repositories"/>
+                    <TopTab active href="#" label="Settings"/>
                 </div>
-                <div className="h-px w-full bg-gray-300 mb-10"/>
+                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
 
-                {/* 메인 2컬럼 레이아웃 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
-                    {/* LEFT : 아바타, 닉네임, 테마, 연동 */}
-                    <div className="flex flex-col items-center">
-
-                        {/* 아바타 */}
-                        <div
-                            className="relative h-28 w-28 overflow-hidden rounded-full border border-gray-300 bg-gray-100">
-                            {profileUrl ? (
-                                <img src={profileUrl} alt="avatar" className="h-full w-full object-cover"/>
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center text-6xl">
-                                    <i className="fa-solid fa-skull"></i>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 프로필 업로드/제거 */}
-                        <div className="mt-4 flex gap-3">
-                            <button
-                                type="button"
-                                onClick={() => document.getElementById('profileUpload')?.click()}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
-                            >
-                                프로필 업로드
-                            </button>
-                            <button
-                                type="button"
-                                onClick={onClickRemove}
-                                className="px-4 py-2 bg-neutral-900 text-white rounded hover:bg-neutral-800"
-                            >
-                                프로필 제거
-                            </button>
-                            <input
-                                id="profileUpload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-                                    if (!file) return;
-                                    try {
-                                        const url = await uploadProfileImg(file);
-                                        setProfileUrl(url);
-                                    } catch (err) {
-                                        console.error('업로드 실패:', err);
-                                        alert('업로드 실패');
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        {/* 닉네임 */}
-                        <form onSubmit={handleSubmitNickName} className="mt-6 flex flex-col items-start w-full px-6">
-                            <label className="text-lg font-semibold">닉네임</label>
-                            <input
-                                name="nickName"
-                                value={form.nickName ?? ""}
-                                className="mb-2 w-full p-2.5 border border-neutral-300 rounded-lg bg-neutral-100"
-                                onChange={handleChange}
-                                placeholder="nickname"
-                            />
-                            <button
-                                type="submit"
-                                className="py-2.5 px-5 w-full bg-neutral-800 text-neutral-200 rounded-lg hover:bg-neutral-700"
-                            >
-                                UPDATE
-                            </button>
-
-                            {/* 성공/실패 메시지 */}
-                            {error && (
-                                <p
-                                    className={`mt-2 text-sm ${
-                                        error.includes("성공") ? "text-green-600" : "text-red-600"
-                                    }`}
-                                >
-                                    {error}
-                                </p>
-                            )}
-                        </form>
-
-                        {/* 테마 */}
-                        <div className="mt-10 flex items-center gap-3">
-                            <div className="text-lg font-semibold">테마</div>
-                            <ThemeToggle/>
-                        </div>
-
-                        {/* 소셜 연동 */}
-                        <div className="mt-6 flex items-center justify-center gap-3">
-                            {/* 구글 */}
-                            <button
-                                type="button"
-                                onClick={() => !linked.google && startLink('google')}
-                                disabled={linked.google}
-                                className={
-                                    `px-4 py-2 rounded text-white ` +
-                                    (linked.google
-                                        ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                                        : 'bg-red-500 hover:bg-red-400')
-                                }
-                            >
-                                {linked.google ? '구글 연동 완료' : '구글 연동'}
-                            </button>
-
-                            {/* 깃허브 */}
-                            <button
-                                type="button"
-                                onClick={() => !linked.github && startLink('github')}
-                                disabled={linked.github}
-                                className={
-                                    `px-4 py-2 rounded text-white ` +
-                                    (linked.github
-                                        ? 'bg-gray-400 cursor-not-allowed opacity-60'
-                                        : 'bg-gray-800 hover:bg-gray-700')
-                                }
-                            >
-                                {linked.github ? '깃 연동 완료' : '깃허브 연동'}
-                            </button>
-                        </div>
+                {/* 배너 */}
+                {banner && (
+                    <div
+                        className={
+                            "mb-6 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all " +
+                            (banner.type === 'success'
+                                ? "border-green-400/40 bg-green-50/50 text-green-700 dark:border-green-500/30 dark:bg-green-900/20 dark:text-green-300"
+                                : banner.type === 'error'
+                                    ? "border-red-400/40 bg-red-50/50 text-red-700 dark:border-red-500/30 dark:bg-red-900/20 dark:text-red-300"
+                                    : "border-neutral-300/60 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900/70 dark:text-neutral-300")
+                        }
+                    >
+                        <span className="inline-block h-2 w-2 rounded-full bg-current opacity-60"/>
+                        <span>{banner.msg}</span>
                     </div>
+                )}
 
-                    {/* RIGHT : Profile README, 회원탈퇴 */}
-                    <div>
-                        {/* Profile README (introduce 컬럼 활용) */}
-                        <div className="mt-4 w-full">
-                            <h3 className="mb-3 text-2xl font-bold">Profile README</h3>
-                            <form onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3">
-                              <textarea
-                                  name="introduce"
-                                  value={form.introduce ?? ""}
-                                  onChange={handleChange}
-                                  className="min-h-[200px] rounded-md border border-gray-300 bg-white p-4 text-gray-700"
-                                  placeholder={`마크다운 형식으로 기술/자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
-                              />
+                {/* 메인 2컬럼 */}
+                <div className="flex gap-6 px-2">
+
+                    {/* LEFT : 아바타/닉네임/테마/연동 */}
+                    <div className="flex flex-col gap-4">
+
+                        {/* 아바타 카드 */}
+                        <Card>
+                            <div className="flex items-start gap-4">
+                                <div
+                                    className="relative h-28 w-28 overflow-hidden rounded-full border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900">
+                                    {profileUrl ? (
+                                        <img src={profileUrl} alt="avatar" className="h-full w-full object-cover"/>
+                                    ) : (
+                                        <div
+                                            className="flex h-full w-full items-center justify-center text-6xl text-neutral-400">
+                                            <i className="fa-solid fa-skull"></i>
+                                        </div>
+                                    )}
+
+                                    {isMySetting && (
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-neutral-900/70 py-1 text-[12px] text-neutral-200 backdrop-blur"
+                                        >
+                                            <i className="fa-regular fa-camera"></i>
+                                            <span>Edit</span>
+                                        </button>
+                                    )}
+                                    <input
+                                        ref={fileInputRef}
+                                        id="profileUpload"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+                                            try {
+                                                const url = await uploadProfileImg(file);
+                                                setProfileUrl(url);
+                                                setBanner({type: 'success', msg: '프로필 이미지가 업데이트되었습니다'});
+                                            } catch (err) {
+                                                console.error('업로드 실패:', err);
+                                                setBanner({type: 'error', msg: '업로드 실패'});
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="flex-1 px-2">
+                                    <div className="text-sm text-neutral-500">계정</div>
+                                    <div className="mt-1 text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+                                        {member?.email || '-'}
+                                    </div>
+
+                                    {/* 소셜 연동 */}
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <LinkBtn
+                                            brand="google"
+                                            label={linked.google ? "Connected" : "Connect"}
+                                            onClick={() => !linked.google && startLink("google")}
+                                            disabled={linked.google}
+                                        />
+
+                                        <LinkBtn
+                                            brand="github"
+                                            label={linked.github ? "Connected" : "Connect"}
+                                            onClick={() => !linked.github && startLink("github")}
+                                            disabled={linked.github}
+                                        />
+
+                                    </div>
+                                </div>
+                                <ThemeToggle/>
+
+                            </div>
+                        </Card>
+
+                        {/* 닉네임 카드 */}
+                        <Card>
+                            <form onSubmit={handleSubmitNickName} className="flex flex-col gap-3">
+                                <label
+                                    className="text-sm font-medium text-neutral-600 dark:text-neutral-300">닉네임</label>
+                                <input
+                                    name="nickName"
+                                    value={form.nickName ?? ""}
+                                    onChange={handleChange}
+                                    placeholder="nickname"
+                                    className="w-full rounded-lg border border-neutral-300 bg-neutral-100 p-2.5 text-neutral-900 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                />
                                 <button
                                     type="submit"
-                                    className="self-end rounded bg-neutral-800 px-4 py-2 text-white hover:bg-neutral-700"
+                                    disabled={!dirtyNick}
+                                    className={
+                                        "rounded-lg px-4 py-2 text-sm text-white " +
+                                        (dirtyNick
+                                            ? "bg-neutral-900 hover:bg-neutral-800"
+                                            : "bg-neutral-600/50 cursor-not-allowed")
+                                    }
                                 >
-                                    Save
+                                    UPDATE
                                 </button>
                             </form>
+                        </Card>
 
-                            {/* 미리보기 */}
-                            <div className="mt-6 border rounded-md p-4 bg-gray-50">
-                                <h4 className="font-semibold mb-2">Preview</h4>
-                                <ReactMarkdown>{form.introduce}</ReactMarkdown>
+                        <Card>
+                            <div className="flex items-center justify-between">
+                                <div className="pr-2">
+                                    <div className="mb-1 text-lg font-semibold">Delete account</div>
+                                    <p className="text-sm text-neutral-500">Your account and data will be permanently
+                                        deleted.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={onClickWithdraw}
+                                    className="rounded px-3 py-1.5 text-sm self-end border
+                                    border-gray-300 hover:border-red-500 hover:text-red-500
+                                    dark:border-gray-400 dark:hover:border-red-500"
+                                >
+                                    Delete account
+                                </button>
                             </div>
-                        </div>
+
+                        </Card>
+                    </div>
+
+                    <div className="flex-grow flex flex-col gap-4">
+
+                        {/* Profile README */}
+                        <Card>
+                            <div className="mb-3 flex items-center justify-between">
+                                <h3 className="text-2xl font-bold">Profile README</h3>
+
+                                {/* Write / Preview 탭 */}
+                                <div className="flex items-center rounded-lg border border-neutral-300 dark:border-neutral-700 overflow-hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveMdTab("write")}
+                                        className={
+                                            "px-3 py-1 text-sm " +
+                                            (activeMdTab === "write"
+                                                ? "bg-neutral-800 text-neutral-100"
+                                                : "text-neutral-500 dark:text-neutral-300")
+                                        }
+                                    >
+                                        Write
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveMdTab("preview")}
+                                        className={
+                                            "px-3 py-1 text-sm " +
+                                            (activeMdTab === "preview"
+                                                ? "bg-neutral-800 text-neutral-100"
+                                                : "text-neutral-500 dark:text-neutral-300")
+                                        }
+                                    >
+                                        Preview
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3">
+                                {activeMdTab === "write" ? (
+                                    // ✍️ 작성 모드
+                                    <textarea
+                                        name="introduce"
+                                        value={form.introduce ?? ""}
+                                        onChange={handleChange}
+                                        onInput={handleInput}
+                                        className="min-h-[220px] rounded-md border border-neutral-300 bg-white p-4 text-neutral-800 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                        placeholder={`마크다운 형식으로 자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
+                                    />
+                                ) : (
+                                    // 👀 미리보기 모드
+                                    <div className="markdown min-h-[220px] rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            rehypePlugins={[rehypeRaw]}
+                                        >
+                                            {form.introduce || "*미리보기 내용이 없습니다.*"}
+                                        </ReactMarkdown>
+                                    </div>
+                                )}
+
+                                {/* 하단 Save 버튼 */}
+                                <div className="flex items-center justify-between text-xs text-neutral-500">
+                                    <div>⌘/Ctrl + Enter 로 저장</div>
+                                    <button
+                                        type="submit"
+                                        disabled={!dirtyIntro}
+                                        className={
+                                            "rounded bg-neutral-900 px-4 py-2 text-white " +
+                                            (!dirtyIntro ? "opacity-50 cursor-not-allowed" : "hover:bg-neutral-800")
+                                        }
+                                    >
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        </Card>
+
 
                         {/* 회원탈퇴 */}
-                        <div className="mt-10">
-                            <div className="mb-3 text-lg font-semibold">회원탈퇴</div>
-                            <button
-                                type="button"
-                                onClick={onClickWithdraw}
-                                className="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-500"
-                            >
-                                탈퇴하기
-                            </button>
-                        </div>
+                        <Card>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+
+            {/*회원 탈퇴 모달*/}
+            {confirmOpen && (
+                <div className="fixed inset-0 z-50 grid place-items-center p-4">
+            {/* overlay */}
+            <button
+                aria-hidden
+                className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                onClick={() => setConfirmOpen(false)}
+            />
+            {/* dialog */}
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="confirm-title"
+                className="
+                  relative w-full max-w-md rounded-lg
+                  border bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5
+                  dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700 dark:ring-0
+                  transition-transform duration-200
+                "
+            >
+                <div className="p-5">
+                    <div id="confirm-title" className="text-lg font-semibold">
+                        Are you sure you want to delete your account?
+                    </div>
+                    <p className="mt-1 px-1 text-sm text-neutral-500 dark:text-neutral-400">
+                        This action cannot be undone.
+                    </p>
+
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            onClick={() => setConfirmOpen(false)}
+                            className="
+                                rounded-md px-4 py-2 text-sm
+                                border border-neutral-200 bg-neutral-100 text-neutral-900 hover:bg-neutral-200
+                                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400
+                                dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
+                                dark:focus-visible:outline-neutral-500
+                              "
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => {
+                                setConfirmOpen(false);
+                                alert('회원탈퇴 로직 연결 예정');
+                            }}
+                            className="
+                                rounded-md px-4 py-2 text-sm
+                                bg-red-600 text-white hover:bg-red-500
+                                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500
+                              "
+                        >
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    )}
+        </section>
+    );
+}
+
+function Card({children}) {
+    return (
+        <div
+            className="rounded-lg border border-neutral-200 bg-white px-4 py-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950/30">
+            {children}
+        </div>
+    );
+}
+
+function TopTab({href, label, active}) {
+    return active ? (
+        <span
+            className="p-4 -mb-px font-semibold text-black dark:text-neutral-300 border-b-2 border-black dark:border-neutral-300">
+      {label}
+    </span>
+    ) : (
+        <Link href={href} className="p-4 -mb-px hover:text-neutral-700 dark:hover:text-neutral-300">
+            {label}
+        </Link>
+    );
+}
+
+function LinkBtn({label, onClick, disabled, brand}) {
+    const base =
+        "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition " +
+        "border focus-visible:outline-none focus-visible:ring-2 " +
+        "focus-visible:ring-neutral-400/60 focus-visible:ring-offset-2 " +
+        "focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950 " +
+        "border-neutral-300 dark:border-neutral-700";
+
+    const enabled =
+        "bg-neutral-900 text-white shadow-sm hover:bg-neutral-800 active:bg-neutral-800 " +
+        "dark:bg-neutral-900 dark:text-white";
+
+    const blocked =
+        "bg-neutral-100 text-neutral-400 border-neutral-200 " +
+        "dark:bg-neutral-800/40 dark:text-neutral-500 dark:border-neutral-700/80 " +
+        "cursor-not-allowed pointer-events-none select-none shadow-none";
+
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            disabled={disabled}
+            aria-disabled={disabled ? "true" : "false"}
+            aria-label={label}
+            title={disabled ? "Connected" : "Connect"}
+            className={`${base} ${disabled ? blocked : enabled}`}
+        >
+            {/* 브랜드 아이콘 */}
+            {brand === "google" && (
+                <i
+                    className="fab fa-google text-md"
+                    aria-hidden="true"
+                />
+            )}
+            {brand === "github" && (
+                <i
+                    className="fab fa-github text-md"
+                    aria-hidden="true"
+                />
+            )}
+
+            <span className="tracking-tight">{label}</span>
+        </button>
+    );
+}
+
+function PageSkeleton() {
+    return (
+        <section className="px-4 pb-16">
+            <div className="mx-auto max-w-6xl animate-pulse">
+                <div className="h-9 w-64 bg-neutral-200 dark:bg-neutral-800 rounded mb-6"/>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-6">
+                        <div className="h-44 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
+                        <div className="h-40 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
+                        <div className="h-24 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
+                    </div>
+                    <div className="space-y-6">
+                        <div className="h-96 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
+                        <div className="h-24 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
                     </div>
                 </div>
             </div>

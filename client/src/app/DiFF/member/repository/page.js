@@ -8,7 +8,7 @@ import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
 import RepoPost from "./RepoPost";
 import {AddRepoModal} from './addRepoModal';
-import {RepoInfo} from './repoInfo';
+import RepoInfo from './repoInfo';
 import GhostBar from './sideBar';
 import Link from "next/link";
 
@@ -117,7 +117,7 @@ export default function RepositoriesPage() {
     );
 
     useEffect(() => {
-        if (selectedRepo) setTab('info');
+        if (selectedRepo) setTab('posts');
     }, [selectedRepo?.id]);
 
     const onClose = useCallback(() => setSelectedRepoId(null), []);
@@ -207,7 +207,7 @@ export default function RepositoriesPage() {
         }
     };
 
-    if (loading) return <div className="text-center">로딩...</div>;
+    if (loading) return <div className="text-center">loading...</div>;
 
     const profileHref =
         isMyRepos ? '/DiFF/member/profile'
@@ -223,11 +223,11 @@ export default function RepositoriesPage() {
         <LayoutGroup>
             <section className="px-4">
                 <div className="mx-auto max-w-6xl h-full">
-                    <div className="mb-3 flex items-center gap-6 text-2xl font-bold">
-                        <Link href={profileHref} className="text-gray-400 hover:text-gray-700">Profile</Link>
-                        <span>Repositories</span>
+                    <div className="flex items-center text-gray-500">
+                        <Link href={profileHref} className="p-4 -mb-px">Profile</Link>
+                        <span className="text-black p-4 -mb-px font-semibold border-b-2 border-black">Repositories</span>
                         {isMyRepos &&
-                            <Link href="/DiFF/member/settings" className="text-gray-400 hover:text-gray-700">
+                            <Link href="/DiFF/member/settings" className="p-4 -mb-px">
                                 Settings
                             </Link>
                         }
@@ -240,8 +240,8 @@ export default function RepositoriesPage() {
                         {/* 탭 */}
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
+                                {key: 'posts', label: 'Posts'},
                                 {key: 'info', label: 'Info'},
-                                {key: 'posts', label: 'Posts'}
                             ].map((t) => (
                                 <button
                                     key={t.key}
@@ -330,7 +330,7 @@ export default function RepositoriesPage() {
                                         {tab === 'info' && selectedRepo ? (
                                             <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
-                                                repo={selectedRepo}
+                                                repo={selectedRepo}   // ✅ 여기서 repo.id 전달됨
                                                 repositories={repositories}
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}

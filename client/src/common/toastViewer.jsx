@@ -40,5 +40,5 @@ export default function ToastViewer({ content, showImages = true }) {
         };
     }, [content, showImages]);
 
-    return <div ref={viewerRef}></div>;
+    return <div ref={viewerRef} className="tui-viewer" />;
 }

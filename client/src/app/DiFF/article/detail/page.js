@@ -369,49 +369,9 @@ function ArticleDetailInner() {
         }
     };
 
-    // const refreshFollowFromServer = async (id) => {
-    //     try {
-    //         const fl = await getFollowingList();
-    //         const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
-    //         const now =
-    //             (id && list.some(m => getId(m) === Number(id))) ||
-    //             list.some(m => getNick(m) === (authorNick ?? '').trim());
-    //         setIsFollowing(!!now);
-    //     } catch (e) {
-    //         console.error('❌ 팔로우 재확인 실패:', e);
-    //     }
-    // };
-    //
-    // const onFollowToggle = async () => {
-    //     if (!authorId || followBusy) return;
-    //     setFollowBusy(true);
-    //     try {
-    //         if (isFollowing) {
-    //             const res = await unfollowMember(authorId);
-    //             const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('팔로우 중이 아닙니다');
-    //             if (!ok) throw new Error(res?.msg || '언팔로우 실패');
-    //         } else {
-    //             const res = await followMember(authorId);
-    //             const ok = res?.resultCode?.startsWith?.('S-') || res?.success === true || (res?.msg || '').includes('이미 팔로우');
-    //             if (!ok) throw new Error(res?.msg || '팔로우 실패');
-    //         }
-    //         await refreshFollowFromServer(authorId);
-    //     } catch (e) {
-    //         console.error('❌ 팔/언 실패:', e);
-    //         // 필요하면 alert(e.message);
-    //     } finally {
-    //         setFollowBusy(false);
-    //     }
-    // };
-
-    // const isOwn = !!article?.extra__writer
-    //     && ( (typeof window !== 'undefined' && localStorage.getItem('nickName')) || '' )
-    //         .trim().toLowerCase()
-    //     === article.extra__writer.trim().toLowerCase();
-
     const handleInput = (e) => {
         const textarea = textareaRef.current;
-        textarea.style.height = "auto"; // 입력 전 높이 초기화
+        textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
 
@@ -419,7 +379,7 @@ function ArticleDetailInner() {
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
     return (
-        <>
+        <div className="w-full min-h-screen pt-6">
             <LoadingOverlay show={loading}/>
 
             {errMsg ? (
@@ -428,20 +388,31 @@ function ArticleDetailInner() {
                 </div>
             ) : (
                 <div className="max-w-3xl mx-auto">
-                    {/* title */}
                     <div className="flex justify-between">
-                        <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
+                        <div className="flex items-center gap-2 mb-2 ml-2">
+                            {/*제목*/}
+                            <h1 className="text-3xl font-bold">{article.title}</h1>·
+                            {/* 날짜 */}
+                            <div className="text-gray-500 dark:text-neutral-400">
+                                {new Date(article.regDate).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric"
+                                })}
+                            </div>
+                        </div>
 
-                        <div className="flex items-center">
-                            {/* 공유 버튼 */}
+                        <div className="flex items-center gap-3">
+                            {/* 공유 */}
                             <button
                                 type="button"
-                                className="p-2 hover:text-gray-900 flex items-center"
+                                className="flex items-center hover:text-gray-900
+                                dark:hover:text-neutral-500 dark:text-neutral-400"
                                 onClick={async () => {
                                     try {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         await navigator.clipboard.writeText(url);
-                                        alert("링크가 복사되었습니다.");
+                                        alert("Link copied.");
                                     } catch {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         const input = document.createElement("input");
@@ -450,14 +421,13 @@ function ArticleDetailInner() {
                                         input.select();
                                         document.execCommand("copy");
                                         document.body.removeChild(input);
-                                        alert("링크가 복사되었습니다.");
+                                        alert("Link copied.");
                                     }
                                 }}
                             >
                                 <i className="fa-solid fa-share-nodes"></i>
                             </button>
-
-                            {/* 더보기 메뉴 (작성자 글일 때만 보임) */}
+                            {/* 옵션 */}
                             {isMyPost && (
                                 <div className="relative">
                                     <button
@@ -472,25 +442,29 @@ function ArticleDetailInner() {
                                                 setMenuOpen(true);
                                             }
                                         }}
-                                        className="py-2 hover:text-gray-900"
+                                        className="hover:text-gray-900
+                                        dark:hover:text-neutral-500 dark:text-neutral-400"
                                     >
                                         <i className="fa-solid fa-ellipsis-vertical text-xl"></i>
                                     </button>
 
+                                    {/*모달 메뉴*/}
                                     {menuOpen && (
                                         <div
                                             ref={menuRef}
                                             role="menu"
-                                            className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg bg-white shadow-sm
-                       divide-y divide-gray-100 font-normal dark:bg-gray-700 dark:divide-gray-600"
+                                            className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg font-normal shadow-sm
+                                                    bg-white divide-y divide-gray-100  text-gray-800
+                                                    dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
                                         >
-                                            <ul className="py-1 text-sm text-gray-700 dark:text-gray-200">
+                                            <ul className="py-1 text-sm">
                                                 {article.userCanModify && (
                                                     <li>
                                                         <Link
                                                             href={`/DiFF/article/modify?id=${article.id}`}
                                                             role="menuitem"
-                                                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                            className="block px-4 py-2 hover:bg-gray-100
+                                                            dark:hover:bg-neutral-700"
                                                             onClick={() => setMenuOpen(false)}
                                                         >
                                                             <i className="fa-solid fa-pen"></i> Edit
@@ -503,7 +477,8 @@ function ArticleDetailInner() {
                                                             type="button"
                                                             role="menuitem"
                                                             onClick={() => handleDelete(article.id)}
-                                                            className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-red-500"
+                                                            className="w-full text-left block px-4 py-2 hover:bg-gray-100 text-red-500
+                                                            dark:hover:bg-neutral-700"
                                                         >
                                                             <i className="fa-solid fa-trash-can"></i> Delete
                                                         </button>
@@ -518,7 +493,7 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* article info */}
-                    <div className="text-gray-600 my-4 px-2 flex justify-between items-end">
+                    <div className="flex justify-between items-end text-gray-600 my-4 px-2  dark:text-neutral-400">
                         <div className="flex items-center gap-2">
                             {/* 닉네임 */}
                             <div
@@ -526,12 +501,13 @@ function ArticleDetailInner() {
                                     e.preventDefault();
                                     window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`;
                                 }}
-                                className="mx-2 hover:underline hover:text-black cursor-pointer text-md font-semibold"
+                                className="mx-2 hover:underline cursor-pointer text-md font-semibold
+                                 hover:text-black dark:hover:text-neutral-300"
                             >
                                 {article.extra__writer}
                             </div>
 
-                            {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만 보이도록) */}
+                            {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만) */}
                             {!isMyPost && member?.id && (
                                 <div className="flex">
                                     <button
@@ -556,12 +532,13 @@ function ArticleDetailInner() {
                                             }
                                         }}
                                         className={`py-1 text-sm rounded-full border transition w-20 
-                                          ${
-                                            member.isFollowing
-                                                ? hoverUnfollow
-                                                    ? "text-red-500 border hover:border-red-500"
-                                                    : "border text-gray-500 bg-gray-100"
-                                                : "hover:bg-gray-100 border-gray-700"
+                                                    ${ member.isFollowing
+                                            ? hoverUnfollow
+                                                ? "text-red-500 border hover:border-red-500"
+                                                : "border text-gray-500 bg-gray-100 " +
+                                                "dark:bg-neutral-800/40 dark:text-neutral-500 dark:border-neutral-700/80 "
+                                            : "text-gray-700 border-gray-700 hover:bg-gray-100 " +
+                                            "dark:hover:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-300"
                                         }`}
                                         aria-label={
                                             member.isFollowing
@@ -575,33 +552,33 @@ function ArticleDetailInner() {
                             )}
                         </div>
 
-                        {/* 오른쪽 날짜 영역 기존 그대로 */}
-                        <div className="text-gray-500">
-                            {new Date(article.regDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                            })}
+                        {/*좋아요*/}
+                        <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
+                            <i
+                                className={`${liked ? "fa-solid text-red-500" :
+                                    "fa-regular text-gray-500 dark:text-neutral-400"} 
+                                        fa-heart text-xl`}
+                            ></i>
+                            <span className="text-sm">{likeCount}</span>
                         </div>
                     </div>
 
-
                     {/* 본문 */}
                     <div
-                        className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg text-gray-800 border-t border-b py-6">
+                        className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg border-t border-b py-6
+                        text-gray-800 dark:text-neutral-400 dark:border-neutral-700">
                         <ToastViewer content={article.body} showImages={true}/>
                     </div>
 
                     {/* 댓글 입력 */}
-                    <div className="mt-10">
+                    <div className="my-10">
                         <form onSubmit={handleSubmitreply} className="relative">
                             <label htmlFor="comment" className="sr-only">댓글 작성</label>
 
                             <div
-                                className="relative rounded-2xl border border-black/10 dark:border-white/15
-                                 bg-white/80 dark:bg-black/40 backdrop-blur-sm
-                                 shadow-sm transition-all
-                                 focus-within:border-black/20 dark:focus-within:border-white/30"
+                                className="relative rounded-xl border backdrop-blur-sm shadow-sm transition-all
+                                border-black/10 focus-within:border-black/20 bg-white/80
+                                dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
                             >
                                 {/* textarea */}
                                 <textarea
@@ -620,20 +597,20 @@ function ArticleDetailInner() {
                                     placeholder="What are your thoughts?"
                                     className="block w-full resize-none bg-transparent
                                        p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
-                                       text-gray-900 dark:text-gray-100
-                                       placeholder-gray-400 dark:placeholder-gray-500
+                                       text-gray-900 dark:text-neutral-200
+                                       placeholder-gray-400 dark:placeholder-neutral-500
                                        focus:outline-none"
                                 />
 
-                                <div className="absolute bottom-2 right-2 flex items-center gap-2">
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="absolute bottom-2 right-2 flex items-center gap-3">
+                                    <span className="text-xs text-gray-500 dark:text-neutral-500">
                                       {reply.trim().length}/1000
                                     </span>
                                     <button
                                         type="submit"
                                         disabled={!reply.trim()}
                                         className="px-4 py-2 rounded-full
-                                         bg-black text-white dark:bg-white dark:text-black
+                                         bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
                                          text-xs font-medium
                                          shadow-sm hover:shadow-md
                                          transition-all
@@ -651,12 +628,12 @@ function ArticleDetailInner() {
                     {/* 댓글 목록 */}
                     <div className="my-6 space-y-4">
                         {replyLoading ? (
-                            <p className="text-gray-500">댓글 불러오는 중...</p>
+                            <p className="text-gray-500 dark:text-neutral-500">Loading...</p>
                         ) : replies.length === 0 ? (
-                            <p className="text-gray-500">아직 댓글이 없습니다.</p>
+                            <p className="text-gray-500 dark:text-neutral-500">No comments yet.</p>
                         ) : (
                             replies.map((r) => (
-                                <div key={r.id} className="relative mb-2 border-b pb-4">
+                                <div key={r.id} className="relative mb-2 border-b pb-4 dark:border-neutral-700">
                                     <div className="flex gap-3">
                                         {/* Avatar */}
                                         <Link
@@ -669,15 +646,16 @@ function ArticleDetailInner() {
                                                     alt={`${r.extra__writer} profile`}
                                                     className="w-10 h-10 rounded-full object-cover"
                                                 />
-                                            ) : (
+                                             ) : (
                                                 <div
-                                                    className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold">
+                                                    className="w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold
+                                                     bg-gray-100 border-gray-300
+                                                     dark:text-neutral-500 dark:bg-neutral-600 dark:border-neutral-700">
                                                     <i className="fa-solid fa-skull"></i>
                                                 </div>
                                             )}
                                         </Link>
 
-                                        {/* Right side */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start gap-3">
                                                 <div className="flex-1">
@@ -685,12 +663,12 @@ function ArticleDetailInner() {
                                                     <div className="leading-6 break-words mt-1">
                                                         <Link
                                                             href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
-                                                            className="font-semibold text-lg hover:underline"
+                                                            className="font-semibold text-lg hover:underline dark:text-neutral-300"
                                                         >
                                                             {r.extra__writer}
                                                         </Link>
                                                         &nbsp;ㆍ&nbsp;
-                                                        <span className="text-sm text-gray-500">
+                                                        <span className="text-sm text-gray-500 dark:text-neutral-400">
                                                             {new Date(r.regDate).toLocaleDateString("en-US", {
                                                                 year: "numeric",
                                                                 month: "short",
@@ -714,13 +692,13 @@ function ArticleDetailInner() {
                                                                     setReplies((prev) =>
                                                                         prev.map((item) =>
                                                                             item.id === r.id ? {
-                                                                            ...item,
+                                                                                ...item,
                                                                                 editBody: e.target.value
-                                                                        } : item
-                                                                          )
-                                                                      )
-                                                                  }
-                                                              />
+                                                                            } : item
+                                                                        )
+                                                                    )
+                                                                }
+                                                            />
                                                             <div className="mt-2 flex items-center gap-2">
                                                                 <button
                                                                     onClick={async () => {
@@ -761,7 +739,7 @@ function ArticleDetailInner() {
                                                                         )
                                                                     }
                                                                     className="px-3 py-1.5 rounded-full border border-black/15 dark:border-white/20 text-xs
-                             hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                                                            hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                                                                 >
                                                                     Cancel
                                                                 </button>
@@ -769,15 +747,16 @@ function ArticleDetailInner() {
                                                         </div>
                                                     ) : (
                                                         <div className="m-1 mt-3 flex items-center gap-3 text-gray-500">
-              <span className="whitespace-pre-wrap align-baseline text-gray-800 dark:text-gray-100">
-                {r.body}
-              </span>
+                                                            <span
+                                                                className="whitespace-pre-wrap align-baseline text-gray-800 dark:text-gray-100">
+                                                                {r.body}
+                                                            </span>
                                                         </div>
                                                     )}
                                                 </div>
 
-                                                {/* Right controls: like + menu (고정) */}
                                                 <div className="flex items-center gap-1 shrink-0">
+                                                    {/*좋아요*/}
                                                     <button
                                                         onClick={() => handleReplyLikeToggle(r.id, r.liked)}
                                                         aria-label="이 댓글 좋아요"
@@ -787,13 +766,14 @@ function ArticleDetailInner() {
                                                     >
                                                         <i
                                                             className={`${
-                                                                r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500"
+                                                                r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500 dark:text-neutral-400"
                                                             } fa-heart text-base`}
                                                         />
                                                         {r.likeCount !== 0 &&
                                                             <span className="text-sm">{r.likeCount}</span>}
                                                     </button>
 
+                                                    {/*옵션*/}
                                                     {(r.userCanModify || r.userCanDelete) && (
                                                         <div className="relative">
                                                             <button
@@ -804,7 +784,8 @@ function ArticleDetailInner() {
                                                                 onClick={() =>
                                                                     setReplyMenuOpen(replyMenuOpen === r.id ? null : r.id)
                                                                 }
-                                                                className="text-gray-600 dark:text-gray-300"
+                                                                className="hover:text-gray-900
+                                                                    dark:hover:text-neutral-500 dark:text-neutral-400"
                                                                 title="More"
                                                             >
                                                                 <i className="fa-solid fa-ellipsis-vertical text-sm"></i>
@@ -814,14 +795,14 @@ function ArticleDetailInner() {
                                                                 <div
                                                                     ref={menuRef}
                                                                     role="menu"
-                                                                    className="absolute right-0 mt-2 z-20 min-w-36 overflow-hidden rounded-xl
-                             border border-black/10 dark:border-white/15 py-1
-                             bg-white dark:bg-gray-800 shadow-lg"
+                                                                    className="absolute right-0 mt-2 z-20 min-w-36 py-1 overflow-hidden rounded-xl shadow-lg border
+                                                                         bg-white divide-y divide-gray-100  text-gray-800
+                                                                        dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
                                                                 >
                                                                     {r.userCanModify && (
                                                                         <button
                                                                             role="menuitem"
-                                                                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-neutral-700"
                                                                             onClick={() => {
                                                                                 setReplyMenuOpen(null);
                                                                                 setReplies((prev) =>
@@ -843,8 +824,8 @@ function ArticleDetailInner() {
                                                                     {r.userCanDelete && (
                                                                         <button
                                                                             role="menuitem"
-                                                                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400
-                                 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                                            className="w-full text-left px-4 py-2 text-sm text-red-500
+                                                                                hover:bg-gray-100 dark:hover:bg-neutral-700 "
                                                                             onClick={async () => {
                                                                                 setReplyMenuOpen(null);
                                                                                 if (confirm("Are you sure you want to delete this comment?")) {
@@ -878,13 +859,13 @@ function ArticleDetailInner() {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
 
 export default function Page() {
     return (
-        <Suspense fallback={<p>불러오는 중...</p>}>
+        <Suspense fallback={<p>Loading...</p>}>
             <ArticleDetailInner/>
         </Suspense>
     );
