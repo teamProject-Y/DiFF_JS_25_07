@@ -1,7 +1,7 @@
 import React from "react";
 import "./overlayMenu.css";
 import {motion} from "framer-motion";
-import HamburgerButton from "@/common/HamMenu";
+import HamburgerButton from "@/common/hamMenu";
 import Link from "next/link";
 
 function AnimatedMenuItem({num, label, outline}) {

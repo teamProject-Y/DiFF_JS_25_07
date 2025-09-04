@@ -1,6 +1,6 @@
 // src/common/HamburgerMenu.jsx
 import React from "react";
-import "./HamMenu.css";
+import "./hamMenu.css";
 
 export default function HamburgerMenu({ open, onClick }) {
     return (
