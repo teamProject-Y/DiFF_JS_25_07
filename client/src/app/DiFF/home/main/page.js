@@ -4,7 +4,7 @@
 import {useEffect, useRef, useState} from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useRouter } from "next/navigation"
+import {useRouter} from "next/navigation"
 
 import {trendingArticle} from '@/lib/ArticleAPI';
 
@@ -25,9 +25,9 @@ const HamburgerButton = dynamic(() => import('@/common/HamMenu'), {ssr: false});
 
 // background
 const sections = [
-    { id: 'terminal', color: '#161616' },
-    { id: 'docs', color: '#fafafa' },
-    { id: 'trending', color: '#fafafa' }
+    {id: 'terminal', color: '#161616'},
+    {id: 'docs', color: '#fafafa'},
+    {id: 'trending', color: '#fafafa'}
 ];
 
 // 로그인 분기용: 만료/리프레시
@@ -163,27 +163,64 @@ export default function Page() {
     }, []);
 
     // background
-    useEffect(() => {
-        if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
+    // useEffect(() => {
+    //     if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
+    //
+    //     const observer = new IntersectionObserver(entries => {
+    //         const visible = entries.find(e => e.isIntersecting);
+    //         if (visible) {
+    //             const section = sections.find(s => s.id === visible.target.id);
+    //             if (section) setBgColor(section.color);
+    //         }
+    //     }, {threshold: 0.5});
+    //
+    //     sectionRefs.current.forEach(section => {
+    //         if (section) observer.observe(section);
+    //     });
+    //
+    //     return () => {
+    //         sectionRefs.current.forEach(section => {
+    //             if (section) observer.unobserve(section);
+    //         });
+    //     };
+    // }, [sectionRefs.current.map(ref => ref)]);
 
-        const observer = new IntersectionObserver(entries => {
+    useEffect(() => {
+        const root = document.getElementById('pageScroll');
+        if (!root || sectionRefs.current.some(ref => !ref)) return;
+
+        const observer = new IntersectionObserver((entries) => {
             const visible = entries.find(e => e.isIntersecting);
             if (visible) {
-                const section = sections.find(s => s.id === visible.target.id);
-                if (section) setBgColor(section.color);
+                const s = sections.find(v => v.id === visible.target.id);
+                if (s) setBgColor(s.color);
             }
-        }, { threshold: 0.5 });
+        }, { root, threshold: 0.5 }); // ★ root 지정
 
-        sectionRefs.current.forEach(section => {
-            if (section) observer.observe(section);
-        });
+        sectionRefs.current.forEach(el => el && observer.observe(el));
+        return () => observer.disconnect();
+    }, []);
 
-        return () => {
-            sectionRefs.current.forEach(section => {
-                if (section) observer.unobserve(section);
+    // (다른 useEffect들 아래 아무 데)
+    useEffect(() => {
+        const scroller = document.getElementById('pageScroll');
+        if (!scroller) return;
+
+        // 브라우저 자동 위치 복원 끄기
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+        // 초기 프레임: 스냅/스무스 오프 + 맨 위로
+        scroller.classList.add('snap-disabled', 'no-smooth');
+        scroller.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+        // 2프레임 뒤에 복구 + GSAP 리프레시
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                scroller.classList.remove('no-smooth', 'snap-disabled');
+                window.ScrollTrigger?.refresh?.();
             });
-        };
-    }, [sectionRefs.current.map(ref => ref)]);
+        });
+    }, []);
 
 
     if (!mounted) return null; // 마운트 전 렌더 방지
@@ -197,33 +234,41 @@ export default function Page() {
         <div
             id="pageScroll"
             data-scroll-root
-            className="w-full transition-colors duration-700 h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
-            style={{ backgroundColor: bgColor }}
+            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-proximity scroll-smooth"
+            style={{backgroundColor: bgColor}}
         >
-            <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg" ref={el => sectionRefs.current[0] = el}>
+            <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
+                 ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
 
 
-            <section id="docs" className="is-light-bg w-full min-h-screen pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
-                <BeforeExplain />
+            <section id="docs" className="pin-section is-light-bg w-full min-h-screen pt-20 dark:is-dark-bg"
+                     ref={el => sectionRefs.current[1] = el}>
+                <BeforeExplain/>
 
             </section>
 
 
             {/* trending */}
-            <div id="trending" className="is-light-bg w-full h-screen snap-start px-20 pt-20 dark:is-dark-bg" ref={el => sectionRefs.current[2] = el}>
+            <div id="trending"
+                 className="is-light-bg w-full h-screen snap-start bg-white px-20 pt-20 dark:is-dark-bg dark:bg-black"
+                 ref={el => sectionRefs.current[2] = el}>
                 <div className="text-3xl text-black font-bold">TRENDING</div>
                 <div className="article-slider h-2/3 w-full mt-8 flex relative">
                     <div className="flex absolute right-0 -top-16  font-extralight text-3xl text-neutral-500 z-10">
-                        <button className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
+                        <button
+                            className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
-                                <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1" fill="none"
+                                      strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
-                        <button className="custom-next rounded-full  m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
+                        <button
+                            className="custom-next rounded-full  m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
-                                <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1" fill="none"
+                                      strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
                     </div>
@@ -342,6 +387,11 @@ export default function Page() {
                     <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
                 </div>
             </div>
+
+            <style jsx global>{`
+                .snap-disabled { scroll-snap-type: none !important; }
+                .no-smooth     { scroll-behavior: auto !important; }
+            `}</style>
         </div>
     );
 }
