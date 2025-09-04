@@ -18,9 +18,9 @@ import {
     Title,
     Tooltip,
     Legend,
+    TimeScale,
 } from "chart.js";
-
-// ✅ 한 번에 등록
+import "chartjs-adapter-date-fns";
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -31,5 +31,6 @@ ChartJS.register(
     ArcElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    TimeScale
 );
