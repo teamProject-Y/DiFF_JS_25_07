@@ -65,11 +65,11 @@ export default function RepoInfo({
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (repo?.id) {
-            console.log("[RepoInfo] repo.id =", repo.id); // ✅ repo id 확인
+            console.log("[RepoInfo] repo.id =", repo.id); // repo id 확인
 
             getLanguageDistribution(repo.id)
                 .then((data) => {
-                    console.log("[RepoInfo] getLanguageDistribution result =", data); // ✅ API 결과 확인
+                    console.log("[RepoInfo] getLanguageDistribution result =", data); // API 결과 확인
                     setLanguages(data);
                 })
                 .catch((err) => {

@@ -4,7 +4,7 @@ export const metadata = { title: 'DiFF Docs — 4. 옵션' };
 
 export default function StartPage() {
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen dark:text-neutral-300">
             <div className="max-w-7xl px-8 flex">
                 <div className="w-1/5">
                     <DocsSidebar />

@@ -9,10 +9,5 @@ module.exports = {
     extend: {},
   },
   plugins: [
-      require("daisyui"),
-    plugin(function ({ addVariant, e }) {
-      addVariant('autofill', '&:-webkit-autofill')
-      addVariant('dark-autofill', '.dark &:-webkit-autofill')
-      plugins: [require('@tailwindcss/typography')]
-    }),],
-};
+      require("daisyui")
+]};

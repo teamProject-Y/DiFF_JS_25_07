@@ -2,9 +2,9 @@
 import React, { useEffect, useRef } from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
-import "highlight.js/styles/atom-one-dark.css"; // ✅ 코드블럭 스타일
+import "highlight.js/styles/atom-one-dark.css"; // 코드블럭 스타일
 
-// ✅ 이미지 업로드 (Cloudinary 예시)
+// 이미지 업로드 (Cloudinary 예시)
 const handleUpload = async (file) => {
     const data = new FormData();
     data.append("file", file);
@@ -35,7 +35,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
                 initialEditType: "markdown",
                 previewStyle: "vertical",
                 initialValue: initialValue || "",
-                // ✅ 여기서 언어 지정
+                // 여기서 언어 지정
                 codeBlockLanguages: [
                     "javascript",
                     "java",
@@ -46,7 +46,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
                 ],
             });
 
-            // ✅ highlight.js 적용
+            // highlight.js 적용
             instanceRef.current.on("change", () => {
                 if (onChange) onChange(instanceRef.current.getMarkdown());
                 editorRef.current
@@ -56,7 +56,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
                     });
             });
 
-            // ✅ 이미지 업로드 hook
+            // 이미지 업로드 hook
             instanceRef.current.addHook("addImageBlobHook", async (blob) => {
                 try {
                     const url = await handleUpload(blob);
@@ -72,7 +72,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
         return () => instanceRef.current?.destroy();
     }, []);
 
-    // ✅ 외부에서 initialValue 갱신될 때 반영
+    // 외부에서 initialValue 갱신될 때 반영
     useEffect(() => {
         if (instanceRef.current && initialValue) {
             instanceRef.current.setMarkdown(initialValue, false); // false = 커서 위치 유지

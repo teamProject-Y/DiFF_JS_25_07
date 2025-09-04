@@ -1,17 +1,9 @@
 "use client";
 
+import '@/common/registerChart';
 import { Doughnut } from "react-chartjs-2";
-import {
-    Chart as ChartJS,
-    ArcElement,
-    Tooltip,
-    Legend,
-} from "chart.js";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function LanguageChart({ languages }) {
-        console.log(' chart render', languages);
     if (!languages || languages.length === 0) {
         return <p className="text-sm text-gray-400">언어 데이터 없음</p>;
     }
@@ -21,29 +13,17 @@ export default function LanguageChart({ languages }) {
         datasets: [
             {
                 data: languages.map(l => l.totalLines),
-                backgroundColor: [
-                    "#f87171", // red
-                    "#60a5fa", // blue
-                    "#34d399", // green
-                    "#fbbf24", // yellow
-                    "#a78bfa", // purple
-                    "#f472b6", // pink
-                    "#94a3b8", // gray
-                ],
+                backgroundColor: ["#f87171","#60a5fa","#34d399","#fbbf24","#a78bfa","#f472b6","#94a3b8"],
                 borderWidth: 0,
             },
         ],
     };
 
     const options = {
+        responsive: true,
         plugins: {
-            legend: {
-                position: "right",
-                labels: {
-                    usePointStyle: true,
-                    boxWidth: 8,
-                },
-            },
+            legend: { position: "right", labels: { usePointStyle: true, boxWidth: 8 } },
+            title: { display: true, text: '언어별 비율' },
         },
     };
 

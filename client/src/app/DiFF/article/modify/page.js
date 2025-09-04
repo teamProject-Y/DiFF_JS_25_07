@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
-import LoadingOverlay from '@/common/LoadingOverlay';
+import LoadingOverlay from '@/common/loadingOverlay';
 import ToastEditor from "@/common/toastEditor";
 
 export default function ModifyArticlePage() {
