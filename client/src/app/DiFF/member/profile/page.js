@@ -6,8 +6,10 @@ import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+
 import {
     fetchUser,
     uploadProfileImg,

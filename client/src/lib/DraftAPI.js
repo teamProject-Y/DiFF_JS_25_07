@@ -93,7 +93,7 @@ export const getDraftById = async (id) => {
 export const saveDraft = async (data) => {
     const res = await DraftAPI.post('/draft/save', data);
     console.log('[API][saveDraft] response:', res.data);
-    return res.data;
+    return res.data1;
 };
 
 
