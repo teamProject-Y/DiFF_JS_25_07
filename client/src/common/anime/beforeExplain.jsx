@@ -14,6 +14,8 @@ const BeforeExplain = () => {
     const text1Ref = useRef(null);
     const text2Ref = useRef(null);
     const text3Ref = useRef(null);
+    const rightTextRef = useRef(null);
+    const rightTextRef2 = useRef(null);
 
     useLayoutEffect(() => {
         if (typeof window === 'undefined') return;
@@ -22,6 +24,8 @@ const BeforeExplain = () => {
         const text1 = text1Ref.current;
         const text2 = text2Ref.current;
         const text3 = text3Ref.current;
+        const rightText = rightTextRef.current;
+        const rightText2 = rightTextRef2.current;
 
         // 스크롤 컨테이너
         const scrollContainer = document.getElementById('pageScroll');
@@ -33,7 +37,18 @@ const BeforeExplain = () => {
         const enableSmooth = () => scrollContainer?.classList.remove('no-smooth');
 
         // 초기 상태
-        gsap.set([text1, text2, text3], {opacity: 0, y: 40, force3D: true, willChange: 'transform'});
+        gsap.set([text2, text3], {opacity: 0, y: 40, force3D: true, willChange: 'transform'});
+
+        const q1 = gsap.utils.selector(text1);
+        const bullet = q1('.dot')[0];
+
+        const textTargets = q1('span:not(.dot), li');
+
+        const initialTextColor  = textTargets[0] ? getComputedStyle(textTargets[0]).color : 'black'; // tailwind gray-900 대체값
+        const initialBulletBg   = bullet ? getComputedStyle(bullet).backgroundColor : '#000';
+
+        gsap.set(textTargets, { willChange: 'color' });
+        gsap.set(bullet,      { willChange: 'background-color' });
 
         // 메인 타임라인 (pin + 텍스트 시퀀스만)
         const tl = gsap.timeline({
@@ -42,7 +57,7 @@ const BeforeExplain = () => {
                 start: 'top top',
                 end: '+=300%',       // 카드 구간 삭제했으니 스크롤 길이 축소
                 pin: true,
-                scrub: 0.3,
+                scrub: 0.5,
                 pinSpacing: true,
                 scroller: scrollContainer || undefined,
                 anticipatePin: 2,
@@ -52,10 +67,44 @@ const BeforeExplain = () => {
             }
         });
 
+        const HOLD = 0.7;
+
         tl
-            // 1) 등장 → 퇴장
-            .to(text1, {opacity: 1, y: 0, snap: {y: 1}, duration: 1.5, ease: 'power3.out'})
-            .to(text1, {opacity: 0, y: -40, duration: 1.2, ease: 'power3.inOut'}, '+=0.3')
+            // ✅ text1 색 변경과 오른쪽 텍스트 등장 동기화
+            .add('text1Focus', '+=0.3')
+            .to(q1('span, li'), {
+                color: '#3b82f6',
+                duration: 1.2,
+                ease: 'power3.inOut',
+                stagger: 0.06
+            }, 'text1Focus')
+            .to(bullet, {
+                backgroundColor: '#3b82f6',
+                duration: 1.2,
+                ease: 'power3.inOut'
+            }, 'text1Focus')
+            .fromTo(rightText,                           // ✅ 동시에 오른쪽 텍스트 등장
+                { opacity: 0, x: 30 },
+                { opacity: 1, x: 0, duration: 1.0, ease: 'power3.out' },
+                'text1Focus'
+            )
+
+
+            // 2) 조금 더 스크롤(HOLD) 후 원래색으로 복귀
+            .add('revert', `+=${HOLD}`)
+            .to(textTargets, {
+                color: initialTextColor,
+                duration: 1.0,
+                ease: 'power2.inOut'
+            }, 'revert')
+            .to(bullet, {
+                backgroundColor: initialBulletBg,
+                duration: 1.0,
+                ease: 'power2.inOut'
+            }, 'revert')
+            .to(rightText, {             // 오른쪽 텍스트는 서서히 사라지게(원하면 지워도 됨)
+                opacity: 0, y: -20, duration: 0.8, ease: 'power2.inOut'
+            }, 'revert+=0.2')
 
             // 2) 등장 → 퇴장
             .to(text2, {opacity: 1, y: 0, snap: {y: 1}, duration: 1.5, ease: 'power3.out'}, '-=0.6')
@@ -81,7 +130,7 @@ const BeforeExplain = () => {
             <div className="absolute top-6 left-8 z-20 flex items-center gap-3">
                 <span className="w-5 h-5 rounded-full border-[6px] border-blue-600"/>
                 <span className="text-base md:text-lg font-semibold text-[#2a5cff]">
-                    ROBOTORI EDU 특징
+                    DiFF – Git 히스토리에서 블로그 초안까지
                 </span>
             </div>
             <button
@@ -104,19 +153,14 @@ const BeforeExplain = () => {
                         </h1>
                     </div>
 
-                    {/* 불릿 리스트 (text2) */}
+                    {/* 불릿 리스트 (text1) */}
                     <div ref={text1Ref} className="space-y-4">
                         <div className="flex items-center gap-3">
-                            <span className="w-2.5 h-2.5 rounded-full bg-blue-600"/>
-                            <span className="text-blue-700 font-semibold">
-                                수준과 목적에 따른 커리큘럼
+                            <span className="dot w-2.5 h-2.5 rounded-full bg-black"/>
+                            <span className="text-black font-semibold">
+                                커밋 요약 자동화
                             </span>
                         </div>
-                        <ul className="pl-6 text-gray-600 space-y-2">
-                            <li className="list-disc">Short / Long 교육기간 및 시간</li>
-                            <li className="list-disc">방문 또는 집합형 교육형태</li>
-                            <li className="list-disc">교구, 교재, SW, Total 컨텐츠 제공</li>
-                        </ul>
                     </div>
 
                     {/* 불릿 리스트 (text2) */}
@@ -147,27 +191,19 @@ const BeforeExplain = () => {
                         </p>
                     </div>
 
-                    {/* 데코: 블루 선버스트 */}
-                    <svg
-                        className="absolute -bottom-24 right-0 w-[520px] h-[520px] opacity-90 pointer-events-none"
-                        viewBox="0 0 512 512"
+                    <div
+                        ref={rightTextRef}
+                        className="absolute top-1/3 right-2 text-right z-20"
                         aria-hidden="true"
                     >
-                        <g transform="translate(256,256)">
-                            {Array.from({length: 12}).map((_, i) => (
-                                <rect
-                                    key={i}
-                                    x="-18"
-                                    y="110"
-                                    width="36"
-                                    height="130"
-                                    rx="8"
-                                    transform={`rotate(${i * 30})`}
-                                    fill="#3B5BFF"
-                                />
-                            ))}
-                        </g>
-                    </svg>
+                        <p className="text-black font-semibold text-lg md:text-8xl">
+                            커밋 요약이 자동으로 생성
+                        </p>
+                        <p className="text-black text-5xl md:text-3xl mt-1">
+                            PR 설명·체인지로그를 더 빨리, 더 일관되게.
+                        </p>
+                    </div>
+
                 </div>
             </div>
 
