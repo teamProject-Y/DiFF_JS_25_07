@@ -6,7 +6,6 @@ import {useRouter} from 'next/navigation';
 import {getGithubCommitList} from '@/lib/RepositoryAPI';
 
 export default function CommitList({repo}) {
-
     const connected = !!repo?.url && !!repo?.name;
     const [branch, setBranch] = useState(repo?.defaultBranch || 'main');
     const [page, setPage] = useState(1);

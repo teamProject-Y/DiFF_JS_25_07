@@ -40,7 +40,6 @@ export default function RepoInfo({
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (repo?.id) {
-
             getLanguageDistribution(repo.id)
                 .then((data) => {
                     setLanguages(data);
