@@ -123,7 +123,9 @@ export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyw
     const rid = repositoryId ?? repoId;
     const res = await ArticleAPI.get('/api/DiFF/article/list', {
         params: { repositoryId: rid, searchItem, keyword, page }
+
     });
+    console.log("🛰 [fetchArticles] res.data:", res.data);
     return res.data;
 };
 
@@ -136,12 +138,9 @@ export const trendingArticle = async ({ count, days }) => {
 
 // lib/ArticleAPI.js
 export const writeArticle = async (data) => {
-    console.log('📦 doWrite 호출, payload:', data);
-    // repositoryId 숫자 변환
     if (data?.repositoryId != null) {
         data = { ...data, repositoryId: Number(data.repositoryId) };
     }
-    // draftId 숫자 변환
     if (data?.draftId != null) {
         data = { ...data, draftId: Number(data.draftId) };
     }
@@ -149,8 +148,6 @@ export const writeArticle = async (data) => {
     const res = await ArticleAPI.post('/api/DiFF/article/doWrite', normalizeArticlePayload(data));
     const result = res.data;
 
-    // (디버깅 로그)
-    console.log('📦 articleId:', result?.data1);
     return result; // ResultData
 };
 

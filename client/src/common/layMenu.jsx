@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getFollowingList } from "@/lib/UserAPI";
 import { useRouter } from "next/navigation"
+import LoginSpeedDial from "@/common/toogle/loginSpeedDial";
 
 
 export default function LayMenu() {
@@ -33,7 +34,7 @@ export default function LayMenu() {
     return (
         <nav className="top-20 h-[calc(100vh-80px)] mx-auto max-w-7xl flex justify-around">
             {/* 왼쪽 메뉴 */}
-            <aside className="py-3 w-64">
+            <aside className="py-3 w-64 relative"> {/* relative 추가 */}
                 <nav className=" text-gray-600 mb-6">
                     {menuItems.map(({ href, label }) => {
                         const isActive =
@@ -70,13 +71,25 @@ export default function LayMenu() {
                                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(href)}
                                     className="px-9 py-1 hover:underline dark:text-neutral-300
                                     cursor-pointer">
-                                        {f.nickName}
+                                    {f.nickName}
                                 </li>
                             ))}
                         </ul>
                     ) : (
                         <p>팔로잉한 사용자가 없습니다.</p>
                     )}
+                </div>
+
+                <div className="fixed bottom-6 left-6">
+                    <LoginSpeedDial
+                        writeHref="/DiFF/article/write"
+                        draftsHref="/DiFF/article/drafts"
+                        onToggleTheme={() => {
+                            document.documentElement.classList.toggle("dark");
+                            localStorage.theme =
+                                document.documentElement.classList.contains("dark") ? "dark" : "";
+                        }}
+                    />
                 </div>
             </aside>
         </nav>
