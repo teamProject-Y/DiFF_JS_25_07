@@ -62,31 +62,28 @@ export const importGithubRepo = async (ghRepo) => {
         owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
     };
 
-    return await createRepository(payload); // 서버는 Repository로 바인딩
+    return await createRepository(payload);
 };
 
 export const getGithubCommitList = async (repo, opts = {}) => {
-    if (!repo?.name) {
-        throw new Error('Missing repository name');
+
+    if (!repo?.name || !repo?.url) {
+        throw new Error('Missing repository');
     }
 
+    // https://github.com/teamProject-Y/DiFF
     const owner = repo.url.split('/')[3];
     const repoName = repo.url.split('/')[4];
-    // https://github.com/teamProject-Y/DiFF
 
     const params = {
         owner: owner,
         repoName: repoName,
-        branch: "main",
-        page: opts.page ?? 1,
-        perPage: opts.perPage ?? 50,
+        branch: opts.branch ?? repo.defaultBranch ?? null,
+        page: opts.page ?? null,
+        perPage: opts.perPage ?? null,
     };
 
     const res = await UserAPI.get(`/api/DiFF/github/commits`, { params });
-
-    console.log("============== commits list res ==============")
-    console.log(res.data);
-    console.log(res.data.msg);
 
     const data = res?.data ?? {};
     const code = data.resultCode || data.code || '';
@@ -114,9 +111,6 @@ export const getGithubCommitList = async (repo, opts = {}) => {
 
     return Array.isArray(raw) ? raw.map(normalize) : [];
 };
-
-export const getOwnerFromGithubUrl = (url) => parseGithubOwnerRepo(url).owner;
-
 
 export const deleteRepository = async (ghRepo) => {
 

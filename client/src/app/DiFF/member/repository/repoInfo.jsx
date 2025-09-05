@@ -103,7 +103,7 @@ export default function RepoInfo({
 
                         {/* 하단 박스 */}
                         <div
-                            className="flex-grow p-4 overflow-y-scroll rounded-xl border shadow-sm
+                            className="flex-grow overflow-y-scroll rounded-xl border shadow-sm
                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                             {repo.url ?
                                 <>

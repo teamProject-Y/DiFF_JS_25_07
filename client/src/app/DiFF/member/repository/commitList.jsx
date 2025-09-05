@@ -1,24 +1,23 @@
 // components/CommitList.jsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getGithubCommitList } from '@/lib/RepositoryAPI';
+import {useEffect, useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {getGithubCommitList} from '@/lib/RepositoryAPI';
 
-export default function CommitList({ repo }) {
-
-    console.log("commitlist 들어옴 repo: ", repo);
+export default function CommitList({repo}) {
 
     const router = useRouter();
 
     const connected = !!repo?.url && !!repo?.name;
     const [branch, setBranch] = useState(repo?.defaultBranch || 'main');
     const [page, setPage] = useState(1);
-    const [perPage] = useState(50);
+    const [perPage] = useState(10);
 
     const [commits, setCommits] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState('');
+    const [refreshTick, setRefreshTick] = useState(0);
 
     // repo 바뀌면 초기화
     useEffect(() => {
@@ -37,9 +36,7 @@ export default function CommitList({ repo }) {
                 setLoading(true);
                 setErr('');
 
-                console.log("use effect 됨")
-
-                const list = await getGithubCommitList(repo, { branch, page, perPage });
+                const list = await getGithubCommitList(repo, {branch, page, perPage});
                 if (!cancelled) setCommits(list);
             } catch (e) {
                 if (!cancelled) setErr(e?.message || '커밋을 불러오지 못했습니다.');
@@ -48,7 +45,9 @@ export default function CommitList({ repo }) {
             }
         })();
 
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [connected, repo, branch, page, perPage]);
 
     if (!connected) {
@@ -56,110 +55,109 @@ export default function CommitList({ repo }) {
     }
 
     return (
-        <div className="flex flex-col gap-3">
-            {/* 제어부 */}
-            <div className="flex items-center gap-2">
-                <span className="text-sm text-neutral-500">Branch</span>
-                <input
-                    value={branch}
-                    onChange={(e) => { setPage(1); setBranch(e.target.value.trim()); }}
-                    placeholder="e.g. main"
-                    className="px-2 py-1 rounded-md border text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                    style={{ minWidth: 160 }}
-                />
-                <button
-                    onClick={() => setPage((p) => p)} // 간단 새로고침
-                    className="px-3 py-1 rounded-lg border text-sm bg-white hover:bg-neutral-100
-                     border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
-                >
-                    Refresh
-                </button>
-                <a
-                    href={repo.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="ml-auto text-sm underline"
-                >
-                    Open repository
-                </a>
+        <div
+            className="flex flex-col h-full min-h-0 rounded-lg bg-white dark:text-neutral-300 dark:bg-neutral-900/50 dark:border-neutral-700">
+            <div
+                className="flex justify-between shrink-0 px-3 py-2 border-b
+                bg-gray-100 dark:bg-neutral-900/70 dark:border-neutral-700">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm">
+                        <i className="fa-solid fa-code-branch"></i> Branch
+                    </span>
+                    <input
+                        value={branch}
+                        onChange={(e) => {
+                            setPage(1);
+                            setBranch(e.target.value.trim());
+                        }}
+                        placeholder="e.g. main"
+                        className="px-2 py-1 rounded-md border text-sm focus:outline-none focus:ring-1
+                         focus:ring-blue-400 dark:border-neutral-700 dark:bg-neutral-800"
+                        style={{minWidth: 160}}
+                    />
+                    <button
+                        onClick={() => setRefreshTick((n) => n + 1)}
+                        className="px-3 py-1 rounded-lg border text-sm bg-white hover:bg-neutral-100 border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                    >
+                        Refresh
+                    </button>
+
+                </div>
+                <div className="flex items-center justify-end gap-2">
+                    <button
+                        className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50
+                            bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
+                        disabled={page <= 1 || loading}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                        Prev
+                    </button>
+                    <span className="text-xs text-neutral-500">Page {page}</span>
+                    <button
+                        className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
+                        disabled={loading}
+                        onClick={() => setPage((p) => p + 1)}
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
 
-            {/* 상태 */}
-            {loading && <div className="text-sm text-neutral-500">Loading commits…</div>}
-            {!!err && <div className="text-sm text-red-500">{err}</div>}
-            {!loading && !err && commits.length === 0 && (
-                <div className="text-sm text-neutral-500">표시할 커밋이 없습니다.</div>
-            )}
+            <div className="flex-1 min-h-0 overflow-y-auto px-3">
+                {loading && <div className="h-full w-full flex justify-center items-center text-sm text-neutral-500">Loading commits…</div>}
+                {!!err && <div className="h-full w-full flex justify-center items-center text-sm text-red-500">{err}</div>}
+                {/* 상태 표시 */}
+                {!loading && !err && commits.length === 0 && (
+                    <div className="py-6 text-sm text-neutral-500">No commits this repository yet</div>
+                )}
 
-            {/* 리스트 */}
-            {!loading && !err && commits.length > 0 && (
-                <>
-                    <ul className="divide-y">
+                {/* 커밋 리스트 */}
+                {!loading && !err && commits.length > 0 && (
+                    <ul className="divide-y divide-neutral-200 dark:divide-neutral-700">
                         {commits.map((c) => (
-                            <li key={c.sha} className="py-3 flex items-start gap-3">
+                            <li key={c.sha} className="py-4 flex items-start gap-3">
                                 <img
                                     src={c.authorAvatarUrl || 'https://avatars.githubusercontent.com/u/0?v=4'}
                                     alt=""
-                                    className="w-8 h-8 rounded-full object-cover"
+                                    className="w-10 h-10 rounded-full object-cover self-center"
                                 />
                                 <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium truncate">{c.message || '(no message)'}</span>
-                                        {c.htmlUrl && (
-                                            <a
-                                                href={c.htmlUrl}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="text-xs text-blue-600 underline shrink-0"
-                                            >
-                                                View on GitHub
-                                            </a>
-                                        )}
-                                    </div>
-                                    <div className="text-xs text-neutral-500 mt-0.5">
-                                        {(c.authorName || c.authorLogin || 'unknown')} ·{' '}
-                                        {c.authoredAt ? new Date(c.authoredAt).toLocaleString() : '(no date)'}
-                                    </div>
-                                    <div className="text-[11px] text-neutral-400 mt-0.5">
-                                        {c.parentSha
-                                            ? `${String(c.parentSha).slice(0,7)}..${String(c.sha).slice(0,7)}`
-                                            : String(c.sha).slice(0,7)}
+                                    <a
+                                        className="font-medium truncate hover:underline clamp-1"
+                                        href={c.htmlUrl || '#'}
+                                        target="_blank"
+                                    >
+                                        {c.message || '(no message)'}
+                                    </a>
+                                    <div className="flex gap-1 text-xs text-neutral-500 mt-0.5">
+                                        <span>{c.authorName || c.authorLogin || 'unknown'}</span>
+                                        <span>·</span>
+                                        <span>{c.authoredAt ?
+                                            new Date(c.authoredAt).toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "2-digit",
+                                                year: "numeric"
+                                            })
+                                            : ''}</span>
+                                        <span>·</span>
+                                        <span>{String(c.sha).slice(0, 6)}</span>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() =>
-                                        router.push(`/draft/new?repoId=${repo.id}&base=${c.parentSha || ''}&head=${c.sha}`)
+                                        router.push(
+                                            `/draft/new?repoId=${repo.id}&base=${c.parentSha || ''}&head=${c.sha}`,
+                                        )
                                     }
-                                    className="shrink-0 px-3 py-1 rounded-lg border text-sm hover:bg-neutral-100
-                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
+                                    className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center hover:bg-neutral-100 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700"
                                 >
                                     Generate draft
                                 </button>
                             </li>
                         ))}
                     </ul>
-
-                    {/* 페이징 */}
-                    <div className="flex items-center justify-end gap-2 pt-2">
-                        <button
-                            className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50
-                         bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
-                            disabled={page <= 1}
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        >
-                            Prev
-                        </button>
-                        <span className="text-xs text-neutral-500">Page {page}</span>
-                        <button
-                            className="px-3 py-1 rounded-lg border text-sm
-                         bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
-                            onClick={() => setPage((p) => p + 1)}
-                        >
-                            Next
-                        </button>
-                    </div>
-                </>
-            )}
+                )}
+            </div>
         </div>
     );
 }

@@ -89,7 +89,7 @@ function PostCard({article}) {
     return (
         <div
             onClick={() => handleArticleClick(article.id)}
-            className="group cursor-pointer rounded-lg border transition-transform duration-200
+            className="group cursor-pointer rounded-lg border transition-transform duration-200 bg-white
             border-gray-200 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-900/50"
         >
             <div className="p-4">
