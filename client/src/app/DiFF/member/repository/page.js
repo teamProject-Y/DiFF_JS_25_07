@@ -77,7 +77,6 @@ export default function RepositoriesPage() {
         }
     }, [repositories, selectedRepoId]);
 
-    // 최초 1회만 사용자 레포 불러오기
     useEffect(() => {
         const accessToken = getAccessToken();
         if (!accessToken) {
@@ -293,7 +292,7 @@ export default function RepositoriesPage() {
 
                             {/* 메인 컨텐츠 */}
                             <div
-                                className="relative border rounded-r-lg pt-8 h-[calc(100vh-220px)] overflow-hidden
+                                className="relative border rounded-r-lg h-[calc(100vh-220px)] overflow-hidden
                                  bg-gray-50 border-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700">
 
                                 {/* 리포 없을 때 */}
@@ -342,12 +341,10 @@ export default function RepositoriesPage() {
                                         {tab === 'info' && selectedRepo ? (
                                             <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
-                                                repo={selectedRepo}   // repoId 전달
-                                                repositories={repositories}
+                                                repo={selectedRepo}
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}
                                                 useExternalSidebar={true}
-                                                activeTab={tab}
                                             />
                                         ) : null}
                                         {tab === 'posts' && selectedRepo ? (

@@ -20,7 +20,7 @@ export default function LanguageChart({ languages }) {
                 backgroundColor: ["#ff9c9c","#a9d0ff","#b9ffe6",
                     "#ffde99","#e5ffa8","#ffb1f2","#c1fdff"],
                 borderWidth: 0,
-                hoverOffset: 2, // 원하면 호버시 살짝 튀어나오게
+                hoverOffset: 2,
             },
         ],
     };
@@ -39,7 +39,7 @@ export default function LanguageChart({ languages }) {
                     pointStyle: "circle",
                     boxWidth: 6,
                     boxHeight: 6,
-                    padding: 10, // 차트와 범례 사이 간격
+                    padding: 10,
                     color: theme === 'dark' ? '#d4d4d4' : '#101828',
                     fontSize: "20px",
                 },

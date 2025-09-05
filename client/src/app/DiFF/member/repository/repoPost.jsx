@@ -89,8 +89,8 @@ function PostCard({ article, isMyRepo }) {
     return (
         <div
             onClick={() => handleArticleClick(article.id)}
-            className="group cursor-pointer rounded-lg border transition-transform duration-200
-            border-gray-200 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-900/50"
+            className="group cursor-pointer rounded-lg border transition-transform duration-200 bg-white dark:bg-neutral-900/30
+            border-gray-200 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-700/20"
         >
             <div className="p-4">
                 <div className="flex items-start justify-between gap-4">

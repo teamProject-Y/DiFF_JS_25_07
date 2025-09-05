@@ -22,6 +22,17 @@ export const createRepository = async (data) => {
     }
 };
 
+export const renameRepository = async (data) => {
+    try {
+        const res = await ArticleAPI.post("/api/DiFF/repository/rename", data);
+        console.log("[API][renameRepository] status:", res.status, "data:", res.data);
+        return res.data;
+    } catch (err) {
+        console.error("[API][renameRepository] error:", err);
+        throw err;
+    }
+}
+
 export const getAnalysisHistory = async (repoId) => {
     console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/history");
     const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/history`);
@@ -42,9 +53,6 @@ export const getLanguageDistribution = async (repoId) => {
     }
 };
 
-
-
-
 export const importGithubRepo = async (ghRepo) => {
     const payload = {
         name: ghRepo?.name ?? ghRepo?.full_name ?? '',
@@ -54,7 +62,54 @@ export const importGithubRepo = async (ghRepo) => {
         owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
     };
 
-    return await createRepository(payload); // 서버는 Repository로 바인딩
+    return await createRepository(payload);
+};
+
+export const getGithubCommitList = async (repo, opts = {}) => {
+
+    if (!repo?.name || !repo?.url) {
+        throw new Error('Missing repository');
+    }
+
+    // https://github.com/teamProject-Y/DiFF
+    const owner = repo.url.split('/')[3];
+    const repoName = repo.url.split('/')[4];
+
+    const params = {
+        owner: owner,
+        repoName: repoName,
+        branch: opts.branch ?? repo.defaultBranch ?? null,
+        page: opts.page ?? null,
+        perPage: opts.perPage ?? null,
+    };
+
+    const res = await UserAPI.get(`/api/DiFF/github/commits`, { params });
+
+    const data = res?.data ?? {};
+    const code = data.resultCode || data.code || '';
+    if (code && !String(code).startsWith('S-')) {
+        throw new Error(data.msg || data.message || '커밋 조회 실패');
+    }
+
+    const raw =
+        data.data1 ??
+        (Array.isArray(data.data) ? data.data : data.data?.commits) ??
+        [];
+
+    const normalize = (c) => ({
+        sha: c.sha,
+        htmlUrl: c.htmlUrl || c.html_url,
+        message: (c.message || '').split('\n')[0],
+        authorName: c.authorName ?? c.AuthorName,
+        authorLogin: c.authorLogin ?? c.AuthorLogin,
+        authorAvatarUrl: c.authorAvatarUrl ?? c.AuthorAvatarUrl,
+        authoredAt: c.authoredAt ?? c.AuthoredAt,
+        parentSha:
+            c.parentSha ??
+            (Array.isArray(c.parents) && c.parents.length > 0 ? c.parents[0]?.sha : null),
+    });
+
+    return Array.isArray(raw) ? raw.map(normalize) : [];
 };
 
 export const deleteRepository = async (ghRepo) => {

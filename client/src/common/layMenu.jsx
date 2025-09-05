@@ -80,7 +80,6 @@ export default function LayMenu() {
                     )}
                 </div>
 
-                <div className="fixed bottom-6 left-6">
                     <LoginSpeedDial
                         writeHref="/DiFF/article/write"
                         draftsHref="/DiFF/article/drafts"
@@ -90,7 +89,6 @@ export default function LayMenu() {
                                 document.documentElement.classList.contains("dark") ? "dark" : "";
                         }}
                     />
-                </div>
             </aside>
         </nav>
     );

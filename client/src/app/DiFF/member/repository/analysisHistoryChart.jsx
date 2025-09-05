@@ -8,6 +8,7 @@ import {useTheme} from "@/common/thema";
 export default function AnalysisHistoryChart({ history = [] }) {
 
     const theme = useTheme() === 'dark' ? 'rgb(100,100,100)' : 'rgb(200,200,200)';
+    const reverseTheme = useTheme() === 'dark' ? 'rgb(200,200,200)' : 'rgb(100,100,100)';
 
     if (!history.length) {
         return <p className="text-gray-500 text-center">분석 데이터 없음</p>;
@@ -72,12 +73,20 @@ export default function AnalysisHistoryChart({ history = [] }) {
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { top: 0, right: 6, bottom: 0, left: 0 } },
         plugins: {
             legend: {
                 position: 'right',
-                labels: { usePointStyle: true, pointStyle: 'circle', padding: 15 },
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    padding: 5 ,
+                    boxWidth: 5,
+                    boxHeight: 5,
+                    color: reverseTheme,
+                },
             },
-            title: { display: true, text: 'Analysis History' },
+            title: { display: true, text: 'Analysis History', color: reverseTheme },
         },
         elements: {
             point: { radius: 4, hoverRadius: 6 },
@@ -87,8 +96,18 @@ export default function AnalysisHistoryChart({ history = [] }) {
             x: {
                 type: 'time',
                 time: { unit: 'day' },
+                // 4) 축 라벨 개수 제한 + 회전 제거
+                ticks: { color: reverseTheme, maxTicksLimit: 6, autoSkip: true, maxRotation: 0 },
+                grid: { display: false },
+                border: { display: false },
             },
-            y: { beginAtZero: true },
+            y: {
+                beginAtZero: true,
+                // 5) y축 틱 개수 제한
+                ticks: { color: reverseTheme, maxTicksLimit: 3 },
+                grid: { display: false },
+                border: { display: false },
+            },
         },
     };
 
