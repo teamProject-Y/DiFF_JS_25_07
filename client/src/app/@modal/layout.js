@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import LoginForm from "@/app/DiFF/member/login/loginModal";
-import JoinForm from "@/app/DiFF/member/join/joinModal";
+import JoinForm from '@/app/DiFF/member/join/joinModal';
 import ModalOpenIntro from "@/common/anime/modalOpenIntro";
 
 export default function ModalLayout({ children }) {
