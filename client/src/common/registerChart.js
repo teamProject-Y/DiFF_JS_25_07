@@ -1,32 +1,36 @@
-// src/common/registerChart.js
-'use client';
-
-import 'chart.js/auto';
+"use client";
 
 import {
     Chart as ChartJS,
-    ArcElement,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
+    // 스케일(축)
+    CategoryScale,   // X축 카테고리
+    LinearScale,     // Y축 숫자
+
+    // 차트 요소들
+    BarElement,      // 막대
+    LineElement,     // 선
+    PointElement,    // 점
+    ArcElement,      // 파이/도넛
+
+    RadialLinearScale, // 레이더/폴라에어 차트용
+
+    // 플러그인
     Title,
     Tooltip,
     Legend,
     TimeScale,
-} from 'chart.js';
-import 'chartjs-adapter-date-fns';
-
+} from "chart.js";
+import "chartjs-adapter-date-fns";
 ChartJS.register(
-    ArcElement,
     CategoryScale,
     LinearScale,
-    PointElement,
+    RadialLinearScale,
+    BarElement,
     LineElement,
+    PointElement,
+    ArcElement,
     Title,
     Tooltip,
     Legend,
     TimeScale
 );
-
-export default ChartJS;

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import LanguageChart from "./languageChart";
+
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {getAnalysisHistory, getLanguageDistribution} from "@/lib/RepositoryAPI";
 
@@ -65,11 +66,11 @@ export default function RepoInfo({
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (repo?.id) {
-            console.log("[RepoInfo] repo.id =", repo.id); // repo id 확인
+            console.log("[RepoInfo] repo.id =", repo.id); // ✅ repo id 확인
 
             getLanguageDistribution(repo.id)
                 .then((data) => {
-                    console.log("[RepoInfo] getLanguageDistribution result =", data); // API 결과 확인
+                    console.log("[RepoInfo] getLanguageDistribution result =", data); // ✅ API 결과 확인
                     setLanguages(data);
                 })
                 .catch((err) => {
@@ -125,26 +126,21 @@ export default function RepoInfo({
                 </aside>
             )}
 
-            {repositories.length === 0 &&
-                <div className="w-full h-full bg-red-400">
-
-                </div>
-            }
-
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
                 {/* 중앙 메인(Info) */}
                 <div className="flex-grow flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col">
                         {/* 상단 카드 */}
                         <div
-                            className="h-[35%] rounded-xl border border-neutral-200 shadow-sm p-4 mb-3 mr-3">
+                            className="h-[35%] rounded-xl border shadow-sm p-4 mb-3 mr-3
+                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                             <AnalysisHistoryChart history={history} />
-                            그래프
                         </div>
 
                         {/* 하단 박스 */}
                         <div
-                            className="flex-grow p-4 mr-3 overflow-y-scroll rounded-xl border border-neutral-200 shadow-sm">
+                            className="flex-grow p-4 mr-3 overflow-y-scroll rounded-xl border shadow-sm
+                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                             {repo.url ?
                                 <>
                                     깃허브 커밋들 가져오기
@@ -159,7 +155,8 @@ export default function RepoInfo({
                 </div>
 
                 <div className="w-[30%] space-y-3 flex flex-col">
-                    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
+                    <div className="rounded-xl border  shadow-sm p-4
+                     bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                         <div className="flex items-center gap-3">
                             <div className="flex items-center min-w-0 flex-grow">
                                 {editingName ? (
@@ -212,7 +209,8 @@ export default function RepoInfo({
                         <div className="mt-2 flex w-full text-sm justify-between items-center">
                             <div className="py-2"><i
                                 className="fa-solid fa-calendar text-neutral-400"></i> {repo.regDate}</div>
-                            <span className="ml-auto text-xs px-2 py-1 rounded-full bg-neutral-100 border">
+                            <span className="ml-auto text-xs px-2 py-1 rounded-full border
+                            bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                               {visibility}
                             </span>
                             {repo?.url && (
@@ -230,7 +228,8 @@ export default function RepoInfo({
                     </div>
 
                     {/* 통계 */}
-                    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm p-4">
+                    <div className="rounded-xl border shadow-sm p-4
+                    bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                         <div className="grid grid-cols-4 gap-4 text-center">
                             <div>
                                 <div className="text-neutral-500 text-xs">Stars</div>
@@ -252,15 +251,15 @@ export default function RepoInfo({
                     </div>
 
                     {/* 언어 비율 */}
-                    <div className="rounded-xl border border-neutral-200 flex-grow shadow-sm p-4">
-                        <div className="font-semibold mb-3">Languages</div>
-
+                    <div className="rounded-xl border flex-grow shadow-sm p-4 max-h-[45%]
+                    bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
+                        <div className="font-semibold">Languages</div>
                             <LanguageChart languages={languages} />
                     </div>
 
-                    <button className="w-full p-2 hover:bg-red-500 hover:text-white bg-white
-                        border border-neutral-200 rounded-xl shadow-sm text-red-500 transition-colors">
-
+                    <button className="w-full p-2 border rounded-xl transition-colors
+                    shadow-sm text-red-500  hover:bg-red-500 hover:text-white
+                        bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                         Delete Repository
                     </button>
 

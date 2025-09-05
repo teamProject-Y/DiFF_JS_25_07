@@ -61,15 +61,44 @@ export default function AfterMainPage({me, trendingArticles}) {
             });
     }, []); //
 
-    const handleArticleClick = async (id) => {
+// 로컬스토리지에 조회 기록 저장
+    function markAsViewed(articleId) {
+        const viewedKey = "viewedArticles";
+        const viewed = JSON.parse(localStorage.getItem(viewedKey)) || [];
+
+        console.log("📌 기존 viewed 목록:", viewed);
+
+        if (!viewed.includes(articleId)) {
+            const updated = [...viewed, articleId];
+            localStorage.setItem(viewedKey, JSON.stringify(updated));
+            console.log(`✅ ${articleId} 추가됨. 저장된 목록:`, updated);
+        } else {
+            console.log(`⚠️ ${articleId}는 이미 본 글입니다.`);
+        }
+    }
+
+    const handleArticleClick = (id) => {
+        console.log('handleArticleClick 호출됨:', id);
         try {
-            await increaseArticleHits(id);  // ✅ 조회수 증가 요청
+            console.log("🖱️ 클릭한 articleId:", id);
+
+            markAsViewed(id);
+
             window.location.href = `/DiFF/article/detail?id=${id}`;
         } catch (err) {
-            console.error("조회수 증가 실패:", err);
+            console.error("❌ 로컬스토리지 저장 실패:", err);
             window.location.href = `/DiFF/article/detail?id=${id}`;
         }
     };
+    // const handleArticleClick = async (id) => {
+    //     try {
+    //         await increaseArticleHits(id);
+    //         window.location.href = `/DiFF/article/detail?id=${id}`;
+    //     } catch (err) {
+    //         console.error("조회수 증가 실패:", err);
+    //         window.location.href = `/DiFF/article/detail?id=${id}`;
+    //     }
+    // };
 
     return (
         <div className="w-full h-screen overflow-hidden bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">
@@ -137,8 +166,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                                 })}
                                                             </span>
                                                             <span>view: {article.hits}</span>
-                                                            <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                            <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                            <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                            <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                         </div>
                                                     </div>
                                                     <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
@@ -199,8 +228,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                             })}
                                                         </span>
                                                         <span>view: {article.hits}</span>
-                                                        <span><i className="fa-solid fa-comments"></i> {article.extra__sumReplies}</span>
-                                                        <span><i className="fa-solid fa-heart"></i> {article.extra__sumReaction}</span>
+                                                        <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                        <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                     </div>
                                                 </div>
                                                 <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">

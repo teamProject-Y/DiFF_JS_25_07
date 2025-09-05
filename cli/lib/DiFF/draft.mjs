@@ -38,16 +38,25 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
 
 export async function createDraft(memberId, repositoryId) {
     try {
-        console.log("📤 draft 생성 요청:", { memberId, repositoryId });
+        const payload = {
+            memberId,
+            repositoryId,
+            title: "",      // 최소값
+            body: "",       // 최소값
+            isPublic: true, // 기본값 (공개)
+        };
+
+        console.log("📤 draft 생성 요청:", payload);
+
         const { data } = await axios.post(
             "http://localhost:8080/api/DiFF/draft/mkDraft",
-            { memberId, repositoryId }
+            payload
         );
+
         console.log("📥 draft 생성 응답:", data);
 
         if (data.resultCode?.startsWith("S-")) {
             const { draftId, diffId } = data.data1;
-            // console.log(`✅ draft 생성 성공 → draftId=${draftId}, diffId=${diffId}`);
             return { draftId, diffId };
         } else {
             console.log("❌ draft 생성 실패:", data.msg);
@@ -58,6 +67,7 @@ export async function createDraft(memberId, repositoryId) {
         return null;
     }
 }
+
 
 /** meta 마지막 체크섬 업데이트 **/
 export async function updateMeta(branchName, lastChecksum) {
