@@ -9,8 +9,17 @@ export default function LanguageChart({ languages }) {
     const theme = useTheme();
 
     if (!languages || languages.length === 0) {
-        return <p className="text-sm text-gray-400 dark:text-neutral-300">No data</p>;
+        return (
+            <div className="w-[200px] h-[200px] flex flex-col items-center justify-center gap-2
+            text-gray-600 dark:text-neutral-400">
+                <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-2">
+                    <i className="fa-solid fa-chart-pie text-3xl"></i>
+                </div>
+                <p className="font-semibold">No analysis yet.</p>
+            </div>
+        );
     }
+
 
     const chartData = {
         labels: languages.map(l => l.language),

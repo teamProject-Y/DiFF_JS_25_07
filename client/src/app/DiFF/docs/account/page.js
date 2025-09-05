@@ -1,4 +1,4 @@
-import DocsSidebar from "@/common/docsSide";
+import DocsSidebar from "@/app/DiFF/docs/docsSide";
 
 export const metadata = { title: 'DiFF Docs — 6. 계정/보안' };
 
