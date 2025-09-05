@@ -65,6 +65,7 @@ const BeforeExplain = () => {
         // 메인 타임라인 (pin + 텍스트 시퀀스만)
         const tl = gsap.timeline({
             scrollTrigger: {
+                id: 'docs',
                 trigger: container,
                 start: 'top top',
                 end: '+=500%',       // 카드 구간 삭제했으니 스크롤 길이 축소
@@ -75,8 +76,15 @@ const BeforeExplain = () => {
                 anticipatePin: 2,
                 invalidateOnRefresh: true,
                 markers: true,
+                pinType: 'transform',
+                fastScrollEnd: true,
                 onToggle: (self) => self.isActive ? (disableSnap(), disableSmooth()) : (enableSnap(), enableSmooth()),
                 onRefresh: (self) => self.isActive ? (disableSnap(), disableSmooth()) : (enableSnap(), enableSmooth()),
+
+                   onEnter:     () => scrollContainer?.classList.add('pin-active'),
+               onLeave:     () => scrollContainer?.classList.remove('pin-active'),
+               onEnterBack: () => scrollContainer?.classList.add('pin-active'),
+              onLeaveBack: () => scrollContainer?.classList.remove('pin-active'),
             }
         });
 

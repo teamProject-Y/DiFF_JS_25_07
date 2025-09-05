@@ -452,3 +452,6 @@ li {
     background-color: #f9fafb;
     font-weight: bold;
 }
+
+#pageScroll { touch-action: pan-y; }
+.article-slider, .swiper { touch-action: pan-x; }
