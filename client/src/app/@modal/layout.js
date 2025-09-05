@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 
-import LoginForm from '@/common/loginModal';
-import JoinForm from '@/common/joinModal';
+import LoginForm from "@/app/DiFF/member/login/loginModal";
+import JoinForm from '@/app/DiFF/member/join/joinModal';
 import ModalOpenIntro from "@/common/anime/modalOpenIntro";
 
 export default function ModalLayout({ children }) {

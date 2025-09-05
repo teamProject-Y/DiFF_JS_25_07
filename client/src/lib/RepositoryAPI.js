@@ -57,9 +57,11 @@ export const importGithubRepo = async (ghRepo) => {
     const payload = {
         name: ghRepo?.name ?? ghRepo?.full_name ?? '',
         aPrivate: ghRepo?.aPrivate ?? !!ghRepo?.private ?? false,
-        url: ghRepo?.url ?? ghRepo?.html_url ?? ghRepo?.apiUrl ?? '',
+        url: ghRepo?.url ?? ghRepo?.html_url ?? '',
         defaultBranch: ghRepo?.defaultBranch ?? ghRepo?.default_branch ?? '',
-        owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
+        // owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
+        githubOwner: ghRepo?.githubOwner ?? null,
+        githubName: ghRepo?.githubName ?? null,
     };
 
     return await createRepository(payload);
@@ -72,11 +74,11 @@ export const getGithubCommitList = async (repo, opts = {}) => {
     }
 
     // https://github.com/teamProject-Y/DiFF
-    const owner = repo.url.split('/')[3];
-    const repoName = repo.url.split('/')[4];
+    const owner = repo.githubOwner ?? repo.url.split('/')[3];
+    const repoName = repo.githubName ?? repo.url.split('/')[4];
 
     const params = {
-        owner: owner,
+        owner: repo.owner ?? owner,
         repoName: repoName,
         branch: opts.branch ?? repo.defaultBranch ?? null,
         page: opts.page ?? null,

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce} from "@/lib/UserAPI";
 import { updateNotificationSetting } from "@/lib/NotificationAPI";
-import ThemeToggle from "@/common/thema";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -344,8 +343,6 @@ function SettingsPage() {
 
                                     </div>
                                 </div>
-                                <ThemeToggle/>
-
                             </div>
                         </Card>
 
@@ -515,8 +512,7 @@ function SettingsPage() {
                                 )}
 
                                 {/* 하단 Save 버튼 */}
-                                <div className="flex items-center justify-between text-xs text-neutral-500">
-                                    <div>⌘/Ctrl + Enter 로 저장</div>
+                                <div className="flex items-center justify-end text-xs text-neutral-500">
                                     <button
                                         type="submit"
                                         disabled={!dirtyIntro}
@@ -655,10 +651,8 @@ function LinkBtn({label, onClick, disabled, brand}) {
         >
             {/* 브랜드 아이콘 */}
             {brand === "google" && (
-                <i
-                    className="fab fa-google text-md"
-                    aria-hidden="true"
-                />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png"
+                     alt="googe" className="w-4 h-4"/>
             )}
             {brand === "github" && (
                 <i
