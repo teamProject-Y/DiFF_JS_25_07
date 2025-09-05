@@ -23,6 +23,7 @@ function ModifyArticlePageInner() {
     const [article, setArticle] = useState(null);
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
+    const [isPublic, setIsPublic] = useState(true);
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -41,6 +42,7 @@ function ModifyArticlePageInner() {
                 setArticle(art);
                 setTitle(art.title ?? '');
                 setBody(art.body ?? '');
+                setIsPublic(art.isPublic ?? true);
             } catch (e) {
                 const status = e?.response?.status;
                 if (status === 401) {
@@ -88,6 +90,7 @@ function ModifyArticlePageInner() {
                 id: Number(id),
                 title,
                 body,
+                isPublic,
                 userCanModify: true,
             };
 
@@ -155,6 +158,30 @@ function ModifyArticlePageInner() {
                                 <div className="rounded-xl border border-neutral-300 bg-neutral-100/50 p-2 dark:border-neutral-700 dark:bg-neutral-900/40">
                                     <ToastEditor key={id} initialValue={article?.body ?? ''} onChange={setBody} />
                                 </div>
+                            </div>
+
+
+                            {/* 공개/비공개 토글 */}
+                            <div>
+                                <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                    Visibility
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPublic(!isPublic)}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                                        isPublic ? 'bg-green-500' : 'bg-gray-400'
+                                    }`}
+                                >
+                                <span
+                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                                        isPublic ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                                />
+                                </button>
+                                        <span className="ml-3 text-sm text-neutral-700 dark:text-neutral-300">
+                                                {isPublic ? '공개' : '비공개'}
+                                        </span>
                             </div>
 
                             {/* Actions */}

@@ -170,6 +170,7 @@ export function WriteArticlePage() {
     const [repoError, setRepoError] = useState('');
     const [draftId, setDraftId] = useState(sp.get('draftId'));
     const [diffId, setDiffId] = useState(null);
+    const [isPublic, setIsPublic] = useState(true);
 
     // 로그인 체크
     useEffect(() => {
@@ -183,11 +184,11 @@ export function WriteArticlePage() {
             (async () => {
                 try {
                     const draft = await getDraftById(draftId);
+                    setIsPublic(draft.isPublic ?? true);
                     setTitle(draft.title || '');
                     setBody(draft.body || '');
                     setRepositoryId(draft.repositoryId || null);
 
-                    // ✅ draft 불러올 때 diffId도 세팅 (서버에서 내려줘야 함)
                     if (draft.diffId) {
                         setDiffId(draft.diffId);
                         console.log("📥 draft.diffId 세팅:", draft.diffId);
@@ -262,7 +263,8 @@ export function WriteArticlePage() {
                 checksum,
                 repositoryId: Number(repositoryId),
                 draftId: draftId ? Number(draftId) : null,
-                diffId: diffId ? Number(diffId) : null
+                diffId: diffId ? Number(diffId) : null,
+                isPublic: isPublic,
             };
 
             console.log("📤 [handleSubmit] 서버로 보낼 data:", data);
@@ -272,9 +274,10 @@ export function WriteArticlePage() {
             console.log("📥 [handleSubmit] 서버 응답 전체:", res);
 
             if (res?.resultCode?.startsWith('S-')) {
-                console.log("✅ [handleSubmit] 글 작성 성공 → 리스트 이동");
-                router.push(`/DiFF/article/list?repositoryId=${repositoryId}`);
-            } else {
+                const articleId = res.data1; // 서버가 반환한 id
+                router.push(`/DiFF/article/detail?id=${articleId}`);
+            }
+            else {
                 console.error("❌ [handleSubmit] 작성 실패 응답:", res);
                 setError(res?.msg || '작성 실패');
             }
@@ -320,7 +323,8 @@ export function WriteArticlePage() {
                 title,
                 body,
                 checksum,
-                repositoryId: Number(repositoryId)
+                repositoryId: Number(repositoryId),
+                isPublic: isPublic,
             };
 
             const res = await saveDraft(data);
@@ -454,6 +458,30 @@ export function WriteArticlePage() {
 
                         {/* 버튼들 */}
                         <div className="flex flex-wrap items-center justify-between gap-3">
+
+                            {/* 공개/비공개 토글 */}
+                            <div>
+                                <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                    Visibility
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPublic(!isPublic)}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                                        isPublic ? 'bg-green-500' : 'bg-gray-400'
+                                    }`}
+                                >
+                                <span
+                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                                        isPublic ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                                />
+                                </button>
+                                <span className="ml-3 text-sm text-neutral-700 dark:text-neutral-300">
+                                                {isPublic ? '공개' : '비공개'}
+                                        </span>
+                            </div>
+
                             <div className="flex gap-2">
                                 {/* Upload (Primary) */}
                                 <button
