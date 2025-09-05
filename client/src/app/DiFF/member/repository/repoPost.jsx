@@ -73,8 +73,8 @@ function EmptyState(isMyRepo) {
 }
 
 // --- Individual post card ---
-function PostCard({article}) {
-    const {analysis} = article;
+function PostCard({ article, isMyRepo }) {
+    const analysis = article?.analysis;
 
     const handleArticleClick = async (id) => {
         try {
@@ -98,6 +98,12 @@ function PostCard({article}) {
                     text-neutral-900 dark:text-neutral-300">
                         {article.title || 'Untitled'}
                     </h2>
+
+                    {isMyRepo && (
+                        <span className="ml-2 text-xs px-2 py-1 rounded border border-neutral-300 dark:border-neutral-600">
+                                    {article.isPublic ? "public" : "private"}
+                        </span>
+                    )}
                 </div>
 
                 <div className="ml-1 my-2 flex flex-wrap items-center gap-3 text-xs
@@ -138,18 +144,13 @@ export default function RepoPost({repoId, isMyRepo}) {
     let theme = useTheme();
 
     const mapArticles = (payload) => {
-        console.log("📦 [mapArticles] payload:", payload);
 
         const root = payload ?? {};
         const list = root?.data?.articles ?? root?.articles ?? root?.data ?? [];
 
-        console.log("📋 [mapArticles] list:", list);
-
         if (!Array.isArray(list)) return [];
 
-        return list.map((a) => {
-            console.log("📝 [mapArticles] single article:", a);
-
+        return list.map((a, idx) => {
             return {
                 id: a?.id ?? a?.articleId ?? crypto.randomUUID(),
                 title: a?.title ?? "(No title)",
@@ -157,6 +158,7 @@ export default function RepoPost({repoId, isMyRepo}) {
                 extra__sumReplies: a?.extra__sumReplies ?? 0,
                 extra__sumReaction: a?.extra__sumReaction ?? 0,
                 analysis: a?.analysis ?? null,
+                isPublic: a?.isPublic ?? true,
             };
         });
     };
