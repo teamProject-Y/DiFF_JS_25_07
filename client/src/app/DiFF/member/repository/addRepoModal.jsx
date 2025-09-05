@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getGithubRepos } from '@/lib/RepositoryAPI';
+import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
+import {motion, AnimatePresence} from 'framer-motion';
+import {getGithubRepos} from '@/lib/RepositoryAPI';
 
 export function AddRepoModal({
                                  open,
@@ -77,7 +77,6 @@ export function AddRepoModal({
             url: r?.html_url ?? r?.url ?? '',
             default_branch: r?.default_branch ?? r?.defaultBranch ?? '',
         }));
-
 
 
     // 깃허브 미연동 상태에서 모달이 열리면 리스트/선택값 클리어
@@ -208,40 +207,55 @@ export function AddRepoModal({
             {open && (
                 <motion.div
                     key="add-repo-choice"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 flex items-center justify-center bg-black/40"
-                    style={{ zIndex: 200 }}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    exit={{opacity: 0}}
+                    className="fixed inset-0 flex items-center justify-center bg-neutral-950/50"
+                    style={{zIndex: 200}}
                     onClick={onClose}
                     aria-modal="true"
                     role="dialog"
                 >
                     <motion.div
-                        initial={{ y: 12, opacity: 0, scale: 0.98 }}
-                        animate={{ y: 0, opacity: 1, scale: 1 }}
-                        exit={{ y: 12, opacity: 0, scale: 0.98 }}
-                        transition={{ type: 'spring', stiffness: 240, damping: 22 }}
+                        initial={{y: 12, opacity: 0, scale: 0.98}}
+                        animate={{y: 0, opacity: 1, scale: 1}}
+                        exit={{y: 12, opacity: 0, scale: 0.98}}
+                        transition={{type: 'spring', stiffness: 240, damping: 22}}
                         className="w-[min(60vw)] h-[min(80vh)] rounded-xl
-                        bg-gray-50 p-6 shadow-xl relative overflow-hidden flex flex-col"
+                                 bg-white p-6 shadow-xl relative overflow-hidden flex flex-col
+                                 border border-neutral-200 dark:bg-neutral-950 dark:border-neutral-800"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 p-1 rounded-full"
+                            className="absolute top-4 right-4 p-1 rounded-full
+                                   text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900
+                                   dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
                             type="button"
                         >
                             <i className="fa-solid fa-xmark text-xl"></i>
                         </button>
 
-                        <h2 className="text-2xl font-bold m-2 pb-4">Add Repository</h2>
+                        <h2 className="text-2xl font-bold m-2 pb-4 text-neutral-900 dark:text-neutral-100">
+                            Add Repository
+                        </h2>
 
                         <div className="flex-1 min-h-0 flex gap-4">
                             {/* 왼쪽: 직접 생성 */}
-                            <form onSubmit={submitCreate} className="w-[45%] bg-white rounded-lg border p-4 flex flex-col mr-2">
-                                <p className="text-lg font-bold mb-3">Create directly here</p>
+                            <form
+                                onSubmit={submitCreate}
+                                className="w-[45%] bg-white rounded-lg border p-4 flex flex-col mr-2
+                                            border-neutral-200 dark:bg-neutral-950/60 dark:border-neutral-800"
+                            >
+                                <p className="text-lg font-bold mb-3 text-neutral-900 dark:text-neutral-100">
+                                    Create directly here
+                                </p>
+
                                 <div className="mt-3">
-                                    <label className="block font-medium mb-1 px-2">Repository Name *</label>
+                                    <label
+                                        className="block font-medium mb-1 px-2 text-neutral-700 dark:text-neutral-300">
+                                        Repository Name *
+                                    </label>
                                     <input
                                         type="text"
                                         value={name}
@@ -250,21 +264,24 @@ export function AddRepoModal({
                                         placeholder=" "
                                         aria-invalid={nameInvalid}
                                         aria-describedby={nameInvalid ? 'name-error' : undefined}
-                                        className={`w-full rounded-lg px-3 py-2 border-gray-300 border ${
-                                            nameInvalid ? 'border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500' : ''
-                                        }`}
+                                        className={`w-full rounded-lg px-3 py-2 border border-neutral-300
+                                              text-neutral-900 placeholder-neutral-400
+                                              focus:outline-none focus:ring-1 focus:ring-neutral-900
+                                              dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:placeholder-neutral-500
+                                              ${nameInvalid ? 'border-red-500 focus:ring-red-500 dark:focus:ring-red-400' : ''}`}
                                     />
 
-                                    <p
-                                        id="name-error"
-                                        className={`mt-1 text-xs pl-2 ${nameInvalid ? 'text-red-500' : 'text-white'}`}
-                                    >
+                                    <p id="name-error"
+                                       className={`mt-1 text-xs pl-2 ${nameInvalid ? 'text-red-500' : 'text-transparent'}`}>
                                         Please enter repository name
                                     </p>
                                 </div>
 
                                 <div className="mt-2 mb-5">
-                                    <label className="block font-medium mb-1 px-2">Visibility *</label>
+                                    <label
+                                        className="block font-medium mb-1 px-2 text-neutral-700 dark:text-neutral-300">
+                                        Visibility *
+                                    </label>
                                     <div className="relative">
                                         {/* 토글 버튼 */}
                                         <button
@@ -273,8 +290,10 @@ export function AddRepoModal({
                                             aria-haspopup="listbox"
                                             aria-expanded={visOpen}
                                             onClick={() => setVisOpen((v) => !v)}
-                                            className="hover:bg-gray-100 focus:bg-gray-100 border-gray-300 border
-                                             w-full rounded-lg font-medium px-4 py-2 inline-flex items-center justify-between"
+                                            className="border w-full rounded-lg font-medium px-4 py-2 inline-flex items-center justify-between
+                                                       border-neutral-300 hover:bg-neutral-100 focus:bg-neutral-100
+                                                       dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100
+                                                       dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
                                         >
                                             {visibility}
                                             <svg
@@ -297,11 +316,14 @@ export function AddRepoModal({
                                         {visOpen && (
                                             <div
                                                 ref={visMenuRef}
-                                                className="absolute z-30 mt-1 right-0 top-full left-0 bg-white border divide-y divide-gray-100 rounded-lg shadow-md w-full dark:bg-gray-700"
+                                                className="absolute z-30 mt-1 right-0 top-full left-0 w-full
+                                                             rounded-lg border shadow-md
+                                                             bg-white border-neutral-200 divide-y divide-neutral-100
+                                                             dark:bg-neutral-900 dark:border-neutral-800 dark:divide-neutral-800"
                                                 role="listbox"
                                                 tabIndex={-1}
                                             >
-                                                <ul className="py-1 font-medium text-gray-700 dark:text-gray-200 w-full">
+                                                <ul className="py-1 font-medium w-full text-neutral-700 dark:text-neutral-200">
                                                     {['Public', 'Private'].map((opt) => (
                                                         <li
                                                             key={opt}
@@ -311,7 +333,7 @@ export function AddRepoModal({
                                                                 setVisibility(opt);
                                                                 setVisOpen(false);
                                                             }}
-                                                            className="cursor-pointer px-4 py-2 hover:bg-gray-100 w-full dark:hover:bg-gray-600 dark:hover:text-white"
+                                                            className="cursor-pointer px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 w-full"
                                                         >
                                                             {opt}
                                                         </li>
@@ -323,13 +345,18 @@ export function AddRepoModal({
                                 </div>
 
                                 <div className="my-2">
-                                    <label className="block font-medium mb-1 px-2">Description</label>
+                                    <label
+                                        className="block font-medium mb-1 px-2 text-neutral-700 dark:text-neutral-300">
+                                        Description
+                                    </label>
                                     <textarea
                                         value={desc}
                                         onChange={(e) => setDesc(e.target.value)}
                                         placeholder=" "
                                         rows={5}
-                                        className="w-full border-gray-300 border rounded-lg px-3 py-2 resize-none focus:ring-1"
+                                        className="w-full border rounded-lg px-3 py-2 resize-none focus:ring-1
+                                                 border-neutral-300 text-neutral-900 focus:ring-neutral-900
+                                                 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:focus:ring-neutral-100"
                                     />
                                 </div>
 
@@ -340,7 +367,8 @@ export function AddRepoModal({
                                     <button
                                         type="submit"
                                         disabled={submitting || !name.trim()}
-                                        className="w-full px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60"
+                                        className="w-full px-4 py-2 rounded-lg bg-neutral-900 text-white disabled:opacity-60 hover:bg-neutral-800
+                                                dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
                                     >
                                         {submitting ? 'Creating…' : 'Create Repository'}
                                     </button>
@@ -348,23 +376,30 @@ export function AddRepoModal({
                             </form>
 
                             {/* 오른쪽: 깃허브에서 가져오기 */}
-                            <div className="w-[55%] bg-white rounded-lg border p-4">
+                            <div className="w-[55%] bg-white rounded-lg border p-4
+                            border-neutral-200 dark:bg-neutral-950/60 dark:border-neutral-800">
                                 <div className="flex flex-col h-full">
-                                    <p className="text-lg font-bold mb-6">Import from GitHub</p>
+                                    <p className="text-lg font-bold mb-6 text-neutral-900 dark:text-neutral-100">
+                                        Import from GitHub
+                                    </p>
 
                                     {!isGithubLinked ? (
                                         // 깃허브 미연동: 연동 유도 UI
-                                        <div className="flex-1 flex flex-col items-center justify-center text-center rounded-lg border-2 border-dashed p-8">
-                                            <h4 className="text-base font-semibold mb-1">Connect GitHub</h4>
-                                            <p className="text-sm text-gray-500 mb-5">
+                                        <div className="flex-1 flex flex-col items-center justify-center text-center rounded-lg
+                                                        border-2 border-dashed p-8 border-neutral-300 dark:border-neutral-700">
+                                            <h4 className="text-base font-semibold mb-1 text-neutral-900 dark:text-neutral-100">
+                                                Connect GitHub
+                                            </h4>
+                                            <p className="text-sm text-neutral-500 mb-5 dark:text-neutral-400">
                                                 Link your GitHub account to import repositories.
                                             </p>
                                             <button
                                                 type="button"
                                                 onClick={handleLinkGithub}
-                                                className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-1 text-sm font-medium text-white hover:bg-gray-800"
+                                                className="inline-flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-1 text-sm font-medium text-white hover:bg-neutral-800
+                                                            dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
                                             >
-                                                <i className="fa-brands fa-github text-2xl" />
+                                                <i className="fa-brands fa-github text-2xl"/>
                                                 Link GitHub
                                             </button>
                                         </div>
@@ -375,21 +410,22 @@ export function AddRepoModal({
                                                 value={ghQuery}
                                                 onChange={(e) => setGhQuery(e.target.value)}
                                                 placeholder="Search repository"
-                                                className="w-full border-gray-300 border rounded-lg px-3 py-2 my-5"
+                                                className="w-full border rounded-lg px-3 py-2 my-5
+                                                         border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:ring-1 focus:ring-neutral-900
+                                                         dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:ring-neutral-100"
                                             />
 
                                             <div
-                                                className="flex-1 min-h-0 border-gray-300 border rounded-lg overflow-y-auto p-2 mb-8"
-                                                style={{ scrollbarGutter: 'stable', maxHeight: 360 }}
+                                                className="flex-1 min-h-0 border rounded-lg overflow-y-auto p-2 mb-8
+                                                        border-neutral-300 dark:border-neutral-700"
+                                                style={{scrollbarGutter: 'stable', maxHeight: 360}}
                                             >
-                                                {ghLoading && (
-                                                    <p className="text-sm text-neutral-500 px-1 py-2">Loading...</p>
-                                                )}
-                                                {ghErr && (
-                                                    <p className="text-sm text-red-500 px-1 py-2">{ghErr}</p>
-                                                )}
+                                                {ghLoading &&
+                                                    <p className="text-sm text-neutral-500 px-1 py-2">Loading...</p>}
+                                                {ghErr && <p className="text-sm text-red-500 px-1 py-2">{ghErr}</p>}
                                                 {!ghLoading && !ghErr && filteredGh.length === 0 && (
-                                                    <p className="text-sm text-neutral-500 px-1 py-2">No repositories found.</p>
+                                                    <p className="text-sm text-neutral-500 px-1 py-2">No repositories
+                                                        found.</p>
                                                 )}
 
                                                 <ul className="space-y-1 mb-4">
@@ -408,32 +444,40 @@ export function AddRepoModal({
                                                                 onClick={() =>
                                                                     setGhSelectedId((prev) => (prev === selectId ? null : selectId))
                                                                 }
-                                                                className={`flex items-center justify-between gap-3 cursor-pointer rounded-md px-3 py-2 ${
+                                                                className={`flex items-center justify-between gap-3 cursor-pointer rounded-md px-3 py-2 border ${
                                                                     selected
-                                                                        ? 'bg-gray-100 border border-gray-300'
-                                                                        : 'hover:bg-gray-50 border border-transparent'
+                                                                        ? 'bg-neutral-100 border-neutral-300 dark:bg-neutral-800 dark:border-neutral-700'
+                                                                        : 'hover:bg-neutral-50 border-transparent dark:hover:bg-neutral-800'
                                                                 }`}
                                                                 title={repoName}
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0">
                                                                     <span
                                                                         className={`inline-block w-3 h-3 rounded-full border ${
-                                                                            selected ? 'bg-gray-800 border-gray-800' : 'bg-white border-gray-400'
+                                                                            selected
+                                                                                ? 'bg-neutral-900 border-neutral-900 dark:bg-neutral-100 dark:border-neutral-100'
+                                                                                : 'bg-white border-neutral-400 dark:bg-neutral-900 dark:border-neutral-600'
                                                                         }`}
                                                                     />
                                                                     <div className="min-w-0">
-                                                                        <div className="truncate font-medium">{repoName}</div>
+                                                                        <div
+                                                                            className="truncate font-medium text-neutral-900 dark:text-neutral-100">
+                                                                            {repoName}
+                                                                        </div>
                                                                         {owner && (
-                                                                            <div className="text-xs text-neutral-400 truncate">@{owner}</div>
+                                                                            <div
+                                                                                className="text-xs text-neutral-400 truncate">@{owner}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
                                                                 <span
-                                                                    className={`text-xs px-2 py-0.5 rounded-lg border text-gray-500 ${
-                                                                        isPrivate ? 'bg-rose-100 text-rose-700' : ''
+                                                                    className={`text-xs px-2 py-0.5 rounded-lg border ${
+                                                                        isPrivate
+                                                                            ? 'border-neutral-900 bg-neutral-900 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900'
+                                                                            : 'border-neutral-200 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'
                                                                     }`}
                                                                 >
-                                                                  {isPrivate ? 'Private' : 'Public'}
+                                                                    {isPrivate ? 'Private' : 'Public'}
                                                                 </span>
                                                             </li>
                                                         );
@@ -444,7 +488,8 @@ export function AddRepoModal({
                                                 type="button"
                                                 onClick={submitImportRepo}
                                                 disabled={submitting || !ghSelectedId}
-                                                className="mt-auto w-full px-4 py-2 rounded-lg bg-black text-white disabled:opacity-60"
+                                                className="mt-auto w-full px-4 py-2 rounded-lg bg-neutral-900 text-white disabled:opacity-60 hover:bg-neutral-800
+                                                    dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
                                             >
                                                 {submitting ? 'Importing…' : 'Import Selected'}
                                             </button>
