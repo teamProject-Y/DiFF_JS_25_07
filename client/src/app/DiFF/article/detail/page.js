@@ -619,7 +619,7 @@ function ArticleDetailInner() {
                             }}
                             className="mt-6 text-red-500 hover:text-red-700"
                         >
-                            🚨 신고하기
+                            🚨Report
                         </button>
 
                     </div>

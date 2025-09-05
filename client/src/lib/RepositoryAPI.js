@@ -53,6 +53,7 @@ export const getLanguageDistribution = async (repoId) => {
     }
 };
 
+
 export const importGithubRepo = async (ghRepo) => {
     const payload = {
         name: ghRepo?.name ?? ghRepo?.full_name ?? '',
@@ -113,11 +114,3 @@ export const getGithubCommitList = async (repo, opts = {}) => {
 
     return Array.isArray(raw) ? raw.map(normalize) : [];
 };
-
-export const deleteRepository = async (ghRepo) => {
-
-}
-
-export const modifyRepository = async (ghRepo) => {
-
-}
