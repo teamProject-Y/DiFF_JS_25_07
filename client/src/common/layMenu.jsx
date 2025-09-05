@@ -76,7 +76,7 @@ export default function LayMenu() {
                             ))}
                         </ul>
                     ) : (
-                        <p>팔로잉한 사용자가 없습니다.</p>
+                        <p className="px-8">No users followed.</p>
                     )}
                 </div>
 

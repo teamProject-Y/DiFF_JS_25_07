@@ -40,11 +40,9 @@ export default function RepoInfo({
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (repo?.id) {
-            console.log("[RepoInfo] repo.id =", repo.id); // repo id 확인
 
             getLanguageDistribution(repo.id)
                 .then((data) => {
-                    // console.log("[RepoInfo] getLanguageDistribution result =", data); // API 결과 확인
                     setLanguages(data);
                 })
                 .catch((err) => {
@@ -93,7 +91,7 @@ export default function RepoInfo({
             )}
 
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
-                <div className="flex-grow flex flex-col">
+                <div className="max-w-[70%] min-w-[70%] flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col">
                         <div
                             className="h-[35%] rounded-xl border shadow-sm p-4 mb-3

@@ -39,7 +39,7 @@ export default function LoginSpeedDial({
             <div
                 ref={wrapRef}
                 className="absolute left-10 bottom-10 pointer-events-auto flex flex-col items-end gap-3"
-                style={{ zIndex }}
+                style={{zIndex}}
             >
                 {/* Speed-Dial 버튼들 (위로 펼침) */}
                 <AnimatePresence>
@@ -50,9 +50,9 @@ export default function LoginSpeedDial({
                             animate="show"
                             exit="hide"
                             variants={{
-                                hidden: { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
-                                show: { transition: { staggerChildren: 0.06 } },
-                                hide: { transition: { staggerChildren: 0.04, staggerDirection: -1 } },
+                                hidden: {transition: {staggerChildren: 0.05, staggerDirection: -1}},
+                                show: {transition: {staggerChildren: 0.06}},
+                                hide: {transition: {staggerChildren: 0.04, staggerDirection: -1}},
                             }}
                             className="flex flex-col items-end gap-3 mb-1 mx-auto"
                         >
@@ -61,14 +61,14 @@ export default function LoginSpeedDial({
                                 href={writeHref}
                                 onClick={() => setOpen(false)}
                                 variant="neutral"
-                                icon={<i className="fa-solid fa-pen" aria-hidden="true" />}
+                                icon={<i className="fa-solid fa-pen" aria-hidden="true"/>}
                             />
                             <SpeedDialItem
                                 label="Drafts"
                                 href={draftsHref}
                                 onClick={() => setOpen(false)}
                                 variant="neutral"
-                                icon={<i className="fa-solid fa-list" aria-hidden="true" />}
+                                icon={<i className="fa-solid fa-list" aria-hidden="true"/>}
                             />
                             <SpeedDialItem
                                 label="Theme"
@@ -80,10 +80,18 @@ export default function LoginSpeedDial({
                                 // ThemeToggle 아이콘이 커도 래퍼로 균일하게 축소
                                 icon={
                                     <span className="inline-flex items-center justify-center scale-[0.7]">
-                                        <ThemeToggle />
+                                        <ThemeToggle/>
                                     </span>
                                 }
                                 theme={theme}
+                            />
+                            <SpeedDialItem
+                                label="Logout"
+                                href={draftsHref}
+                                onClick={() => setOpen(false)}
+                                variant="neutral"
+                                icon={<i className="fa-solid fa-power-off" aria-hidden="true"/>}
+                                color="rgba(255, 79, 85, 0.8)"
                             />
                         </motion.ul>
                     )}
@@ -107,11 +115,11 @@ export default function LoginSpeedDial({
                 >
                     <motion.span
                         initial={false}
-                        animate={open ? { rotate: 45 } : { rotate: 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                        animate={open ? {rotate: 45} : {rotate: 0}}
+                        transition={{type: "spring", stiffness: 400, damping: 22}}
                         className="text-xl leading-none"
                     >
-                        <i className="fa-solid fa-plus" aria-hidden="true" />
+                        <i className="fa-solid fa-plus" aria-hidden="true"/>
                     </motion.span>
                 </button>
             </div>
@@ -126,37 +134,38 @@ function SpeedDialItem({
                            icon,
                            variant = "neutral",
                            theme,
+                           color,
                        }) {
     const item = (
         <motion.li
             variants={{
-                hidden: { opacity: 0, y: 20, scale: 0.8 },
+                hidden: {opacity: 0, y: 20, scale: 0.8},
                 show: {
                     opacity: 1,
                     y: 0,
                     scale: 1,
-                    transition: { type: "spring", stiffness: 520, damping: 22, bounce: 0.35 },
+                    transition: {type: "spring", stiffness: 520, damping: 22, bounce: 0.35},
                 },
-                hide: { opacity: 0, y: 16, scale: 0.9, transition: { duration: 0.12, ease: "easeInOut" } },
+                hide: {opacity: 0, y: 16, scale: 0.9, transition: {duration: 0.12, ease: "easeInOut"}},
             }}
-            whileHover={{ scale: 1.04 }}
+            whileHover={{scale: 1.04}}
             className="group relative"
         >
             {/* tooltip */}
             <div className="absolute left-14 top-1/2 -translate-y-1/2 pointer-events-none select-none">
                 <div className="flex items-center gap-2">
-          <span
-              className="
-              px-2 py-1 rounded-md text-sm
-              bg-neutral-900/85 text-white dark:bg-neutral-100/80 dark:text-neutral-900
-              border border-black/10 dark:border-white/20
-              shadow-sm
-              opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition
-              whitespace-nowrap
-            "
-          >
-            {label}
-          </span>
+                      <span
+                          className="
+                          px-2 py-1 rounded-md text-sm
+                          bg-neutral-900/85 text-white dark:bg-neutral-100/80 dark:text-neutral-900
+                          border border-black/10 dark:border-white/20
+                          shadow-sm
+                          opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition
+                          whitespace-nowrap
+                        "
+                      >
+                        {label}
+                      </span>
                 </div>
             </div>
 
@@ -166,9 +175,12 @@ function SpeedDialItem({
                 aria-label={label}
                 className={buttonClassByVariant(variant, theme)}
             >
-        <span className="text-[15px] leading-none flex items-center justify-center">
-          {icon}
-        </span>
+                <span
+                    className="text-sm leading-none flex items-center justify-center"
+                    style={color&& {color: color}}
+                >
+                    {icon}
+                </span>
             </button>
         </motion.li>
     );

@@ -11,7 +11,10 @@ export default function AnalysisHistoryChart({ history = [] }) {
     const reverseTheme = useTheme() === 'dark' ? 'rgb(200,200,200)' : 'rgb(100,100,100)';
 
     if (!history.length) {
-        return <p className="text-gray-500 text-center">분석 데이터 없음</p>;
+        return <p className="h-full w-full flex justify-center items-center text-gray-500 text-center">
+            There’s no analysis yet.
+            Once you create a draft, it will be analyzed automatically.
+            Go ahead and create one below.</p>;
     }
 
     const num = (v) => (v == null || v === '' ? null : Number(v));
