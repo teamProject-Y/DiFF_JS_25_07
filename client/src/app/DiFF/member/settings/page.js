@@ -52,19 +52,19 @@ function SettingsPage() {
     const items = [
         {
             key: "reply",
-            desc: "when someone comments on your post.",
+            desc: "When someone comments on your post.",
         },
         {
             key: "follow",
-            desc: "when someone follows you.",
+            desc: "When someone follows you.",
         },
         {
             key: "article",
-            desc: "when someone you follow publishes a new article.",
+            desc: "When someone you follow publishes a new article.",
         },
         {
             key: "draft",
-            desc: "when your post is saved as a draft.",
+            desc: "When your post is saved as a draft.",
         },
     ];
 
@@ -239,7 +239,7 @@ function SettingsPage() {
     if (loading) return <PageSkeleton/>;
 
     return (
-        <section className="min-h-full px-4 pb-16">
+        <section className="min-h-full px-4 pb-16 dark:text-neutral-300">
             <div className="mx-auto max-w-6xl">
 
                 {/* 상단 탭 타이틀 */}
@@ -396,7 +396,7 @@ function SettingsPage() {
                                                           border
                                                           ${isOn
                                                     ? "border-neutral-700 text-neutral-300 bg-neutral-900 hover:bg-neutral-800"
-                                                    : "border-red-600 text-red-300 bg-red-700 hover:bg-red-800"
+                                                    : "border-red-500 text-red-500 hover:bg-red-500/10"
                                                 }`}
                                             >
                                                 {isOn ? "ON" : "OFF"}
@@ -467,7 +467,6 @@ function SettingsPage() {
 
                             <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3">
                                 {activeMdTab === "write" ? (
-                                    // ✍️ 작성 모드
                                     <textarea
                                         name="introduce"
                                         value={form.introduce ?? ""}
@@ -477,7 +476,6 @@ function SettingsPage() {
                                         placeholder={`마크다운 형식으로 자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
                                     />
                                 ) : (
-                                    // 👀 미리보기 모드
                                     <div className="markdown min-h-[220px] rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}

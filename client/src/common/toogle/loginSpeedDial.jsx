@@ -38,7 +38,7 @@ export default function LoginSpeedDial({
         <div className="pointer-events-none">
             <div
                 ref={wrapRef}
-                className="fixed right-10 bottom-10 pointer-events-auto flex flex-col items-end gap-3"
+                className="absolute left-10 bottom-10 pointer-events-auto flex flex-col items-end gap-3"
                 style={{ zIndex }}
             >
                 {/* Speed-Dial 버튼들 (위로 펼침) */}
@@ -143,7 +143,7 @@ function SpeedDialItem({
             className="group relative"
         >
             {/* tooltip */}
-            <div className="absolute right-14 top-1/2 -translate-y-1/2 pointer-events-none select-none">
+            <div className="absolute left-14 top-1/2 -translate-y-1/2 pointer-events-none select-none">
                 <div className="flex items-center gap-2">
           <span
               className="
