@@ -329,7 +329,7 @@ export default function Header() {
                                                             onClick={() => (window.location.href = link)}
                                                             className="group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 transition
                                                                        hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
-                                                                                                            >
+                                                        >
                                                             <span
                                                                 className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
                                                                          border border-neutral-300 bg-neutral-100 text-neutral-600

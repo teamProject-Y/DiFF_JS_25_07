@@ -448,7 +448,8 @@ function ProfileInner() {
                                             return (
                                                 <li
                                                     key={u?.id ?? u?.nickName ?? idx}
-                                                    className="flex items-center hover:bg-neutral-100/70 dark:hover:bg-neutral-800/60"
+                                                    className="flex items-center gap-3"
+                                                    onClick={() => setOpenModal(null)}
                                                 >
                                                     <Link
                                                         href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? '')}`}
