@@ -17,6 +17,7 @@ import {
 } from '@/lib/UserAPI';
 import LoadingOverlay from "@/common/loadingOverlay";
 import ToastViewer from "@/common/toastViewer";
+import {saveReport} from "@/lib/NotionAPI";
 
 function ArticleDetailInner() {
 
@@ -56,7 +57,13 @@ function ArticleDetailInner() {
     const textareaRef = useRef(null);
     const [loginedMemberId, setLoginedMemberId] = useState(null);
 
-
+    // 신고
+    const [isReporting, setIsReporting] = useState(false);
+    const [reportBody, setReportBody] = useState("");
+    const [open, setOpen] = useState(false);
+    const [reason, setReason] = useState("");
+    const [message, setMessage] = useState("");
+    const [title, setTitle] = useState("");
     const norm = (s) => (s ?? '').toString().trim().toLowerCase();
 
     const getId = (m) => Number(
@@ -383,6 +390,28 @@ function ArticleDetailInner() {
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
+    // 신고
+    const handleReport = async () => {
+        try {
+            setIsReporting(true);
+
+            const report = {
+                articleId: article.id,
+                title: title,
+                body: reason,
+                email: "user@example.com"
+            };
+
+            const res = await saveReport(report);
+            console.log("✅ 서버 응답:", res);
+            setMessage(res.message || "신고가 정상적으로 접수되었습니다.");
+        } catch (err) {
+            console.error("❌ 신고 실패:", err);
+            setMessage("신고 중 오류가 발생했습니다.");
+        } finally {
+            setIsReporting(false);
+        }
+    };
 
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
@@ -577,6 +606,22 @@ function ArticleDetailInner() {
                             ></i>
                             <span className="text-sm">{likeCount}</span>
                         </div>
+
+                        {/* 신고 버튼 */}
+                        <button
+                            onClick={() => {
+
+                                if (article?.id) {
+                                    router.push(`/DiFF/article/report?id=${article.id}`);
+                                } else {
+                                    alert("게시글 ID를 불러올 수 없습니다.");
+                                }
+                            }}
+                            className="mt-6 text-red-500 hover:text-red-700"
+                        >
+                            🚨 신고하기
+                        </button>
+
                     </div>
 
                     {/* 본문 */}

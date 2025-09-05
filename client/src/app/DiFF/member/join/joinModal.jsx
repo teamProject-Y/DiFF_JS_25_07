@@ -36,7 +36,7 @@ export default function JoinForm() {
             const { loginPw, checkLoginPw, nickName, email } = form;
             const res = await signUp({ loginPw, checkLoginPw, nickName, email });
 
-            // ✅ 백엔드 응답 구조 맞추기
+            // 백엔드 응답 구조 맞추기
             const { resultCode, msg: serverMsg, data1: accessToken, data2: refreshToken } = res;
 
             if (resultCode === 'S-1' && accessToken) {
