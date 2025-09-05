@@ -54,6 +54,8 @@ function ArticleDetailInner() {
     const [hoverUnfollow, setHoverUnfollow] = useState(false);
 
     const textareaRef = useRef(null);
+    const [loginedMemberId, setLoginedMemberId] = useState(null);
+
 
     const norm = (s) => (s ?? '').toString().trim().toLowerCase();
 
@@ -71,6 +73,13 @@ function ArticleDetailInner() {
 
     const getNick = (m) =>
         (m?.nickName ?? m?.nickname ?? m?.name ?? m?.user?.nickName ?? m?.user?.name ?? m?.extra__writer ?? '').toString().trim();
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const id = Number(localStorage.getItem("loginedMemberId"));
+            setLoginedMemberId(id);
+        }
+    }, []);
 
     // 게시글 불러오기
     useEffect(() => {
@@ -506,6 +515,13 @@ function ArticleDetailInner() {
                             >
                                 {article.extra__writer}
                             </div>
+                            {/* 작성자 본인만 공개/비공개 여부 표시 */}
+                            {isMyPost && (
+                                <span className="ml-2 text-xs px-2 py-1 rounded border border-neutral-300 dark:border-neutral-600">
+                                    {article.isPublic ? "public" : "private"}
+                                </span>
+                            )}
+
 
                             {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만) */}
                             {!isMyPost && member?.id && (

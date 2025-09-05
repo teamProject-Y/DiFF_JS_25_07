@@ -248,15 +248,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                             )}
                         </div>
 
-                        <LoginSpeedDial
-                            writeHref="/DiFF/article/write"
-                            draftsHref="/DiFF/article/drafts"
-                            onToggleTheme={() => {
-                                document.documentElement.classList.toggle("dark");
-                                localStorage.theme =
-                                    document.documentElement.classList.contains("dark") ? "dark" : "";
-                            }}
-                        />
+
                     </main>
                 </div>
             </div>

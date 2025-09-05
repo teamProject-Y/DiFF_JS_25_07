@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getFollowingList } from "@/lib/UserAPI";
 import { useRouter } from "next/navigation"
+import LoginSpeedDial from "@/common/toogle/loginSpeedDial";
 
 
 export default function LayMenu() {
@@ -78,7 +79,18 @@ export default function LayMenu() {
                         <p>팔로잉한 사용자가 없습니다.</p>
                     )}
                 </div>
+                <LoginSpeedDial
+                    writeHref="/DiFF/article/write"
+                    draftsHref="/DiFF/article/drafts"
+                    onToggleTheme={() => {
+                        document.documentElement.classList.toggle("dark");
+                        localStorage.theme =
+                            document.documentElement.classList.contains("dark") ? "dark" : "";
+                    }}
+                />
             </aside>
+
+
         </nav>
     );
 }
