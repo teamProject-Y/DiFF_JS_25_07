@@ -48,28 +48,30 @@ function SettingsPage() {
         draft: member?.allowDraftNotification ?? false,
     });
 
-//  알림 아이템
+    //  알림 아이템
     const items = [
         {
             key: "reply",
+            title: "Comment",
             desc: "When someone comments on your post.",
         },
         {
             key: "follow",
+            title: "Follow",
             desc: "When someone follows you.",
         },
         {
             key: "article",
+            title: "New Article",
             desc: "When someone you follow publishes a new article.",
         },
         {
             key: "draft",
+            title: "Draft",
             desc: "When your post is saved as a draft.",
         },
     ];
 
-
-    //  토글 핸들러
     const handleToggle = async (type) => {
         const newValue = !settings[type];
         setSettings((prev) => ({ ...prev, [type]: newValue }));
@@ -395,7 +397,8 @@ function SettingsPage() {
                                                 className={`w-16 rounded px-3 py-1.5 text-sm font-medium transition-colors
                                                           border
                                                           ${isOn
-                                                    ? "border-neutral-700 text-neutral-300 bg-neutral-900 hover:bg-neutral-800"
+                                                    ? "border-gray-700 text-gray-700 dark:text-neutral-400 dark:border-neutral-400 " +
+                                                    "dark:bg-neutral-900 hover:bg-gray-100 dark:hover:neutral-800"
                                                     : "border-red-500 text-red-500 hover:bg-red-500/10"
                                                 }`}
                                             >
