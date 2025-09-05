@@ -86,7 +86,18 @@ export default function BeforeMainPage() {
         if (step < LINES.length) setShowInput(false);
         else if (step === LINES.length) {
             setShowInput(true);
-            setTimeout(() => inputRef.current?.focus(), 100);
+            requestAnimationFrame(() => {
+                   const scroller = document.getElementById('pageScroll'); // 없으면 window 사용
+                   const restoreTop = scroller ? scroller.scrollTop : window.scrollY;
+                   try {
+                         inputRef.current?.focus({ preventScroll: true });
+                       } catch (_) {
+                         inputRef.current?.focus();
+                       }
+                   // Safari/구형 브라우저 대비: 포커스 후 스크롤 위치 복구
+                       if (scroller) scroller.scrollTop = restoreTop;
+                   else window.scrollTo(0, restoreTop);
+                 });
         } else {
             setShowInput(false);
         }
