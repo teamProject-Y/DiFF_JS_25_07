@@ -1,4 +1,4 @@
-import DocsSidebar from "@/app/DiFF/docs/docsSide";
+import DocsSidebar from "../docsSide";
 
 export const metadata = { title: 'DiFF Docs — 7. 지원' };
 
@@ -22,7 +22,7 @@ export default function StartPage() {
                             <li className="list_content">잘 모르겠어요.</li>
                             <li className="list_item">이메일을 찾을 수 없다고 떠요</li>
                             <li className="list_content">먼저 DiFF 서비스에 가입을 해야 사용하실 수 있습니다.
-                            또한 git을 사용 중이어야하며, git에 로그인이 되었는 지 확인 후 다시 시도해보세요.<br/>
+                                또한 git을 사용 중이어야하며, git에 로그인이 되었는 지 확인 후 다시 시도해보세요.<br/>
                                 (확인 명령어: git config user.name)</li>
                         </ol>
                     </div>

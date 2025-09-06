@@ -76,11 +76,10 @@ export default function LayMenu() {
                             ))}
                         </ul>
                     ) : (
-                        <p>팔로잉한 사용자가 없습니다.</p>
+                        <p className="px-8">No users followed.</p>
                     )}
                 </div>
 
-                <div className="fixed bottom-6 left-6">
                     <LoginSpeedDial
                         writeHref="/DiFF/article/write"
                         draftsHref="/DiFF/article/drafts"
@@ -90,7 +89,6 @@ export default function LayMenu() {
                                 document.documentElement.classList.contains("dark") ? "dark" : "";
                         }}
                     />
-                </div>
             </aside>
         </nav>
     );

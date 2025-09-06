@@ -381,7 +381,7 @@ function ProfileInner() {
                 {/* 목록 모달 */}
                 {openModal && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50"
                         onClick={() => setOpenModal(null)}
                     >
                         <div
@@ -448,7 +448,8 @@ function ProfileInner() {
                                             return (
                                                 <li
                                                     key={u?.id ?? u?.nickName ?? idx}
-                                                    className="flex items-center hover:bg-neutral-100/70 dark:hover:bg-neutral-800/60"
+                                                    className="flex items-center gap-3"
+                                                    onClick={() => setOpenModal(null)}
                                                 >
                                                     <Link
                                                         href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? '')}`}

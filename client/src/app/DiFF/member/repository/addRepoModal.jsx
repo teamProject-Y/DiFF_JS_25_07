@@ -69,15 +69,12 @@ export function AddRepoModal({
         raw.map((r) => ({
             id: String(r.id ?? r.githubId ?? r.repoId ?? r.name ?? Math.random()),
             name: r?.name ?? r?.full_name?.split('/')?.pop() ?? 'Unknown',
-            owner:
-                typeof r?.owner === 'string'
-                    ? r.owner
-                    : r?.owner?.login ?? '', // 문자열 보장
-            private: Boolean(r?.private ?? r?.aprivate ?? r?.aPrivate),
-            url: r?.html_url ?? r?.url ?? '',
-            default_branch: r?.default_branch ?? r?.defaultBranch ?? '',
+            aPrivate: Boolean(r?.private ?? r?.aprivate ?? r?.aPrivate),
+            url: r?.html_url ?? r?.url ?? null,
+            default_branch: r?.default_branch ?? r?.defaultBranch ?? null,
+            githubName: r?.githubName ?? null,
+            githubOwner: r?.githubOwner ?? null,
         }));
-
 
     // 깃허브 미연동 상태에서 모달이 열리면 리스트/선택값 클리어
     useEffect(() => {
@@ -102,6 +99,7 @@ export function AddRepoModal({
                 if (json?.resultCode && String(json.resultCode).startsWith('F')) {
                     throw new Error(json?.msg || '깃허브 리포 불러오기 실패');
                 }
+
                 const list = Array.isArray(json?.data)
                     ? json.data
                     : Array.isArray(json?.data1)
@@ -110,6 +108,7 @@ export function AddRepoModal({
 
                 const normalized = normalizeGhRepos(list);
                 setGhList(normalized);
+
             } catch (e) {
                 setGhErr(e?.message || '요청 실패');
             } finally {
@@ -122,7 +121,7 @@ export function AddRepoModal({
         const q = ghQuery.trim().toLowerCase();
         if (!q) return ghList;
         return ghList.filter((r) => {
-            const n = (r?.name || r?.full_name || 'Unknown').toLowerCase();
+            const n = (r?.githubName || r?.name || 'Unknown').toLowerCase();
             return n.includes(q);
         });
     }, [ghList, ghQuery]);
@@ -174,9 +173,12 @@ export function AddRepoModal({
                 name: repo?.name || repo?.full_name || '',
                 url: repo?.url || '',
                 defaultBranch: repo?.default_branch || '',
-                aPrivate: !!repo?.private,
-                owner: repo?.owner || '',
+                aPrivate: !!repo?.aPrivate,
+                githubName: repo?.githubName || '',
+                githubOwner: repo?.githubOwner || '',
             };
+
+            console.log("payload: ", payload);
 
             const res = await onImport?.(payload);
             if (res?.ok) {

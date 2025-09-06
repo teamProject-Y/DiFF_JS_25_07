@@ -49,6 +49,8 @@ const normalizeRepos = (raw) =>
                     day: "numeric",
                 })
                 : null,
+            githubName: r?.githubName ?? null,
+            githubOwner: r?.githubOwner ?? null,
         };
     });
 
@@ -77,7 +79,6 @@ export default function RepositoriesPage() {
         }
     }, [repositories, selectedRepoId]);
 
-    // 최초 1회만 사용자 레포 불러오기
     useEffect(() => {
         const accessToken = getAccessToken();
         if (!accessToken) {
@@ -114,6 +115,8 @@ export default function RepositoriesPage() {
         () => repositories.find((r) => r.id === selectedRepoId) || repositories[0],
         [repositories, selectedRepoId]
     );
+
+    console.log("selectedRepo: ", selectedRepo);
 
     useEffect(() => {
         if (selectedRepo) setTab('posts');
@@ -190,6 +193,8 @@ export default function RepositoriesPage() {
                     url: payload?.url || '',
                     defaultBranch: payload?.default_branch || '',
                     aprivate: !!payload?.private,
+                    githubName: payload?.githubName || 'no',
+                    githubOwner: payload?.githubOwner || '없어',
                 };
 
                 setRepositories((prev) => {
@@ -237,6 +242,7 @@ export default function RepositoriesPage() {
 
                     <div className="relative">
                         {/* 탭 */}
+                        {repositories.length !== 0 && (
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
                                 {key: 'posts', label: 'Posts'},
@@ -255,9 +261,11 @@ export default function RepositoriesPage() {
                                 </button>
                             ))}
                         </div>
+                        )}
 
                         <div className="grid grid-cols-[230px_1fr] items-start">
-                            {/* 왼쪽 사이드바 */}
+
+                        {/* 왼쪽 사이드바 */}
                             <aside
                                 className="h-[calc(100vh-220px)] overflow-y-auto rounded-l-lg border-t border-l border-b
                                 bg-gray-100 dark:bg-neutral-800/50 dark:border-neutral-700">
@@ -293,7 +301,7 @@ export default function RepositoriesPage() {
 
                             {/* 메인 컨텐츠 */}
                             <div
-                                className="relative border rounded-r-lg pt-8 h-[calc(100vh-220px)] overflow-hidden
+                                className="relative border rounded-r-lg h-[calc(100vh-220px)] overflow-hidden
                                  bg-gray-50 border-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700">
 
                                 {/* 리포 없을 때 */}
@@ -342,12 +350,10 @@ export default function RepositoriesPage() {
                                         {tab === 'info' && selectedRepo ? (
                                             <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
-                                                repo={selectedRepo}   // repoId 전달
-                                                repositories={repositories}
+                                                repo={selectedRepo}
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}
                                                 useExternalSidebar={true}
-                                                activeTab={tab}
                                             />
                                         ) : null}
                                         {tab === 'posts' && selectedRepo ? (

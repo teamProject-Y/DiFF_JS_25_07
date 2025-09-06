@@ -1,8 +1,11 @@
 "use client";
+
 import React, { useEffect, useRef } from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
-import "highlight.js/styles/atom-one-dark.css"; // 코드블럭 스타일
+import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
+import "highlight.js/styles/atom-one-dark.css";
+import {useTheme} from "@/common/thema";
 
 // 이미지 업로드 (Cloudinary 예시)
 const handleUpload = async (file) => {
@@ -22,12 +25,13 @@ const handleUpload = async (file) => {
 export default function ToastEditor({ initialValue = "", onChange }) {
     const editorRef = useRef(null);
     const instanceRef = useRef(null);
+    let theme = useTheme();
 
     useEffect(() => {
         if (!editorRef.current) return;
 
         const initEditor = async () => {
-            const hljs = (await import("highlight.js")).default;
+            const highlightJs = (await import("highlight.js")).default;
 
             instanceRef.current = new Editor({
                 el: editorRef.current,
@@ -35,7 +39,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
                 initialEditType: "markdown",
                 previewStyle: "vertical",
                 initialValue: initialValue || "",
-                // 여기서 언어 지정
+                theme: theme,
                 codeBlockLanguages: [
                     "javascript",
                     "java",
@@ -52,7 +56,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
                 editorRef.current
                     .querySelectorAll("pre code")
                     .forEach((block) => {
-                        hljs.highlightElement(block);
+                        highlightJs.highlightElement(block);
                     });
             });
 
@@ -75,7 +79,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
     // 외부에서 initialValue 갱신될 때 반영
     useEffect(() => {
         if (instanceRef.current && initialValue) {
-            instanceRef.current.setMarkdown(initialValue, false); // false = 커서 위치 유지
+            instanceRef.current.setMarkdown(initialValue, false);
         }
     }, [initialValue]);
 
