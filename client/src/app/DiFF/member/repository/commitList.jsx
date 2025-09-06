@@ -52,6 +52,7 @@ export default function CommitList({repo}) {
         console.log("draft:", draft);
         console.log("draft detail: ", draft.msg, draft.data1);
         return draft;
+
     }
 
     if (!connected) {
