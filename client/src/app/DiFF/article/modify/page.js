@@ -33,7 +33,7 @@ function ModifyArticlePageInner() {
         if (!id) return;
         (async () => {
             try {
-                const art = await getArticle(id); // token is attached automatically
+                const art = await getArticle(id);
                 if (!art?.userCanModify) {
                     alert('You do not have permission to edit this article.');
                     router.replace(`/DiFF/article/detail?id=${id}`);

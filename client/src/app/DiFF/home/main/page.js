@@ -8,7 +8,6 @@ import {useRouter} from "next/navigation"
 
 import {trendingArticle} from '@/lib/ArticleAPI';
 
-
 // 동적 import (Swiper)
 import {Navigation, Pagination, A11y, Autoplay} from 'swiper/modules';
 import 'swiper/css';
@@ -117,10 +116,6 @@ import BeforeExplain from "@/common/anime/beforeExplain";
 function extractFirstImage(body) {
     if (!body) return null;
     const match = body.match(/!\[[^\]]*\]\(([^)]+)\)/);
-    if (match) {
-        console.log("이미지 URL:", match[1]);
-    }
-    match ? console.log(match[1]) : console.log("no match");
     return match ? match[1] : null;
 }
 
@@ -139,7 +134,6 @@ export default function Page() {
 
     const [bgColor, setBgColor] = useState(sections[0].color);
     const sectionRefs = useRef([]);
-
 
     useEffect(() => setIsClient(true), []);
 
@@ -199,10 +193,10 @@ export default function Page() {
         <div
             id="pageScroll"
             data-scroll-root
-            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-mandatory"
+            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-proximity scroll-smooth"
             style={{backgroundColor: bgColor}}
         >
-            <div id="terminal" className="is-dark-bg h-screen w-full snap-start pt-20 dark:is-light-bg"
+            <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
                  ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
@@ -215,11 +209,11 @@ export default function Page() {
 
             {/* trending */}
             <div id="trending"
-                 className="is-light-bg w-full h-screen bg-white px-20 snap-start pt-20 dark:is-dark-bg dark:bg-black"
+                 className="is-light-bg w-full h-screen snap-start bg-white px-20 pt-20 dark:is-dark-bg dark:bg-black"
                  ref={el => sectionRefs.current[2] = el}>
                 <div className="text-3xl text-black font-bold">TRENDING</div>
                 <div className="article-slider h-2/3 w-full mt-8 flex relative">
-                    <div className="flex absolute right-0 -top-16 font-extralight text-3xl text-neutral-500 z-10">
+                    <div className="flex absolute right-0 -top-16  font-extralight text-3xl text-neutral-500 z-10">
                         <button
                             className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
@@ -228,7 +222,7 @@ export default function Page() {
                             </svg>
                         </button>
                         <button
-                            className="custom-next rounded-full m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
+                            className="custom-next rounded-full  m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
                                 <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1" fill="none"
                                       strokeLinecap="round" strokeLinejoin="round"/>
@@ -265,6 +259,7 @@ export default function Page() {
                                         const imgSrc = extractFirstImage(article.body);
                                         return (
                                             <SwiperSlide key={article.id ?? index}>
+                                                {/*<Link href={`/DiFF/article/detail?id=${article.id}`}>*/}
                                                 <div
                                                     className="article-card h-[90%] bg-white shadow-md rounded-b-lg overflow-hidden cursor-pointer hover:shadow-lg transition"
                                                     onClick={() => router.push(`/DiFF/article/detail?id=${article.id}`)}
@@ -314,6 +309,7 @@ export default function Page() {
                                                         </div>
                                                     </div>
                                                 </div>
+                                                {/*</Link>*/}
                                             </SwiperSlide>
                                         );
                                     })

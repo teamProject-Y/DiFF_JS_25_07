@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce} from "@/lib/UserAPI";
 import { updateNotificationSetting } from "@/lib/NotificationAPI";
-import ThemeToggle from "@/common/thema";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -48,28 +47,30 @@ function SettingsPage() {
         draft: member?.allowDraftNotification ?? false,
     });
 
-//  알림 아이템
+    //  알림 아이템
     const items = [
         {
             key: "reply",
-            desc: "when someone comments on your post.",
+            title: "Comment",
+            desc: "When someone comments on your post.",
         },
         {
             key: "follow",
-            desc: "when someone follows you.",
+            title: "Follow",
+            desc: "When someone follows you.",
         },
         {
             key: "article",
-            desc: "when someone you follow publishes a new article.",
+            title: "New Article",
+            desc: "When someone you follow publishes a new article.",
         },
         {
             key: "draft",
-            desc: "when your post is saved as a draft.",
+            title: "Draft",
+            desc: "When your post is saved as a draft.",
         },
     ];
 
-
-    //  토글 핸들러
     const handleToggle = async (type) => {
         const newValue = !settings[type];
         setSettings((prev) => ({ ...prev, [type]: newValue }));
@@ -239,7 +240,7 @@ function SettingsPage() {
     if (loading) return <PageSkeleton/>;
 
     return (
-        <section className="min-h-full px-4 pb-16">
+        <section className="min-h-full px-4 pb-16 dark:text-neutral-300">
             <div className="mx-auto max-w-6xl">
 
                 {/* 상단 탭 타이틀 */}
@@ -248,7 +249,7 @@ function SettingsPage() {
                     <TopTab href="/DiFF/member/repository" label="Repositories"/>
                     <TopTab active href="#" label="Settings"/>
                 </div>
-                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800 mb-10"/>
+                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700 mb-10"/>
 
                 {/* 배너 */}
                 {banner && (
@@ -342,8 +343,6 @@ function SettingsPage() {
 
                                     </div>
                                 </div>
-                                <ThemeToggle/>
-
                             </div>
                         </Card>
 
@@ -395,8 +394,9 @@ function SettingsPage() {
                                                 className={`w-16 rounded px-3 py-1.5 text-sm font-medium transition-colors
                                                           border
                                                           ${isOn
-                                                    ? "border-neutral-700 text-neutral-300 bg-neutral-900 hover:bg-neutral-800"
-                                                    : "border-red-600 text-red-300 bg-red-700 hover:bg-red-800"
+                                                    ? "border-gray-700 text-gray-700 dark:text-neutral-400 dark:border-neutral-400 " +
+                                                    "dark:bg-neutral-900 hover:bg-gray-100 dark:hover:neutral-800"
+                                                    : "border-red-500 text-red-500 hover:bg-red-500/10"
                                                 }`}
                                             >
                                                 {isOn ? "ON" : "OFF"}
@@ -467,7 +467,6 @@ function SettingsPage() {
 
                             <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3">
                                 {activeMdTab === "write" ? (
-                                    // ✍️ 작성 모드
                                     <textarea
                                         name="introduce"
                                         value={form.introduce ?? ""}
@@ -477,7 +476,6 @@ function SettingsPage() {
                                         placeholder={`마크다운 형식으로 자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
                                     />
                                 ) : (
-                                    // 👀 미리보기 모드
                                     <div className="markdown min-h-[220px] rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
@@ -514,8 +512,7 @@ function SettingsPage() {
                                 )}
 
                                 {/* 하단 Save 버튼 */}
-                                <div className="flex items-center justify-between text-xs text-neutral-500">
-                                    <div>⌘/Ctrl + Enter 로 저장</div>
+                                <div className="flex items-center justify-end text-xs text-neutral-500">
                                     <button
                                         type="submit"
                                         disabled={!dirtyIntro}
@@ -654,10 +651,8 @@ function LinkBtn({label, onClick, disabled, brand}) {
         >
             {/* 브랜드 아이콘 */}
             {brand === "google" && (
-                <i
-                    className="fab fa-google text-md"
-                    aria-hidden="true"
-                />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png"
+                     alt="googe" className="w-4 h-4"/>
             )}
             {brand === "github" && (
                 <i

@@ -66,8 +66,6 @@ export async function mkRepo(memberId, repoName, commitHash){
     }
 }
 
-
-
 export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     try {
         const { data } = await axios.post(

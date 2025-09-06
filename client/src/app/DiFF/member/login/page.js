@@ -1,5 +1,5 @@
 'use client';
-import LoginForm from '@/common/loginModal';
+import LoginForm from "@/app/DiFF/member/login/loginModal";
 
 export default function LoginFullPage() {
 
