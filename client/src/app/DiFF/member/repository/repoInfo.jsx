@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
-import {getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
+import {connectRepository, getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 
 export default function RepoInfo({
@@ -28,13 +28,19 @@ export default function RepoInfo({
 
     const onSaveName = async () => {
         try {
-            const response = await renameRepository(); ////////////// 이거 아직 안햇음 파라미터 넣어야됨
+            const response = await renameRepository(repo.id, nameInput);
+            console.log("res: ", response);
             setEditingName(false);
         } catch (e) {
             console.error(e);
             alert('이름 저장 중 오류가 발생했습니다.');
         }
     };
+
+    function connectionUrl(url) {
+        const res = connectRepository(url);
+        console.log("connect repository res: ", res);
+    }
 
     // 언어 비율 데이터
     const [languages, setLanguages] = useState([]);
@@ -53,6 +59,7 @@ export default function RepoInfo({
     const visibility = repo?.aprivate ? 'private' : 'public';
 
     const nameRef = useRef(null);
+
     const enterEdit = () => {
         setEditingName(true);
         setTimeout(() => nameRef.current?.focus?.(), 0);
@@ -69,7 +76,6 @@ export default function RepoInfo({
     return (
         <motion.div
             key={`detail-${repo?.id ?? 'none'}`}
-            // variants={container}
             initial="hidden"
             animate="show"
             exit="hidden"
@@ -108,8 +114,50 @@ export default function RepoInfo({
                                 </>
                                 :
                                 <>
-                                    연결 안되어 있음
+                                    <div className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
+
+                                        <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
+                                            <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400" />
+                                        </div>
+
+                                        <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">Connect a GitHub repository</div>
+                                        <div className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                            Link your repo to enable analysis and commit history.
+                                        </div>
+
+                                        {/* URL 입력 + 연결 버튼 */}
+                                        <form
+                                            className="mt-4 w-full max-w-md flex items-center gap-2"
+                                            onSubmit={(e) => {
+                                                e.preventDefault();
+                                                const url = e.currentTarget.repoUrl.value.trim();
+                                                connectionUrl(url);
+                                            }}
+                                        >
+                                            <div className="relative flex-1">
+                                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+                                                  <i className="fa-brands fa-github text-neutral-400" />
+                                                </span>
+                                                <input
+                                                    type="url"
+                                                    name="repoUrl"
+                                                    placeholder="https://github.com/owner/repo"
+                                                    className="w-full pl-10 pr-3 py-2 rounded-lg bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-600"
+                                                    required
+                                                    pattern="https?://(www\.)?github\.com/[^/\s]+/[^/\s]+/?"
+                                                    aria-label="GitHub Repository URL"
+                                                />
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                className="px-3 py-2 rounded-lg bg-gray-100 dark:text-neutral-300 dark:bg-neutral-700 font-medium hover:opacity-60 transition"
+                                            >
+                                                Connect
+                                            </button>
+                                        </form>
+                                    </div>
                                 </>
+
                             }
                         </div>
                     </div>

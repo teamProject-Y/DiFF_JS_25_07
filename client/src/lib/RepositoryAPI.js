@@ -3,8 +3,7 @@ import {ArticleAPI} from "@/lib/ArticleAPI";
 
 // fetch github repository
 export const getGithubRepos = async () => {
-    const response = await UserAPI.get(`/api/DiFF/github/repos`, {
-    });
+    const response = await UserAPI.get(`/api/DiFF/github/repos`, {});
     return response.data;
 };
 
@@ -85,7 +84,7 @@ export const getGithubCommitList = async (repo, opts = {}) => {
         perPage: opts.perPage ?? null,
     };
 
-    const res = await UserAPI.get(`/api/DiFF/github/commits`, { params });
+    const res = await UserAPI.get(`/api/DiFF/github/commits`, {params});
 
     const data = res?.data ?? {};
     const code = data.resultCode || data.code || '';
@@ -114,10 +113,24 @@ export const getGithubCommitList = async (repo, opts = {}) => {
     return Array.isArray(raw) ? raw.map(normalize) : [];
 };
 
-export const deleteRepository = async (ghRepo) => {
-
+export const connectRepository = async (repoUrl) => {
+    const res = await UserAPI.get(`/api/DiFF/github/validate`,
+        {params: {url: repoUrl}});
+    return res.data;
 }
 
-export const modifyRepository = async (ghRepo) => {
+export const mkDraft = async (owner, repoName, sha) => {
+
+    if (!owner || !repoName || !sha) {
+        throw new Error(
+            `mkDraft: missing required fields. owner=${owner}, repoName=${repoName}, sha=${sha}`
+        );
+    }
+
+    const res = await UserAPI.get(`/api/DiFF/github/commit/${owner}/${repoName}/${sha}`,);
+    return res.data;
+};
+
+export const deleteRepository = async (ghRepo) => {
 
 }

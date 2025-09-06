@@ -11,11 +11,18 @@ export default function AnalysisHistoryChart({ history = [] }) {
     const reverseTheme = useTheme() === 'dark' ? 'rgb(200,200,200)' : 'rgb(100,100,100)';
 
     if (!history.length) {
-        return <p className="h-full w-full flex justify-center items-center text-gray-500 text-center">
-            There’s no analysis yet.
-            Once you create a draft, it will be analyzed automatically.
-            Go ahead and create one below.</p>;
+        return (
+            <div className="h-full w-full flex flex-col gap-1 items-center justify-center text-center text-gray-600 dark:text-neutral-400">
+                <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
+                    <i className="fa-solid fa-chart-column text-2xl"></i>
+                </div>
+
+                <div className="text-lg font-bold">No analysis yet.</div>
+                <div className="text-blue-500 dark:text-blue-400">Once you create a draft, it will be analyzed automatically.</div>
+            </div>
+        );
     }
+
 
     const num = (v) => (v == null || v === '' ? null : Number(v));
     const pt  = (h, key) => ({ x: new Date(h.analyzeDate), y: num(h[key]) });
