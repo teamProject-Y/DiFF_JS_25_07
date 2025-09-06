@@ -3,7 +3,7 @@
 
 import {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
-import {getGithubCommitList} from '@/lib/RepositoryAPI';
+import {getGithubCommitList, mkDraft} from '@/lib/RepositoryAPI';
 
 export default function CommitList({repo}) {
 
@@ -48,8 +48,11 @@ export default function CommitList({repo}) {
         };
     }, [connected, repo, branch, page, perPage]);
 
-    function makeDraft() {
-
+    async function makeDraft(commit) {
+        const draft = await mkDraft(repo.githubOwner, repo.githubName, commit.sha);
+        console.log("draft:", draft);
+        console.log("draft detail: ", draft.msg, draft.data1);
+        return draft;
     }
 
     if (!connected) {
@@ -146,7 +149,7 @@ export default function CommitList({repo}) {
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => makeDraft()}
+                                    onClick={() => makeDraft(c)}
                                     className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center hover:bg-neutral-100 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700"
                                 >
                                     Make Draft

@@ -23,8 +23,6 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
         return null;
     }
 
-    // console.log("✅ 최종 draftId:", draftId, "diffId:", diffId, "checksum:", to);
-
     const ok = await sendDiFF(memberId, repositoryId, draftId, diffId, to, diff);
 
     if (ok) {
@@ -35,15 +33,14 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
     return ok ? { draftId, diffId, checksum: to } : null;
 }
 
-
 export async function createDraft(memberId, repositoryId) {
     try {
         const payload = {
             memberId,
             repositoryId,
-            title: "",      // 최소값
-            body: "",       // 최소값
-            isPublic: true, // 기본값 (공개)
+            title: "",
+            body: "",
+            isPublic: true,
         };
 
         console.log("📤 draft 생성 요청:", payload);

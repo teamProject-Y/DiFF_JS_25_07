@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
-import {getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
+import {connectRepository, getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 
 export default function RepoInfo({
@@ -36,6 +36,11 @@ export default function RepoInfo({
             alert('이름 저장 중 오류가 발생했습니다.');
         }
     };
+
+    function connectionUrl(url) {
+        const res = connectRepository(url);
+        console.log("connect repository res: ", res);
+    }
 
     // 언어 비율 데이터
     const [languages, setLanguages] = useState([]);
@@ -112,12 +117,10 @@ export default function RepoInfo({
                                 <>
                                     <div className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
 
-                                        {/* 아이콘 배지 */}
                                         <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
                                             <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400" />
                                         </div>
 
-                                        {/* 안내 텍스트 */}
                                         <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">Connect a GitHub repository</div>
                                         <div className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                                             Link your repo to enable analysis and commit history.
@@ -129,8 +132,7 @@ export default function RepoInfo({
                                             onSubmit={(e) => {
                                                 e.preventDefault();
                                                 const url = e.currentTarget.repoUrl.value.trim();
-                                                // TODO: 서버 연결 로직 호출 (예: connectRepository(url))
-                                                // 성공 시 repo.url 갱신 → CommitList가 보이도록 처리
+                                                connectionUrl(url);
                                             }}
                                         >
                                             <div className="relative flex-1">

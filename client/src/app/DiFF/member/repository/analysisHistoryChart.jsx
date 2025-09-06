@@ -14,11 +14,11 @@ export default function AnalysisHistoryChart({ history = [] }) {
         return (
             <div className="h-full w-full flex flex-col gap-1 items-center justify-center text-center text-gray-600 dark:text-neutral-400">
                 <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
-                    <i class="fa-solid fa-chart-column text-2xl"></i>
+                    <i className="fa-solid fa-chart-column text-2xl"></i>
                 </div>
 
                 <div className="text-lg font-bold">No analysis yet.</div>
-                <div className="text-blue-500">Once you create a draft, it will be analyzed automatically.</div>
+                <div className="text-blue-500 dark:text-blue-400">Once you create a draft, it will be analyzed automatically.</div>
             </div>
         );
     }
