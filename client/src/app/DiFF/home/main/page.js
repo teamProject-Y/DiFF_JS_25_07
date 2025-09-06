@@ -5,15 +5,9 @@ import {useEffect, useRef, useState} from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import {useRouter} from "next/navigation"
-import gsap from 'gsap';
-import {ScrollTrigger} from 'gsap/ScrollTrigger';
 
 import {trendingArticle} from '@/lib/ArticleAPI';
 
-// GSAP 플러그인 등록
-if (typeof window !== 'undefined') {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
 // 동적 import (Swiper)
 import {Navigation, Pagination, A11y, Autoplay} from 'swiper/modules';
@@ -145,7 +139,7 @@ export default function Page() {
 
     const [bgColor, setBgColor] = useState(sections[0].color);
     const sectionRefs = useRef([]);
-    const scrollTriggerRef = useRef(null);
+
 
     useEffect(() => setIsClient(true), []);
 
@@ -169,133 +163,30 @@ export default function Page() {
         }
     }, []);
 
-    // GSAP ScrollTrigger Snap 설정
-    useEffect(() => {
-        if (!mounted || loggedIn) return;
+     useEffect(() => {
+           if (!mounted || loggedIn) return;
+           const scroller = document.getElementById('pageScroll');
+           if (!scroller || sectionRefs.current.length === 0) return;
+           if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+           scroller.scrollTo({ top: 0, behavior: 'auto' });
 
-        const scroller = document.getElementById('pageScroll');
-        if (!scroller || sectionRefs.current.length === 0) return;
+               const io = new IntersectionObserver((entries) => {
+                 let best = { ratio: 0, id: null };
+                 entries.forEach(e => {
+                       if (e.isIntersecting && e.intersectionRatio > best.ratio) {
+                             best = { ratio: e.intersectionRatio, id: e.target.id };
+                           }
+                     });
+                 if (best.id) {
+                       const idx = sections.findIndex(s => s.id === best.id);
+                       if (idx !== -1) setBgColor(sections[idx].color);
+                     }
+               }, { root: scroller, threshold: [0.25, 0.5, 0.75, 1] });
 
-        // 브라우저 자동 위치 복원 끄기
-        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+               sectionRefs.current.forEach(el => el && io.observe(el));
+           return () => io.disconnect();
+         }, [mounted, loggedIn]);
 
-        // 초기 위치 설정
-        scroller.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-
-        // GSAP ScrollTrigger로 snap 구현
-        const sectionTopsPx = [];
-
-        const getAbsTop = (el) => {
-                const scRect = scroller.getBoundingClientRect();
-            const rect = el.getBoundingClientRect();
-                const scrollTop = scroller.scrollTop;
-            return (rect.top - scRect.top) + scroller.scrollTop;
-            };
-
-        sectionRefs.current.forEach((section) => {
-            if (section) {
-                sectionTopsPx.push(getAbsTop(section));
-            }
-        });
-
-         // 스냅 지점 재계산 함수 (pinSpacing/리사이즈/이미지 로드 후)
-        const recomputeSnapOnly = () => {
-               sectionTopsPx.length = 0;
-               sectionRefs.current.forEach((section) => {
-                     if (!section) return;
-                     sectionTopsPx.push(getAbsTop(section));
-                   });
-             };
-
-        const onRefresh = () => recomputeSnapOnly();
-        ScrollTrigger.addEventListener('refresh', onRefresh);
-
-        // ScrollTrigger 생성
-        scrollTriggerRef.current = ScrollTrigger.create({
-            scroller: scroller,
-            start: 0,
-            end: () => ScrollTrigger.maxScroll(scroller),
-            snap: (value) => {
-                if (scroller.classList.contains('pin-active')) return value;
-
-                const max = ScrollTrigger.maxScroll(scroller);  // 각 섹션 위치로 snap
-                const current = value * max;
-                let nearest = sectionTopsPx[0] ?? 0;
-                for (let i = 1; i < sectionTopsPx.length; i++) {
-                         if (Math.abs(sectionTopsPx[i] - current) < Math.abs(nearest - current)) {
-                               nearest = sectionTopsPx[i];
-                             }
-                       }
-                   return nearest / max;
-            },
-            onUpdate: (self) => {
-                // 현재 스크롤 위치에 따른 배경색 변경
-                const max = ScrollTrigger.maxScroll(scroller);
-                const y = self.progress * max;
-                   let currentSection = 0;
-                   for (let i = 0; i < sectionTopsPx.length; i++) {
-                        if (y >= sectionTopsPx[i]) currentSection = i;
-                      }
-
-                if (sections[currentSection]) {
-                    setBgColor(sections[currentSection].color);
-                }
-            }
-        });
-
-        requestAnimationFrame(() => {
-               ScrollTrigger.refresh();  // 초회 한 번만 전체 새로고침
-            });
-         window.addEventListener('resize', () => ScrollTrigger.refresh());
-         window.addEventListener('load',   () => ScrollTrigger.refresh());
-         const ro = new ResizeObserver(() => ScrollTrigger.refresh());
-         ro.observe(scroller);
-
-        // 수동 스크롤 시 snap 비활성화를 위한 처리
-        let isScrolling = false;
-        let scrollTimeout;
-
-        const handleScroll = () => {
-            if (!isScrolling) {
-                isScrolling = true;
-                // pin 섹션에서는 snap 비활성화
-                if (scroller.classList.contains('pin-active') && scrollTriggerRef.current) {
-                    scrollTriggerRef.current.snap = false;
-                }
-            }
-
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                isScrolling = false;
-                // snap 재활성화
-                if (!scroller.classList.contains('pin-active') && scrollTriggerRef.current) {
-                    scrollTriggerRef.current.snap = (value) => {
-                        const max = ScrollTrigger.maxScroll(scroller);
-                        const current = value * max;
-                        let nearest = sectionTopsPx[0] ?? 0;
-                        for (let i = 1; i < sectionTopsPx.length; i++) {
-                            if (Math.abs(sectionTopsPx[i] - current) < Math.abs(nearest - current)) {
-                                nearest = sectionTopsPx[i];
-                            }
-                        }
-                        return nearest / max;
-                    };
-                }
-            }, 150);
-
-        };
-
-        scroller.addEventListener('scroll', handleScroll);
-
-        return () => {
-            scroller.removeEventListener('scroll', handleScroll);
-            ScrollTrigger.removeEventListener('refresh', onRefresh);
-            if (scrollTriggerRef.current) {
-                scrollTriggerRef.current.kill();
-                scrollTriggerRef.current = null;
-            }
-        };
-    }, [mounted, loggedIn]);
 
     if (!mounted) return null;
 
@@ -308,15 +199,15 @@ export default function Page() {
         <div
             id="pageScroll"
             data-scroll-root
-            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none"
+            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-mandatory"
             style={{backgroundColor: bgColor}}
         >
-            <div id="terminal" className="is-dark-bg h-screen w-full pt-20 dark:is-light-bg"
+            <div id="terminal" className="is-dark-bg h-screen w-full snap-start pt-20 dark:is-light-bg"
                  ref={el => sectionRefs.current[0] = el}>
                 <BeforeMainPage/>
             </div>
 
-            <section id="docs" className="pin-section is-light-bg w-full min-h-screen pt-20 dark:is-dark-bg"
+            <section id="docs" className="pin-section is-light-bg w-full snap-start min-h-screen pt-20 dark:is-dark-bg"
                      ref={el => sectionRefs.current[1] = el}>
                 <style jsx>{`#docs, #docs * { transition: none !important; }`}</style>
                 <BeforeExplain/>
@@ -324,7 +215,7 @@ export default function Page() {
 
             {/* trending */}
             <div id="trending"
-                 className="is-light-bg w-full h-screen bg-white px-20 pt-20 dark:is-dark-bg dark:bg-black"
+                 className="is-light-bg w-full h-screen bg-white px-20 snap-start pt-20 dark:is-dark-bg dark:bg-black"
                  ref={el => sectionRefs.current[2] = el}>
                 <div className="text-3xl text-black font-bold">TRENDING</div>
                 <div className="article-slider h-2/3 w-full mt-8 flex relative">
