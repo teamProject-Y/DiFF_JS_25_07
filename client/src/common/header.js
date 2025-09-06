@@ -319,7 +319,7 @@ export default function Header() {
                                         {/* 리스트 */}
                                         {notifications && notifications.length > 0 ? (
                                             <ul className="max-h-80 overflow-y-auto">
-                                                {notifications.map((n) => {
+                                                {notifications.slice(0, 50).map((n) => {
                                                     console.log("📌 알림 데이터:", n);
                                                     const link = getNotificationLink(n);
 
@@ -328,14 +328,14 @@ export default function Header() {
                                                             key={n.id}
                                                             onClick={() => (window.location.href = link)}
                                                             className="group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 transition
-                                                                       hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
-                                                        >
-                                                            <span
-                                                                className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
-                                                                         border border-neutral-300 bg-neutral-100 text-neutral-600
-                                                                         dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-                                                            >
-                                                              <i className={iconFor(n.type)} aria-hidden />
+                                                                     hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
+                                                                                                        >
+                                                          <span
+                                                              className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
+                                                                       border border-neutral-300 bg-neutral-100 text-neutral-600
+                                                                       dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+                                                          >
+                                                            <i className={iconFor(n.type)} aria-hidden />
                                                             </span>
 
                                                             <div className="min-w-0 flex-1">
@@ -356,10 +356,9 @@ export default function Header() {
                                                 })}
                                             </ul>
                                         ) : (
-                                            <div className="px-3 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
-                                                No notifications yet.
-                                            </div>
+                                            <p className="text-sm text-gray-400">No notifications</p>
                                         )}
+
                                     </div>
                                 </div>
                             )}

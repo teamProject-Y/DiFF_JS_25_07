@@ -390,29 +390,6 @@ function ArticleDetailInner() {
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
-    // 신고
-    const handleReport = async () => {
-        try {
-            setIsReporting(true);
-
-            const report = {
-                articleId: article.id,
-                title: title,
-                body: reason,
-                email: "user@example.com"
-            };
-
-            const res = await saveReport(report);
-            console.log("✅ 서버 응답:", res);
-            setMessage(res.message || "신고가 정상적으로 접수되었습니다.");
-        } catch (err) {
-            console.error("❌ 신고 실패:", err);
-            setMessage("신고 중 오류가 발생했습니다.");
-        } finally {
-            setIsReporting(false);
-        }
-    };
-
     if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
     if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
 
@@ -427,25 +404,27 @@ function ArticleDetailInner() {
             ) : (
                 <div className="max-w-3xl mx-auto">
                     <div className="flex justify-between">
-                        <div className="flex items-center gap-2 mb-2 ml-2">
-                            {/*제목*/}
-                            <h1 className="text-3xl font-bold">{article.title}</h1>·
-                            {/* 날짜 */}
-                            <div className="text-gray-500 dark:text-neutral-400">
-                                {new Date(article.regDate).toLocaleDateString("en-US", {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric"
-                                })}
-                            </div>
+                        {/* 제목 + 날짜 묶음 */}
+                        <div className="flex items-baseline gap-2 mb-2 ml-2 flex-wrap">
+                            <h1 className="text-3xl font-bold inline">
+                                {article.title}
+                            </h1>
+                            <span className="text-gray-500 dark:text-neutral-400 text-lg">
+                                · {new Date(article.regDate).toLocaleDateString("en-US", {
+                                                        year: "numeric",
+                                                        month: "short",
+                                                        day: "numeric"
+                                                    })}
+                              </span>
                         </div>
 
+                        {/* 공유 + 옵션 */}
                         <div className="flex items-center gap-3">
-                            {/* 공유 */}
+                            {/* 공유 버튼 */}
                             <button
                                 type="button"
                                 className="flex items-center hover:text-gray-900
-                                dark:hover:text-neutral-500 dark:text-neutral-400"
+                                             dark:hover:text-neutral-500 dark:text-neutral-400"
                                 onClick={async () => {
                                     try {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
@@ -531,7 +510,7 @@ function ArticleDetailInner() {
                     </div>
 
                     {/* article info */}
-                    <div className="flex justify-between items-end text-gray-600 my-4 px-2  dark:text-neutral-400">
+                    <div className="flex justify-between items-end text-gray-600 my-4 px-2 dark:text-neutral-400">
                         <div className="flex items-center gap-2">
                             {/* 닉네임 */}
                             <div
@@ -541,16 +520,16 @@ function ArticleDetailInner() {
                                 }}
                                 className="mx-2 hover:underline cursor-pointer text-md font-semibold
                                  hover:text-black dark:hover:text-neutral-300"
-                            >
-                                {article.extra__writer}
-                            </div>
-                            {/* 작성자 본인만 공개/비공개 여부 표시 */}
-                            {isMyPost && (
-                                <span className="ml-2 text-xs px-2 py-1 rounded border border-neutral-300 dark:border-neutral-600">
-                                    {article.isPublic ? "public" : "private"}
-                                </span>
-                            )}
+                                                >
+                                                    {article.extra__writer}
+                                                </div>
 
+                                                {/* 작성자 본인만 공개/비공개 여부 표시 */}
+                                                {isMyPost && (
+                                                    <span className="ml-2 text-xs px-2 py-1 rounded border border-neutral-300 dark:border-neutral-600">
+                                                        {article.isPublic ? "public" : "private"}
+                                                    </span>
+                            )}
 
                             {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만) */}
                             {!isMyPost && member?.id && (
@@ -562,12 +541,12 @@ function ArticleDetailInner() {
                                             try {
                                                 if (member.isFollowing) {
                                                     await unfollowMember(member.id);
-                                                    setMember(prev => ({...prev, isFollowing: false}));
+                                                    setMember(prev => ({ ...prev, isFollowing: false }));
                                                     typeof setFollowerCount === 'function' &&
                                                     setFollowerCount(prev => Math.max(0, prev - 1));
                                                 } else {
                                                     await followMember(member.id);
-                                                    setMember(prev => ({...prev, isFollowing: true}));
+                                                    setMember(prev => ({ ...prev, isFollowing: true }));
                                                     typeof setFollowerCount === 'function' &&
                                                     setFollowerCount(prev => prev + 1);
                                                 }
@@ -577,7 +556,7 @@ function ArticleDetailInner() {
                                             }
                                         }}
                                         className={`py-1 text-sm rounded-full border transition w-20 
-                                                    ${ member.isFollowing
+                                ${member.isFollowing
                                             ? hoverUnfollow
                                                 ? "text-red-500 border hover:border-red-500"
                                                 : "border text-gray-500 bg-gray-100 " +
@@ -597,32 +576,33 @@ function ArticleDetailInner() {
                             )}
                         </div>
 
-                        {/*좋아요*/}
-                        <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
-                            <i
-                                className={`${liked ? "fa-solid text-red-500" :
-                                    "fa-regular text-gray-500 dark:text-neutral-400"} 
-                                        fa-heart text-xl`}
-                            ></i>
-                            <span className="text-sm">{likeCount}</span>
+                        <div className="flex flex-col items-end gap-2">
+                            {/* 좋아요 */}
+                            <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
+                                <i
+                                    className={`${liked ? "fa-solid text-red-500" :
+                                        "fa-regular text-gray-500 dark:text-neutral-400"} 
+                        fa-heart text-xl`}
+                                ></i>
+                                <span className="text-sm">{likeCount}</span>
+                            </div>
+
+                            {/* 신고 버튼 */}
+                            <button
+                                onClick={() => {
+                                    if (article?.id) {
+                                        router.push(`/DiFF/article/report?id=${article.id}`);
+                                    } else {
+                                        alert("게시글 ID를 불러올 수 없습니다.");
+                                    }
+                                }}
+                                className="text-black hover:text-red-500 text-sm"
+                            >
+                                Report
+                            </button>
                         </div>
-
-                        {/* 신고 버튼 */}
-                        <button
-                            onClick={() => {
-
-                                if (article?.id) {
-                                    router.push(`/DiFF/article/report?id=${article.id}`);
-                                } else {
-                                    alert("게시글 ID를 불러올 수 없습니다.");
-                                }
-                            }}
-                            className="mt-6 text-red-500 hover:text-red-700"
-                        >
-                            🚨Report
-                        </button>
-
                     </div>
+
 
                     {/* 본문 */}
                     <div

@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import TotalAnalysisChart from "./totalAnalysisChart.jsx";
-import {getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
+import {getAnalysisHistory, getLanguageDistribution, renameRepository,connectRepository} from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 
 export default function RepoInfo({

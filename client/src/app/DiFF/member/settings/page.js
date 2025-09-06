@@ -537,7 +537,7 @@ function SettingsPage() {
 
             {/*회원 탈퇴 모달*/}
             {confirmOpen && (
-                <div className="fixed inset-0 z-50 grid place-items-center p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center p-4">
                     {/* overlay */}
                     <button
                         aria-hidden
