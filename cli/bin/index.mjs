@@ -18,6 +18,7 @@ program
     .option('--no-analysis', '분석 제외')
     .option('--no-filename', '파일명 제외')
     .action(async (branch, options) => {
+
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
         console.log(chalk.bgCyanBright(chalk.black("selectedBranch: ", selectedBranch)));

@@ -116,11 +116,6 @@ import BeforeExplain from "@/common/anime/beforeExplain";
 function extractFirstImage(body) {
     if (!body) return null;
     const match = body.match(/!\[[^\]]*\]\(([^)]+)\)/);
-    if (match) {
-        console.log("이미지 URL:", match[1]);
-    }
-
-    match ? console.log(match[1]) : console.log("no match");
     return match ? match[1] : null;
 }
 

@@ -8,15 +8,9 @@ import removeMd from "remove-markdown";
 import {saveFcmTokenToServer} from "@/lib/FirebaseAPI";
 import LoginSpeedDial from "@/common/toogle/loginSpeedDial";
 
-// 게시물에 이미지 있는지 확인
 function extractFirstImage(body) {
     if (!body) return null;
     const match = body.match(/!\[[^\]]*\]\(([^)]+)\)/);
-    if (match) {
-        console.log("이미지 URL:", match[1]);
-    }
-
-    match ? console.log(match[1]) : console.log("no match");
     return match ? match[1] : null;
 }
 
@@ -90,15 +84,6 @@ export default function AfterMainPage({me, trendingArticles}) {
             window.location.href = `/DiFF/article/detail?id=${id}`;
         }
     };
-    // const handleArticleClick = async (id) => {
-    //     try {
-    //         await increaseArticleHits(id);
-    //         window.location.href = `/DiFF/article/detail?id=${id}`;
-    //     } catch (err) {
-    //         console.error("조회수 증가 실패:", err);
-    //         window.location.href = `/DiFF/article/detail?id=${id}`;
-    //     }
-    // };
 
     return (
         <div className="w-full h-screen overflow-hidden bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">

@@ -1,4 +1,4 @@
-import DocsSidebar from "../docsSide";
+import DocsSidebar from "@/app/DiFF/docs/docsSide";
 
 export const metadata = { title: 'DiFF Docs — 4. 옵션' };
 

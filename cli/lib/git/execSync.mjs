@@ -261,8 +261,6 @@ export function getDiFF(from, to) {
 
         let files = diffNameResult.stdout.trim().split('\n').filter(f => !!f);
 
-        // console.log(chalk.yellow('📄 Changed files before filtering:'), files);
-
         // 2. 확장자 필터링
         files = files.filter(file => extensions.some(ext => file.endsWith(ext)));
 

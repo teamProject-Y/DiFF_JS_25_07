@@ -53,7 +53,6 @@ export const getLanguageDistribution = async (repoId) => {
     }
 };
 
-
 export const importGithubRepo = async (ghRepo) => {
     const payload = {
         name: ghRepo?.name ?? ghRepo?.full_name ?? '',
@@ -114,3 +113,25 @@ export const getGithubCommitList = async (repo, opts = {}) => {
 
     return Array.isArray(raw) ? raw.map(normalize) : [];
 };
+
+export const connectRepository = async (repoUrl) => {
+    const res = await UserAPI.get(`/api/DiFF/github/validate`,
+        {params: {url: repoUrl}});
+    return res.data;
+}
+
+export const mkDraft = async (owner, repoName, sha) => {
+
+    if (!owner || !repoName || !sha) {
+        throw new Error(
+            `mkDraft: missing required fields. owner=${owner}, repoName=${repoName}, sha=${sha}`
+        );
+    }
+
+    const res = await UserAPI.get(`/api/DiFF/github/commit/${owner}/${repoName}/${sha}`,);
+    return res.data;
+};
+
+export const deleteRepository = async (ghRepo) => {
+
+}
