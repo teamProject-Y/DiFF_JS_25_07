@@ -250,7 +250,7 @@ export function getDiFF(from, to) {
 
         const gitignoreFilter = getGitIgnoreFilter();
 
-        // 1. 변경된 파일 목록 추출
+        // 변경된 파일 목록 추출
         const diffNameResult = spawnSync('git', ['diff', '--name-only', from, to], {
             encoding: 'utf-8'
         });
