@@ -92,3 +92,11 @@ export const saveInquiry = async (inquiry) => {
     );
     return response.data;
 };
+
+export const saveReport = async (report) => {
+    const response = await NotionAPI.post(
+        '/api/DiFF/notionReport/saveReport',
+        report
+    );
+    return response.data;
+};
