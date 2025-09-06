@@ -175,7 +175,7 @@ export default function Page() {
                        const idx = sections.findIndex(s => s.id === best.id);
                        if (idx !== -1) setBgColor(sections[idx].color);
                      }
-               }, { root: scroller, threshold: [0.25, 0.5, 0.75, 1] });
+               }, { root: scroller, threshold: [0.25, 0.5, 0.5, 1] });
 
                sectionRefs.current.forEach(el => el && io.observe(el));
            return () => io.disconnect();
@@ -193,7 +193,7 @@ export default function Page() {
         <div
             id="pageScroll"
             data-scroll-root
-            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-proximity scroll-smooth"
+            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-mandatory scroll-smooth"
             style={{backgroundColor: bgColor}}
         >
             <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
@@ -201,11 +201,15 @@ export default function Page() {
                 <BeforeMainPage/>
             </div>
 
-            <section id="docs" className="pin-section is-light-bg w-full snap-start min-h-screen pt-20 dark:is-dark-bg"
-                     ref={el => sectionRefs.current[1] = el}>
-                <style jsx>{`#docs, #docs * { transition: none !important; }`}</style>
-                <BeforeExplain/>
-            </section>
+            <div id="docs" className="is-light-bg min-h-screen w-full pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
+                <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-1/2 mb-8">
+
+                </div>
+                <BeforeExplain />
+                <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-1/2 py-16">
+
+                </div>
+            </div>
 
             {/* trending */}
             <div id="trending"

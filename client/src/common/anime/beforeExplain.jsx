@@ -32,6 +32,9 @@ export default function BeforeExplain() {
             if (progress >= 2/3) step = 2;
             else if (progress >= 1/3) step = 1;
 
+            const activePin = y >= wrapTop && y < (wrapTop + (wrapHeight - viewH));
+            scroller.classList.toggle('snap-none', activePin);
+
             const sets = [
                 { text: text1Ref.current, dot: '.dot',  active: step === 0 },
                 { text: text2Ref.current, dot: '.dot2', active: step === 1 },
@@ -88,9 +91,9 @@ export default function BeforeExplain() {
                     더보기 <span className="ml-1">+</span>
                 </button>
 
-                <div className="relative z-10 grid h-full grid-cols-1 md:grid-cols-2 items-start gap-10 px-6 md:px-16 pt-16">
+                <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-12 px-8 md:px-20 pt-16 max-w-[1400px] mx-auto">
                     {/* LEFT */}
-                    <div className="max-w-2xl">
+                    <div className="max-w-none">
                         <div className="space-y-28">
                             <div className="flex items-center gap-3">
                                 <span className="w-5 h-5 rounded-full border-[6px] border-blue-600"/>
@@ -99,7 +102,7 @@ export default function BeforeExplain() {
                 </span>
                             </div>
 
-                            <h1 className="font-bold text-slate-900 leading-[1.08] text-[clamp(28px,6vw,50px)]">
+                            <h1 className="font-bold text-slate-900 leading-[1.03] text-[clamp(30px,5.0vw,50px)]">
                                 <span className="block whitespace-nowrap break-keep">당신의 개발 기록을</span>
                                 <span className="block whitespace-nowrap break-keep">콘텐츠로 바꿔주는 스마트 워크플로우</span>
                             </h1>
@@ -132,10 +135,14 @@ export default function BeforeExplain() {
                             <p className="font-black tracking-tight text-gray-900 text-[clamp(48px,9vw,140px)]"></p>
                         </div>
 
-                        <div ref={right1Ref} className="absolute top-60 right-2 text-right z-20 opacity-0" aria-hidden="true">
-                            <p className="text-black font-semibold text-lg md:text-6xl"># 커밋 요약이 자동으로 생성</p>
-                            <p className="text-black text-2xl md:text-3xl mt-1">PR 설명·체인지로그를 더 빨리, 더 일관되게.</p>
+                        <div ref={right1Ref} className="absolute top-56 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
+                            <h2 className="text-black font-semibold tracking-tight leading-[0.9] text-[clamp(36px,7.2vw,96px)]">
+                                <span className="block"># 커밋 요약이</span>
+                                <span className="block">자동으로 생성</span>
+                            </h2>
+                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10">PR 설명·체인지로그를 더 빨리, 더 일관되게.</p>
                         </div>
+
                         <div ref={right2Ref} className="absolute top-60 right-2 text-right z-20 opacity-0" aria-hidden="true">
                             <p className="text-black font-semibold text-lg md:text-6xl"># 리뷰 포인트 자동 추출</p>
                             <p className="text-black text-2xl md:text-3xl mt-1">중요 변경을 놓치지 않게 포커싱.</p>
