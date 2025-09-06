@@ -24,7 +24,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
         setError(null);
 
         if (!values.email || !values.loginPw) {
-            return setError("이메일과 비밀번호를 입력하세요.");
+            return setError("Please enter your email and password.");
         }
 
         try {

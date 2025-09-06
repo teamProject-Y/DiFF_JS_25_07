@@ -10,6 +10,7 @@ import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
 import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
 import ThemeToggle from "@/common/thema";
+import ModalLayout from "@/app/@modal/layout";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -58,6 +59,12 @@ export default function Header() {
     const [notifications, setNotifications] = useState([]);
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
+    // 🔑 모달 상태 추가
+    const [mode, setMode] = useState(null); // 'login' | 'join' | null
+
+    const openLogin = () => setMode('login');
+    const openJoin = () => setMode('join');
+    const closeModal = () => setMode(null);
 
     useEffect(() => {
         const isScrollable = (el) => {
@@ -209,12 +216,18 @@ export default function Header() {
 
     const iconFor = (t) => {
         switch ((t || '').toLowerCase()) {
-            case 'comment': return 'fa-regular fa-comment';
-            case 'like':    return 'fa-regular fa-thumbs-up';
-            case 'follow':  return 'fa-solid fa-user-plus';
-            case 'system':  return 'fa-regular fa-bell';
-            case 'draft':  return 'fa-solid fa-pen';
-            default:        return 'fa-regular fa-bell';
+            case 'comment':
+                return 'fa-regular fa-comment';
+            case 'like':
+                return 'fa-regular fa-thumbs-up';
+            case 'follow':
+                return 'fa-solid fa-user-plus';
+            case 'system':
+                return 'fa-regular fa-bell';
+            case 'draft':
+                return 'fa-solid fa-pen';
+            default:
+                return 'fa-regular fa-bell';
         }
     };
 
@@ -244,137 +257,177 @@ export default function Header() {
         }
     }
 
-
-
     return (
-        <HeaderWrap className={`
-                        ${hide ? 'hide' : ''}
-                        bg-[${background}] h-[${height}]
-                        dark:text-white
-                        `}
-                    style={{backgroundColor: background, height}}>
+        <>
+            <HeaderWrap
+                className={`
+        ${hide ? 'hide' : ''}
+        bg-[${background}] h-[${height}]
+        dark:text-white
+      `}
+                style={{backgroundColor: background, height}}
+            >
+                <div className="pl-4">
+                    <Link
+                        href="/DiFF/home/main"
+                        className="block text-3xl p-4 font-semibold dark:text-neutral-300"
+                    >
+                        DiFF
+                    </Link>
+                </div>
 
-            <div className="pl-4">
-                <Link href="/DiFF/home/main" className="block text-3xl p-4 font-semibold dark:text-neutral-300">DiFF</Link>
-            </div>
-
-            {/* 검색창 */}
-            {accessToken &&
-                <form onSubmit={handleSearch} className="relative flex items-center gap-2">
-                    <div className="px-3 flex rounded-full border overflow-hidden text-neutral-500
-                     dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500">
-                        <input
-                            type="text"
-                            placeholder="Search anything"
-                            value={keyword}
-                            autoComplete="on"
-                            onChange={(e) => setKeyword(e.target.value)}
-                            className="p-2 w-64 focus:outline-none dark:bg-neutral-800 dark:placeholder-neutral-500"
-                        />
-                        <button type="submit" className="">
-                            <i className="fa-solid fa-magnifying-glass"></i>
-                        </button>
-                    </div>
-                </form>
-            }
-            <ThemeToggle/>
-
-            <ul className="flex items-center gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
-                {accessToken ? (
-                    <>
-                        <li className="relative" ref={dropdownRef}>
-
-                            <button onClick={handleBellClick} className="relative rounded-full p-2 hover:bg-neutral-100/60 dark:hover:bg-neutral-800/60">
-                                <i className="fa-solid fa-bell" />
-                                {unread && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />}
+                {/* 검색창 */}
+                {accessToken && (
+                    <form onSubmit={handleSearch} className="relative flex items-center gap-2">
+                        <div
+                            className="px-3 flex rounded-full border overflow-hidden text-neutral-500
+              dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500"
+                        >
+                            <input
+                                type="text"
+                                placeholder="Search anything"
+                                value={keyword}
+                                autoComplete="on"
+                                onChange={(e) => setKeyword(e.target.value)}
+                                className="p-2 w-64 focus:outline-none dark:bg-neutral-800 dark:placeholder-neutral-500"
+                            />
+                            <button type="submit">
+                                <i className="fa-solid fa-magnifying-glass"></i>
                             </button>
-
-                            {/* 드롭다운 */}
-                            {open && (
-                                <div
-                                    role="menu"
-                                    aria-label="Notifications"
-                                    className="absolute right-0 mt-2 w-80 z-50"
-                                >
-                                    {/* 말풍선 꼬리 */}
-                                    <span className="pointer-events-none absolute right-4 -top-1.5 h-3 w-3 rotate-45 rounded-sm z-20
-                                       border border-neutral-200 bg-white
-                                       dark:border-neutral-700 dark:bg-neutral-800"></span>
-
-                                    {/* 카드 */}
-                                    <div className="rounded-2xl border border-neutral-200 bg-white p-2 shadow z-30
-                                                    dark:border-neutral-700 dark:bg-neutral-800">
-                                        {/* 헤더 */}
-                                        <div className="mb-2 flex items-center justify-between px-2">
-                                            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Notifications</span>
-                                            <button
-                                                onClick={() => setOpen(false)}
-                                                className="text-xs rounded-lg border border-neutral-300 px-2 py-1 text-neutral-600 transition
-                                                            hover:bg-neutral-200 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-950"
-                                            >
-                                                Close
-                                            </button>
-                                        </div>
-
-                                        {/* 리스트 */}
-                                        {notifications && notifications.length > 0 ? (
-                                            <ul className="max-h-80 overflow-y-auto">
-                                                {notifications.map((n) => {
-                                                    console.log("📌 알림 데이터:", n);
-                                                    const link = getNotificationLink(n);
-
-                                                    return (
-                                                        <li
-                                                            key={n.id}
-                                                            onClick={() => (window.location.href = link)}
-                                                            className="group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 transition
-                                                                       hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
-                                                                                                            >
-                                                            <span
-                                                                className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
-                                                                         border border-neutral-300 bg-neutral-100 text-neutral-600
-                                                                         dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-                                                            >
-                                                              <i className={iconFor(n.type)} aria-hidden />
-                                                            </span>
-
-                                                            <div className="min-w-0 flex-1">
-                                                                <div
-                                                                    className="truncate text-sm text-neutral-800 dark:text-neutral-200"
-                                                                    title={n.message}
-                                                                >
-                                                                    {n.message}
-                                                                </div>
-                                                                {n.type && (
-                                                                    <div className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                                                                        {n.type}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        ) : (
-                                            <div className="px-3 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
-                                                No notifications yet.
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </li>
-
-                        <li><Link href="/DiFF/member/logout" onClick={handleLogout}>LOGOUT</Link></li>
-                        <li><Link href="/DiFF/member/profile">MYPAGE</Link></li>
-                    </>
-                ) : (
-                    <>
-                        <li><Link href="/DiFF/member/login" scroll={false} prefetch={false}>LOGIN</Link></li>
-                        <li><Link href="/DiFF/member/join" scroll={false} prefetch={false}>JOIN</Link></li>
-                    </>
+                        </div>
+                    </form>
                 )}
-            </ul>
-        </HeaderWrap>
+
+                <ThemeToggle/>
+
+                <ul className="flex items-center gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
+                    {accessToken ? (
+                        <>
+                            {/* 🔔 알림 */}
+                            <li className="relative" ref={dropdownRef}>
+                                <button
+                                    onClick={handleBellClick}
+                                    className="relative rounded-full p-2 hover:bg-neutral-100/60 dark:hover:bg-neutral-800/60"
+                                >
+                                    <i className="fa-solid fa-bell"/>
+                                    {unread && (
+                                        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"/>
+                                    )}
+                                </button>
+
+                                {/* 드롭다운 */}
+                                {open && (
+                                    <div
+                                        role="menu"
+                                        aria-label="Notifications"
+                                        className="absolute right-0 mt-2 w-80 z-50"
+                                    >
+                                        {/* 꼬리 */}
+                                        <span
+                                            className="pointer-events-none absolute right-4 -top-1.5 h-3 w-3 rotate-45 rounded-sm z-20
+                      border border-neutral-200 bg-white
+                      dark:border-neutral-700 dark:bg-neutral-800"
+                                        ></span>
+
+                                        {/* 카드 */}
+                                        <div
+                                            className="rounded-2xl border border-neutral-200 bg-white p-2 shadow z-30
+                      dark:border-neutral-700 dark:bg-neutral-800"
+                                        >
+                                            {/* 헤더 */}
+                                            <div className="mb-2 flex items-center justify-between px-2">
+                      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        Notifications
+                      </span>
+                                                <button
+                                                    onClick={() => setOpen(false)}
+                                                    className="text-xs rounded-lg border border-neutral-300 px-2 py-1 text-neutral-600 transition
+                          hover:bg-neutral-200 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-950"
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+
+                                            {/* 리스트 */}
+                                            {notifications && notifications.length > 0 ? (
+                                                <ul className="max-h-80 overflow-y-auto">
+                                                    {notifications.slice(0, 50).map((n) => {
+                                                        const link = getNotificationLink(n);
+                                                        return (
+                                                            <li
+                                                                key={n.id}
+                                                                onClick={() => (window.location.href = link)}
+                                                                className="group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 transition
+                                hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
+                                                            >
+                              <span
+                                  className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
+                                  border border-neutral-300 bg-neutral-100 text-neutral-600
+                                  dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+                              >
+                                <i className={iconFor(n.type)} aria-hidden/>
+                              </span>
+
+                                                                <div className="min-w-0 flex-1">
+                                                                    <div
+                                                                        className="truncate text-sm text-neutral-800 dark:text-neutral-200"
+                                                                        title={n.message}
+                                                                    >
+                                                                        {n.message}
+                                                                    </div>
+                                                                    {n.type && (
+                                                                        <div
+                                                                            className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                                                            {n.type}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            ) : (
+                                                <p className="text-sm text-gray-400">No notifications</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </li>
+
+                            <li>
+                                <Link href="/DiFF/member/logout" onClick={handleLogout}>
+                                    LOGOUT
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/DiFF/member/profile">MYPAGE</Link>
+                            </li>
+                        </>
+                    ) : (
+                        <>
+                            <li>
+                                <button
+                                    onClick={() =>
+                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))
+                                    }
+                                >
+                                    LOGIN
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={() =>
+                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))
+                                    }
+                                >
+                                    JOIN
+                                </button>
+                            </li>
+                        </>
+                    )}
+                </ul>
+            </HeaderWrap>
+            <ModalLayout mode={mode} onClose={() => setMode(null)}/>
+        </>
     );
 }

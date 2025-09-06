@@ -18,10 +18,10 @@ export default function JoinForm() {
     const onChange = (e) => setForm(v => ({ ...v, [e.target.name]: e.target.value }));
 
     const validate = () => {
-        if (!form.email.trim() || !form.email.includes('@')) return '유효한 이메일을 입력하세요.';
-        if (!form.nickName.trim()) return '닉네임을 입력하세요.';
-        if (!form.loginPw.trim()) return '비밀번호를 입력하세요.';
-        if (form.loginPw !== form.checkLoginPw) return '비밀번호가 일치하지 않습니다.';
+        if (!form.email.trim() || !form.email.includes('@')) return 'Check the email form';
+        if (!form.nickName.trim()) return 'Please enter your nickname.';
+        if (!form.loginPw.trim()) return 'Please enter your password.';
+        if (form.loginPw !== form.checkLoginPw) return 'Password does not match.';
         return '';
     };
 
@@ -36,7 +36,7 @@ export default function JoinForm() {
             const { loginPw, checkLoginPw, nickName, email } = form;
             const res = await signUp({ loginPw, checkLoginPw, nickName, email });
 
-            // ✅ 백엔드 응답 구조 맞추기
+            // 백엔드 응답 구조 맞추기
             const { resultCode, msg: serverMsg, data1: accessToken, data2: refreshToken } = res;
 
             if (resultCode === 'S-1' && accessToken) {

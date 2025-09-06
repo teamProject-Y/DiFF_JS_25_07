@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import LoginForm from "@/app/DiFF/member/login/loginModal";
@@ -9,22 +8,14 @@ import JoinForm from '@/app/DiFF/member/join/joinModal';
 import ModalOpenIntro from "@/common/anime/modalOpenIntro";
 
 export default function ModalLayout({ children }) {
-    const router = useRouter();
-    const pathname = usePathname();
-    const sp = useSearchParams();
-
-    const isModalRoute = useMemo(
-        () => /\/DiFF\/member\/(login|join)$/.test(pathname || ''),
-        [pathname]
-    );
-    const mode = useMemo(
-        () => (pathname && pathname.endsWith('/login') ? 'login' : 'join'),
-        [pathname]
-    );
+    // 'login' | 'join' | null
+    const [mode, setMode] = useState(null);
+    const isModalOpen = mode !== null;
 
     // 슬라이드 방향
     const prevRef = useRef(mode);
     const [dir, setDir] = useState(1);
+
     useEffect(() => {
         const prev = prevRef.current;
         if (prev !== mode) {
@@ -33,31 +24,41 @@ export default function ModalLayout({ children }) {
         }
     }, [mode]);
 
-    const callbackUrl = sp?.get('callbackUrl') || '/DiFF/home/main';
-    const afterLoginUri = sp?.get('afterLoginUri') || undefined;
-
     const panelX = mode === 'join' ? 0 : '-100%';
 
-    // 닫기: 항상 메인으로 replace
-    const closeToMain = () => router.replace('/DiFF/home/main');
+    // 닫기
+    const closeModal = () => setMode(null);
 
-    // 모달이 아닌 경로에서는 아예 렌더하지 않음(완전히 언마운트)
+    // ✅ Header에서 이벤트 받아서 열기
+    useEffect(() => {
+        const handler = (e) => {
+            console.log("👉 모달 열기 이벤트 감지:", e.detail);
+            setMode(e.detail); // 'login' or 'join'
+        };
+        window.addEventListener("open-modal", handler);
+        return () => window.removeEventListener("open-modal", handler);
+    }, []);
+
+    useEffect(() => {
+        console.log("🔄 mode 변경됨 →", mode);
+    }, [mode]);
+
     return (
         <AnimatePresence mode="wait">
-            {isModalRoute && (
+            {isModalOpen && (
                 <motion.div
                     key="modal-root"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                 >
-                    {/* toogle */}
+                    {/* dimmed background */}
                     <motion.div
                         className="fixed inset-0 z-[100] bg-black/60"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={closeToMain}
+                        onClick={closeModal}
                     />
 
                     {/* frame */}
@@ -71,13 +72,11 @@ export default function ModalLayout({ children }) {
                     >
                         <div className="relative w-[min(1100px,92vw)] h-[min(640px,78vh)] rounded-3xl overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.35)] bg-white">
                             <button
-                                onClick={closeToMain}
-                                className="absolute right-4 top-4 z-20 h-8 w-8 rounded-full text-xl
-                                flex justify-center items-center"
+                                onClick={closeModal}
+                                className="absolute right-4 top-4 z-20 h-8 w-8 rounded-full text-xl flex justify-center items-center"
                                 aria-label="close"
                             >
-                                <i className={`fa-solid fa-xmark 
-                                ${mode === 'join' ? 'text-white' : ''}`}></i>
+                                <i className={`fa-solid fa-xmark ${mode === 'join' ? 'text-white' : ''}`}></i>
                             </button>
 
                             <div className="relative grid grid-cols-2 w-full h-full">
@@ -104,13 +103,15 @@ export default function ModalLayout({ children }) {
                                                     transition={{ duration: 0.22 }}
                                                 >
                                                     <a
-                                                        href="/DiFF/member/join"
+                                                        href="#"
                                                         className="absolute bottom-5 right-5 text-white underline font-semibold"
-                                                        onClick={(e) => { e.preventDefault(); router.push('/DiFF/member/join'); }}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setMode('join');
+                                                        }}
                                                     >
-                                                        회원가입으로 이동
+                                                        Sign Up
                                                     </a>
-
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>
@@ -129,7 +130,10 @@ export default function ModalLayout({ children }) {
                                                     exit={{ x: 40 * dir, opacity: 0 }}
                                                     transition={{ duration: 0.22 }}
                                                 >
-                                                    <LoginForm callbackUrl={callbackUrl} afterLoginUriFromPage={afterLoginUri} />
+                                                    <LoginForm
+                                                        callbackUrl="/DiFF/home/main"
+                                                        afterLoginUriFromPage={undefined}
+                                                    />
                                                 </motion.div>
                                             ) : (
                                                 <motion.div
@@ -140,9 +144,12 @@ export default function ModalLayout({ children }) {
                                                     transition={{ duration: 0.22 }}
                                                 >
                                                     <a
-                                                        href="/DiFF/member/login"
+                                                        href="#"
                                                         className="absolute bottom-5 left-5 text-white underline font-semibold"
-                                                        onClick={(e) => { e.preventDefault(); router.push('/DiFF/member/login'); }}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setMode('login');
+                                                        }}
                                                     >
                                                         로그인으로 이동
                                                     </a>
@@ -170,12 +177,9 @@ export default function ModalLayout({ children }) {
                                 </motion.div>
                             </div>
 
-                            <ModalOpenIntro open={isModalRoute} brandText="DiFF" />
+                            <ModalOpenIntro open={isModalOpen} brandText="DiFF" />
                         </div>
-
-
                     </motion.div>
-
 
                     {/* children은 라우팅 유지용 */}
                     <div style={{ display: 'none' }}>{children}</div>
