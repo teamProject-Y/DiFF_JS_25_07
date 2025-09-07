@@ -5,6 +5,22 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {getGithubCommitList, mkDraft} from '@/lib/RepositoryAPI';
 
+const parseOwnerRepo = (url = '') => {
+    try {
+        const u = new URL(url);
+        const parts = u.pathname.split('/').filter(Boolean);
+        if (u.hostname.includes('github.com') && !u.hostname.includes('api.')) {
+            return [parts[0], parts[1]];
+        }
+        if (u.hostname.includes('api.github.com') && parts[0] === 'repos') {
+            return [parts[1], parts[2]];
+        }
+        return [parts[0], parts[1]];
+    } catch {
+        return [null, null];
+    }
+};
+
 export default function CommitList({repo}) {
     const connected = !!repo?.url && !!repo?.name;
     const [branch, setBranch] = useState(repo?.defaultBranch || 'main');
@@ -33,7 +49,20 @@ export default function CommitList({repo}) {
                 setLoading(true);
                 setErr('');
 
-                const list = await getGithubCommitList(repo, {branch, page, perPage});
+                // owner/name 교정
+                const [ownerFromUrl, nameFromUrl] = parseOwnerRepo(repo?.url || '');
+                const safeOwner = (repo?.githubOwner || repo?.owner || ownerFromUrl || '').replace(/_/g, '-');
+                const safeName  = (repo?.githubName || repo?.name  || nameFromUrl  || '');
+
+                const repoFixed = {
+                    ...repo,
+                    owner: safeOwner,
+                    name: safeName,
+                    githubOwner: safeOwner,
+                    githubName: safeName,
+                };
+
+                const list = await getGithubCommitList(repoFixed, {branch, page, perPage});
                 if (!cancelled) setCommits(list);
             } catch (e) {
                 if (!cancelled) setErr(e?.message || '커밋을 불러오지 못했습니다.');
@@ -45,10 +74,15 @@ export default function CommitList({repo}) {
         return () => {
             cancelled = true;
         };
-    }, [connected, repo, branch, page, perPage]);
+    }, [connected, repo, branch, page, perPage, refreshTick]); // refreshTick 추가
 
     async function makeDraft(commit) {
-        const draft = await mkDraft(repo.githubOwner, repo.githubName, commit.sha);
+        // owner/name 교정
+        const [ownerFromUrl, nameFromUrl] = parseOwnerRepo(repo?.url || '');
+        const safeOwner = (repo?.githubOwner || repo?.owner || ownerFromUrl || '').replace(/_/g, '-');
+        const safeName  = (repo?.githubName || repo?.name  || nameFromUrl  || '');
+
+        const draft = await mkDraft(safeOwner, safeName, commit.sha);
         console.log("draft:", draft);
         console.log("draft detail: ", draft.msg, draft.data1);
         return draft;
