@@ -87,7 +87,7 @@ export default function LoginSpeedDial({
                             />
                             <SpeedDialItem
                                 label="Logout"
-                                href={draftsHref}
+                                href={`/DiFF/member/logout`}
                                 onClick={() => setOpen(false)}
                                 variant="neutral"
                                 icon={<i className="fa-solid fa-power-off" aria-hidden="true"/>}

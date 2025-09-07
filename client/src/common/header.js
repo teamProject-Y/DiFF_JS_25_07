@@ -307,12 +307,10 @@ export default function Header() {
                     </form>
                 )}
 
-                <ThemeToggle/>
-
                 <ul className="flex items-center gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
                     {accessToken ? (
                         <>
-                            {/* 🔔 알림 */}
+                            {/* 알림 */}
                             <li className="relative" ref={dropdownRef}>
                                 <button
                                     onClick={handleBellClick}
@@ -405,14 +403,14 @@ export default function Header() {
                                 )}
                             </li>
 
-                            <li>
-                                <Link href="/DiFF/member/logout" onClick={handleLogout}>
-                                    LOGOUT
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/DiFF/member/profile">MYPAGE</Link>
-                            </li>
+                            {/*<li>*/}
+                            {/*    <Link href="/DiFF/member/logout" onClick={handleLogout}>*/}
+                            {/*        LOGOUT*/}
+                            {/*    </Link>*/}
+                            {/*</li>*/}
+                            {/*<li>*/}
+                            {/*    <Link href="/DiFF/member/profile">MYPAGE</Link>*/}
+                            {/*</li>*/}
                         </>
                     ) : (
                         <>
