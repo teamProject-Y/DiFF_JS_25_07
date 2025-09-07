@@ -3,11 +3,13 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { saveReport } from '@/lib/NotionAPI';
 import { useState, useRef, useMemo, useEffect } from 'react';
+import {useTheme} from "@/common/thema";
 
 export default function ReportForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const articleId = searchParams.get('id');
+    const theme = useTheme();
 
     const [report, setReport] = useState({
         articleId: articleId || '',
@@ -157,14 +159,15 @@ export default function ReportForm() {
                                 type="email"
                                 placeholder="your-mail@mail.com"
                                 ref={emailRef}
-                                value={report.email}
-                                onChange={(e) => setReport({...report, email: e.target.value})}
+                                value={inquiry.email}
+                                onChange={(e) => setInquiry({...inquiry, email: e.target.value})}
                                 onBlur={() => setTouched(prev => ({...prev, email: true}))}
                                 className={`bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5
                                  ${showError('email')
                                     ? 'focus:ring-1 border-red-500 focus:ring-red-500 focus:border-red-500 '
                                     : 'border-gray-300 focus:outline-none focus:ring-0 focus-visible:outline-none'}
-                            dark:bg-neutral-800 dark:border-neutral-700  dark:placeholder-neutral-500 dark:text-neutral-300`}
+                                    ${theme === 'dark' ? `dark:bg-neutral-800 dark:border-neutral-700  dark:placeholder-neutral-500 dark:text-neutral-300`
+                                    : ``}`}
                             />
                         </div>
                     </div>
