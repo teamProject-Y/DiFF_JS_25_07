@@ -34,7 +34,7 @@ const sections = [
 function isExpired(token, skewMs = 30000) {
     try {
         const payload = JSON.parse(atob((token?.split?.('.')[1] || '')));
-        if (!payload?.exp) return false; // exp 없으면 패스
+        if (!payload?.exp) return false;
         return payload.exp * 1000 <= Date.now() - skewMs;
     } catch {
         return true;
@@ -75,7 +75,7 @@ function useMountedLogin() {
                 return;
             }
             const ok = await tryRefresh();
-            setLoggedIn(ok); // ✅ 오타 수정: setLoggedIn(오케이) → setLoggedIn(ok)
+            setLoggedIn(ok);
         };
         compute();
         const onChange = () => compute();
@@ -89,7 +89,7 @@ function useMountedLogin() {
     return {mounted, loggedIn};
 }
 
-// JWT payload 파싱 (사용자 코드 유지)
+// JWT payload 파싱
 function parseJwt(token) {
     if (!token) return {};
     try {
@@ -107,7 +107,7 @@ function parseJwt(token) {
     }
 }
 
-// 분기용 컴포넌트 import (2개만)
+// 분기용 컴포넌트 import
 import BeforeMainPage from './BeforeMainPage';
 import AfterMainPage from './AfterMainPage';
 import removeMd from "remove-markdown";
@@ -157,79 +157,43 @@ export default function Page() {
         }
     }, []);
 
-    // background
-    // useEffect(() => {
-    //     if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
-    //
-    //     const observer = new IntersectionObserver(entries => {
-    //         const visible = entries.find(e => e.isIntersecting);
-    //         if (visible) {
-    //             const section = sections.find(s => s.id === visible.target.id);
-    //             if (section) setBgColor(section.color);
-    //         }
-    //     }, {threshold: 0.5});
-    //
-    //     sectionRefs.current.forEach(section => {
-    //         if (section) observer.observe(section);
-    //     });
-    //
-    //     return () => {
-    //         sectionRefs.current.forEach(section => {
-    //             if (section) observer.unobserve(section);
-    //         });
-    //     };
-    // }, [sectionRefs.current.map(ref => ref)]);
+     useEffect(() => {
+           if (!mounted || loggedIn) return;
+           const scroller = document.getElementById('pageScroll');
+           if (!scroller || sectionRefs.current.length === 0) return;
+           if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+           scroller.scrollTo({ top: 0, behavior: 'auto' });
 
-    useEffect(() => {
-        const root = document.getElementById('pageScroll');
-        if (!root || sectionRefs.current.some(ref => !ref)) return;
+               const io = new IntersectionObserver((entries) => {
+                 let best = { ratio: 0, id: null };
+                 entries.forEach(e => {
+                       if (e.isIntersecting && e.intersectionRatio > best.ratio) {
+                             best = { ratio: e.intersectionRatio, id: e.target.id };
+                           }
+                     });
+                 if (best.id) {
+                       const idx = sections.findIndex(s => s.id === best.id);
+                       if (idx !== -1) setBgColor(sections[idx].color);
+                     }
+               }, { root: scroller, threshold: [0.25, 0.5, 0.5, 1] });
 
-        const observer = new IntersectionObserver((entries) => {
-            const visible = entries.find(e => e.isIntersecting);
-            if (visible) {
-                const s = sections.find(v => v.id === visible.target.id);
-                if (s) setBgColor(s.color);
-            }
-        }, { root, threshold: 0.5 }); // ★ root 지정
-
-        sectionRefs.current.forEach(el => el && observer.observe(el));
-        return () => observer.disconnect();
-    }, []);
-
-    // (다른 useEffect들 아래 아무 데)
-    useEffect(() => {
-        const scroller = document.getElementById('pageScroll');
-        if (!scroller) return;
-
-        // 브라우저 자동 위치 복원 끄기
-        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-
-        // 초기 프레임: 스냅/스무스 오프 + 맨 위로
-        scroller.classList.add('snap-disabled', 'no-smooth');
-        scroller.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-
-        // 2프레임 뒤에 복구 + GSAP 리프레시
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                scroller.classList.remove('no-smooth', 'snap-disabled');
-                window.ScrollTrigger?.refresh?.();
-            });
-        });
-    }, []);
+               sectionRefs.current.forEach(el => el && io.observe(el));
+           return () => io.disconnect();
+         }, [mounted, loggedIn]);
 
 
-    if (!mounted) return null; // 마운트 전 렌더 방지
+    if (!mounted) return null;
 
     if (loggedIn) {
         return <AfterMainPage me={user} trendingArticles={trendingArticles}/>;
     }
 
-    // 로그인 전 화면 + 트렌딩 + 메뉴 (사용자 UI 유지)
+    // 로그인 전 화면
     return (
         <div
             id="pageScroll"
             data-scroll-root
-            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-proximity scroll-smooth"
+            className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-mandatory scroll-smooth"
             style={{backgroundColor: bgColor}}
         >
             <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
@@ -237,13 +201,15 @@ export default function Page() {
                 <BeforeMainPage/>
             </div>
 
+            <div id="docs" className="is-light-bg min-h-screen w-full pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
+                <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-1/2 mb-8">
 
-            <section id="docs" className="pin-section is-light-bg w-full min-h-screen pt-20 dark:is-dark-bg"
-                     ref={el => sectionRefs.current[1] = el}>
-                <BeforeExplain/>
+                </div>
+                <BeforeExplain />
+                <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-1/2 py-16">
 
-            </section>
-
+                </div>
+            </div>
 
             {/* trending */}
             <div id="trending"
@@ -294,7 +260,7 @@ export default function Page() {
                             >
                                 {trendingArticles.length > 0 ? (
                                     trendingArticles.slice(0, 10).map((article, index) => {
-                                        const imgSrc = extractFirstImage(article.body); // 본문에서 첫 이미지 추출
+                                        const imgSrc = extractFirstImage(article.body);
                                         return (
                                             <SwiperSlide key={article.id ?? index}>
                                                 {/*<Link href={`/DiFF/article/detail?id=${article.id}`}>*/}
@@ -305,8 +271,7 @@ export default function Page() {
                                                     tabIndex={0}
                                                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(`/DiFF/article/detail?id=${article.id}`)}
                                                 >
-                                                    <div
-                                                        className="h-1/2 w-full bg-gray-200 flex items-center justify-center ">
+                                                    <div className="h-1/2 w-full bg-gray-200 flex items-center justify-center">
                                                         {imgSrc ? (
                                                             <img
                                                                 src={imgSrc}
@@ -355,7 +320,6 @@ export default function Page() {
                                 ) : (
                                     <div>트렌딩 게시물이 없습니다.</div>
                                 )}
-
                             </SwiperWrapper>
                         )
                     )}
@@ -368,8 +332,7 @@ export default function Page() {
             <br/>
             <br/>
 
-
-            {/* toogle menu */}
+            {/* toggle menu */}
             <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
                          blogName={user.blogName}/>
             <div className="pointer-events-none">
@@ -382,11 +345,6 @@ export default function Page() {
                     <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
                 </div>
             </div>
-
-            <style jsx global>{`
-                .snap-disabled { scroll-snap-type: none !important; }
-                .no-smooth     { scroll-behavior: auto !important; }
-            `}</style>
         </div>
     );
 }
