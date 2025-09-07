@@ -178,7 +178,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
                                             당신은 DiFF에 글을 작성한 첫반째 사용자 입니다. 그래서 작은 선물을 준비 했어요.
                                             <br />
-                                            쿠폰 번호 :
+                                            쿠폰 번호: scew-sdfv-jfj-sdf1
                                         </a>
                                     </div>
                                 )
