@@ -167,7 +167,20 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         );
                                     })
                                 ) : (
-                                    <div className="p-4">No trending posts.</div>
+                                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
+                                        {/* 아이콘 */}
+                                        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                            <i className="fa-solid fa-newspaper text-2xl text-gray-400"></i>
+                                        </div>
+
+                                        {/* 메시지 */}
+                                        <p className="text-lg font-medium">No posts from people you follow.</p>
+                                        <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
+                                            당신은 DiFF에 글을 작성한 첫반째 사용자 입니다. 그래서 작은 선물을 준비 했어요.
+                                            <br />
+                                            쿠폰 번호 :
+                                        </a>
+                                    </div>
                                 )
                             ) : followingArticles === null ? (
                                 <></>
@@ -229,7 +242,18 @@ export default function AfterMainPage({me, trendingArticles}) {
                                     );
                                 })
                             ) : (
-                                <div className="p-4">No posts from people you follow.</div>
+                                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
+                                    {/* 아이콘 */}
+                                    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                        <i className="fa-solid fa-user-plus text-2xl text-gray-400"></i>
+                                    </div>
+
+                                    {/* 메시지 */}
+                                    <p className="text-lg font-medium">No posts from people you follow.</p>
+                                    <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
+                                        Start following someone to see their posts here.
+                                    </a>
+                                </div>
                             )}
                         </div>
 
