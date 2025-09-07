@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
-import TotalAnalysisChart from "./totalAnalysisChart.jsx";
-import {getAnalysisHistory, getLanguageDistribution, renameRepository,connectRepository} from "@/lib/RepositoryAPI";
+import {connectRepository, getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
+import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
 
 export default function RepoInfo({
                                      repo,
@@ -61,6 +61,7 @@ export default function RepoInfo({
     const visibility = repo?.aprivate ? 'private' : 'public';
 
     const nameRef = useRef(null);
+
     const enterEdit = () => {
         setEditingName(true);
         setTimeout(() => nameRef.current?.focus?.(), 0);
@@ -77,7 +78,6 @@ export default function RepoInfo({
     return (
         <motion.div
             key={`detail-${repo?.id ?? 'none'}`}
-            // variants={container}
             initial="hidden"
             animate="show"
             exit="hidden"
@@ -100,8 +100,6 @@ export default function RepoInfo({
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
                 <div className="max-w-[70%] min-w-[70%] flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col">
-
-                        {/* ✅ 탭 버튼 */}
                         <div className="flex gap-2 mb-2">
                             <button
                                 onClick={() => setActiveTab("history")}
@@ -125,7 +123,7 @@ export default function RepoInfo({
                             </button>
                         </div>
 
-                        {/* ✅ 탭 내용 */}
+                        {/* 탭 내용 */}
                         <div className="h-[35%] rounded-xl border shadow-sm p-4 mb-3
                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                             {activeTab === "history" ? (
