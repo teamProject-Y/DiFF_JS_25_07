@@ -445,7 +445,7 @@ function ArticleDetailInner() {
                                 <i className="fa-solid fa-share-nodes"></i>
                             </button>
                             {/* 옵션 */}
-                            {isMyPost && (
+                            {/*{isMyPost && (*/}
                                 <div className="relative">
                                     <button
                                         ref={menuBtnRef}
@@ -475,6 +475,23 @@ function ArticleDetailInner() {
                                                     dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
                                         >
                                             <ul className="py-1 text-sm">
+                                                <li>
+                                                    <button
+                                                        type="button"
+                                                        role="menuitem"
+                                                        onClick={() => {
+                                                            if (article?.id) {
+                                                                router.push(`/DiFF/article/report?id=${article.id}`);
+                                                            } else {
+                                                                alert("An error occurred while processing your request. Please try again later.");
+                                                            }
+                                                        }}
+                                                        className="w-full text-left block px-4 py-2 hover:bg-gray-100
+                                                            dark:hover:bg-neutral-700"
+                                                    >
+                                                        <i className="fa-solid fa-bullhorn"></i> Report
+                                                    </button>
+                                                </li>
                                                 {article.userCanModify && (
                                                     <li>
                                                         <Link
@@ -505,7 +522,7 @@ function ArticleDetailInner() {
                                         </div>
                                     )}
                                 </div>
-                            )}
+                            {/*)}*/}
                         </div>
                     </div>
 

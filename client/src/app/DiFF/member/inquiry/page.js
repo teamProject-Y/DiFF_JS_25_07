@@ -3,9 +3,11 @@
 import {useRouter} from 'next/navigation';
 import {saveInquiry} from '@/lib/NotionAPI';
 import {useState, useEffect, useRef, useMemo} from 'react';
+import {useTheme} from "@/common/thema";
 
 export default function InquiryForm() {
     const router = useRouter();
+    const theme =  useTheme();
 
     const [inquiry, setInquiry] = useState({
         title: '',
@@ -197,7 +199,8 @@ export default function InquiryForm() {
                                  ${showError('email')
                                     ? 'focus:ring-1 border-red-500 focus:ring-red-500 focus:border-red-500 '
                                     : 'border-gray-300 focus:outline-none focus:ring-0 focus-visible:outline-none'}
-                            dark:bg-neutral-800 dark:border-neutral-700  dark:placeholder-neutral-500 dark:text-neutral-300`}
+                                    ${theme === 'dark' ? `dark:bg-neutral-800 dark:border-neutral-700  dark:placeholder-neutral-500 dark:text-neutral-300`
+                                : ``}`}
                             />
                         </div>
                     </div>
