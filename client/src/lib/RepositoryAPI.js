@@ -58,7 +58,6 @@ export const importGithubRepo = async (ghRepo) => {
         aPrivate: ghRepo?.aPrivate ?? !!ghRepo?.private ?? false,
         url: ghRepo?.url ?? ghRepo?.html_url ?? '',
         defaultBranch: ghRepo?.defaultBranch ?? ghRepo?.default_branch ?? '',
-        // owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
         githubOwner: ghRepo?.githubOwner ?? null,
         githubName: ghRepo?.githubName ?? null,
     };
@@ -68,7 +67,7 @@ export const importGithubRepo = async (ghRepo) => {
 
 export const getGithubCommitList = async (repo, opts = {}) => {
 
-    if (!repo?.name || !repo?.url) {
+    if (!repo?.url) {
         throw new Error('Missing repository');
     }
 
@@ -83,6 +82,8 @@ export const getGithubCommitList = async (repo, opts = {}) => {
         page: opts.page ?? null,
         perPage: opts.perPage ?? null,
     };
+
+    console.log("params: ", params);
 
     const res = await UserAPI.get(`/api/DiFF/github/commits`, {params});
 
