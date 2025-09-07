@@ -181,53 +181,6 @@ function getGitIgnoreExcludes(repoPath = process.cwd()) {
     return lines.map(pattern => `:(exclude)${pattern}`);
 }
 
-/** 유효한 파일만 diff 추출 **/
-// export function getDiFF(from, to) {
-//
-//     console.log(chalk.bgCyanBright(chalk.black(from)));
-//     console.log(chalk.bgCyanBright(chalk.black(to)));
-//
-//     // test용
-//     const wow = '01e4bb97c0bcbc8f884f425f5a1661108f7fc5cb';
-//
-//     return new Promise((resolve, reject) => {
-//         const extensions = ['*.mjs', '*.jsx', '*.java', '*.ts', '*.tsx', '*.jsp', '*.js',
-//             '*.py', '*.c', '*.cs', '*.cpp', '*.php', '*.go', '*.rs', '*.rb', '*.kt', '*.swift'];
-//
-//         const excludePaths = getGitIgnoreExcludes();
-//
-//         const args = ['diff', '-W', wow, to, '--', ...extensions, ...excludePaths];
-//         const child = spawn('git', args);
-//
-//         let output = '';
-//
-//         child.stdout.on('data', (data) => {
-//             output += data.toString();
-//         });
-//
-//         child.stderr.on('data', (data) => {
-//             console.error('stderr:', data.toString());
-//         });
-//
-//         child.on('close', (code) => {
-//             if (code === 0) {
-//                 const filtered = output;
-//
-//                 // 디버깅용
-//                 console.log(chalk.bgCyanBright(chalk.black('+++ raw diff preview:', filtered.slice(0, 100))));
-//                 const preview = filtered.length > 100 ? filtered.slice(0, 100) + '...' : filtered;
-//                 console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 (앞 100자):')));
-//                 console.log(preview);
-//                 console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 끝')));
-//
-//                 resolve(filtered);
-//             } else {
-//                 reject(new Error(`git diff exited with code ${code}`));
-//             }
-//         });
-//     });
-// }
-
 function getGitIgnoreFilter() {
     const ig = ignore();
     const ignorePath = path.join(process.cwd(), '.gitignore');
@@ -266,8 +219,6 @@ export function getDiFF(from, to) {
 
         // 3. .gitignore 필터 적용
         files = gitignoreFilter.filter(files);
-
-        // console.log(chalk.green('✅ Files after .gitignore filtering:'), files);
 
         if (files.length === 0) {
             console.log(chalk.gray('🚫 No matching files to diff.'));
