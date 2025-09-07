@@ -3,8 +3,7 @@ import {ArticleAPI} from "@/lib/ArticleAPI";
 
 // fetch github repository
 export const getGithubRepos = async () => {
-    const response = await UserAPI.get(`/api/DiFF/github/repos`, {
-    });
+    const response = await UserAPI.get(`/api/DiFF/github/repos`, {});
     return response.data;
 };
 
@@ -85,7 +84,7 @@ export const getGithubCommitList = async (repo, opts = {}) => {
         perPage: opts.perPage ?? null,
     };
 
-    const res = await UserAPI.get(`/api/DiFF/github/commits`, { params });
+    const res = await UserAPI.get(`/api/DiFF/github/commits`, {params});
 
     const data = res?.data ?? {};
     const code = data.resultCode || data.code || '';
