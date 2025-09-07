@@ -4,26 +4,35 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
-import TotalAnalysisChart from "./totalAnalysisChart.jsx";
-import {getAnalysisHistory, getLanguageDistribution, renameRepository,connectRepository} from "@/lib/RepositoryAPI";
+import {
+    connectRepository,
+    getAnalysisHistory,
+    getLanguageDistribution,
+    renameRepository,
+    deleteRepository, // ✅ 삭제 API 추가
+} from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
+import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
 
 export default function RepoInfo({
                                      repo,
                                      onClose,
                                      useExternalSidebar = false,
+                                     onDeleted, // ✅ 부모에서 삭제 후 리스트 갱신하도록 콜백 받을 수 있음
                                  }) {
-
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
     const [history, setHistory] = useState([]);
     const [activeTab, setActiveTab] = useState("history");
+
+    const [deleteRequested, setDeleteRequested] = useState(false); // ✅ 삭제 상태
 
     useEffect(() => {
         if (repo?.id) {
             getAnalysisHistory(repo.id).then(setHistory);
         }
     }, [repo?.id]);
+
     useEffect(() => {
         setNameInput(repo?.name ?? '');
     }, [repo?.name]);
@@ -61,6 +70,7 @@ export default function RepoInfo({
     const visibility = repo?.aprivate ? 'private' : 'public';
 
     const nameRef = useRef(null);
+
     const enterEdit = () => {
         setEditingName(true);
         setTimeout(() => nameRef.current?.focus?.(), 0);
@@ -74,10 +84,34 @@ export default function RepoInfo({
         if (e.key === 'Escape') cancelEdit();
     };
 
+    // ✅ 삭제 로직을 useEffect로 실행
+    useEffect(() => {
+        if (!deleteRequested || !repo?.id) return;
+
+        const doDelete = async () => {
+            try {
+                const res = await deleteRepository(repo.id);
+                if (res.resultCode?.startsWith("S-")) {
+                    alert("리포지토리 삭제 성공!");
+                    onDeleted?.(repo.id); // 부모에서 리스트 갱신하도록 콜백 실행
+                    onClose?.(); // 상세 뷰 닫기
+                } else {
+                    alert("삭제 실패: " + res.msg);
+                }
+            } catch (err) {
+                console.error("❌ 삭제 오류:", err);
+                alert("삭제 요청 중 오류가 발생했습니다.");
+            } finally {
+                setDeleteRequested(false); // 상태 초기화
+            }
+        };
+
+        doDelete();
+    }, [deleteRequested, repo?.id, onDeleted, onClose]);
+
     return (
         <motion.div
             key={`detail-${repo?.id ?? 'none'}`}
-            // variants={container}
             initial="hidden"
             animate="show"
             exit="hidden"
@@ -100,8 +134,6 @@ export default function RepoInfo({
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
                 <div className="max-w-[70%] min-w-[70%] flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col">
-
-                        {/* ✅ 탭 버튼 */}
                         <div className="flex gap-2 mb-2">
                             <button
                                 onClick={() => setActiveTab("history")}
@@ -125,7 +157,7 @@ export default function RepoInfo({
                             </button>
                         </div>
 
-                        {/* ✅ 탭 내용 */}
+                        {/* 탭 내용 */}
                         <div className="h-[35%] rounded-xl border shadow-sm p-4 mb-3
                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                             {activeTab === "history" ? (
@@ -297,11 +329,19 @@ export default function RepoInfo({
                             <LanguageChart languages={languages} />
                     </div>
 
-                    <button className="w-full p-2 border rounded-xl transition-colors
-                    shadow-sm text-red-500  hover:bg-red-500 hover:text-white
-                        bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
+                    <button
+                        onClick={() => {
+                            if (confirm("정말 이 리포지토리를 삭제하시겠습니까?")) {
+                                setDeleteRequested(true);
+                            }
+                        }}
+                        className="w-full p-2 border rounded-xl transition-colors
+                           shadow-sm text-red-500 hover:bg-red-500 hover:text-white
+                           bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
+                    >
                         Delete Repository
                     </button>
+
 
 
                 </div>

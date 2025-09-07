@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 
@@ -84,17 +85,18 @@ export default function BeforeExplain() {
     return (
         <section ref={wrapRef} className="relative w-full h-[350vh] bg-white overflow-visible">
             <div className="sticky top-0 h-screen">
-                <button
-                    type="button"
-                    className="absolute top-6 right-8 z-20 px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                <Link
+                    href="/DiFF/docs/intro"               // 원하는 경로
+                    className="absolute top-6 right-8 z-20 px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 inline-flex items-center"
+                    role="button"
                 >
                     더보기 <span className="ml-1">+</span>
-                </button>
+                </Link>
 
                 <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-12 px-8 md:px-20 pt-16 max-w-[1400px] mx-auto">
                     {/* LEFT */}
                     <div className="max-w-none">
-                        <div className="space-y-28">
+                        <div className="space-y-20">
                             <div className="flex items-center gap-3">
                                 <span className="w-5 h-5 rounded-full border-[6px] border-blue-600"/>
                                 <span className="text-base md:text-lg font-semibold text-[#2a5cff]">
@@ -117,13 +119,13 @@ export default function BeforeExplain() {
                         <div ref={text2Ref} className="space-y-4 mt-6">
                             <div className="flex items-center gap-3">
                                 <span className="dot2 w-2.5 h-2.5 rounded-full bg-black"/>
-                                <span className="text-black font-semibold">PR/체인지로그 일관성 향상</span>
+                                <span className="text-black font-semibold">블로그 초안 생성</span>
                             </div>
                         </div>
                         <div ref={text3Ref} className="space-y-4 mt-6">
                             <div className="flex items-center gap-3">
                                 <span className="dot3 w-2.5 h-2.5 rounded-full bg-black"/>
-                                <span className="text-black font-semibold">팀 온보딩/회고 효율 업</span>
+                                <span className="text-black font-semibold">코드 품질 점수화</span>
                             </div>
                         </div>
                     </div>
@@ -135,21 +137,28 @@ export default function BeforeExplain() {
                             <p className="font-black tracking-tight text-gray-900 text-[clamp(48px,9vw,140px)]"></p>
                         </div>
 
-                        <div ref={right1Ref} className="absolute top-56 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
-                            <h2 className="text-black font-semibold tracking-tight leading-[0.9] text-[clamp(36px,7.2vw,96px)]">
+                        <div ref={right1Ref} className="absolute top-64 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
+                            <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
                                 <span className="block"># 커밋 요약이</span>
                                 <span className="block">자동으로 생성</span>
                             </h2>
-                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10">PR 설명·체인지로그를 더 빨리, 더 일관되게.</p>
+                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10">귀찮은 commit review를 요약해줍니다.</p>
                         </div>
 
-                        <div ref={right2Ref} className="absolute top-60 right-2 text-right z-20 opacity-0" aria-hidden="true">
-                            <p className="text-black font-semibold text-lg md:text-6xl"># 리뷰 포인트 자동 추출</p>
-                            <p className="text-black text-2xl md:text-3xl mt-1">중요 변경을 놓치지 않게 포커싱.</p>
+                        <div ref={right2Ref} className="absolute top-64 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
+                            <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
+                                <span className="block"># 블로그 초안을</span>
+                                <span className="block">자동으로 생성</span>
+                            </h2>
+                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10"> GPT가 글 뼈대를 자동으로 작성.</p>
                         </div>
-                        <div ref={right3Ref} className="absolute top-60 right-2 text-right z-20 opacity-0" aria-hidden="true">
-                            <p className="text-black font-semibold text-lg md:text-6xl"># 팀 지식 축적이 쉬워짐</p>
-                            <p className="text-black text-2xl md:text-3xl mt-1">온보딩/회고/문서화까지 한 번에.</p>
+
+                        <div ref={right3Ref} className="absolute top-64 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
+                            <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
+                                <span className="block"># 코드 품질을</span>
+                                <span className="block">점수로</span>
+                            </h2>
+                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10">코드 변화의 품질을 정량적으로 계산..</p>
                         </div>
                     </div>
                 </div>
