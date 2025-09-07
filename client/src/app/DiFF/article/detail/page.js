@@ -603,20 +603,6 @@ function ArticleDetailInner() {
                                 ></i>
                                 <span className="text-sm">{likeCount}</span>
                             </div>
-
-                            {/* 신고 버튼 */}
-                            <button
-                                onClick={() => {
-                                    if (article?.id) {
-                                        router.push(`/DiFF/article/report?id=${article.id}`);
-                                    } else {
-                                        alert("게시글 ID를 불러올 수 없습니다.");
-                                    }
-                                }}
-                                className="text-black hover:text-red-500 text-sm"
-                            >
-                                Report
-                            </button>
                         </div>
                     </div>
 
