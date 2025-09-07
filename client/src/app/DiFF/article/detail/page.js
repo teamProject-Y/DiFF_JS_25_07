@@ -307,7 +307,7 @@ function ArticleDetailInner() {
 
             if (isSuccess) {
                 alert("게시물이 삭제되었습니다.");
-                router.push("/api/DiFF/article/list?repositoryId=" + article.repositoryId);
+                router.push("/DiFF/member/repository");
             } else {
                 const msg = res?.msg || "삭제에 실패했습니다.";
                 alert(msg);
