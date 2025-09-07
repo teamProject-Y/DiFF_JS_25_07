@@ -6,6 +6,7 @@ import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {connectRepository, getAnalysisHistory, getLanguageDistribution, renameRepository} from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
+import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
 
 export default function RepoInfo({
                                      repo,
@@ -16,6 +17,7 @@ export default function RepoInfo({
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
     const [history, setHistory] = useState([]);
+    const [activeTab, setActiveTab] = useState("history");
 
     useEffect(() => {
         if (repo?.id) {
@@ -98,10 +100,37 @@ export default function RepoInfo({
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
                 <div className="max-w-[70%] min-w-[70%] flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col">
-                        <div
-                            className="h-[35%] rounded-xl border shadow-sm p-4 mb-3
+                        <div className="flex gap-2 mb-2">
+                            <button
+                                onClick={() => setActiveTab("history")}
+                                className={`px-3 py-1 rounded-md text-sm ${
+                                    activeTab === "history"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-200 dark:bg-neutral-700"
+                                }`}
+                            >
+                                History
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("total")}
+                                className={`px-3 py-1 rounded-md text-sm ${
+                                    activeTab === "total"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-200 dark:bg-neutral-700"
+                                }`}
+                            >
+                                Total
+                            </button>
+                        </div>
+
+                        {/* 탭 내용 */}
+                        <div className="h-[35%] rounded-xl border shadow-sm p-4 mb-3
                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
-                            <AnalysisHistoryChart history={history} />
+                            {activeTab === "history" ? (
+                                <AnalysisHistoryChart history={history} />
+                            ) : (
+                                <TotalAnalysisChart history={history} />
+                            )}
                         </div>
 
                         {/* 하단 박스 */}
