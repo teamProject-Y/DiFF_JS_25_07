@@ -8,9 +8,10 @@ import {fetchUser} from '@/lib/UserAPI';
 import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
-import { hasUnread, getNotifications, markAllAsRead } from "@/lib/NotificationAPI";
+import {hasUnread, getNotifications, markAllAsRead} from "@/lib/NotificationAPI";
 import ThemeToggle from "@/common/thema";
 import ModalLayout from "@/app/@modal/layout";
+import {signOut} from "next-auth/react";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -59,12 +60,19 @@ export default function Header() {
     const [notifications, setNotifications] = useState([]);
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
-    // 🔑 모달 상태 추가
     const [mode, setMode] = useState(null); // 'login' | 'join' | null
+
+    const [onEditMode, setOnEditMode] = useState(false);
 
     const openLogin = () => setMode('login');
     const openJoin = () => setMode('join');
     const closeModal = () => setMode(null);
+
+    useEffect(() => {
+        if (pathname?.startsWith('/DiFF/article/write') || pathname?.startsWith('/DiFF/article/modify')) {
+            setOnEditMode(true);
+        }
+    }, [pathname]);
 
     useEffect(() => {
         const isScrollable = (el) => {
@@ -259,12 +267,13 @@ export default function Header() {
 
     return (
         <>
+            {!onEditMode && (
             <HeaderWrap
                 className={`
-        ${hide ? 'hide' : ''}
-        bg-[${background}] h-[${height}]
-        dark:text-white
-      `}
+                    ${hide && 'hide'}
+                    bg-[${background}] h-[${height}]
+                    dark:text-white
+                  `}
                 style={{backgroundColor: background, height}}
             >
                 <div className="pl-4">
@@ -281,7 +290,7 @@ export default function Header() {
                     <form onSubmit={handleSearch} className="relative flex items-center gap-2">
                         <div
                             className="px-3 flex rounded-full border overflow-hidden text-neutral-500
-              dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500"
+                                        dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500"
                         >
                             <input
                                 type="text"
@@ -325,24 +334,26 @@ export default function Header() {
                                         {/* 꼬리 */}
                                         <span
                                             className="pointer-events-none absolute right-4 -top-1.5 h-3 w-3 rotate-45 rounded-sm z-20
-                      border border-neutral-200 bg-white
-                      dark:border-neutral-700 dark:bg-neutral-800"
+                                                      border border-neutral-200 bg-white
+                                                      dark:border-neutral-700 dark:bg-neutral-800"
                                         ></span>
 
                                         {/* 카드 */}
                                         <div
                                             className="rounded-2xl border border-neutral-200 bg-white p-2 shadow z-30
-                      dark:border-neutral-700 dark:bg-neutral-800"
+                                                    dark:border-neutral-700 dark:bg-neutral-800"
                                         >
                                             {/* 헤더 */}
                                             <div className="mb-2 flex items-center justify-between px-2">
-                      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                        Notifications
-                      </span>
+                                                  <span
+                                                      className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                                                    Notifications
+                                                  </span>
                                                 <button
                                                     onClick={() => setOpen(false)}
-                                                    className="text-xs rounded-lg border border-neutral-300 px-2 py-1 text-neutral-600 transition
-                          hover:bg-neutral-200 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-950"
+                                                    className="text-xs rounded-lg border px-2 py-1 transition
+                                                                hover:bg-neutral-200 border-neutral-300 text-neutral-600
+                                                                dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-950"
                                                 >
                                                     Close
                                                 </button>
@@ -358,15 +369,15 @@ export default function Header() {
                                                                 key={n.id}
                                                                 onClick={() => (window.location.href = link)}
                                                                 className="group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 transition
-                                hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
+                                                                hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
                                                             >
-                              <span
-                                  className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
-                                  border border-neutral-300 bg-neutral-100 text-neutral-600
-                                  dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-                              >
-                                <i className={iconFor(n.type)} aria-hidden/>
-                              </span>
+                                                                  <span
+                                                                      className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
+                                                                      border border-neutral-300 bg-neutral-100 text-neutral-600
+                                                                      dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+                                                                  >
+                                                                    <i className={iconFor(n.type)} aria-hidden/>
+                                                                  </span>
 
                                                                 <div className="min-w-0 flex-1">
                                                                     <div
@@ -427,6 +438,7 @@ export default function Header() {
                     )}
                 </ul>
             </HeaderWrap>
+                )}
             <ModalLayout mode={mode} onClose={() => setMode(null)}/>
         </>
     );
