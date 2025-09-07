@@ -3,10 +3,21 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 
-function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
-export default function BeforeExplain() {
-    const wrapRef   = useRef(null); // 긴 래퍼 (예: 350vh)
+// scroller 좌표계 기준의 절대 top(px)
+function absTop(el, scroller) {
+    const er = el.getBoundingClientRect();
+    const sr = scroller.getBoundingClientRect();
+    return er.top - sr.top + scroller.scrollTop;
+}
+
+export default function BeforeExplain({
+                                          scrollerId = 'pageScroll',
+                                          startOffsetPx = 0,     // 수동 오프셋(옵션). 자동이 알아서 잡으니 기본 0으로 둬도 됨.
+                                          endExtraPx   = 0       // 끝 구간 늘리고 싶을 때만 사용
+                                      }) {
+    const wrapRef   = useRef(null); // h-[350vh] 래퍼
     const text1Ref  = useRef(null);
     const text2Ref  = useRef(null);
     const text3Ref  = useRef(null);
@@ -15,45 +26,64 @@ export default function BeforeExplain() {
     const right3Ref = useRef(null);
 
     useEffect(() => {
-        const scroller = document.getElementById('pageScroll');
+        const scroller = document.getElementById(scrollerId);
         const wrap = wrapRef.current;
         if (!scroller || !wrap) return;
 
-        let ticking = false;
+        let raf = 0;
 
         const update = () => {
-            ticking = false;
-            const wrapTop = wrap.offsetTop;
-            const wrapHeight = wrap.scrollHeight;
-            const viewH = scroller.clientHeight;
-            const y = scroller.scrollTop;
+            const viewH      = scroller.clientHeight;
+            const y          = scroller.scrollTop;
 
-            const progress = clamp01((y - wrapTop) / (wrapHeight - viewH));
+            // 기준 위치들을 모두 "scroller 기준 절대좌표"로 변환
+            const wrapTopAbs   = absTop(wrap, scroller);
+            const docsEl       = document.getElementById('docs');
+            const docsTopAbs   = docsEl ? absTop(docsEl, scroller) : 0;
+
+            // 섹션(docs) 꼭대기와 래퍼 사이의 "실제" 선행 갭
+            const leadingGap   = Math.max(0, wrapTopAbs - docsTopAbs);
+
+            // 뷰포트 비율 기반 오프셋(66% 권장)과 실제 선행 갭, 사용자가 준 수동 오프셋 중 가장 큰 값 사용
+            const dynOffset    = leadingGap + 1 + (startOffsetPx || 0);
+
+            // 시작/끝 결정: docs에 스냅되자마자 progress가 즉시 올라가도록 start를 wrapTopAbs - dynOffset로 당김
+            const start        = wrapTopAbs - dynOffset;
+            const end          = wrapTopAbs + (wrap.scrollHeight - viewH) + endExtraPx;
+            const span         = Math.max(1, end - start);
+
+            const progress     = clamp01((y - start) / span);
+
+            // 단계 분기
             let step = 0;
             if (progress >= 2/3) step = 2;
             else if (progress >= 1/3) step = 1;
 
-            const activePin = y >= wrapTop && y < (wrapTop + (wrapHeight - viewH));
-            scroller.classList.toggle('snap-none', activePin);
+            // "핀 비슷한 구간"에서는 스냅 잠깐 끄기(충돌 방지)
+            const activePin = y >= start && y < end;
+            scroller.classList.toggle('snap-disabled', activePin);
 
+            // 좌측 불릿/텍스트 컬러 토글
             const sets = [
                 { text: text1Ref.current, dot: '.dot',  active: step === 0 },
                 { text: text2Ref.current, dot: '.dot2', active: step === 1 },
                 { text: text3Ref.current, dot: '.dot3', active: step === 2 },
             ];
-
             sets.forEach(({ text, dot, active }) => {
                 if (!text) return;
                 const bullet = text.querySelector(dot);
-                const spans = text.querySelectorAll('span:not(.dot):not(.dot2):not(.dot3), li');
-                bullet && bullet.classList.toggle('bg-blue-500', active);
-                bullet && bullet.classList.toggle('bg-black', !active);
+                const spans  = text.querySelectorAll('span:not(.dot):not(.dot2):not(.dot3), li');
+                if (bullet) {
+                    bullet.classList.toggle('bg-blue-500', active);
+                    bullet.classList.toggle('bg-black', !active);
+                }
                 spans.forEach(el => {
                     el.classList.toggle('text-blue-500', active);
                     el.classList.toggle('text-black', !active);
                 });
             });
 
+            // 우측 문구 교체
             const rights = [right1Ref.current, right2Ref.current, right3Ref.current];
             rights.forEach((el, i) => {
                 if (!el) return;
@@ -65,28 +95,31 @@ export default function BeforeExplain() {
         };
 
         const onScroll = () => {
-            if (!ticking) {
-                ticking = true;
-                requestAnimationFrame(update);
-            }
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(update);
         };
 
+        // 초기 1회(이미 docs 위 스페이스가 있어도 즉시 보정)
         update();
         scroller.addEventListener('scroll', onScroll, { passive: true });
-        const ro = new ResizeObserver(update);
+
+        // 레이아웃 변동(폰트 로드/이미지 등)에도 재계산
+        const ro = new ResizeObserver(() => update());
         ro.observe(wrap);
 
         return () => {
+            cancelAnimationFrame(raf);
             scroller.removeEventListener('scroll', onScroll);
             ro.disconnect();
+            scroller.classList.remove('snap-disabled');
         };
-    }, []);
+    }, [scrollerId, startOffsetPx, endExtraPx]);
 
     return (
         <section ref={wrapRef} className="relative w-full h-[350vh] bg-white overflow-visible">
             <div className="sticky top-0 h-screen">
                 <Link
-                    href="/DiFF/docs/intro"               // 원하는 경로
+                    href="/DiFF/docs/intro"
                     className="absolute top-6 right-8 z-20 px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 inline-flex items-center"
                     role="button"
                 >

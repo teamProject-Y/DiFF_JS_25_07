@@ -181,6 +181,29 @@ export default function Page() {
            return () => io.disconnect();
          }, [mounted, loggedIn]);
 
+    // background
+    useEffect(() => {
+        if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
+
+        const observer = new IntersectionObserver(entries => {
+            const visible = entries.find(e => e.isIntersecting);
+            if (visible) {
+                const section = sections.find(s => s.id === visible.target.id);
+                if (section) setBgColor(section.color);
+            }
+        }, { threshold: 0.5 });
+
+        sectionRefs.current.forEach(section => {
+            if (section) observer.observe(section);
+        });
+
+        return () => {
+            sectionRefs.current.forEach(section => {
+                if (section) observer.unobserve(section);
+            });
+        };
+    }, [sectionRefs.current.map(ref => ref)]);
+
 
     if (!mounted) return null;
 

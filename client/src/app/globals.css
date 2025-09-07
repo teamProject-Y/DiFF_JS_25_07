@@ -453,5 +453,4 @@ li {
     font-weight: bold;
 }
 
-#pageScroll { touch-action: pan-y; }
-.article-slider, .swiper { touch-action: pan-x; }
+.snap-disabled { scroll-snap-type: none !important; }

@@ -159,8 +159,8 @@ export default function ReportForm() {
                                 type="email"
                                 placeholder="your-mail@mail.com"
                                 ref={emailRef}
-                                value={inquiry.email}
-                                onChange={(e) => setInquiry({...inquiry, email: e.target.value})}
+                                value={report.email}
+                                onChange={(e) => setReport({...report, email: e.target.value})}
                                 onBlur={() => setTouched(prev => ({...prev, email: true}))}
                                 className={`bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5
                                  ${showError('email')
