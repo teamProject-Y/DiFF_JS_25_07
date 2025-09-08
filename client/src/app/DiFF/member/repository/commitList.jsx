@@ -2,7 +2,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import {useRouter} from 'next/navigation';
+// import {useRouter} from 'next/navigation'; // [RM-COMMENT] 사용 안 함
 import {getGithubCommitList, mkDraft} from '@/lib/RepositoryAPI';
 
 const parseOwnerRepo = (url = '') => {
@@ -21,8 +21,11 @@ const parseOwnerRepo = (url = '') => {
     }
 };
 
-export default function CommitList({repo}) {
-    const connected = !!repo?.url && !!repo?.name;
+// [ADD] refreshSignal, enabled 파라미터 추가
+export default function CommitList({ repo, refreshSignal, enabled = true }) {
+    // const connected = !!repo?.url && !!repo?.name; // [CHG-COMMENT] 이름 유무와 무관하게 URL만으로 연결 판단
+    const connected = !!repo?.url; // [ADD] URL만 있으면 연결된 것으로 간주
+
     const [branch, setBranch] = useState(repo?.defaultBranch || 'main');
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
@@ -31,6 +34,22 @@ export default function CommitList({repo}) {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState('');
     const [refreshTick, setRefreshTick] = useState(0);
+
+    // [ADD] 외부에서 refreshSignal이 바뀌면 강제 새로고침 트리거
+    useEffect(() => {
+        if (!enabled) return;
+        if (!connected) return;
+        if (typeof refreshSignal === 'number') {
+            setRefreshTick((n) => n + 1);
+        }
+    }, [refreshSignal, enabled, connected]);
+
+    // [ADD] repo.url이 갱신되면(연결 직후)도 한 번 더 강제 리프레시
+    useEffect(() => {
+        if (!enabled) return;
+        if (!connected) return;
+        setRefreshTick((n) => n + 1);
+    }, [repo?.url, enabled, connected]);
 
     // repo 바뀌면 초기화
     useEffect(() => {
@@ -41,6 +60,7 @@ export default function CommitList({repo}) {
     }, [repo?.id, repo?.owner, repo?.name, repo?.defaultBranch]);
 
     useEffect(() => {
+        if (!enabled) return; // [ADD] 비활성 시 패칭 중단
         if (!connected) return;
 
         let cancelled = false;
@@ -62,7 +82,9 @@ export default function CommitList({repo}) {
                     githubName: safeName,
                 };
 
-                const list = await getGithubCommitList(repoFixed, {branch, page, perPage});
+                // [TIP] RepositoryAPI 내부에서 cache 비활성화 권장(fetch { cache:'no-store' } / revalidate:0)
+                //      여기선 옵션을 건드릴 수 없으므로 refreshTick 변화를 의존성으로 강제 재요청
+                const list = await getGithubCommitList(repoFixed, { branch, page, perPage /* , _ts: Date.now() */ }); // [HINT] 서버가 허용하면 쿼리 파라미터 캐시 버스터 추가 가능
                 if (!cancelled) setCommits(list);
             } catch (e) {
                 if (!cancelled) setErr(e?.message || '커밋을 불러오지 못했습니다.');
@@ -74,7 +96,8 @@ export default function CommitList({repo}) {
         return () => {
             cancelled = true;
         };
-    }, [connected, repo, branch, page, perPage, refreshTick]); // refreshTick 추가
+        // [CHG] refreshTick을 의존성에 유지 → 강제 refetch
+    }, [enabled, connected, repo, branch, page, perPage, refreshTick]);
 
     async function makeDraft(commit) {
         // owner/name 교정
@@ -93,8 +116,7 @@ export default function CommitList({repo}) {
     }
 
     return (
-        <div
-            className="flex flex-col h-full w-full min-h-0 rounded-lg bg-white dark:text-neutral-300 dark:bg-neutral-900/50 dark:border-neutral-700">
+        <div className="flex flex-col h-full w-full min-h-0 rounded-lg bg-white dark:text-neutral-300 dark:bg-neutral-900/50 dark:border-neutral-700">
             <div
                 className="flex justify-between shrink-0 px-3 py-2 border-b
                 bg-gray-100 dark:bg-neutral-900/70 dark:border-neutral-700">
@@ -112,20 +134,21 @@ export default function CommitList({repo}) {
                         className="px-2 py-1 rounded-md border text-sm focus:outline-none focus:ring-1
                          focus:ring-blue-400 dark:border-neutral-700 dark:bg-neutral-800"
                         style={{minWidth: 200}}
+                        disabled={!enabled} // [ADD]
                     />
                     <button
                         onClick={() => setRefreshTick((n) => n + 1)}
                         className="px-3 py-1 rounded-lg border text-sm bg-white hover:bg-neutral-100 border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                        disabled={!enabled || loading} // [ADD]
                     >
                         Refresh
                     </button>
-
                 </div>
                 <div className="flex items-center justify-end gap-2">
                     <button
                         className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50
                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
-                        disabled={page <= 1 || loading}
+                        disabled={page <= 1 || loading || !enabled}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
                         Prev
@@ -133,7 +156,7 @@ export default function CommitList({repo}) {
                     <span className="text-xs text-neutral-500">Page {page}</span>
                     <button
                         className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
-                        disabled={loading}
+                        disabled={loading || !enabled}
                         onClick={() => setPage((p) => p + 1)}
                     >
                         Next
@@ -184,6 +207,7 @@ export default function CommitList({repo}) {
                                 <button
                                     onClick={() => makeDraft(c)}
                                     className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center hover:bg-neutral-100 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                                    disabled={!enabled} // [ADD]
                                 >
                                     Make Draft
                                 </button>
