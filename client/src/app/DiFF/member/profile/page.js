@@ -334,10 +334,14 @@ function ProfileInner() {
                     </aside>
 
                     {/* Right */}
-                    <main>
+                    <main className="flex-1 ml-8">
                         <section className="mb-8">
-                            <h3 className="mb-3 text-2xl font-bold">README</h3>
-                            <div className="min-h-[120px] prose dark:prose-invert max-w-none markdown">
+                            <span className="text-sm rounded-full py-1 px-3 bg-gray-200 dark:text-neutral-500">
+                                Introduction written by {member.nickName}
+                            </span>
+
+
+                            <div className="min-h-[120px] prose dark:prose-invert max-w-none markdown dark:text-neutral-300">
                                 {member?.introduce ? (
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
