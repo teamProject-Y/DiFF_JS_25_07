@@ -1,5 +1,5 @@
 'use client';
-import JoinForm from '@/common/joinModal';
+import JoinForm from "@/app/DiFF/member/join/joinModal";
 
 export default function LoginFullPage() {
 
