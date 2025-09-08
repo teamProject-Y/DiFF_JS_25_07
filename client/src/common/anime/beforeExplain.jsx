@@ -45,10 +45,10 @@ export default function BeforeExplain() {
                 if (!text) return;
                 const bullet = text.querySelector(dot);
                 const spans = text.querySelectorAll('span:not(.dot):not(.dot2):not(.dot3), li');
-                bullet && bullet.classList.toggle('bg-blue-500', active);
+                bullet && bullet.classList.toggle('bg-blue-600', active);
                 bullet && bullet.classList.toggle('bg-black', !active);
                 spans.forEach(el => {
-                    el.classList.toggle('text-blue-500', active);
+                    el.classList.toggle('text-blue-600', active);
                     el.classList.toggle('text-black', !active);
                 });
             });
@@ -88,43 +88,46 @@ export default function BeforeExplain() {
 
                 <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-10 px-8 md:px-20 pt-8 max-w-[1400px] mx-auto">
                     {/* LEFT */}
-                    <div className="max-w-none">
+                    <div className="max-w-none text-black">
                         <div className="space-y-12">
                             <div className="flex items-center gap-3">
                                 <span className="w-5 h-5 rounded-full border-[6px] border-blue-600" />
-                                <span className="text-base md:text-lg font-semibold text-[#2a5cff]">
+                                <span className="text-base md:text-lg font-semibold text-blue-600">
                   DiFF – Git 히스토리에서 블로그 초안까지
                 </span>
                             </div>
 
-                            <h1 className="font-bold text-slate-900 leading-[1.03] text-[clamp(30px,5.0vw,50px)]">
-                                <span className="block whitespace-nowrap break-keep">당신의 개발 기록을</span>
-                                <span className="block whitespace-nowrap break-keep">콘텐츠로 바꿔주는 스마트 워크플로우</span>
+                            <h1 className="font-bold leading-[1.03] text-[clamp(30px,5.0vw,50px)]">
+                                <span className="block whitespace-nowrap break-keep">
+                                    당신의&nbsp;
+                                    <span className="text-blue-600">개발 기록</span>을</span>
+                                <span className="block whitespace-nowrap break-keep mt-5">
+                                    <span className="bg-blue-600 text-white">콘텐츠</span>로 바꿔주는 스마트 워크플로우</span>
                             </h1>
                         </div>
 
-                        <div ref={text1Ref} className="space-y-4 mt-6">
+                        <div ref={text1Ref} className="space-y-4 mt-10">
                             <div className="flex items-center gap-3">
                                 <span className="dot w-2.5 h-2.5 rounded-full bg-black" />
-                                <span className="text-black font-semibold">커밋 요약 자동화</span>
+                                <span className="font-bold text-lg">Draft from CLI or Commit</span>
                             </div>
                         </div>
                         <div ref={text2Ref} className="space-y-4 mt-5">
                             <div className="flex items-center gap-3">
                                 <span className="dot2 w-2.5 h-2.5 rounded-full bg-black" />
-                                <span className="text-black font-semibold">블로그 초안 생성</span>
+                                <span className="font-bold text-lg">Repo-Native Blogging</span>
                             </div>
                         </div>
                         <div ref={text3Ref} className="space-y-4 mt-5">
                             <div className="flex items-center gap-3">
                                 <span className="dot3 w-2.5 h-2.5 rounded-full bg-black" />
-                                <span className="text-black font-semibold">코드 품질 점수화</span>
+                                <span className="font-bold text-lg">Code Quality Insights</span>
                             </div>
                         </div>
                     </div>
 
                     {/* RIGHT */}
-                    <div className="relative md:pl-10">
+                    <div className="relative md:pl-10 mt-10">
                         <div className="leading-none">
                             <p className="font-black tracking-tight text-gray-900 text-[clamp(40px,8vw,120px)]"></p>
                             <p className="font-black tracking-tight text-gray-900 text-[clamp(48px,9vw,140px)]"></p>
@@ -136,18 +139,20 @@ export default function BeforeExplain() {
                             className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
-                            <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
-                                <span className="block"># 커밋 요약이</span>
-                                <span className="block">자동으로 생성</span>
+                            {/*CLI 한 줄 또는 선택한 커밋으로 블로그 초안을 자동 생성합니다.*/}
+                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
+                                <span className="block"># 숨쉬기보다 쉬운</span>
+                                <span className="block">블로그 쓰기</span>
                             </h2>
-                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
-                                귀찮은 commit review를 요약해줍니다.
+                            <p className="leading-tight text-[clamp(16px,2.2vw,30px)] mt-8">
+                                CLI 한 줄, 커밋 하나로 블로그 초안이 완성.
                             </p>
-                            {/* ⬇️ 설명 바로 아래 더보기 버튼 */}
+
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-5 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                                    className="mt-5 inline-flex items-center px-4 py-2 rounded-full border
+                                    border-blue-600 text-blue-600 text-sm hover:bg-gray-50"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
@@ -161,17 +166,19 @@ export default function BeforeExplain() {
                             className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
-                            <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
-                                <span className="block"># 블로그 초안을</span>
-                                <span className="block">자동으로 생성</span>
+                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
+                                <span className="block"># 눕기보다 쉬운</span>
+                                <span className="block">리포지토리 관리</span>
                             </h2>
-                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
-                                GPT가 글 뼈대를 자동으로 작성.
+                            <p className="leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
+                                리포지토리 별로 글을 작성하고 <br/>
+                                원격 리포지토리와 연결해 통합하여 관리.
                             </p>
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border
+                                    border-blue-600 text-blue-600 text-sm hover:bg-gray-50"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
@@ -185,17 +192,19 @@ export default function BeforeExplain() {
                             className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
-                            <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
-                                <span className="block"># 코드 품질을</span>
-                                <span className="block">점수로</span>
+                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
+                                <span className="block"># 자는 것보다 쉬운</span>
+                                <span className="block">코드 품질 성장</span>
                             </h2>
-                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
-                                코드 변화의 품질을 정량적으로 계산..
+                            <p className="leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
+                                글마다 6가지 코드 지표, <br/>
+                                리포별 성장 그래프까지.
                             </p>
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border
+                                    border-blue-600 text-blue-600 text-sm hover:bg-gray-50"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
