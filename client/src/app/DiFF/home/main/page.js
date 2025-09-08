@@ -115,6 +115,11 @@ function extractFirstImage(body) {
     return match ? match[1] : null;
 }
 
+function trimByChars(str = '', max = 15) {
+    const arr = Array.from(String(str).trim());
+    return arr.length > max ? arr.slice(0, max).join('') + '…' : arr.join('');
+}
+
 export default function Page() {
     const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -273,10 +278,8 @@ export default function Page() {
                         isClient && (
                             <SwiperWrapper
                                 modules={[Navigation, Pagination, A11y, Autoplay]}
-                                spaceBetween={30}
                                 loop={true}
                                 autoplay={{delay: 3000}}
-                                slidesPerView={4}
                                 navigation={{
                                     prevEl: ".custom-prev",
                                     nextEl: ".custom-next",
@@ -286,6 +289,13 @@ export default function Page() {
                                 observer={true}
                                 observeParents={true}
                                 resizeObserver={true}
+
+                                breakpoints={{
+                                    0:     { slidesPerView: 1, spaceBetween: 12 },
+                                    640:   { slidesPerView: 2, spaceBetween: 16 },   // sm
+                                    1024:  { slidesPerView: 3, spaceBetween: 20 },   // lg
+                                    1280:  { slidesPerView: 4, spaceBetween: 24 },   // xl 이상
+                                }}
                             >
                                 {trendingArticles.length > 0 ? (
                                     trendingArticles.slice(0, 10).map((article, index) => {
@@ -312,8 +322,9 @@ export default function Page() {
                                                         )}
                                                     </div>
                                                     <div className="h-1/2 p-5 flex flex-col">
-                                                        <h3 className="text-xl font-semibold clamp-1 mb-2">{article.title}</h3>
-                                                        <p className="clamp-3 text-sm text-gray-600">
+                                                        <h3 className="text-xl font-semibold clamp-1 mb-2"
+                                                            title={article.title ?? 'Untitled'}>{article.title ?? 'Untitled'}</h3>
+                                                        <p className="clamp-2 text-sm text-gray-600">
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                         <div className="flex-grow"></div>
