@@ -231,10 +231,11 @@ function SettingsPage() {
     }, []);
 
     const handleInput = (e) => {
-        const textarea = textareaRef.current;
+        const textarea = e.target;
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
+
 
     if (loading) return <PageSkeleton/>;
 
@@ -427,7 +428,7 @@ function SettingsPage() {
                         <div className="flex-grow flex flex-col gap-4">
 
                             {/* Profile README */}
-                            <Card>
+                            <Card className="flex-1 flex flex-col">
                                 <div className="mb-3 flex items-center justify-between">
                                     <h3 className="text-2xl font-bold">Profile README</h3>
 
@@ -467,11 +468,12 @@ function SettingsPage() {
                                             value={form.introduce ?? ""}
                                             onChange={handleChange}
                                             onInput={handleInput}
-                                            className="min-h-[220px] rounded-md border border-neutral-300 bg-white p-4 text-neutral-800 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                            className="flex-1 rounded-md border border-neutral-300 bg-white p-4 text-neutral-800 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+
                                             placeholder={`마크다운 형식으로 자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
                                         />
                                     ) : (
-                                        <div className="markdown min-h-[220px] rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
+                                        <div className="markdown flex-1 rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
                                             <ReactMarkdown
                                                 remarkPlugins={[remarkGfm]}
                                                 rehypePlugins={[rehypeRaw]}
@@ -596,13 +598,14 @@ function SettingsPage() {
     );
 }
 
-function Card({children}) {
+function Card({children, className}) {
     return (
-        <div>
+        <div className={className}>
             {children}
         </div>
     );
 }
+
 
 function TopTab({href, label, active}) {
     return active ? (
