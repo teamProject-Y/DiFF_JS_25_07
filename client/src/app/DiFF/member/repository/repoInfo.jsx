@@ -16,6 +16,7 @@ import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart"
 
 export default function RepoInfo({
                                      repo,
+                                     isMyRepo,
                                      onClose,
                                      useExternalSidebar = false,
                                      onDeleted,
@@ -151,7 +152,7 @@ export default function RepoInfo({
 
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
                 <div className="max-w-[70%] min-w-[70%] flex flex-col">
-                    <div className="flex-1 overflow-y-auto flex flex-col">
+                    <div className="flex-1 overflow-y-auto flex flex-col gap-3">
 
                         {/* 탭 내용 */}
                         <div className="h-[35%] relative rounded-xl border shadow-sm p-3 mb-1
@@ -183,9 +184,9 @@ export default function RepoInfo({
                             </div>
 
                             {activeTab === "history" ? (
-                                <AnalysisHistoryChart history={history}/>
+                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo} />
                             ) : (
-                                <TotalAnalysisChart history={history}/>
+                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo} />
                             )}
                         </div>
 
@@ -328,7 +329,7 @@ export default function RepoInfo({
                           flex flex-col min-h-0 overflow-hidden">
                         <div className="font-semibold">Languages</div>
                         <div className="mt-2 grow min-h-0 /* overflow-y-auto 로 바꾸면 내부 스크롤 가능 */">
-                            <LanguageChart languages={languages} />
+                            <LanguageChart languages={languages} isMyRepo={isMyRepo} />
                         </div>
                     </div>
 

@@ -1,8 +1,7 @@
-// components/CommitList.jsx
+// member/repository/commitList.jsx
 'use client';
 
-import {useEffect, useState} from 'react';
-// import {useRouter} from 'next/navigation'; // [RM-COMMENT] 사용 안 함
+import {useEffect, useState, useMemo} from 'react';
 import {getGithubCommitList, mkDraft} from '@/lib/RepositoryAPI';
 
 const parseOwnerRepo = (url = '') => {
@@ -21,21 +20,43 @@ const parseOwnerRepo = (url = '') => {
     }
 };
 
-// [ADD] refreshSignal, enabled 파라미터 추가
 export default function CommitList({ repo, refreshSignal, enabled = true }) {
-    // const connected = !!repo?.url && !!repo?.name; // [CHG-COMMENT] 이름 유무와 무관하게 URL만으로 연결 판단
-    const connected = !!repo?.url; // [ADD] URL만 있으면 연결된 것으로 간주
+    // ===== 안정화된 프리미티브 파생값들 =====
+    const repoId = repo?.id ?? null;
+    const repoUrl = repo?.url ?? '';
+    const repoDefaultBranch = repo?.defaultBranch || 'main';
 
-    const [branch, setBranch] = useState(repo?.defaultBranch || 'main');
+    // URL에서 owner/repo 파싱값
+    const [ownerFromUrl, nameFromUrl] = useMemo(
+        () => parseOwnerRepo(repoUrl),
+        [repoUrl]
+    );
+
+    // 최종 사용할 owner/name (언더스코어 → 하이픈 치환 포함)
+    const safeOwner = useMemo(
+        () =>
+            (repo?.githubOwner || repo?.owner || ownerFromUrl || '')
+                .replace(/_/g, '-'),
+        [repo?.githubOwner, repo?.owner, ownerFromUrl]
+    );
+    const safeName = useMemo(
+        () => (repo?.githubName || repo?.name || nameFromUrl || ''),
+        [repo?.githubName, repo?.name, nameFromUrl]
+    );
+
+    const connected = !!repoUrl;
+
+    // ===== UI 상태 =====
+    const [branch, setBranch] = useState(repoDefaultBranch);
     const [page, setPage] = useState(1);
-    const [perPage] = useState(10);
+    const perPage = 10;
 
     const [commits, setCommits] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState('');
     const [refreshTick, setRefreshTick] = useState(0);
 
-    // [ADD] 외부에서 refreshSignal이 바뀌면 강제 새로고침 트리거
+    // 외부 refreshSignal → 내부 tick 증가
     useEffect(() => {
         if (!enabled) return;
         if (!connected) return;
@@ -44,23 +65,26 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
         }
     }, [refreshSignal, enabled, connected]);
 
-    // [ADD] repo.url이 갱신되면(연결 직후)도 한 번 더 강제 리프레시
+    // repo.url이 갱신되면(연결 직후) 한 번 더 강제 리프레시
     useEffect(() => {
         if (!enabled) return;
         if (!connected) return;
         setRefreshTick((n) => n + 1);
-    }, [repo?.url, enabled, connected]);
+    }, [repoUrl, enabled, connected]);
 
-    // repo 바뀌면 초기화
+    // repo 식별/브랜치 기본값 바뀌면 초기화
     useEffect(() => {
-        setBranch(repo?.defaultBranch || 'main');
+        setBranch(repoDefaultBranch);
         setPage(1);
         setCommits([]);
         setErr('');
-    }, [repo?.id, repo?.owner, repo?.name, repo?.defaultBranch]);
+    }, [repoId, repoDefaultBranch]);
 
+    // === 커밋 패치 ===
+    // ⚠️ 여기에서 'repo'(객체) 자체를 의존성에서 제거하고,
+    //     실제로 필요한 프리미티브만 의존하게 변경
     useEffect(() => {
-        if (!enabled) return; // [ADD] 비활성 시 패칭 중단
+        if (!enabled) return;
         if (!connected) return;
 
         let cancelled = false;
@@ -69,22 +93,21 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                 setLoading(true);
                 setErr('');
 
-                // owner/name 교정
-                const [ownerFromUrl, nameFromUrl] = parseOwnerRepo(repo?.url || '');
-                const safeOwner = (repo?.githubOwner || repo?.owner || ownerFromUrl || '').replace(/_/g, '-');
-                const safeName  = (repo?.githubName || repo?.name  || nameFromUrl  || '');
-
                 const repoFixed = {
-                    ...repo,
+                    // 필요한 최소 정보만 전달 (객체 재생성 영향 ↓)
+                    id: repoId,
+                    url: repoUrl,
                     owner: safeOwner,
                     name: safeName,
                     githubOwner: safeOwner,
                     githubName: safeName,
                 };
 
-                // [TIP] RepositoryAPI 내부에서 cache 비활성화 권장(fetch { cache:'no-store' } / revalidate:0)
-                //      여기선 옵션을 건드릴 수 없으므로 refreshTick 변화를 의존성으로 강제 재요청
-                const list = await getGithubCommitList(repoFixed, { branch, page, perPage /* , _ts: Date.now() */ }); // [HINT] 서버가 허용하면 쿼리 파라미터 캐시 버스터 추가 가능
+                const list = await getGithubCommitList(repoFixed, {
+                    branch,
+                    page,
+                    perPage,
+                });
                 if (!cancelled) setCommits(list);
             } catch (e) {
                 if (!cancelled) setErr(e?.message || '커밋을 불러오지 못했습니다.');
@@ -96,18 +119,24 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
         return () => {
             cancelled = true;
         };
-        // [CHG] refreshTick을 의존성에 유지 → 강제 refetch
-    }, [enabled, connected, repo, branch, page, perPage, refreshTick]);
+        // ⬇⬇⬇ 'repo' 대신 안정화된 값들만
+    }, [
+        enabled,
+        connected,
+        repoId,
+        repoUrl,
+        safeOwner,
+        safeName,
+        branch,
+        page,
+        perPage,
+        refreshTick,
+    ]);
 
     async function makeDraft(commit) {
-        // owner/name 교정
-        const [ownerFromUrl, nameFromUrl] = parseOwnerRepo(repo?.url || '');
-        const safeOwner = (repo?.githubOwner || repo?.owner || ownerFromUrl || '').replace(/_/g, '-');
-        const safeName  = (repo?.githubName || repo?.name  || nameFromUrl  || '');
-
         const draft = await mkDraft(safeOwner, safeName, commit.sha);
-        console.log("draft:", draft);
-        console.log("draft detail: ", draft.msg, draft.data1);
+        console.log('draft:', draft);
+        console.log('draft detail: ', draft.msg, draft.data1);
         return draft;
     }
 
@@ -117,13 +146,11 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
 
     return (
         <div className="flex flex-col h-full w-full min-h-0 rounded-lg bg-white dark:text-neutral-300 dark:bg-neutral-900/50 dark:border-neutral-700">
-            <div
-                className="flex justify-between shrink-0 px-3 py-2 border-b
-                bg-gray-100 dark:bg-neutral-900/70 dark:border-neutral-700">
+            <div className="flex justify-between shrink-0 px-3 py-2 border-b bg-gray-100 dark:bg-neutral-900/70 dark:border-neutral-700">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm">
-                        <i className="fa-solid fa-code-branch"></i> Branch
-                    </span>
+          <span className="text-sm">
+            <i className="fa-solid fa-code-branch"></i> Branch
+          </span>
                     <input
                         value={branch}
                         onChange={(e) => {
@@ -131,23 +158,21 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                             setBranch(e.target.value.trim());
                         }}
                         placeholder="e.g. main"
-                        className="px-2 py-1 rounded-md border text-sm focus:outline-none focus:ring-1
-                         focus:ring-blue-400 dark:border-neutral-700 dark:bg-neutral-800"
-                        style={{minWidth: 200}}
-                        disabled={!enabled} // [ADD]
+                        className="px-2 py-1 rounded-md border text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 dark:border-neutral-700 dark:bg-neutral-800"
+                        style={{ minWidth: 200 }}
+                        disabled={!enabled}
                     />
                     <button
                         onClick={() => setRefreshTick((n) => n + 1)}
                         className="px-3 py-1 rounded-lg border text-sm bg-white hover:bg-neutral-100 border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                        disabled={!enabled || loading} // [ADD]
+                        disabled={!enabled || loading}
                     >
                         Refresh
                     </button>
                 </div>
                 <div className="flex items-center justify-end gap-2">
                     <button
-                        className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50
-                            bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
+                        className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
                         disabled={page <= 1 || loading || !enabled}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
@@ -165,20 +190,31 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
             </div>
 
             <div className="flex-1 min-h-0 w-full overflow-y-auto px-3">
-                {loading && <div className="h-full w-full flex justify-center items-center text-sm text-neutral-500">Loading commits…</div>}
-                {!!err && <div className="h-full w-full flex justify-center items-center text-sm text-red-500">{err}</div>}
-                {/* 상태 표시 */}
+                {loading && (
+                    <div className="h-full w-full flex justify-center items-center text-sm text-neutral-500">
+                        Loading commits…
+                    </div>
+                )}
+                {!!err && (
+                    <div className="h-full w-full flex justify-center items-center text-sm text-red-500">
+                        {err}
+                    </div>
+                )}
                 {!loading && !err && commits.length === 0 && (
-                    <div className="py-6 text-sm text-neutral-500">No commits this repository yet</div>
+                    <div className="py-6 text-sm text-neutral-500">
+                        No commits this repository yet
+                    </div>
                 )}
 
-                {/* 커밋 리스트 */}
                 {!loading && !err && commits.length > 0 && (
                     <ul className="divide-y max-w-full divide-neutral-200 dark:divide-neutral-700">
                         {commits.map((c) => (
                             <li key={c.sha} className="py-4 flex items-start gap-3">
                                 <img
-                                    src={c.authorAvatarUrl || 'https://avatars.githubusercontent.com/u/0?v=4'}
+                                    src={
+                                        c.authorAvatarUrl ||
+                                        'https://avatars.githubusercontent.com/u/0?v=4'
+                                    }
                                     alt=""
                                     className="w-10 h-10 rounded-full object-cover self-center"
                                 />
@@ -193,13 +229,15 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                     <div className="flex gap-1 text-xs text-neutral-500 mt-0.5">
                                         <span>{c.authorName || c.authorLogin || 'unknown'}</span>
                                         <span>·</span>
-                                        <span>{c.authoredAt ?
-                                            new Date(c.authoredAt).toLocaleDateString("en-US", {
-                                                month: "short",
-                                                day: "2-digit",
-                                                year: "numeric"
-                                            })
-                                            : ''}</span>
+                                        <span>
+                      {c.authoredAt
+                          ? new Date(c.authoredAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: '2-digit',
+                              year: 'numeric',
+                          })
+                          : ''}
+                    </span>
                                         <span>·</span>
                                         <span>{String(c.sha).slice(0, 6)}</span>
                                     </div>
@@ -207,7 +245,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                 <button
                                     onClick={() => makeDraft(c)}
                                     className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center hover:bg-neutral-100 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700"
-                                    disabled={!enabled} // [ADD]
+                                    disabled={!enabled}
                                 >
                                     Make Draft
                                 </button>

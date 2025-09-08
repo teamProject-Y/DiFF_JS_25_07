@@ -5,7 +5,7 @@ import { Doughnut } from "react-chartjs-2";
 import { useTheme } from "@/common/thema";
 import { useMemo } from "react";
 
-export default function LanguageChart({ languages = [] }) {
+export default function LanguageChart({ languages = [], isMyRepo }) {
     const theme = useTheme();
     const isDark = theme === "dark";
 
@@ -134,7 +134,9 @@ export default function LanguageChart({ languages = [] }) {
                         <i className="fa-solid fa-chart-pie text-2xl" />
                     </div>
                     <div className="font-semibold">No analysis yet.</div>
-                    <div className="text-xs opacity-70">Create a draft to see language distribution</div>
+                    {isMyRepo && (
+                        <div className="text-xs opacity-70">Create a draft to see language distribution</div>
+                    )}
                 </div>
             </div>
         );

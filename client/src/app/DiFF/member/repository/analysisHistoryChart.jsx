@@ -5,7 +5,7 @@ import '@/common/registerChart';
 import { Line } from 'react-chartjs-2';
 import {useTheme} from "@/common/thema";
 
-export default function AnalysisHistoryChart({ history = [] }) {
+export default function AnalysisHistoryChart({ history = [], isMyRepo }) {
 
     const theme = useTheme() === 'dark' ? 'rgb(100,100,100)' : 'rgb(200,200,200)';
     const reverseTheme = useTheme() === 'dark' ? 'rgb(200,200,200)' : 'rgb(100,100,100)';
@@ -22,8 +22,10 @@ export default function AnalysisHistoryChart({ history = [] }) {
                     <i className="fa-solid fa-chart-column text-2xl"></i>
                 </div>
                 <div className="text-lg font-bold">No analysis yet.</div>
-                <div className="text-blue-500 dark:text-blue-400">
-                    Once you create a draft, it will be analyzed automatically.</div>
+                {isMyRepo && (
+                    <div className="text-blue-500 dark:text-blue-400">
+                        Once you create a draft, it will be analyzed automatically.</div>
+                )}
             </div>
         );
     }

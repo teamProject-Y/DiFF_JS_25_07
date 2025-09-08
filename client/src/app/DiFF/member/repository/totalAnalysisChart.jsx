@@ -4,7 +4,7 @@ import '@/common/registerChart';
 import { Line } from 'react-chartjs-2';
 import { useTheme } from '@/common/thema';
 
-export default function TotalAnalysisChart({ history = [] }) {
+export default function TotalAnalysisChart({ history = [], isMyRepo }) {
     const mode = useTheme();
     const theme = mode === 'dark' ? 'rgb(100,100,100)' : 'rgb(200,200,200)';
     const reverseTheme = mode === 'dark' ? 'rgb(200,200,200)' : 'rgb(100,100,100)';
@@ -16,9 +16,11 @@ export default function TotalAnalysisChart({ history = [] }) {
                     <i className="fa-solid fa-chart-column text-2xl"></i>
                 </div>
                 <div className="text-lg font-bold">No analysis yet.</div>
-                <div className="text-blue-500 dark:text-blue-400">
-                    Once you create a draft, it will be analyzed automatically.
-                </div>
+                {isMyRepo && (
+                    <div className="text-blue-500 dark:text-blue-400">
+                        Once you create a draft, it will be analyzed automatically.
+                    </div>
+                )}
             </div>
         );
     }
@@ -46,19 +48,10 @@ export default function TotalAnalysisChart({ history = [] }) {
     const options = {
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 0, right: 0, bottom: 8, left: 0 } },
+        layout: { padding: { top: 0, right: 0, bottom: 5, left: 0 } },
         plugins: {
             legend: {
                 display: false,
-                // position: 'right',
-                // labels: {
-                //     usePointStyle: true,
-                //     pointStyle: 'circle',
-                //     padding: 5,
-                //     boxWidth: 4,
-                //     boxHeight: 4,
-                //     color: reverseTheme,
-                // },
             },
         },
         elements: {
@@ -74,11 +67,11 @@ export default function TotalAnalysisChart({ history = [] }) {
                 border: { display: false },
             },
             y: {
-                min: 1,  // ✅ 1~5 고정
+                min: 1,
                 max: 5,
                 ticks: {
                     stepSize: 1,
-                    autoSkip: false, // ✅ A~E 모두 표시
+                    autoSkip: false,
                     color: reverseTheme,
                     callback: (val) => {
                         const n = Number(val);
