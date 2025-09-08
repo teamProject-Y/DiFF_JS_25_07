@@ -361,6 +361,7 @@ export function WriteArticlePage() {
                 <button
                     type="submit"
                     disabled={submitting || !repositoryId}
+                    onClick={handleSubmit}
                     className={clsx(
                         "rounded-md border px-5 py-2 font-medium",
                         " bg-gray-900 text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]",
