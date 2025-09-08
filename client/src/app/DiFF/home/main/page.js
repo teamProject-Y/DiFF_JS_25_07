@@ -19,10 +19,6 @@ const SwiperSlide = dynamic(() => import('swiper/react').then(mod => mod.SwiperS
 SwiperWrapper.displayName = 'SwiperWrapper';
 SwiperSlide.displayName = 'SwiperSlide';
 
-// 외부 컴포넌트
-const OverlayMenu = dynamic(() => import('@/common/overlayMenu'), {ssr: false});
-const HamburgerButton = dynamic(() => import('@/common/hamMenu'), {ssr: false});
-
 // background
 const sections = [
     {id: 'terminal', color: '#161616'},
@@ -157,52 +153,64 @@ export default function Page() {
         }
     }, []);
 
-     useEffect(() => {
-           if (!mounted || loggedIn) return;
-           const scroller = document.getElementById('pageScroll');
-           if (!scroller || sectionRefs.current.length === 0) return;
-           if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-           scroller.scrollTo({ top: 0, behavior: 'auto' });
+    // page.js
+    const lastColorRef = useRef(null);
 
-               const io = new IntersectionObserver((entries) => {
-                 let best = { ratio: 0, id: null };
-                 entries.forEach(e => {
-                       if (e.isIntersecting && e.intersectionRatio > best.ratio) {
-                             best = { ratio: e.intersectionRatio, id: e.target.id };
-                           }
-                     });
-                 if (best.id) {
-                       const idx = sections.findIndex(s => s.id === best.id);
-                       if (idx !== -1) setBgColor(sections[idx].color);
-                     }
-               }, { root: scroller, threshold: [0.25, 0.5, 0.5, 1] });
+    useEffect(() => {
+        if (!mounted || loggedIn) return;
 
-               sectionRefs.current.forEach(el => el && io.observe(el));
-           return () => io.disconnect();
-         }, [mounted, loggedIn]);
+        const scroller = document.getElementById('pageScroll');
+        const els = sectionRefs.current.filter(Boolean);
+        if (!scroller || els.length === 0) return;
+
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        scroller.scrollTo({ top: 0, behavior: 'auto' });
+
+        const io = new IntersectionObserver((entries) => {
+            let best = { ratio: 0, id: null };
+            for (const e of entries) {
+                if (e.isIntersecting && e.intersectionRatio > best.ratio) {
+                    best = { ratio: e.intersectionRatio, id: e.target.id };
+                }
+            }
+            if (!best.id) return;
+            const sec = sections.find(s => s.id === best.id);
+            if (!sec) return;
+
+            // 🔒 같은 색이면 setState 안 함 → 불필요 리렌더 차단
+            if (lastColorRef.current !== sec.color) {
+                lastColorRef.current = sec.color;
+                setBgColor(sec.color);
+            }
+        }, { root: scroller, threshold: [0.25, 0.5, 0.75, 1] });
+
+        els.forEach(el => io.observe(el));
+        return () => io.disconnect();
+    }, [mounted, loggedIn]); // ✅ deps 유지
+
 
     // background
-    useEffect(() => {
-        if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
-
-        const observer = new IntersectionObserver(entries => {
-            const visible = entries.find(e => e.isIntersecting);
-            if (visible) {
-                const section = sections.find(s => s.id === visible.target.id);
-                if (section) setBgColor(section.color);
-            }
-        }, { threshold: 0.5 });
-
-        sectionRefs.current.forEach(section => {
-            if (section) observer.observe(section);
-        });
-
-        return () => {
-            sectionRefs.current.forEach(section => {
-                if (section) observer.unobserve(section);
-            });
-        };
-    }, [sectionRefs.current.map(ref => ref)]);
+    // useEffect(() => {
+    //     if (sectionRefs.current.length === 0 || sectionRefs.current.some(ref => !ref)) return;
+    //
+    //     const observer = new IntersectionObserver(entries => {
+    //         const visible = entries.find(e => e.isIntersecting);
+    //         if (visible) {
+    //             const section = sections.find(s => s.id === visible.target.id);
+    //             if (section) setBgColor(section.color);
+    //         }
+    //     }, { threshold: 0.5 });
+    //
+    //     sectionRefs.current.forEach(section => {
+    //         if (section) observer.observe(section);
+    //     });
+    //
+    //     return () => {
+    //         sectionRefs.current.forEach(section => {
+    //             if (section) observer.unobserve(section);
+    //         });
+    //     };
+    // }, [sectionRefs.current.map(ref => ref)]);
 
 
     if (!mounted) return null;
@@ -356,16 +364,11 @@ export default function Page() {
             <br/>
 
             {/* toggle menu */}
-            <OverlayMenu open={menuOpen} onClose={() => setMenuOpen(false)} userEmail={user.email}
-                         blogName={user.blogName}/>
             <div className="pointer-events-none">
-                <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
-                    <Link href="/DiFF/member/profile">
-                        <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
-                    </Link>
-                </div>
-                <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
-                    <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
+                <div onClick={() =>
+                    window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"})) }
+                     className="fixed right-5 bottom-5 z-50 pointer-events-auto">
+                        <i className="fa-solid fa-power-off text-white cursor-pointer text-3xl hover:text-red-500"></i>
                 </div>
             </div>
         </div>
