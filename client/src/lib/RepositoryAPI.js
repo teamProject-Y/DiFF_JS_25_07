@@ -88,8 +88,9 @@ export const getGithubCommitList = async (repo, opts = {}) => {
 
     const data = res?.data ?? {};
     const code = data.resultCode || data.code || '';
+
     if (code && !String(code).startsWith('S-')) {
-        throw new Error(data.msg || data.message || '커밋 조회 실패');
+        return { resultCode: code, message: res.msg || '커밋 조회 실패', data: [] };
     }
 
     const raw =

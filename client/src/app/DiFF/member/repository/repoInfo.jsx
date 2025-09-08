@@ -155,7 +155,7 @@ export default function RepoInfo({
                     <div className="flex-1 overflow-y-auto flex flex-col gap-3">
 
                         {/* 탭 내용 */}
-                        <div className="h-[35%] relative rounded-xl border shadow-sm p-3 mb-1
+                        <div className="h-[35%] relative rounded-xl border shadow-sm p-3
                               bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700
                               pt-9"
                         >

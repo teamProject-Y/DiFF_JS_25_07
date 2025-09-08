@@ -11,7 +11,7 @@ export default function TotalAnalysisChart({ history = [], isMyRepo }) {
 
     if (!history || history.length === 0) {
         return (
-            <div className="h-full w-full flex flex-col gap-1 items-center justify-center text-center text-gray-600 dark:text-neutral-400">
+            <div className="h-full w-full flex flex-col items-center justify-center text-center text-gray-600 dark:text-neutral-400">
                 <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
                     <i className="fa-solid fa-chart-column text-2xl"></i>
                 </div>
