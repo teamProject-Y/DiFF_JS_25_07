@@ -277,7 +277,6 @@ export default function RepoInfo({
                                     </>
                                 )}
                             </div>
-
                         </div>
 
                         <div className="mt-2 flex w-full text-sm justify-between items-center">

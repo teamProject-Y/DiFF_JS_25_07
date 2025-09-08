@@ -38,6 +38,8 @@ function SettingsPage() {
 
     const fileInputRef = useRef(null);
     const textareaRef = useRef(null);
+    const [editingNick, setEditingNick] = useState(false);
+    const nickRef = useRef(null);
 
     const [settings, setSettings] = useState({
         reply: member?.allowReplyNotification ?? false,
@@ -239,6 +241,34 @@ function SettingsPage() {
 
     if (loading) return <PageSkeleton/>;
 
+    // 닉네임 저장
+    const onSaveNick = async () => {
+        if (!dirtyNick) {
+            setEditingNick(false);
+            return;
+        }
+        setBanner(null);
+        try {
+            const res = await modifyNickName({ nickName: form.nickName });
+            localStorage.setItem("nickName", form.nickName);
+            setMember((prev) => ({ ...prev, nickName: form.nickName }));
+            setBanner({ type: "success", msg: res.msg || "닉네임이 수정되었습니다" });
+            setEditingNick(false);
+        } catch (err) {
+            console.error("닉네임 수정 실패:", err);
+            if (err.response) {
+                setBanner({ type: "error", msg: err.response.data?.msg || "닉네임 수정에 실패했습니다" });
+            } else {
+                setBanner({ type: "error", msg: "서버와 연결할 수 없습니다" });
+            }
+        }
+    };
+// 닉네임 편집 취소
+    const cancelEditNick = () => {
+        setForm((prev) => ({ ...prev, nickName: member?.nickName || "" }));
+        setEditingNick(false);
+    };
+
     return (
         <section className="h-screen flex flex-col px-4 dark:text-neutral-300 overflow-hidden">
             <div className="shrink-0">
@@ -344,27 +374,56 @@ function SettingsPage() {
                                             />
 
                                         </div>
-                                        <form onSubmit={handleSubmitNickName} className="flex flex-col gap-3 pt-3">
-                                            <input
-                                                name="nickName"
-                                                value={form.nickName ?? ""}
-                                                onChange={handleChange}
-                                                placeholder="nickname"
-                                                className="w-full rounded-lg border border-neutral-300 bg-neutral-100 p-2 text-neutral-900 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
-                                            />
-                                            <button
-                                                type="submit"
-                                                disabled={!dirtyNick}
-                                                className={
-                                                    "rounded-lg px-4 py-2 text-sm text-white " +
-                                                    (dirtyNick
-                                                        ? "bg-neutral-900 hover:bg-neutral-800"
-                                                        : "bg-neutral-600/50 cursor-not-allowed")
-                                                }
-                                            >
-                                                UPDATE
-                                            </button>
-                                        </form>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center min-w-0 flex-grow h-11">
+                                                {editingNick ? (
+                                                    <>
+                                                        <input
+                                                            ref={nickRef}
+                                                            value={form.nickName}
+                                                            onChange={(e) => setForm({ ...form, nickName: e.target.value })}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === "Enter") onSaveNick();
+                                                                if (e.key === "Escape") cancelEditNick();
+                                                            }}
+                                                            className="flex-grow min-w-0 px-2 py-1 mr-2 rounded-md border
+                     focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                                            placeholder="nickname"
+                                                        />
+                                                        <button
+                                                            onClick={onSaveNick}
+                                                            className="p-1"
+                                                            title="Save"
+                                                            aria-label="Save nickname"
+                                                        >
+                                                            <i className="fa-solid fa-check"></i>
+                                                        </button>
+                                                        <button
+                                                            onClick={cancelEditNick}
+                                                            className="p-1"
+                                                            title="Cancel"
+                                                            aria-label="Cancel edit"
+                                                        >
+                                                            <i className="fa-solid fa-xmark"></i>
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <p className="text-lg font-semibold break-all pl-1">
+                                                            {member?.nickName ?? "nickname"}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => setEditingNick(true)}
+                                                            className="pl-2 pb-1 text-xs text-neutral-400"
+                                                            title="Rename"
+                                                            aria-label="Rename nickname"
+                                                        >
+                                                            <i className="fa-solid fa-pen"></i>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </Card>
