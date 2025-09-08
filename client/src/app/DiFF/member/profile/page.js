@@ -336,7 +336,7 @@ function ProfileInner() {
                     {/* Right */}
                     <main className="flex-1 ml-8">
                         <section className="mb-8">
-                            <span className="text-sm rounded-full py-1 px-3 bg-gray-200 dark:text-neutral-500">
+                            <span className="text-sm rounded-full py-1 px-3 bg-gray-200 dark:bg-neutral-700 dark:text-neutral-400">
                                 Introduction written by {member.nickName}
                             </span>
 
