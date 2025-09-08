@@ -144,6 +144,11 @@ export const connectRepository = async (repoId, url) => {
 };
 
 export const mkDraft = async (owner, repoName, sha) => {
+    // 전달된 파라미터 로그
+    console.log("🚀 mkDraft 호출됨");
+    console.log("   owner:", owner);
+    console.log("   repoName:", repoName);
+    console.log("   sha:", sha);
 
     if (!owner || !repoName || !sha) {
         throw new Error(
@@ -151,9 +156,20 @@ export const mkDraft = async (owner, repoName, sha) => {
         );
     }
 
-    const res = await UserAPI.get(`/api/DiFF/github/commit/${owner}/${repoName}/${sha}`,);
-    return res.data;
+    try {
+        const url = `/api/DiFF/github/commit/${owner}/${repoName}/${sha}`;
+        console.log("➡️ 요청 URL:", url);
+
+        const res = await UserAPI.get(url);
+
+        console.log("✅ mkDraft 응답 데이터:", res.data);
+        return res.data;
+    } catch (err) {
+        console.error("❌ mkDraft 요청 실패:", err);
+        throw err;
+    }
 };
+
 
 export const deleteRepository = async (ghRepo) => {
 
