@@ -18,6 +18,7 @@ import {
 import LoadingOverlay from "@/common/loadingOverlay";
 import ToastViewer from "@/common/toastViewer";
 import {saveReport} from "@/lib/NotionAPI";
+import ConfirmDialog from "@/common/alertModal";
 
 function ArticleDetailInner() {
 
@@ -58,12 +59,30 @@ function ArticleDetailInner() {
     const [loginedMemberId, setLoginedMemberId] = useState(null);
 
     // 신고
-    const [isReporting, setIsReporting] = useState(false);
-    const [reportBody, setReportBody] = useState("");
-    const [open, setOpen] = useState(false);
-    const [reason, setReason] = useState("");
-    const [message, setMessage] = useState("");
-    const [title, setTitle] = useState("");
+    // const [isReporting, setIsReporting] = useState(false);
+    // const [reportBody, setReportBody] = useState("");
+    // const [open, setOpen] = useState(false);
+    // const [reason, setReason] = useState("");
+    // const [message, setMessage] = useState("");
+    // const [title, setTitle] = useState("");
+
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertCfg, setAlertCfg] = useState({});
+
+    const showAlert = (cfg) => {
+        setAlertCfg({
+            intent: "info",
+            title: "Notice",
+            message: null,
+            confirmText: "OK",
+            showCancel: false,
+            closeOnConfirm: true,
+            closeOnOverlayClick: true,
+            ...cfg,
+        });
+        setAlertOpen(true);
+    };
+
     const norm = (s) => (s ?? '').toString().trim().toLowerCase();
 
     const getId = (m) => Number(
@@ -324,15 +343,15 @@ function ArticleDetailInner() {
                 (typeof res?.msg === 'string' && res.msg.includes('성공'));
 
             if (isSuccess) {
-                alert("게시물이 삭제되었습니다.");
+                showAlert({ intent: "success", title: "Post deleted." });
                 router.push("/DiFF/member/repository");
             } else {
-                const msg = res?.msg || "삭제에 실패했습니다.";
-                alert(msg);
+                const msg = res?.msg || "Failed to delete. Please try again.";
+                showAlert({ intent: "danger", title: msg });
             }
         } catch (e) {
             console.error("[ArticleDetail] delete request error:", e);
-            alert(e?.response?.data?.msg || "삭제 요청에 실패했습니다.");
+            showAlert({ intent: "danger", title: "Failed to delete. Please try again." });
         } finally {
             setDeleting(false);
         }
@@ -356,7 +375,7 @@ function ArticleDetailInner() {
             }
         } catch (e) {
             console.error("좋아요 토글 실패:", e);
-            alert("좋아요 처리 중 문제가 발생했습니다.");
+            showAlert({ intent: "danger", title: "Failed to like at post. Please try again." });
         }
     };
 
@@ -379,7 +398,7 @@ function ArticleDetailInner() {
             setReplies(withLikes);
         } catch (e) {
             console.error("❌ 댓글 작성 실패:", e);
-            alert(e?.response?.data?.msg || "댓글 작성에 실패했습니다.");
+            showAlert({ intent: "danger", title: "Failed to write comment. Please try again." });
         }
     };
 
@@ -407,7 +426,7 @@ function ArticleDetailInner() {
             }
         } catch (e) {
             console.error("❌ 댓글 좋아요 토글 실패:", e);
-            alert("댓글 좋아요 처리 중 오류가 발생했습니다.");
+            showAlert({ intent: "danger", title: "Failed to like at comment. Please try again." });
         }
     };
 
@@ -416,8 +435,8 @@ function ArticleDetailInner() {
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
-    if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
-    if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
+    if (!id) return <p className="text-red-500">Invalid access. Retry again.</p>;
+    if (!article) return <p className="text-gray-500">No post</p>;
 
     return (
         <div className="w-full min-h-screen pt-6 dark:text-neutral-300">
@@ -655,14 +674,14 @@ function ArticleDetailInner() {
                     {/* 댓글 입력 */}
                     <div className="my-10">
                         {isLoggedIn ? (
-                            // ✅ 로그인 상태 → 댓글 입력창
+                            // 로그인 상태 → 댓글 입력창
                             <form onSubmit={handleSubmitreply} className="relative">
                                 <label htmlFor="comment" className="sr-only">댓글 작성</label>
 
                                 <div
                                     className="relative rounded-xl border backdrop-blur-sm shadow-sm transition-all
-                   border-black/10 focus-within:border-black/20 bg-white/80
-                   dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
+                                               border-black/10 focus-within:border-black/20 bg-white/80
+                                               dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
                                 >
                                     {/* textarea */}
                                     <textarea
@@ -680,27 +699,27 @@ function ArticleDetailInner() {
                                         maxLength={1000}
                                         placeholder="What are your thoughts?"
                                         className="block w-full resize-none bg-transparent
-                     p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
-                     text-gray-900 dark:text-neutral-200
-                     placeholder-gray-400 dark:placeholder-neutral-500
-                     focus:outline-none"
+                                                 p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
+                                                 text-gray-900 dark:text-neutral-200
+                                                 placeholder-gray-400 dark:placeholder-neutral-500
+                                                 focus:outline-none"
                                     />
 
                                     {/* 하단 글자수 + 버튼 */}
                                     <div className="absolute bottom-2 right-2 flex items-center gap-3">
-          <span className="text-xs text-gray-500 dark:text-neutral-500">
-            {reply.trim().length}/1000
-          </span>
+                                          <span className="text-xs text-gray-500 dark:text-neutral-500">
+                                            {reply.trim().length}/1000
+                                          </span>
                                         <button
                                             type="submit"
                                             disabled={!reply.trim()}
                                             className="px-4 py-2 rounded-full
-                       bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
-                       text-xs font-medium
-                       shadow-sm hover:shadow-md
-                       transition-all
-                       disabled:opacity-40 disabled:cursor-not-allowed
-                       active:scale-[0.98]"
+                                                   bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
+                                                   text-xs font-medium
+                                                   shadow-sm hover:shadow-md
+                                                   transition-all
+                                                   disabled:opacity-40 disabled:cursor-not-allowed
+                                                   active:scale-[0.98]"
                                         >
                                             Comment
                                         </button>
@@ -961,6 +980,11 @@ function ArticleDetailInner() {
                     </div>
                 </div>
             )}
+            <ConfirmDialog
+                open={alertOpen}
+                onOpenChange={setAlertOpen}
+                {...alertCfg}
+            />
         </div>
     );
 }

@@ -66,7 +66,6 @@ export const importGithubRepo = async (ghRepo) => {
         aPrivate: ghRepo?.aPrivate ?? !!ghRepo?.private ?? false,
         url: ghRepo?.url ?? ghRepo?.html_url ?? '',
         defaultBranch: ghRepo?.defaultBranch ?? ghRepo?.default_branch ?? '',
-        // owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
         githubOwner: ghRepo?.githubOwner ?? null,
         githubName: ghRepo?.githubName ?? null,
     };
@@ -148,21 +147,31 @@ export const connectRepository = async (repoId, url) => {
         }
     );
 
-    return data; // {resultCode, msg, ...}
+    return data;
 };
 
-export const mkDraft = async (owner, repoName, sha) => {
+export const mkDraft = async (repoId, owner, repoName, sha) => {
 
-    if (!owner || !repoName || !sha) {
+    if (!repoId || !owner || !repoName || !sha) {
         throw new Error(
-            `mkDraft: missing required fields. owner=${owner}, repoName=${repoName}, sha=${sha}`
+            `mkDraft: missing required fields. repoId=${repoId} owner=${owner}, repoName=${repoName}, sha=${sha}`
         );
     }
 
-    const res = await UserAPI.get(`/api/DiFF/github/commit/${owner}/${repoName}/${sha}`,);
+    const res = await UserAPI.get(`/api/DiFF/github/commit/${repoId}/${owner}/${repoName}/${sha}`,);
     return res.data;
 };
 
-export const deleteRepository = async (ghRepo) => {
-
-}
+export const deleteRepository = async (id) => {
+    try {
+        const res = await UserAPI.delete(`/api/DiFF/repository/${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error deleting repository:", error);
+        return { resultCode: "F-ERROR", msg: error.message };
+    }
+};

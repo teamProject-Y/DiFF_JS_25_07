@@ -227,11 +227,11 @@ export default function Header() {
             case 'like':
                 return 'fa-regular fa-thumbs-up';
             case 'follow':
-                return 'fa-regular fa-user-plus';
+                return 'fa-regular fa-user';
             case 'system':
                 return 'fa-regular fa-bell';
             case 'draft':
-                return 'fa-regular fa-pen';
+                return 'fa-regular fa-pen-to-square';
             default:
                 return 'fa-regular fa-bell';
         }
