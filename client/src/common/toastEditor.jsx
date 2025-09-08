@@ -35,7 +35,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
 
             instanceRef.current = new Editor({
                 el: editorRef.current,
-                height: "500px",
+                height: "100%",
                 initialEditType: "markdown",
                 previewStyle: "vertical",
                 initialValue: initialValue || "",

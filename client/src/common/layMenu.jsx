@@ -71,7 +71,8 @@ export default function LayMenu() {
                                     {f.profileUrl ? (
                                         <img src={f.profileUrl} className="w-8 h-8 rounded-full object-cover border" />
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center border bg-gray-100 dark:bg-neutral-700">
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center border
+                                        bg-gray-100 dark:bg-neutral-700 dark:border-neutral-700">
                                             <i className="fa-solid fa-skull text-gray-400 dark:text-neutral-300" />
                                         </div>
                                     )}
