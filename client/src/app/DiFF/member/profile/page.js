@@ -375,7 +375,9 @@ function ProfileInner() {
                                         {member.introduce}
                                     </ReactMarkdown>
                                 ) : (
-                                    "아직 자기소개가 없습니다."
+                                    <div className="h-20 w-full mx-10 flex items-center">
+                                    No README Yet.
+                                    </div>
                                 )}
                             </div>
                         </section>
