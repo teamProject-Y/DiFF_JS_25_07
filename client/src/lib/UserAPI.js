@@ -114,15 +114,15 @@ export const fetchUser = async (nickName) => {
 };
 
 // 5-4. 회원 수정
-export const modifyNickName = async ({nickName}) => {
-    const data = {nickName };
-    const response = await UserAPI.put(`api/DiFF/member/doModifyNickName`, data);
+export const modifyNickName = async ({ nickName }) => {
+    const data = { nickName };
+    const response = await UserAPI.put(`/api/DiFF/member/doModifyNickName`, data);
     return response.data;
 };
 
-export const modifyIntroduce = async ({introduce}) => {
-    const data = {introduce };
-    const response = await UserAPI.put(`api/DiFF/member/doModifyIntroduce`, data);
+export const modifyIntroduce = async ({ introduce }) => {
+    const data = { introduce };
+    const response = await UserAPI.put(`/api/DiFF/member/doModifyIntroduce`, data);
     return response.data;
 };
 

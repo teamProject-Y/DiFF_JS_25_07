@@ -73,7 +73,7 @@ export default function SearchPage() {
                     <main className="flex-grow">
                         {/* 타이틀 */}
                         <h1 className="text-2xl font-bold my-4 text-gray-500 dark:text-neutral-500">
-                            Showing Results for <span className="text-black dark:text-neutral-300">"{keyword}"</span>
+                            Showing Results for <span className="text-black dark:text-neutral-300">{'"'}{keyword}{'"'}</span>
                         </h1>
 
                         {/* 탭 버튼 */}

@@ -12,8 +12,8 @@ export default function SideBar({ repositories = [] }) {
                 top: 0,
                 opacity: 0,
                 pointerEvents: 'none',
-                width: 256,              // bar 폭(대강 64 * 4)
-                backgroundColor: 'red',  ///////////////////////// 확인용
+                width: 256,
+                backgroundColor: 'red',
             }}
             initial={{ x: -40, opacity: 0 }}
             animate={{ x: 0, opacity: 0 }}
@@ -27,7 +27,6 @@ export default function SideBar({ repositories = [] }) {
                     style={{ height: 44 }}
                 />
                 {repositories.map((repo) => (
-                    // grid 카드 / 상세 헤더와 동일한 layoutId
                     <motion.li
                         key={repo.id}
                         layoutId={`repo-${repo.id}`}

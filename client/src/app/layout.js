@@ -2,6 +2,7 @@
 import Script from 'next/script';
 import CommonLayout from '@/common/CommonLayout';
 import './globals.css';
+import {Suspense} from 'react';
 
 export const metadata = {title: 'DiFF', description: 'DiFF'};
 
@@ -42,12 +43,14 @@ export default function RootLayout({children, modal}) {
             </Script>
 
         </head>
-        <body className="text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300">
-        <CommonLayout>
-            {children}
-            {modal}
-        </CommonLayout>
-        </body>
+            <body className="text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300">
+            <Suspense fallback={null}>
+            <CommonLayout>
+                {children}
+                {modal}
+            </CommonLayout>
+            </Suspense>
+            </body>
         </html>
     );
 }

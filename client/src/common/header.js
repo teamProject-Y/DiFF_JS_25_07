@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import styled from 'styled-components';
 import {motion, useMotionValue, useTransform} from 'framer-motion';
 import {fetchUser} from '@/lib/UserAPI';
@@ -9,9 +9,7 @@ import {searchArticles} from "@/lib/ArticleAPI";
 import {useRouter} from 'next/navigation';
 import {usePathname, useSearchParams} from 'next/navigation';
 import {hasUnread, getNotifications, markAllAsRead} from "@/lib/NotificationAPI";
-import ThemeToggle from "@/common/thema";
 import ModalLayout from "@/app/@modal/layout";
-import {signOut} from "next-auth/react";
 
 const HeaderWrap = styled.div`
     width: 100%;
@@ -68,10 +66,10 @@ export default function Header() {
     const openJoin = () => setMode('join');
     const closeModal = () => setMode(null);
 
-    useEffect(() => {
-        if (pathname?.startsWith('/DiFF/article/write') || pathname?.startsWith('/DiFF/article/modify')) {
-            setOnEditMode(true);
-        }
+    const isEditMode = useMemo(() => {
+        if (!pathname) return false;
+        return pathname.startsWith('/DiFF/article/write') ||
+            pathname.startsWith('/DiFF/article/modify');
     }, [pathname]);
 
     useEffect(() => {
@@ -229,11 +227,11 @@ export default function Header() {
             case 'like':
                 return 'fa-regular fa-thumbs-up';
             case 'follow':
-                return 'fa-solid fa-user-plus';
+                return 'fa-regular fa-user-plus';
             case 'system':
                 return 'fa-regular fa-bell';
             case 'draft':
-                return 'fa-solid fa-pen';
+                return 'fa-regular fa-pen';
             default:
                 return 'fa-regular fa-bell';
         }
@@ -265,9 +263,10 @@ export default function Header() {
         }
     }
 
+    if (isEditMode) return null;
+
     return (
         <>
-            {!onEditMode && (
             <HeaderWrap
                 className={`
                     ${hide && 'hide'}
@@ -402,41 +401,31 @@ export default function Header() {
                                     </div>
                                 )}
                             </li>
-
-                            {/*<li>*/}
-                            {/*    <Link href="/DiFF/member/logout" onClick={handleLogout}>*/}
-                            {/*        LOGOUT*/}
-                            {/*    </Link>*/}
-                            {/*</li>*/}
-                            {/*<li>*/}
-                            {/*    <Link href="/DiFF/member/profile">MYPAGE</Link>*/}
-                            {/*</li>*/}
                         </>
                     ) : (
-                        <>
-                            <li>
-                                <button
-                                    onClick={() =>
-                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))
-                                    }
-                                >
-                                    LOGIN
-                                </button>
+                         <>
+                             <li>
+                                 {/*<button*/}
+                        {/*//             onClick={() =>*/}
+                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))*/}
+                        {/*//             }*/}
+                        {/*//         >*/}
+                        {/*//             LOGIN*/}
+                        {/*//         </button>*/}
+                        {/*//     </li>*/}
+                        {/*//     <li>*/}
+                        {/*//         <button*/}
+                        {/*//             onClick={() =>*/}
+                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))*/}
+                        {/*//             }*/}
+                        {/*//         >*/}
+                        {/*//             JOIN*/}
+                        {/*//         </button>*/}
                             </li>
-                            <li>
-                                <button
-                                    onClick={() =>
-                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))
-                                    }
-                                >
-                                    JOIN
-                                </button>
-                            </li>
-                        </>
+                         </>
                     )}
                 </ul>
             </HeaderWrap>
-                )}
             <ModalLayout mode={mode} onClose={() => setMode(null)}/>
         </>
     );

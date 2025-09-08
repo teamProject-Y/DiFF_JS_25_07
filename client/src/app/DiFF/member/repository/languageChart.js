@@ -5,7 +5,7 @@ import { Doughnut } from "react-chartjs-2";
 import { useTheme } from "@/common/thema";
 import { useMemo } from "react";
 
-export default function LanguageChart({ languages = [] }) {
+export default function LanguageChart({ languages = [], isMyRepo }) {
     const theme = useTheme();
     const isDark = theme === "dark";
 
@@ -59,7 +59,7 @@ export default function LanguageChart({ languages = [] }) {
         maintainAspectRatio: false, // 부모 크기에 맞춤
         rotation: -90, // 12시 방향 시작
         layout: {
-            padding: { top: 12, right: 12, bottom: 12, left: 12 }, // "조금 여유" 있게
+            padding: { top: 12, right: 12, bottom: 12, left: 12 },
         },
         plugins: {
             legend: { display: false }, // 커스텀 레전드 사용
@@ -99,7 +99,7 @@ export default function LanguageChart({ languages = [] }) {
                 // 퍼센트 (외곽선 → 채움)
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = outline;
-                ctx.font = "600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+                // ctx.font = "600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
                 ctx.strokeText(`${topPct}%`, x, y - 6);
                 ctx.fillStyle = mainColor;
                 ctx.fillText(`${topPct}%`, x, y - 6);
@@ -107,7 +107,7 @@ export default function LanguageChart({ languages = [] }) {
                 // 라벨
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = outline;
-                ctx.font = "12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
+                // ctx.font = "12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
                 ctx.strokeText(topLabel, x, y + 12);
                 ctx.fillStyle = subColor;
                 ctx.fillText(topLabel, x, y + 12);
@@ -134,7 +134,9 @@ export default function LanguageChart({ languages = [] }) {
                         <i className="fa-solid fa-chart-pie text-2xl" />
                     </div>
                     <div className="font-semibold">No analysis yet.</div>
-                    <div className="text-xs opacity-70">Create a draft to see language distribution</div>
+                    {isMyRepo && (
+                        <div className="text-xs opacity-70">Create a draft to see language distribution</div>
+                    )}
                 </div>
             </div>
         );

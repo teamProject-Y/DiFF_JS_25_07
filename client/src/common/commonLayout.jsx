@@ -59,7 +59,6 @@ export default function CommonLayout({ children, modal, pageTitle = 'DiFF' }) {
     const isHomeMain = pathname?.startsWith('/DiFF/home/main');
     const useDarkColor = isHomeMain && !isAuthed;
 
-
     return (
         <>
             <div className="text-neutral-600">
