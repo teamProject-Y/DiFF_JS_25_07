@@ -337,9 +337,13 @@ export default function Page() {
                          blogName={user.blogName}/>
             <div className="pointer-events-none">
                 <div className="fixed right-8 bottom-20 z-50 pointer-events-auto">
-                    <Link href="/DiFF/member/profile">
+                    <button
+                        onClick={() =>
+                            window.dispatchEvent(new CustomEvent("open-modal", { detail: "login" }))
+                        }
+                    >
                         <i className="fa-solid fa-power-off text-white text-3xl hover:text-red-500"></i>
-                    </Link>
+                    </button>
                 </div>
                 <div className="fixed right-6 bottom-6 z-50 pointer-events-auto">
                     <HamburgerButton open={menuOpen} onClick={() => setMenuOpen(v => !v)}/>
