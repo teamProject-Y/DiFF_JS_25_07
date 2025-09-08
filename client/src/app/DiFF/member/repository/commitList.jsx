@@ -71,10 +71,13 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
     const [page, setPage] = useState(1);
     const perPage = 10;
 
-    const [commits, setCommits] = useState([]);          // 정상 시 배열
+    const [commits, setCommits] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);                // {code, message} | null
+    const [err, setErr] = useState(null);
     const [refreshTick, setRefreshTick] = useState(0);
+
+    const [drafting, setDrafting] = useState(false);
+    const uiDisabled = !enabled || loading || drafting;
 
     // 외부 refreshSignal → 내부 tick 증가
     useEffect(() => {
@@ -170,10 +173,15 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
     ]);
 
     async function makeDraft(commit) {
-        const draft = await mkDraft(safeOwner, safeName, commit.sha);
-        console.log('draft:', draft);
-        console.log('draft detail: ', draft.msg, draft.data1);
-        return draft;
+        try {
+            setDrafting(true);
+            const draft = await mkDraft(safeOwner, safeName, commit.sha);
+            console.log('draft:', draft);
+            console.log('draft detail: ', draft.msg, draft.data1);
+            return draft;
+        } finally {
+            setDrafting(false);
+        }
     }
 
     // ===== 파생 상태 =====
@@ -191,7 +199,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
     }
 
     return (
-        <div className="flex flex-col h-full w-full min-h-0 rounded-lg bg-white dark:text-neutral-300 dark:bg-neutral-900/50 dark:border-neutral-700">
+        <div className="relative flex flex-col h-full w-full min-h-0 rounded-lg bg-white dark:text-neutral-300 dark:bg-neutral-900/50 dark:border-neutral-700">
             <div className="flex justify-between shrink-0 px-3 py-2 border-b bg-gray-100 dark:bg-neutral-900/70 dark:border-neutral-700">
                 <div className="flex items-center gap-2">
                     <span className="text-sm">
@@ -211,7 +219,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                     <button
                         onClick={() => setRefreshTick((n) => n + 1)}
                         className="px-3 py-1 rounded-lg border text-sm bg-white hover:bg-neutral-100 border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                        disabled={!enabled || loading}
+                        disabled={uiDisabled}
                     >
                         Refresh
                     </button>
@@ -219,7 +227,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                 <div className="flex items-center justify-end gap-2">
                     <button
                         className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
-                        disabled={page <= 1 || loading || !enabled}
+                        disabled={page <= 1 || uiDisabled}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
                         Prev
@@ -227,13 +235,26 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                     <span className="text-xs text-neutral-500">Page {page}</span>
                     <button
                         className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
-                        disabled={loading || !enabled}
+                        disabled={uiDisabled}
                         onClick={() => setPage((p) => p + 1)}
                     >
                         Next
                     </button>
                 </div>
             </div>
+
+            {drafting && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center rounded-lg
+                    bg-white/50 dark:bg-black/40 backdrop-blur-sm">
+                    <div className="px-4 py-2 rounded-md border bg-white dark:bg-neutral-900
+                      border-neutral-200 dark:border-neutral-700 shadow">
+                        <span className="text-sm">
+                          <i className="fa-solid fa-circle-notch fa-spin mr-2" />
+                          Creating draft…
+                        </span>
+                    </div>
+                </div>
+            )}
 
             <div className="flex-1 min-h-0 w-full overflow-y-auto px-3">
                 {loading && (
@@ -267,19 +288,12 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                             </div>
 
                             <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-                                {/*<button*/}
-                                {/*    onClick={() => setBranch(repoDefaultBranch)}*/}
-                                {/*    className="px-3 py-1.5 rounded-lg border text-sm bg-white hover:bg-neutral-100 border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"*/}
-                                {/*    disabled={!enabled}*/}
-                                {/*>*/}
-                                {/*    Reset to default branch*/}
-                                {/*</button>*/}
                                 <button
                                     onClick={() => setRefreshTick((n) => n + 1)}
                                     className="px-3 py-1.5 rounded-lg border text-sm
                                     bg-white hover:bg-neutral-100 border-neutral-200
                                     dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                                    disabled={!enabled}
+                                    disabled={uiDisabled}
                                 >
                                     Reload
                                 </button>
@@ -334,7 +348,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                 )}
 
                 {/* 정상 렌더링 */}
-                {!loading && !err && !isNoCommitsF2 && Array.isArray(commits) && commits.length > 0 && (
+                {!loading && !err && !isNoCommitsF2 && !drafting && Array.isArray(commits) && commits.length > 0 && (
                     <ul className="divide-y max-w-full divide-neutral-200 dark:divide-neutral-700">
                         {commits.map((c) => (
                             <li key={c.sha} className="py-4 flex items-start gap-3">
@@ -374,8 +388,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                 <button
                                     onClick={() => makeDraft(c)}
                                     className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center hover:bg-neutral-100 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700"
-                                    disabled={!enabled}
-                                >
+                                    disabled={uiDisabled}>
                                     Make Draft
                                 </button>
                             </li>
