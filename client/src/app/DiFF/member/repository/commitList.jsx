@@ -136,9 +136,8 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                         const { code, message } = extractResult(listOrResult);
                         if (code) {
                             setErr({ code, message });
-                            setCommits([]); // 리스트 초기화
+                            setCommits([]);
                         } else {
-                            // 구조를 모르니 안전하게 빈 배열 처리
                             setCommits([]);
                         }
                     } else {
@@ -176,8 +175,6 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
         try {
             setDrafting(true);
             const draft = await mkDraft(safeOwner, safeName, commit.sha);
-            console.log('draft:', draft);
-            console.log('draft detail: ', draft.msg, draft.data1);
             return draft;
         } finally {
             setDrafting(false);
