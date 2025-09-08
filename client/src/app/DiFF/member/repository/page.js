@@ -351,6 +351,7 @@ export default function RepositoriesPage() {
                                             <RepoInfo
                                                 key={`detail-${selectedRepoId ?? 'none'}`}
                                                 repo={selectedRepo}
+                                                isMyRepo={isMyRepos}
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}
                                                 useExternalSidebar={true}
