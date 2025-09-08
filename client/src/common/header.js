@@ -286,10 +286,10 @@ export default function Header() {
 
                 {/* 검색창 */}
                 {accessToken && (
-                    <form onSubmit={handleSearch} className="relative flex items-center gap-2">
+                    <form onSubmit={handleSearch} className="relative flex items-center gap-2 rounded-full border overflow-hidden
+                    text-neutral-500 bg-white dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500">
                         <div
-                            className="px-3 flex rounded-full border overflow-hidden text-neutral-500
-                                        dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500"
+                            className="px-3 flex overflow-hidden"
                         >
                             <input
                                 type="text"
