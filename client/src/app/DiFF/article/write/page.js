@@ -1,17 +1,17 @@
 'use client';
-import { getDraftById, saveDraft } from "@/lib/DraftAPI";
-import { Suspense, useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { writeArticle, getMyRepositories } from '@/lib/ArticleAPI';
+import {getDraftById, saveDraft} from "@/lib/DraftAPI";
+import {Suspense, useEffect, useState, useCallback, useMemo, useRef} from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
+import {writeArticle, getMyRepositories} from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
 import clsx from "clsx";
 
-const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
 /**
  * Minimal monochrome Repo dropdown (keyboard-accessible)
  */
-function RepoDropdown({ items = [], value, onChange, disabled }) {
+function RepoDropdown({items = [], value, onChange, disabled}) {
     const [open, setOpen] = useState(false);
     const btnRef = useRef(null);
     const menuRef = useRef(null);
@@ -38,6 +38,7 @@ function RepoDropdown({ items = [], value, onChange, disabled }) {
                 setOpen(false);
             }
         }
+
         document.addEventListener("mousedown", onDocClick);
         return () => document.removeEventListener("mousedown", onDocClick);
     }, [open]);
@@ -98,7 +99,7 @@ function RepoDropdown({ items = [], value, onChange, disabled }) {
                 )}
             >
                 {label}
-                <i className="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-400 dark:text-neutral-500" />
+                <i className="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-400 dark:text-neutral-500"/>
             </button>
 
             {open && (
@@ -133,7 +134,7 @@ function RepoDropdown({ items = [], value, onChange, disabled }) {
                                 )}
                             >
                                 <span className="truncate">{text}</span>
-                                {isSelected && <i className="fa-solid fa-check text-xs opacity-70" />}
+                                {isSelected && <i className="fa-solid fa-check text-xs opacity-70"/>}
                             </li>
                         );
                     })}
@@ -146,7 +147,7 @@ function RepoDropdown({ items = [], value, onChange, disabled }) {
 export default function Page() {
     return (
         <Suspense fallback={<div className="p-4 text-sm">Loading…</div>}>
-            <WriteArticlePage />
+            <WriteArticlePage/>
         </Suspense>
     );
 }
@@ -279,8 +280,8 @@ export function WriteArticlePage() {
         e?.preventDefault?.();
         setError('');
 
-        if (!repositoryId) return setError('repositoryId가 없습니다.');
-        if (!title.trim() && !body.trim()) return setError('빈 글은 저장할 수 없습니다.');
+        if (!repositoryId) return setError('Can\'t find repository.');
+        if (!title.trim() && !body.trim()) return setError('Can\'t save empty post');
 
         try {
             setSubmitting(true);
@@ -327,7 +328,7 @@ export function WriteArticlePage() {
                 if (!submitting) {
                     // create a synthetic form submit
                     const form = document.getElementById('writer-form');
-                    form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    form?.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));
                 }
             }
         };
@@ -335,83 +336,33 @@ export function WriteArticlePage() {
         return () => window.removeEventListener('keydown', onKey);
     }, [submitting, handleSaveDraft]);
 
-    // constant header height (Tailwind h-14 => 56px)
-    const headerHClass = 'h-14';
-
     return (
-        <div className={clsx(
-            "relative isolate",
-            "min-h-dvh h-dvh w-full overflow-hidden",
-            "bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300"
-        )}>
-            <div className="fixed flex justify-end gap-5 bottom-0 w-full z-50 p-3 border-t bg-white dark:bg-neutral-900 dark:border-neutral-700">
-                <button
-                    type="button"
-                    onClick={handleSaveDraft}
-                    disabled={submitting || !repositoryId}
-                    className={clsx(
-                        "rounded-md border px-5 py-2 font-medium",
-                        "border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100/60",
-                        "disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                    )}
-                >
-                    {submitting && submittingType === 'save' ? 'Saving…' : 'Save'}
-                </button>
-
-                <button
-                    type="submit"
-                    disabled={submitting || !repositoryId}
-                    onClick={handleSubmit}
-                    className={clsx(
-                        "rounded-md border px-5 py-2 font-medium",
-                        " bg-gray-900 text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]",
-                        "disabled:opacity-50 dark:border-neutral-300 dark:bg-neutral-300 dark:text-neutral-900"
-                    )}
-                >
-                    {submitting && submittingType === 'upload' ? 'Uploading…' : 'Upload'}
-                </button>
-            </div>
-            <form id="writer-form" onSubmit={handleSubmit} className="contents" aria-live="polite">
+        <div
+            className={clsx(
+                "fixed inset-0 flex flex-col",
+                "bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300"
+            )}
+        >
+            <form
+                id="writer-form"
+                onSubmit={handleSubmit}
+                className="flex-1 flex flex-col min-h-0"
+                aria-live="polite"
+            >
                 <div
                     className={clsx(
-                        "sticky inset-x-0 top-0 z-40",
-                        headerHClass,
-                        "flex items-center gap-5 border-b",
-                        "border-neutral-200/70 backdrop-blur supports-[backdrop-filter]:bg-white/60",
-                        "dark:border-neutral-800/70 dark:supports-[backdrop-filter]:bg-black/40",
-                        "px-3 sm:px-4"
+                        "sticky inset-x-0 top-0 z-40 border-b p-3",
+                        "border-neutral-200 dark:border-neutral-700",
+                        "bg-white dark:bg-neutral-900"
                     )}
                 >
-                    {/* Repo */}
-                    <div className="col-span-12 sm:col-span-4 md:col-span-3 flex items-center gap-2">
-                        {loadingRepos ? (
-                            <div className="h-9 w-48 animate-pulse rounded-md bg-neutral-200/70 dark:bg-neutral-800/70" />
-                        ) : repoError ? (
-                            <div className="truncate text-xs text-red-500">{repoError}</div>
-                        ) : repos.length === 0 ? (
-                            <div className="truncate text-xs text-yellow-700 dark:text-yellow-300">No repositories. Create one first.</div>
-                        ) : (
-                            <RepoDropdown
-                                items={repos}
-                                value={repositoryId}
-                                onChange={(v) => setRepositoryId(Number(v))}
-                            />
-                        )}
-                        {draftId && (
-                            <span className="hidden sm:inline-flex items-center rounded-full border px-2 py-1 text-[10px] tracking-wide text-neutral-500 dark:border-neutral-800/80 dark:text-neutral-400">
-                            Draft #{draftId}
-                          </span>
-                        )}
-                    </div>
-
                     {/* Title */}
-                    <div className="flex-1 rounded border dark:border-neutral-700">
+                    <div className="flex-1">
                         <input
                             className={clsx(
-                                "w-full truncate rounded border p-3 text-lg font-bold",
-                                "border-transparent bg-transparent focus:border-neutral-400",
-                                "placeholder:text-neutral-400",
-                                "dark:placeholder:text-neutral-600"
+                                "w-full truncate rounded p-3 text-5xl font-semibold",
+                                "bg-transparent border-transparent focus:outline-none",
+                                "placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
                             )}
                             placeholder="Title"
                             value={title}
@@ -419,62 +370,108 @@ export function WriteArticlePage() {
                         />
                     </div>
 
-                    {/* Actions */}
-                    <div className="col-span-12 sm:col-span-3 md:col-span-3 flex items-center justify-end gap-2">
-                        {/* Visibility toggle */}
-                        <button
-                            type="button"
-                            onClick={() => setIsPublic(!isPublic)}
-                            className={clsx(
-                                "relative inline-flex h-6 w-11 items-center rounded-full transition",
-                                isPublic ? 'bg-neutral-900 dark:bg-neutral-100' : 'bg-neutral-300 dark:bg-neutral-700'
+                    <div className="flex justify-between items-center">
+                        {/* Repo */}
+                        <div className="col-span-12 sm:col-span-4 md:col-span-3 flex items-center gap-2">
+                            {loadingRepos ? (
+                                <div className="h-9 w-48 animate-pulse rounded-md bg-neutral-200/70 dark:bg-neutral-800/70" />
+                            ) : repoError ? (
+                                <div className="truncate text-xs text-red-500">{repoError}</div>
+                            ) : repos.length === 0 ? (
+                                <div className="truncate text-xs text-yellow-700 dark:text-yellow-300">
+                                    No repositories. Create one first.
+                                </div>
+                            ) : (
+                                <RepoDropdown
+                                    items={repos}
+                                    value={repositoryId}
+                                    onChange={(v) => setRepositoryId(Number(v))}
+                                />
                             )}
-                            aria-label={isPublic ? 'Public' : 'Private'}
-                            title={isPublic ? 'Public' : 'Private'}
-                        >
-                          <span
-                              className={clsx(
-                                  "inline-block h-4 w-4 transform rounded-full bg-white transition",
-                                  isPublic ? 'translate-x-6' : 'translate-x-1'
-                              )}
-                          />
-                        </button>
-                        <span className="hidden md:inline text-xs text-neutral-500">{isPublic ? 'Public' : 'Private'}</span>
+                        </div>
 
-                        <button
-                            type="button"
-                            onClick={() => router.push('/DiFF/article/drafts')}
-                            className={clsx(
-                                "h-9 rounded-md px-3 text-sm text-neutral-600 hover:text-neutral-900 hover:underline",
-                                "dark:text-neutral-400 dark:hover:text-neutral-100"
-                            )}
-                        >
-                            Drafts
-                        </button>
+                        {/* Actions */}
+                        <div className="col-span-12 sm:col-span-3 md:col-span-3 flex items-center justify-end gap-2">
+                            {/* Visibility toggle */}
+                            <button
+                                type="button"
+                                onClick={() => setIsPublic(!isPublic)}
+                                className={clsx(
+                                    "relative inline-flex h-6 w-11 items-center rounded-full transition",
+                                    isPublic
+                                        ? "bg-neutral-900 dark:bg-neutral-100"
+                                        : "bg-neutral-300 dark:bg-neutral-700"
+                                )}
+                                aria-label={isPublic ? "Public" : "Private"}
+                                title={isPublic ? "Public" : "Private"}
+                            >
+                                <span
+                                    className={clsx(
+                                        "inline-block h-4 w-4 transform rounded-full bg-white transition",
+                                        isPublic ? "translate-x-6" : "translate-x-1"
+                                    )}
+                                />
+                                            </button>
+                                            <span className="hidden md:inline text-xs text-neutral-500">
+                                    {isPublic ? "Public" : "Private"}
+                                </span>
+
+                            <button
+                                type="button"
+                                onClick={() => router.push("/DiFF/article/drafts")}
+                                className={clsx(
+                                    "h-9 rounded-md px-3 text-sm text-neutral-600 hover:text-neutral-900 hover:underline",
+                                    "dark:text-neutral-400 dark:hover:text-neutral-100"
+                                )}
+                            >
+                                Drafts
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {!!error && (
-                    <div className="sticky top-14 z-30 w-full border-b border-red-200/60 bg-red-50/70 px-3 py-1.5 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
+                    <div className="border-b border-red-200/60 bg-red-50/70 px-3 py-1.5 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
                         {error}
                     </div>
                 )}
 
-                <div className={clsx(
-                    "absolute inset-x-0 bottom-0",
-                    error ? 'top-[calc(56px+28px)]' : 'top-14'
-                )}>
-                    <div className="h-full w-full overflow-hidden">
-                        <div className="h-full w-full overflow-auto px-0">
-                            <div className="h-full w-full [--editor-padding:0]">
-                                <div className="h-full w-full">
-                                    <ToastEditor
-                                        initialValue={body}
-                                        onChange={(value) => setBody(value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                <div className="flex-1 overflow-auto">
+                    <div className="h-full w-full">
+                        <ToastEditor
+                            initialValue={body}
+                            onChange={(value) => setBody(value)}
+                            height="100%"
+                        />
+                    </div>
+                </div>
+
+                <div className="sticky bottom-0 z-50 w-full border-t p-3 bg-white dark:bg-neutral-900 dark:border-neutral-700">
+                    <div className="flex justify-end gap-5">
+                        <button
+                            type="button"
+                            onClick={handleSaveDraft}
+                            disabled={submitting || !repositoryId}
+                            className={clsx(
+                                "rounded-md border px-5 py-2 font-medium",
+                                "border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100/60",
+                                "disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                            )}
+                        >
+                            {submitting && submittingType === "save" ? "Saving…" : "Save"}
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={submitting || !repositoryId}
+                            className={clsx(
+                                "rounded-md border px-5 py-2 font-medium",
+                                "bg-gray-900 text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]",
+                                "disabled:opacity-50 dark:border-neutral-300 dark:bg-neutral-300 dark:text-neutral-900"
+                            )}
+                        >
+                            {submitting && submittingType === "upload" ? "Uploading…" : "Upload"}
+                        </button>
                     </div>
                 </div>
             </form>
@@ -482,47 +479,77 @@ export function WriteArticlePage() {
             {/* Global tiny CSS to make ToastUI fill its container, keep it borderless for full-bleed feel */}
             <style jsx global>{`
                 /* Toast UI Editor: fill parent and scroll INSIDE */
-                .toastui-editor-defaultUI{
-                    height:100% !important;
-                    border:0 !important;
-                    display:flex; flex-direction:column;
+                .toastui-editor-defaultUI,
+                .toastui-editor-main,
+                .toastui-editor-ww-container .ProseMirror,
+                .toastui-editor-md-container .CodeMirror,
+                .toastui-editor-md-container .CodeMirror-scroll {
+                    background-color: #111214;
                 }
-                .toastui-editor-toolbar{ flex:0 0 auto; }
-                .toastui-editor-main{
-                    flex:1 1 0% !important;
-                    min-height:0 !important;
-                    height:auto !important;
+                
+                .toastui-editor-defaultUI {
+                    height: 100% !important;
+                    border: 0 !important;
+                    display: flex;
+                    flex-direction: column;
+                    
                 }
+
+                .toastui-editor-toolbar {
+                    flex: 0 0 auto;
+                }
+
+                .toastui-editor-main {
+                    flex: 1 1 0% !important;
+                    min-height: 0 !important;
+                    height: auto !important;
+                }
+
                 /* both WYSIWYG and Markdown containers fill */
                 .toastui-editor-md-container,
-                .toastui-editor-ww-container{
-                    height:100% !important;
-                    min-height:0 !important;
+                .toastui-editor-ww-container {
+                    height: 100% !important;
+                    min-height: 0 !important;
                 }
+
                 /* WYSIWYG scroll */
-                .toastui-editor-ww-container .ProseMirror{
-                    height:100% !important;
-                    overflow:auto !important;
-                    box-sizing:border-box;
+                .toastui-editor-ww-container .ProseMirror {
+                    height: 100% !important;
+                    overflow: auto !important;
+                    box-sizing: border-box;
                 }
+
                 /* Markdown scroll */
                 .toastui-editor-md-container .CodeMirror,
-                .toastui-editor-md-container .CodeMirror-scroll{
-                    height:100% !important;
+                .toastui-editor-md-container .CodeMirror-scroll {
+                    height: 100% !important;
                 }
-                .toastui-editor-md-container .CodeMirror-scroll{
-                    overflow:auto !important;
+
+                .toastui-editor-md-container .CodeMirror-scroll {
+                    overflow: auto !important;
                 }
-                
+
                 .toastui-editor-main-container {
-                    min-height:100% !important;
+                    min-height: 100% !important;
                 }
-                
-                .toastui-editor-defaultUI .ProseMirror{ padding:24px 20px; }
-                @media (min-width:640px){ .toastui-editor-defaultUI .ProseMirror{ padding:12px 12px; 
-                min-height:100% !important;} }
-                @media (min-width:1024px){ .toastui-editor-defaultUI .ProseMirror{ padding:20px 20px; 
-                min-height: 100% !important;} }
+
+                .toastui-editor-defaultUI .ProseMirror {
+                    padding: 24px 20px;
+                }
+
+                @media (min-width: 640px) {
+                    .toastui-editor-defaultUI .ProseMirror {
+                        padding: 12px 12px;
+                        min-height: 100% !important;
+                    }
+                }
+
+                @media (min-width: 1024px) {
+                    .toastui-editor-defaultUI .ProseMirror {
+                        padding: 20px 20px;
+                        min-height: 100% !important;
+                    }
+                }
             `}</style>
         </div>
     );
