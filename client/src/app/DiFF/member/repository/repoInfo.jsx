@@ -9,7 +9,7 @@ import {
     getAnalysisHistory,
     getLanguageDistribution,
     renameRepository,
-    deleteRepository, // ✅ 삭제 API 추가
+    deleteRepository,
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
@@ -18,14 +18,15 @@ export default function RepoInfo({
                                      repo,
                                      onClose,
                                      useExternalSidebar = false,
-                                     onDeleted, // ✅ 부모에서 삭제 후 리스트 갱신하도록 콜백 받을 수 있음
+                                     onDeleted,
+                                     onRenamed,
                                  }) {
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
     const [history, setHistory] = useState([]);
     const [activeTab, setActiveTab] = useState("history");
 
-    const [deleteRequested, setDeleteRequested] = useState(false); // ✅ 삭제 상태
+    const [deleteRequested, setDeleteRequested] = useState(false);
 
     useEffect(() => {
         if (repo?.id) {
@@ -42,6 +43,8 @@ export default function RepoInfo({
             const response = await renameRepository(repo.id, nameInput);
             console.log("res: ", response);
             setEditingName(false);
+
+            onRenamed?.(repo.id, nameInput);
         } catch (e) {
             console.error(e);
             alert('이름 저장 중 오류가 발생했습니다.');
@@ -84,7 +87,6 @@ export default function RepoInfo({
         if (e.key === 'Escape') cancelEdit();
     };
 
-    // ✅ 삭제 로직을 useEffect로 실행
     useEffect(() => {
         if (!deleteRequested || !repo?.id) return;
 
@@ -275,7 +277,6 @@ export default function RepoInfo({
                                     </>
                                 )}
                             </div>
-
                         </div>
 
                         <div className="mt-2 flex w-full text-sm justify-between items-center">

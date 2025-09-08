@@ -8,7 +8,6 @@ export default function TotalAnalysisChart({ history }) {
         return <p className="text-sm text-gray-400">토탈 데이터 없음</p>;
     }
 
-    // ✅ 날짜 포맷 → 9.4 형식
     const labels = history.map(h => {
         const d = new Date(h.analyzeDate);
         return `${d.getMonth() + 1}.${d.getDate()}`;

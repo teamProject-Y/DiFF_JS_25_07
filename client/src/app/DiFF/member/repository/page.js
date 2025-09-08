@@ -354,8 +354,15 @@ export default function RepositoriesPage() {
                                                 onChangeRepo={(id) => setSelectedRepoId(String(id))}
                                                 onClose={onClose}
                                                 useExternalSidebar={true}
+                                                onRenamed={(id, newName) => {
+
+                                                    setRepositories((prev) =>
+                                                        prev.map((r) => (r.id === id ? { ...r, name: newName } : r))
+                                                    );
+                                                }}
                                             />
                                         ) : null}
+
                                         {tab === 'posts' && selectedRepo ? (
                                             <RepoPost
                                                 key={`posts-${selectedRepoId ?? 'none'}`}
