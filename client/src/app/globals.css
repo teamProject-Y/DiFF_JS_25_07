@@ -466,3 +466,4 @@ li {
     caret-color: #111827 !important;
     transition: background-color 9999s ease-out 0s !important;
 }
+.snap-disabled { scroll-snap-type: none !important; }

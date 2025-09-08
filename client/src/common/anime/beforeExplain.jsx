@@ -6,7 +6,7 @@ import Link from 'next/link';
 function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 
 export default function BeforeExplain() {
-    const wrapRef   = useRef(null); // 긴 래퍼 (예: 350vh)
+    const wrapRef   = useRef(null);
     const text1Ref  = useRef(null);
     const text2Ref  = useRef(null);
     const text3Ref  = useRef(null);
@@ -20,7 +20,6 @@ export default function BeforeExplain() {
         if (!scroller || !wrap) return;
 
         let ticking = false;
-
         const update = () => {
             ticking = false;
             const wrapTop = wrap.offsetTop;
@@ -85,20 +84,14 @@ export default function BeforeExplain() {
     return (
         <section ref={wrapRef} className="relative w-full h-[350vh] bg-white overflow-visible">
             <div className="sticky top-0 h-screen">
-                <Link
-                    href="/DiFF/docs/intro"               // 원하는 경로
-                    className="absolute top-6 right-8 z-20 px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 inline-flex items-center"
-                    role="button"
-                >
-                    더보기 <span className="ml-1">+</span>
-                </Link>
+                {/* 상단 고정 버튼 제거됨 */}
 
-                <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-12 px-8 md:px-20 pt-16 max-w-[1400px] mx-auto">
+                <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-10 px-8 md:px-20 pt-8 max-w-[1400px] mx-auto">
                     {/* LEFT */}
                     <div className="max-w-none">
-                        <div className="space-y-20">
+                        <div className="space-y-12">
                             <div className="flex items-center gap-3">
-                                <span className="w-5 h-5 rounded-full border-[6px] border-blue-600"/>
+                                <span className="w-5 h-5 rounded-full border-[6px] border-blue-600" />
                                 <span className="text-base md:text-lg font-semibold text-[#2a5cff]">
                   DiFF – Git 히스토리에서 블로그 초안까지
                 </span>
@@ -110,55 +103,104 @@ export default function BeforeExplain() {
                             </h1>
                         </div>
 
-                        <div ref={text1Ref} className="space-y-4 mt-8">
+                        <div ref={text1Ref} className="space-y-4 mt-6">
                             <div className="flex items-center gap-3">
-                                <span className="dot w-2.5 h-2.5 rounded-full bg-black"/>
+                                <span className="dot w-2.5 h-2.5 rounded-full bg-black" />
                                 <span className="text-black font-semibold">커밋 요약 자동화</span>
                             </div>
                         </div>
-                        <div ref={text2Ref} className="space-y-4 mt-6">
+                        <div ref={text2Ref} className="space-y-4 mt-5">
                             <div className="flex items-center gap-3">
-                                <span className="dot2 w-2.5 h-2.5 rounded-full bg-black"/>
+                                <span className="dot2 w-2.5 h-2.5 rounded-full bg-black" />
                                 <span className="text-black font-semibold">블로그 초안 생성</span>
                             </div>
                         </div>
-                        <div ref={text3Ref} className="space-y-4 mt-6">
+                        <div ref={text3Ref} className="space-y-4 mt-5">
                             <div className="flex items-center gap-3">
-                                <span className="dot3 w-2.5 h-2.5 rounded-full bg-black"/>
+                                <span className="dot3 w-2.5 h-2.5 rounded-full bg-black" />
                                 <span className="text-black font-semibold">코드 품질 점수화</span>
                             </div>
                         </div>
                     </div>
 
                     {/* RIGHT */}
-                    <div className="relative md:pl-12">
+                    <div className="relative md:pl-10">
                         <div className="leading-none">
                             <p className="font-black tracking-tight text-gray-900 text-[clamp(40px,8vw,120px)]"></p>
                             <p className="font-black tracking-tight text-gray-900 text-[clamp(48px,9vw,140px)]"></p>
                         </div>
 
-                        <div ref={right1Ref} className="absolute top-64 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
+                        {/* STEP 1 */}
+                        <div
+                            ref={right1Ref}
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            aria-hidden="true"
+                        >
                             <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
                                 <span className="block"># 커밋 요약이</span>
                                 <span className="block">자동으로 생성</span>
                             </h2>
-                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10">귀찮은 commit review를 요약해줍니다.</p>
+                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
+                                귀찮은 commit review를 요약해줍니다.
+                            </p>
+                            {/* ⬇️ 설명 바로 아래 더보기 버튼 */}
+                            <div className="flex justify-end">
+                                <Link
+                                    href="/DiFF/docs/intro"
+                                    className="mt-5 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                                    role="button"
+                                >
+                                    more <span className="ml-1">+</span>
+                                </Link>
+                            </div>
                         </div>
 
-                        <div ref={right2Ref} className="absolute top-64 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
+                        {/* STEP 2 */}
+                        <div
+                            ref={right2Ref}
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            aria-hidden="true"
+                        >
                             <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
                                 <span className="block"># 블로그 초안을</span>
                                 <span className="block">자동으로 생성</span>
                             </h2>
-                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10"> GPT가 글 뼈대를 자동으로 작성.</p>
+                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
+                                GPT가 글 뼈대를 자동으로 작성.
+                            </p>
+                            <div className="flex justify-end">
+                                <Link
+                                    href="/DiFF/docs/intro"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                                    role="button"
+                                >
+                                    more <span className="ml-1">+</span>
+                                </Link>
+                            </div>
                         </div>
 
-                        <div ref={right3Ref} className="absolute top-64 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]" aria-hidden="true">
+                        {/* STEP 3 */}
+                        <div
+                            ref={right3Ref}
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            aria-hidden="true"
+                        >
                             <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
                                 <span className="block"># 코드 품질을</span>
                                 <span className="block">점수로</span>
                             </h2>
-                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-10">코드 변화의 품질을 정량적으로 계산..</p>
+                            <p className="text-black leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
+                                코드 변화의 품질을 정량적으로 계산..
+                            </p>
+                            <div className="flex justify-end">
+                                <Link
+                                    href="/DiFF/docs/intro"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
+                                    role="button"
+                                >
+                                    more <span className="ml-1">+</span>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -168,7 +210,7 @@ export default function BeforeExplain() {
                     <div className="flex flex-col items-center">
                         <span className="mb-2 text-xs opacity-60">Scroll to animate</span>
                         <div className="w-5 h-8 border border-gray-300 rounded-full flex justify-center opacity-60">
-                            <div className="w-0.5 h-2 bg-gray-400 rounded-full mt-1.5"/>
+                            <div className="w-0.5 h-2 bg-gray-400 rounded-full mt-1.5" />
                         </div>
                     </div>
                 </div>

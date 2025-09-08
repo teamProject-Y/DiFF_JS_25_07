@@ -403,26 +403,26 @@ export default function Header() {
                             </li>
                         </>
                     ) : (
-                        <>
-                            <li>
-                                <button
-                                    onClick={() =>
-                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))
-                                    }
-                                >
-                                    LOGIN
-                                </button>
+                         <>
+                             <li>
+                                 {/*<button*/}
+                        {/*//             onClick={() =>*/}
+                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))*/}
+                        {/*//             }*/}
+                        {/*//         >*/}
+                        {/*//             LOGIN*/}
+                        {/*//         </button>*/}
+                        {/*//     </li>*/}
+                        {/*//     <li>*/}
+                        {/*//         <button*/}
+                        {/*//             onClick={() =>*/}
+                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))*/}
+                        {/*//             }*/}
+                        {/*//         >*/}
+                        {/*//             JOIN*/}
+                        {/*//         </button>*/}
                             </li>
-                            <li>
-                                <button
-                                    onClick={() =>
-                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))
-                                    }
-                                >
-                                    JOIN
-                                </button>
-                            </li>
-                        </>
+                         </>
                     )}
                 </ul>
             </HeaderWrap>
