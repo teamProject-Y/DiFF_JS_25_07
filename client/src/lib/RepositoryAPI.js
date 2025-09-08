@@ -21,16 +21,24 @@ export const createRepository = async (data) => {
     }
 };
 
-export const renameRepository = async (data) => {
+export const renameRepository = async (id, name) => {
+    const payload = { id, name };
+
     try {
-        const res = await ArticleAPI.post("/api/DiFF/repository/rename", data);
+        const res = await ArticleAPI.post(
+            "/api/DiFF/repository/rename",
+            payload,
+            { headers: { "Content-Type": "application/json" } }
+        );
         console.log("[API][renameRepository] status:", res.status, "data:", res.data);
         return res.data;
     } catch (err) {
-        console.error("[API][renameRepository] error:", err);
+        const msg = err?.response?.data ?? err.message;
+        console.error("[API][renameRepository] error:", msg);
         throw err;
     }
-}
+};
+
 
 export const getAnalysisHistory = async (repoId) => {
     console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/history");

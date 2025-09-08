@@ -15,22 +15,20 @@ import CommitList from "@/app/DiFF/member/repository/commitList";
 import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
 
 export default function RepoInfo({
-                                     repo,
-                                     isMyRepo,
-                                     onClose,
-                                     useExternalSidebar = false,
-                                     onDeleted,
+                                     repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
                                  }) {
+
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
     const [history, setHistory] = useState([]);
     const [activeTab, setActiveTab] = useState("history");
-
     const [deleteRequested, setDeleteRequested] = useState(false);
-
     const [repoUrl, setRepoUrl] = useState(repo?.url ?? '');
-    useEffect(() => setRepoUrl(repo?.url ?? ''), [repo?.url]);
+    const [displayName, setDisplayName] = useState(repo?.name ?? '');
     const [commitRefreshKey, setCommitRefreshKey] = useState(0);
+
+    useEffect(() => setDisplayName(repo?.name ?? ''), [repo?.name]);
+    useEffect(() => setRepoUrl(repo?.url ?? ''), [repo?.url]);
 
     useEffect(() => {
         if (repo?.id) {
@@ -43,15 +41,29 @@ export default function RepoInfo({
     }, [repo?.name]);
 
     const onSaveName = async () => {
-        try {
-            const response = await renameRepository(repo.id, nameInput);
-            console.log("res: ", response);
+        const next = nameInput.trim();
+        if (!next || next === displayName) { // 공백/동일명 처리
             setEditingName(false);
+            setNameInput(displayName);
+            return;
+        }
+
+        try {
+            const res = await renameRepository(repo.id, next);
+            if (res?.resultCode?.startsWith("S-")) {
+                setDisplayName(next);
+                setEditingName(false);
+                setNameInput(next);
+                onRenamed?.(repo.id, next);
+            } else {
+                alert(res?.msg ?? "Failed");
+            }
         } catch (e) {
             console.error(e);
             alert('이름 저장 중 오류가 발생했습니다.');
         }
     };
+
 
     // 깃허브 리포 연결
     async function connectionUrl(url) {
@@ -286,7 +298,7 @@ export default function RepoInfo({
                                 ) : (
                                     <>
                                         <p className="text-xl font-semibold break-all pl-1">
-                                            {repo?.name ?? 'Repository'}
+                                            {displayName}
                                         </p>
                                         <button
                                             onClick={enterEdit}
