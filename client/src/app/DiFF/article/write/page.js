@@ -344,13 +344,13 @@ export function WriteArticlePage() {
             "min-h-dvh h-dvh w-full overflow-hidden",
             "bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300"
         )}>
-            <div className="fixed flex justify-end gap-5 bottom-0 w-full z-50 p-5 text-xl bg-white dark:bg-neutral-900">
+            <div className="fixed flex justify-end gap-5 bottom-0 w-full z-50 p-3 border-t bg-white dark:bg-neutral-900 dark:border-neutral-700">
                 <button
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={submitting || !repositoryId}
                     className={clsx(
-                        "h-9 rounded-md border px-3 text-sm",
+                        "rounded-md border px-5 py-2 font-medium",
                         "border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100/60",
                         "disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
                     )}
@@ -361,8 +361,9 @@ export function WriteArticlePage() {
                 <button
                     type="submit"
                     disabled={submitting || !repositoryId}
+                    onClick={handleSubmit}
                     className={clsx(
-                        "h-9 rounded-md border px-4 text-sm font-medium",
+                        "rounded-md border px-5 py-2 font-medium",
                         " bg-gray-900 text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]",
                         "disabled:opacity-50 dark:border-neutral-300 dark:bg-neutral-300 dark:text-neutral-900"
                     )}
@@ -517,7 +518,6 @@ export function WriteArticlePage() {
                     min-height:100% !important;
                 }
                 
-                /* 패딩 유지 – 필요 없으면 줄이세요 */
                 .toastui-editor-defaultUI .ProseMirror{ padding:24px 20px; }
                 @media (min-width:640px){ .toastui-editor-defaultUI .ProseMirror{ padding:12px 12px; 
                 min-height:100% !important;} }

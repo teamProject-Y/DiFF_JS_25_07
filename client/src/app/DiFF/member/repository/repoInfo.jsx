@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useEffect, useState, useRef } from 'react';
+import {motion} from 'framer-motion';
+import {useEffect, useState, useRef} from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {
@@ -16,10 +16,10 @@ import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart"
 
 export default function RepoInfo({
                                      repo,
+                                     isMyRepo,
                                      onClose,
                                      useExternalSidebar = false,
                                      onDeleted,
-                                     onRenamed,
                                  }) {
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
@@ -27,6 +27,10 @@ export default function RepoInfo({
     const [activeTab, setActiveTab] = useState("history");
 
     const [deleteRequested, setDeleteRequested] = useState(false);
+
+    const [repoUrl, setRepoUrl] = useState(repo?.url ?? '');
+    useEffect(() => setRepoUrl(repo?.url ?? ''), [repo?.url]);
+    const [commitRefreshKey, setCommitRefreshKey] = useState(0);
 
     useEffect(() => {
         if (repo?.id) {
@@ -43,17 +47,29 @@ export default function RepoInfo({
             const response = await renameRepository(repo.id, nameInput);
             console.log("res: ", response);
             setEditingName(false);
-
-            onRenamed?.(repo.id, nameInput);
         } catch (e) {
             console.error(e);
             alert('이름 저장 중 오류가 발생했습니다.');
         }
     };
 
-    function connectionUrl(url) {
-        const res = connectRepository(url);
-        console.log("connect repository res: ", res);
+    // 깃허브 리포 연결
+    async function connectionUrl(url) {
+
+        console.log("repoId: ", repo.id);
+
+        try {
+            const res = await connectRepository(repo.id, url);
+            if (res?.resultCode === "S-1") {
+                setRepoUrl(url);
+                setCommitRefreshKey(k => k + 1);
+            } else {
+                alert(res?.msg ?? "연결 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("연결 중 오류가 발생했습니다.");
+        }
     }
 
     // 언어 비율 데이터
@@ -87,6 +103,7 @@ export default function RepoInfo({
         if (e.key === 'Escape') cancelEdit();
     };
 
+    // 삭제 로직을 useEffect로 실행
     useEffect(() => {
         if (!deleteRequested || !repo?.id) return;
 
@@ -135,37 +152,41 @@ export default function RepoInfo({
 
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
                 <div className="max-w-[70%] min-w-[70%] flex flex-col">
-                    <div className="flex-1 overflow-y-auto flex flex-col">
-                        <div className="flex gap-2 mb-2">
-                            <button
-                                onClick={() => setActiveTab("history")}
-                                className={`px-3 py-1 rounded-md text-sm ${
-                                    activeTab === "history"
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 dark:bg-neutral-700"
-                                }`}
-                            >
-                                History
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("total")}
-                                className={`px-3 py-1 rounded-md text-sm ${
-                                    activeTab === "total"
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 dark:bg-neutral-700"
-                                }`}
-                            >
-                                Total
-                            </button>
-                        </div>
+                    <div className="flex-1 overflow-y-auto flex flex-col gap-3">
 
                         {/* 탭 내용 */}
-                        <div className="h-[35%] rounded-xl border shadow-sm p-4 mb-3
-                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
+                        <div className="h-[35%] relative rounded-xl border shadow-sm p-3
+                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700
+                              pt-9"
+                        >
+                            <div
+                                className="absolute top-4 right-5 z-30 flex items-center gap-2
+                                        pointer-events-none"
+                            >
+                                <button
+                                    onClick={() => setActiveTab("history")}
+                                    className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
+                                        ${activeTab === "history"
+                                        ? "text-blue-500"
+                                        : "text-gray-400 dark:text-neutral-600"}`}
+                                >
+                                    <i className="fa-solid fa-circle text-[0.3rem]"></i>History
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab("total")}
+                                    className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
+                                        ${activeTab === "total"
+                                        ? "text-blue-500"
+                                        : "text-gray-400 dark:text-neutral-600"}`}
+                                >
+                                    <i className="fa-solid fa-circle text-[0.3rem]"></i>Total
+                                </button>
+                            </div>
+
                             {activeTab === "history" ? (
-                                <AnalysisHistoryChart history={history} />
+                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo} />
                             ) : (
-                                <TotalAnalysisChart history={history} />
+                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo} />
                             )}
                         </div>
 
@@ -173,19 +194,28 @@ export default function RepoInfo({
                         <div
                             className="flex-grow overflow-y-scroll rounded-xl border shadow-sm
                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
-                            {repo.url ?
+                            {repoUrl ?
                                 <>
-                                    <CommitList repo={repo}/>
+                                    <CommitList
+                                        key={`commits-${repo?.id}-${repoUrl}-${commitRefreshKey}`}
+                                        repo={{...repo, url: repoUrl}}
+                                        refreshSignal={commitRefreshKey}
+                                    />
                                 </>
                                 :
                                 <>
-                                    <div className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
+                                    <div
+                                        className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
 
-                                        <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
-                                            <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400" />
+                                        <div
+                                            className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
+                                            <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400"/>
                                         </div>
 
-                                        <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">Connect a GitHub repository</div>
+                                        <div
+                                            className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">Connect
+                                            a GitHub repository
+                                        </div>
                                         <div className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                                             Link your repo to enable analysis and commit history.
                                         </div>
@@ -193,15 +223,16 @@ export default function RepoInfo({
                                         {/* URL 입력 + 연결 버튼 */}
                                         <form
                                             className="mt-4 w-full max-w-md flex items-center gap-2"
-                                            onSubmit={(e) => {
+                                            onSubmit={async (e) => {
                                                 e.preventDefault();
                                                 const url = e.currentTarget.repoUrl.value.trim();
-                                                connectionUrl(url);
+                                                await connectionUrl(url);
                                             }}
                                         >
                                             <div className="relative flex-1">
-                                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                                                  <i className="fa-brands fa-github text-neutral-400" />
+                                                <span
+                                                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+                                                  <i className="fa-brands fa-github text-neutral-400"/>
                                                 </span>
                                                 <input
                                                     type="url"
@@ -228,9 +259,10 @@ export default function RepoInfo({
                     </div>
                 </div>
 
-                <div className="w-[30%] flex flex-col gap-3">
+                <div className="w-[30%] grid grid-rows-[auto,1fr,auto] gap-3 h-full min-h-0">
+                    {/* 상단 카드 */}
                     <div className="rounded-xl border shadow-sm p-4
-                     bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
+                                bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
                         <div className="flex items-center gap-3">
                             <div className="flex items-center min-w-0 flex-grow h-11">
                                 {editingName ? (
@@ -240,24 +272,14 @@ export default function RepoInfo({
                                             value={nameInput}
                                             onChange={(e) => setNameInput(e.target.value)}
                                             onKeyDown={onKeyDownName}
-                                            className="flex-grow min-w-0 px-1 py-2 mr-2rounded-md border
-                                            focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                            className="flex-grow min-w-0 px-1 py-2 mr-2 rounded-md border
+                                                        focus:outline-none focus:ring-1 focus:ring-blue-400"
                                             placeholder="Repository name"
                                         />
-                                        <button
-                                            onClick={onSaveName}
-                                            className="p-1"
-                                            title="Save"
-                                            aria-label="Save name"
-                                        >
+                                        <button onClick={onSaveName} className="p-1" title="Save" aria-label="Save name">
                                             <i className="fa-solid fa-check"></i>
                                         </button>
-                                        <button
-                                            onClick={cancelEdit}
-                                            className=""
-                                            title="Cancel"
-                                            aria-label="Cancel edit"
-                                        >
+                                        <button onClick={cancelEdit} title="Cancel" aria-label="Cancel edit">
                                             <i className="fa-solid fa-xmark"></i>
                                         </button>
                                     </>
@@ -280,15 +302,16 @@ export default function RepoInfo({
                         </div>
 
                         <div className="mt-2 flex w-full text-sm justify-between items-center">
-                            <div className=""><i
-                                className="fa-solid fa-calendar text-neutral-400"></i> {repo.regDate}</div>
+                            <div className="">
+                                <i className="fa-solid fa-calendar text-neutral-400"></i> {repo.regDate}
+                            </div>
                             <span className="ml-auto text-xs px-2 py-1 rounded-full border
-                            bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
-                              {visibility}
-                            </span>
-                            {repo?.url && (
+                       bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
+                                {visibility}
+                              </span>
+                            {repoUrl && (
                                 <a
-                                    href={repo.url}
+                                    href={repoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     title={repo?.name}
@@ -300,36 +323,17 @@ export default function RepoInfo({
                         </div>
                     </div>
 
-                    {/* 통계 */}
-                    <div className="rounded-xl border shadow-sm p-4
-                    bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
-                        <div className="grid grid-cols-4 gap-4 text-center">
-                            <div>
-                                <div className="text-neutral-500 text-xs">Stars</div>
-                                <div className="text-lg font-semibold mt-0.5">0</div>
-                            </div>
-                            <div>
-                                <div className="text-neutral-500 text-xs">Forks</div>
-                                <div className="text-lg font-semibold mt-0.5">0</div>
-                            </div>
-                            <div>
-                                <div className="text-neutral-500 text-xs">Issues</div>
-                                <div className="text-lg font-semibold mt-0.5">0</div>
-                            </div>
-                            <div>
-                                <div className="text-neutral-500 text-xs">Watchers</div>
-                                <div className="text-lg font-semibold mt-0.5">0</div>
-                            </div>
+                    {/* 언어 비율 */}
+                    <div className="rounded-xl border shadow-sm p-4 pb-12
+                          bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700
+                          flex flex-col min-h-0 overflow-hidden">
+                        <div className="font-semibold">Languages</div>
+                        <div className="mt-2 grow min-h-0 /* overflow-y-auto 로 바꾸면 내부 스크롤 가능 */">
+                            <LanguageChart languages={languages} isMyRepo={isMyRepo} />
                         </div>
                     </div>
 
-                    {/* 언어 비율 */}
-                    <div className="rounded-xl border flex-grow shadow-sm p-4 max-h-[45%]
-                    bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
-                        <div className="font-semibold">Languages</div>
-                            <LanguageChart languages={languages} />
-                    </div>
-
+                    {/* 삭제 버튼 (auto 높이) */}
                     <button
                         onClick={() => {
                             if (confirm("정말 이 리포지토리를 삭제하시겠습니까?")) {
@@ -342,10 +346,8 @@ export default function RepoInfo({
                     >
                         Delete Repository
                     </button>
-
-
-
                 </div>
+
 
             </div>
         </motion.div>
