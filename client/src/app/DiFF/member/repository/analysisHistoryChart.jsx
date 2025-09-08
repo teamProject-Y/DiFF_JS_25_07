@@ -10,6 +10,11 @@ export default function AnalysisHistoryChart({ history = [] }) {
     const theme = useTheme() === 'dark' ? 'rgb(100,100,100)' : 'rgb(200,200,200)';
     const reverseTheme = useTheme() === 'dark' ? 'rgb(200,200,200)' : 'rgb(100,100,100)';
 
+    const labels = history.map(h => {
+        const d = new Date(h.analyzeDate);
+        return `${d.getMonth() + 1}.${d.getDate()}`;
+    });
+
     if (!history.length) {
         return (
             <div className="h-full w-full flex flex-col gap-1 items-center justify-center text-center text-gray-600 dark:text-neutral-400">
@@ -105,7 +110,7 @@ export default function AnalysisHistoryChart({ history = [] }) {
     };
 
     return (
-        <div className="h-full w-full text-gray-900 dark:text-neutral-400">
+        <div className="h-full w-full text-gray-900 dark:text-neutral-400 p-1">
             <Line
                 data={data}
                 options={{ ...options, plugins: { ...options.plugins, legendGapBetween: { gap: 20 } }}}

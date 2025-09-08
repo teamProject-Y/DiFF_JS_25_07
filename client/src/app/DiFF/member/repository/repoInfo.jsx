@@ -154,30 +154,34 @@ export default function RepoInfo({
                     <div className="flex-1 overflow-y-auto flex flex-col">
 
                         {/* 탭 내용 */}
-                        <div className="h-[35%] relative rounded-xl border shadow-sm p-4 mb-3
-                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
-                            <div className="absolute z-30 flex gap-2 mb-2">
+                        <div className="h-[35%] relative rounded-xl border shadow-sm p-3 mb-1
+                              bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700
+                              pt-9"
+                        >
+                            <div
+                                className="absolute top-4 right-5 z-30 flex items-center gap-2
+                                        pointer-events-none"
+                            >
                                 <button
                                     onClick={() => setActiveTab("history")}
-                                    className={`mx-1 text-sm flex items-center gap-1 ${
-                                        activeTab === "history"
-                                            ? "text-blue-500"
-                                            : "text-gray-400 dark:text-neutral-600"
-                                    }`}
+                                    className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
+                                        ${activeTab === "history"
+                                        ? "text-blue-500"
+                                        : "text-gray-400 dark:text-neutral-600"}`}
                                 >
                                     <i className="fa-solid fa-circle text-[0.3rem]"></i>History
                                 </button>
                                 <button
                                     onClick={() => setActiveTab("total")}
-                                    className={`mx-1 text-sm flex items-center gap-1 ${
-                                        activeTab === "total"
-                                            ? "text-blue-500"
-                                            : "text-gray-400 dark:text-neutral-600"
-                                    }`}
+                                    className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
+                                        ${activeTab === "total"
+                                        ? "text-blue-500"
+                                        : "text-gray-400 dark:text-neutral-600"}`}
                                 >
                                     <i className="fa-solid fa-circle text-[0.3rem]"></i>Total
                                 </button>
                             </div>
+
                             {activeTab === "history" ? (
                                 <AnalysisHistoryChart history={history}/>
                             ) : (
