@@ -77,7 +77,12 @@ function ArticleDetailInner() {
         m?.target?.id ??
         0
     );
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+    useEffect(() => {
+        const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
+        setIsLoggedIn(!!token);
+    }, []);
     const getNick = (m) =>
         (m?.nickName ?? m?.nickname ?? m?.name ?? m?.user?.nickName ?? m?.user?.name ?? m?.extra__writer ?? '').toString().trim();
 
@@ -402,13 +407,16 @@ function ArticleDetailInner() {
                     <p className="text-red-500">{errMsg}</p>
                 </div>
             ) : (
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-3xl mx-auto ">
                     <div className="flex justify-between">
                         {/* 제목 + 날짜 묶음 */}
-                        <div className="flex items-baseline gap-2 mb-2 ml-2 flex-wrap">
-                            <h1 className="text-3xl font-bold inline">
-                                {article.title}
-                            </h1>
+                        <div
+                            className={`flex items-baseline gap-2 mb-2 ml-2 flex-wrap ${
+                                isLoggedIn ? "pt-0" : "pt-20"
+                            }`}
+                        >
+                            <h1 className="text-3xl font-bold inline">{article.title}</h1>
+
                             <span className="text-gray-500 dark:text-neutral-400 text-lg">
                                 · {new Date(article.regDate).toLocaleDateString("en-US", {
                                                         year: "numeric",
@@ -603,20 +611,6 @@ function ArticleDetailInner() {
                                 ></i>
                                 <span className="text-sm">{likeCount}</span>
                             </div>
-
-                            {/* 신고 버튼 */}
-                            <button
-                                onClick={() => {
-                                    if (article?.id) {
-                                        router.push(`/DiFF/article/report?id=${article.id}`);
-                                    } else {
-                                        alert("게시글 ID를 불러올 수 없습니다.");
-                                    }
-                                }}
-                                className="text-black hover:text-red-500 text-sm"
-                            >
-                                Report
-                            </button>
                         </div>
                     </div>
 
@@ -630,57 +624,75 @@ function ArticleDetailInner() {
 
                     {/* 댓글 입력 */}
                     <div className="my-10">
-                        <form onSubmit={handleSubmitreply} className="relative">
-                            <label htmlFor="comment" className="sr-only">댓글 작성</label>
+                        {isLoggedIn ? (
+                            // ✅ 로그인 상태 → 댓글 입력창
+                            <form onSubmit={handleSubmitreply} className="relative">
+                                <label htmlFor="comment" className="sr-only">댓글 작성</label>
 
-                            <div
-                                className="relative rounded-xl border backdrop-blur-sm shadow-sm transition-all
-                                border-black/10 focus-within:border-black/20 bg-white/80
-                                dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
-                            >
-                                {/* textarea */}
-                                <textarea
-                                    id="comment"
-                                    ref={textareaRef}
-                                    value={reply}
-                                    onInput={handleInput}
-                                    onChange={(e) => setReply(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-                                            e.preventDefault();
-                                            if (reply.trim()) handleSubmitreply(e);
-                                        }
-                                    }}
-                                    maxLength={1000}
-                                    placeholder="What are your thoughts?"
-                                    className="block w-full resize-none bg-transparent
-                                       p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
-                                       text-gray-900 dark:text-neutral-200
-                                       placeholder-gray-400 dark:placeholder-neutral-500
-                                       focus:outline-none"
-                                />
+                                <div
+                                    className="relative rounded-xl border backdrop-blur-sm shadow-sm transition-all
+                   border-black/10 focus-within:border-black/20 bg-white/80
+                   dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
+                                >
+                                    {/* textarea */}
+                                    <textarea
+                                        id="comment"
+                                        ref={textareaRef}
+                                        value={reply}
+                                        onInput={handleInput}
+                                        onChange={(e) => setReply(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                                                e.preventDefault();
+                                                if (reply.trim()) handleSubmitreply(e);
+                                            }
+                                        }}
+                                        maxLength={1000}
+                                        placeholder="What are your thoughts?"
+                                        className="block w-full resize-none bg-transparent
+                     p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
+                     text-gray-900 dark:text-neutral-200
+                     placeholder-gray-400 dark:placeholder-neutral-500
+                     focus:outline-none"
+                                    />
 
-                                <div className="absolute bottom-2 right-2 flex items-center gap-3">
-                                    <span className="text-xs text-gray-500 dark:text-neutral-500">
-                                      {reply.trim().length}/1000
-                                    </span>
-                                    <button
-                                        type="submit"
-                                        disabled={!reply.trim()}
-                                        className="px-4 py-2 rounded-full
-                                         bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
-                                         text-xs font-medium
-                                         shadow-sm hover:shadow-md
-                                         transition-all
-                                         disabled:opacity-40 disabled:cursor-not-allowed
-                                         active:scale-[0.98]"
-                                    >
-                                        Comment
-                                    </button>
+                                    {/* 하단 글자수 + 버튼 */}
+                                    <div className="absolute bottom-2 right-2 flex items-center gap-3">
+          <span className="text-xs text-gray-500 dark:text-neutral-500">
+            {reply.trim().length}/1000
+          </span>
+                                        <button
+                                            type="submit"
+                                            disabled={!reply.trim()}
+                                            className="px-4 py-2 rounded-full
+                       bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
+                       text-xs font-medium
+                       shadow-sm hover:shadow-md
+                       transition-all
+                       disabled:opacity-40 disabled:cursor-not-allowed
+                       active:scale-[0.98]"
+                                        >
+                                            Comment
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        ) : (
+                            <p className="text-center text-sm text-gray-500 dark:text-neutral-400">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        window.dispatchEvent(new CustomEvent("open-modal", { detail: "login" }))
+                                    }
+                                    className="font-medium underline hover:text-gray-700 dark:hover:text-neutral-200"
+                                >
+                                    LOGIN
+                                </button>{" "}
+                                to write a comment.
+                            </p>
+                        )}
                     </div>
+
 
 
                     {/* 댓글 목록 */}

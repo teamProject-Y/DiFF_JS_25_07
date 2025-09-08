@@ -38,6 +38,8 @@ function SettingsPage() {
 
     const fileInputRef = useRef(null);
     const textareaRef = useRef(null);
+    const [editingNick, setEditingNick] = useState(false);
+    const nickRef = useRef(null);
 
     const [settings, setSettings] = useState({
         reply: member?.allowReplyNotification ?? false,
@@ -231,12 +233,41 @@ function SettingsPage() {
     }, []);
 
     const handleInput = (e) => {
-        const textarea = textareaRef.current;
+        const textarea = e.target;
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
 
+
     if (loading) return <PageSkeleton/>;
+
+    // 닉네임 저장
+    const onSaveNick = async () => {
+        if (!dirtyNick) {
+            setEditingNick(false);
+            return;
+        }
+        setBanner(null);
+        try {
+            const res = await modifyNickName({ nickName: form.nickName });
+            localStorage.setItem("nickName", form.nickName);
+            setMember((prev) => ({ ...prev, nickName: form.nickName }));
+            setBanner({ type: "success", msg: res.msg || "닉네임이 수정되었습니다" });
+            setEditingNick(false);
+        } catch (err) {
+            console.error("닉네임 수정 실패:", err);
+            if (err.response) {
+                setBanner({ type: "error", msg: err.response.data?.msg || "닉네임 수정에 실패했습니다" });
+            } else {
+                setBanner({ type: "error", msg: "서버와 연결할 수 없습니다" });
+            }
+        }
+    };
+// 닉네임 편집 취소
+    const cancelEditNick = () => {
+        setForm((prev) => ({ ...prev, nickName: member?.nickName || "" }));
+        setEditingNick(false);
+    };
 
     return (
         <section className="h-screen flex flex-col px-4 dark:text-neutral-300 overflow-hidden">
@@ -322,7 +353,6 @@ function SettingsPage() {
                                     </div>
 
                                     <div className="flex-1 px-2">
-                                        <div className="text-sm text-neutral-500">계정</div>
                                         <div className="mt-1 text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                                             {member?.email || '-'}
                                         </div>
@@ -344,39 +374,62 @@ function SettingsPage() {
                                             />
 
                                         </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center min-w-0 flex-grow h-11">
+                                                {editingNick ? (
+                                                    <>
+                                                        <input
+                                                            ref={nickRef}
+                                                            value={form.nickName}
+                                                            onChange={(e) => setForm({ ...form, nickName: e.target.value })}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === "Enter") onSaveNick();
+                                                                if (e.key === "Escape") cancelEditNick();
+                                                            }}
+                                                            className="flex-grow min-w-0 px-2 py-1 mr-2 rounded-md border
+                     focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                                            placeholder="nickname"
+                                                        />
+                                                        <button
+                                                            onClick={onSaveNick}
+                                                            className="p-1"
+                                                            title="Save"
+                                                            aria-label="Save nickname"
+                                                        >
+                                                            <i className="fa-solid fa-check"></i>
+                                                        </button>
+                                                        <button
+                                                            onClick={cancelEditNick}
+                                                            className="p-1"
+                                                            title="Cancel"
+                                                            aria-label="Cancel edit"
+                                                        >
+                                                            <i className="fa-solid fa-xmark"></i>
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <p className="text-lg font-semibold break-all pl-1">
+                                                            {member?.nickName ?? "nickname"}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => setEditingNick(true)}
+                                                            className="pl-2 pb-1 text-xs text-neutral-400"
+                                                            title="Rename"
+                                                            aria-label="Rename nickname"
+                                                        >
+                                                            <i className="fa-solid fa-pen"></i>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </Card>
 
-                            {/* 닉네임 카드 */}
-                            <Card>
-                                <form onSubmit={handleSubmitNickName} className="flex flex-col gap-3">
-                                    <label
-                                        className="text-sm font-medium text-neutral-600 dark:text-neutral-300">닉네임</label>
-                                    <input
-                                        name="nickName"
-                                        value={form.nickName ?? ""}
-                                        onChange={handleChange}
-                                        placeholder="nickname"
-                                        className="w-full rounded-lg border border-neutral-300 bg-neutral-100 p-2.5 text-neutral-900 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={!dirtyNick}
-                                        className={
-                                            "rounded-lg px-4 py-2 text-sm text-white " +
-                                            (dirtyNick
-                                                ? "bg-neutral-900 hover:bg-neutral-800"
-                                                : "bg-neutral-600/50 cursor-not-allowed")
-                                        }
-                                    >
-                                        UPDATE
-                                    </button>
-                                </form>
-                            </Card>
-
                             <Card className="p-4 space-y-4">
-                                <h2 className="text-lg font-semibold mb-2">Notification Settings</h2>
+                                <h2 className="text-lg font-semibold mb-2 pt-3">Notification Settings</h2>
 
                                 <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
                                     {items.map((item) => {
@@ -434,7 +487,7 @@ function SettingsPage() {
                         <div className="flex-grow flex flex-col gap-4">
 
                             {/* Profile README */}
-                            <Card>
+                            <Card className="flex-1 flex flex-col">
                                 <div className="mb-3 flex items-center justify-between">
                                     <h3 className="text-2xl font-bold">Profile README</h3>
 
@@ -467,18 +520,19 @@ function SettingsPage() {
                                     </div>
                                 </div>
 
-                                <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3">
+                                <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3 h-full">
                                     {activeMdTab === "write" ? (
                                         <textarea
                                             name="introduce"
                                             value={form.introduce ?? ""}
                                             onChange={handleChange}
                                             onInput={handleInput}
-                                            className="min-h-[220px] rounded-md border border-neutral-300 bg-white p-4 text-neutral-800 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                            className="flex-1 rounded-md border border-neutral-300 bg-white p-4 text-neutral-800 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+
                                             placeholder={`마크다운 형식으로 자기소개 작성\n예) ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)\n\n저는 Spring Boot와 React를 좋아합니다!`}
                                         />
                                     ) : (
-                                        <div className="markdown min-h-[220px] rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
+                                        <div className="markdown flex-1 rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
                                             <ReactMarkdown
                                                 remarkPlugins={[remarkGfm]}
                                                 rehypePlugins={[rehypeRaw]}
@@ -603,14 +657,14 @@ function SettingsPage() {
     );
 }
 
-function Card({children}) {
+function Card({children, className}) {
     return (
-        <div
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950/30">
+        <div className={className}>
             {children}
         </div>
     );
 }
+
 
 function TopTab({href, label, active}) {
     return active ? (

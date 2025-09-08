@@ -1,4 +1,3 @@
-// src/app/DiFF/article/write/page.js
 'use client';
 import { getDraftById, saveDraft } from "@/lib/DraftAPI";
 import { Suspense, useEffect, useState, useCallback, useMemo, useRef } from 'react';
@@ -7,9 +6,12 @@ import { writeArticle, getMyRepositories } from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
 import clsx from "clsx";
 
-const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
+const ToastEditor = dynamic(() => import('@/common/toastEditor'), { ssr: false });
 
-function RepoDropdown({ items = [], value, onChange }) {
+/**
+ * Minimal monochrome Repo dropdown (keyboard-accessible)
+ */
+function RepoDropdown({ items = [], value, onChange, disabled }) {
     const [open, setOpen] = useState(false);
     const btnRef = useRef(null);
     const menuRef = useRef(null);
@@ -23,7 +25,7 @@ function RepoDropdown({ items = [], value, onChange }) {
         ? (selected.name || selected.repoName || `Repo#${selected.id}`)
         : "Select a repository";
 
-    // 외부 클릭으로 닫기
+    // close on outside click
     useEffect(() => {
         function onDocClick(e) {
             if (!open) return;
@@ -40,9 +42,10 @@ function RepoDropdown({ items = [], value, onChange }) {
         return () => document.removeEventListener("mousedown", onDocClick);
     }, [open]);
 
-    // 키보드 접근성
+    // keyboard
     const onKeyDown = useCallback(
         (e) => {
+            if (disabled) return;
             if (!open && (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ")) {
                 e.preventDefault();
                 setOpen(true);
@@ -68,47 +71,44 @@ function RepoDropdown({ items = [], value, onChange }) {
                 e.preventDefault();
                 const id = document.activeElement?.getAttribute("data-value");
                 if (id != null) {
-                    onChange?.(id);
+                    onChange?.(Number(id));
                     setOpen(false);
                     btnRef.current?.focus();
                 }
             }
         },
-        [open, onChange]
+        [open, onChange, disabled]
     );
 
     return (
         <div className="relative" onKeyDown={onKeyDown}>
-            {/* 트리거 버튼 */}
             <button
                 type="button"
                 ref={btnRef}
-                onClick={() => setOpen((v) => !v)}
+                onClick={() => !disabled && setOpen((v) => !v)}
                 aria-haspopup="listbox"
                 aria-expanded={open}
-                className="
-                  w-full rounded border px-4 py-3 text-left text-sm
-                  border-neutral-300 bg-neutral-100/70 text-neutral-900
-                  outline-none transition hover:bg-neutral-100 focus:border-neutral-600
-                  pr-10
-                  dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-100
-                "
+                disabled={disabled}
+                className={clsx(
+                    "h-9 min-w-[12rem] truncate rounded-md border px-3 text-left text-sm",
+                    "border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50",
+                    "outline-none focus:border-neutral-600",
+                    "dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-950/60",
+                    disabled && "opacity-60 cursor-not-allowed"
+                )}
             >
                 {label}
-                <i className="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
+                <i className="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-400 dark:text-neutral-500" />
             </button>
 
-            {/* 드롭다운 메뉴 */}
             {open && (
                 <ul
                     ref={menuRef}
                     role="listbox"
-                    className="
-                        absolute right-0 top-full mt-1 w-full
-                        rounded border border-neutral-200 bg-gray-50 backdrop-blur
-                        shadow-lg z-50 max-h-60 overflow-auto
-                        dark:border-neutral-700 dark:bg-neutral-900
-                      "
+                    className={clsx(
+                        "absolute left-0 top-full z-50 mt-1 w-[24rem] max-w-[70vw] overflow-auto rounded-md border shadow-lg",
+                        "max-h-64 border-neutral-200 bg-white/95 backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-900/95"
+                    )}
                 >
                     {items.map((r) => {
                         const id = String(r.id);
@@ -122,18 +122,18 @@ function RepoDropdown({ items = [], value, onChange }) {
                                 tabIndex={0}
                                 data-value={id}
                                 onClick={() => {
-                                    onChange?.(id);
+                                    onChange?.(Number(id));
                                     setOpen(false);
                                     btnRef.current?.focus();
                                 }}
-                                className={`
-                                      flex cursor-pointer items-center justify-between px-3 py-2 text-sm
-                                      text-neutral-800 dark:text-neutral-200 
-                                      ${isSelected ? "font-medium bg-neutral-200 dark:bg-neutral-700" 
-                                    : "hover:bg-neutral-100 dark:hover:bg-neutral-800"}
-                                    `}
+                                className={clsx(
+                                    "flex cursor-pointer items-center justify-between px-3 py-2 text-sm",
+                                    "text-neutral-800 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800",
+                                    isSelected && "bg-neutral-200/70 dark:bg-neutral-700/60"
+                                )}
                             >
                                 <span className="truncate">{text}</span>
+                                {isSelected && <i className="fa-solid fa-check text-xs opacity-70" />}
                             </li>
                         );
                     })}
@@ -145,8 +145,8 @@ function RepoDropdown({ items = [], value, onChange }) {
 
 export default function Page() {
     return (
-        <Suspense fallback={<div className="p-4">Loading…</div>}>
-            <WriteArticlePage/>
+        <Suspense fallback={<div className="p-4 text-sm">Loading…</div>}>
+            <WriteArticlePage />
         </Suspense>
     );
 }
@@ -155,10 +155,10 @@ export function WriteArticlePage() {
     const router = useRouter();
     const sp = useSearchParams();
 
-    // 쿼리스트링
+    // from query
     const repoFromQuery = sp.get('repositoryId');
 
-    // 상태
+    // state
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [repos, setRepos] = useState([]);
@@ -172,13 +172,13 @@ export function WriteArticlePage() {
     const [diffId, setDiffId] = useState(null);
     const [isPublic, setIsPublic] = useState(true);
 
-    // 로그인 체크
+    // auth check
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!token) router.replace('/DiFF/member/login');
     }, [router]);
 
-    // draftId 있으면 임시저장 불러오기
+    // load draft if present
     useEffect(() => {
         if (draftId) {
             (async () => {
@@ -188,19 +188,18 @@ export function WriteArticlePage() {
                     setTitle(draft.title || '');
                     setBody(draft.body || '');
                     setRepositoryId(draft.repositoryId || null);
-
                     if (draft.diffId) {
                         setDiffId(draft.diffId);
-                        console.log("📥 draft.diffId 세팅:", draft.diffId);
+                        // console.log("draft.diffId:", draft.diffId);
                     }
                 } catch (e) {
-                    console.error("임시저장 불러오기 실패:", e);
+                    console.error('Failed to load draft:', e);
                 }
             })();
         }
     }, [draftId]);
 
-    // 내 리포 목록 불러오기
+    // load repos
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -225,7 +224,7 @@ export function WriteArticlePage() {
         };
     }, [repoFromQuery]);
 
-    // SHA-256 체크섬
+    // checksum
     const makeChecksum = useCallback(async (text) => {
         if (!text) return '';
         const enc = new TextEncoder().encode(text);
@@ -233,20 +232,10 @@ export function WriteArticlePage() {
         return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }, []);
 
-    // 게시물 작성
-    // 게시물 작성
+    // submit (upload)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-
-        console.log("🚀 [handleSubmit] 실행됨");
-        console.log("📌 현재 상태:", {
-            repositoryId,
-            title,
-            bodyLength: body?.length,
-            draftId,
-            diffId
-        });
 
         if (!repositoryId) return setError('repositoryId가 없습니다.');
         if (!title.trim()) return setError('제목을 입력하세요.');
@@ -256,7 +245,6 @@ export function WriteArticlePage() {
             setSubmitting(true);
             setSubmittingType('upload');
             const checksum = await makeChecksum(body);
-
             const data = {
                 title,
                 body,
@@ -266,48 +254,29 @@ export function WriteArticlePage() {
                 diffId: diffId ? Number(diffId) : null,
                 isPublic: isPublic,
             };
-
-            console.log("📤 [handleSubmit] 서버로 보낼 data:", data);
-
             const res = await writeArticle(data);
-
-            console.log("📥 [handleSubmit] 서버 응답 전체:", res);
-
             if (res?.resultCode?.startsWith('S-')) {
-                const articleId = res.data1; // 서버가 반환한 id
+                const articleId = res.data1;
                 router.push(`/DiFF/article/detail?id=${articleId}`);
-            }
-            else {
-                console.error("❌ [handleSubmit] 작성 실패 응답:", res);
+            } else {
                 setError(res?.msg || '작성 실패');
             }
         } catch (err) {
-            console.error("💥 [handleSubmit] 요청 실패", err);
-
-            if (err?.response) {
-                console.error("📥 서버 에러 응답:", err.response);
-                console.error("📥 서버 에러 data:", err.response.data);
-                console.error("📥 서버 에러 status:", err.response.status);
-                console.error("📥 서버 에러 headers:", err.response.headers);
-            } else {
-                console.error("📥 네트워크 에러 or axios 설정 문제:", err.message);
-            }
-
+            console.error('upload error', err);
             if (err?.response?.status === 401) {
                 router.replace('/DiFF/member/login');
             } else {
                 setError(err?.response?.data?.msg || err.message || '요청 실패');
             }
         } finally {
-            console.log("🔚 [handleSubmit] 종료 (submitting=false)");
             setSubmitting(false);
             setSubmittingType(null);
         }
     };
 
-
+    // save draft
     const handleSaveDraft = async (e) => {
-        e.preventDefault();
+        e?.preventDefault?.();
         setError('');
 
         if (!repositoryId) return setError('repositoryId가 없습니다.');
@@ -317,40 +286,28 @@ export function WriteArticlePage() {
             setSubmitting(true);
             setSubmittingType('save');
             const checksum = await makeChecksum(body);
-
             const data = {
-                id: draftId ? Number(draftId) : null, // 새 글이면 null
+                id: draftId ? Number(draftId) : null,
                 title,
                 body,
                 checksum,
                 repositoryId: Number(repositoryId),
                 isPublic: isPublic,
             };
-
             const res = await saveDraft(data);
-
-            console.log("💾 saveDraft 응답:", res);
-
-            if (res && res.resultCode && res.resultCode.startsWith("S-")) {
-                alert("임시저장 완료!");
-
-                if (!draftId && res.data1) {
-                    setDraftId(res.data1);
-                }
-                if (res.data2) {
-                    setDiffId(res.data2);
-                    console.log("💾 diffId 세팅:", res.data2);
-                }
+            if (res && res.resultCode && res.resultCode.startsWith('S-')) {
+                alert('임시저장 완료!');
+                if (!draftId && res.data1) setDraftId(res.data1);
+                if (res.data2) setDiffId(res.data2);
             } else {
-                console.error("❌ saveDraft 실패 응답:", res);
-                setError(res?.msg || "임시저장 실패");
+                setError(res?.msg || '임시저장 실패');
             }
         } catch (err) {
-            console.error("💥 saveDraft error:", err);
+            console.error('saveDraft error', err);
             if (err?.response?.status === 401) {
-                router.replace("/DiFF/member/login");
+                router.replace('/DiFF/member/login');
             } else {
-                setError(err?.response?.data?.msg || err.message || "요청 실패");
+                setError(err?.response?.data?.msg || err.message || '요청 실패');
             }
         } finally {
             setSubmitting(false);
@@ -358,58 +315,80 @@ export function WriteArticlePage() {
         }
     };
 
+    // shortcuts: Ctrl/Cmd+S save, Ctrl/Cmd+Enter upload
+    useEffect(() => {
+        const onKey = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                if (!submitting) handleSaveDraft(e);
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                if (!submitting) {
+                    // create a synthetic form submit
+                    const form = document.getElementById('writer-form');
+                    form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [submitting, handleSaveDraft]);
 
-
+    // constant header height (Tailwind h-14 => 56px)
+    const headerHClass = 'h-14';
 
     return (
-        <div className="min-h-screen w-full">
-            {/* 상단 바/뒤로가기 */}
-            <div className="mx-auto max-w-5xl px-4 pt-6">
+        <div className={clsx(
+            "relative isolate",
+            "min-h-dvh h-dvh w-full overflow-hidden",
+            "bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300"
+        )}>
+            <div className="fixed flex justify-end gap-5 bottom-0 w-full z-50 p-5 text-xl bg-white dark:bg-neutral-900">
                 <button
-                    onClick={() => router.push('/DiFF/member/repository')}
-                    className="inline-flex items-center gap-2 rounded border border-neutral-300 bg-white/70 px-3 py-2 text-sm text-neutral-700 backdrop-blur transition hover:bg-white/90 dark:border-neutral-700 dark:bg-neutral-950/30 dark:text-neutral-300 dark:hover:bg-neutral-900/60"
+                    type="button"
+                    onClick={handleSaveDraft}
+                    disabled={submitting || !repositoryId}
+                    className={clsx(
+                        "h-9 rounded-md border px-3 text-sm",
+                        "border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100/60",
+                        "disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    )}
                 >
-                    <i className="fa-solid fa-angle-left" />
-                    <span>Back to Repositories</span>
+                    {submitting && submittingType === 'save' ? 'Saving…' : 'Save'}
+                </button>
+
+                <button
+                    type="submit"
+                    disabled={submitting || !repositoryId}
+                    className={clsx(
+                        "h-9 rounded-md border px-4 text-sm font-medium",
+                        " bg-gray-900 text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]",
+                        "disabled:opacity-50 dark:border-neutral-300 dark:bg-neutral-300 dark:text-neutral-900"
+                    )}
+                >
+                    {submitting && submittingType === 'upload' ? 'Uploading…' : 'Upload'}
                 </button>
             </div>
-
-            {/* 카드 */}
-            <div className="mx-auto max-w-5xl px-4 pb-12 pt-6">
-                <div className="rounded-2xl border border-neutral-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/30">
-                    {/* 헤더 */}
-                    <div className="mb-6 flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-semibold tracking-tight">Write Article</h1>
-                            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                Select a repository, then add a title and content.
-                            </p>
-                        </div>
-                        {draftId && (
-                            <span className="rounded-full border border-neutral-300 px-3 py-1 text-xs text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">
-                                Draft #{draftId}
-                            </span>
-                        )}
-                    </div>
-
-                    <div className="mb-5">
-                        <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                            Repository
-                        </label>
-
+            <form id="writer-form" onSubmit={handleSubmit} className="contents" aria-live="polite">
+                <div
+                    className={clsx(
+                        "sticky inset-x-0 top-0 z-40",
+                        headerHClass,
+                        "flex items-center gap-5 border-b",
+                        "border-neutral-200/70 backdrop-blur supports-[backdrop-filter]:bg-white/60",
+                        "dark:border-neutral-800/70 dark:supports-[backdrop-filter]:bg-black/40",
+                        "px-3 sm:px-4"
+                    )}
+                >
+                    {/* Repo */}
+                    <div className="col-span-12 sm:col-span-4 md:col-span-3 flex items-center gap-2">
                         {loadingRepos ? (
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-full animate-pulse rounded bg-neutral-200/70 dark:bg-neutral-800/70" />
-                                <div className="h-10 w-24 animate-pulse rounded bg-neutral-200/70 dark:bg-neutral-800/70" />
-                            </div>
+                            <div className="h-9 w-48 animate-pulse rounded-md bg-neutral-200/70 dark:bg-neutral-800/70" />
                         ) : repoError ? (
-                            <div className="rounded border border-red-300/60 bg-red-50/50 px-3 py-2 text-sm text-red-700 dark:border-red-800/70 dark:bg-red-950/30 dark:text-red-300">
-                                {repoError}
-                            </div>
+                            <div className="truncate text-xs text-red-500">{repoError}</div>
                         ) : repos.length === 0 ? (
-                            <div className="rounded border border-yellow-300/60 bg-yellow-50/50 px-3 py-2 text-sm text-yellow-800 dark:border-yellow-800/70 dark:bg-yellow-950/30 dark:text-yellow-300">
-                                You don’t have any repositories. Please create one first.
-                            </div>
+                            <div className="truncate text-xs text-yellow-700 dark:text-yellow-300">No repositories. Create one first.</div>
                         ) : (
                             <RepoDropdown
                                 items={repos}
@@ -417,119 +396,134 @@ export function WriteArticlePage() {
                                 onChange={(v) => setRepositoryId(Number(v))}
                             />
                         )}
+                        {draftId && (
+                            <span className="hidden sm:inline-flex items-center rounded-full border px-2 py-1 text-[10px] tracking-wide text-neutral-500 dark:border-neutral-800/80 dark:text-neutral-400">
+                            Draft #{draftId}
+                          </span>
+                        )}
                     </div>
 
-                    {/* 작성 폼 */}
-                    <form onSubmit={handleSubmit} className="space-y-5" aria-live="polite">
-                        {/* 제목 */}
-                        <div>
-                            <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                                Title
-                            </label>
-                            <input
-                                className="w-full rounded border border-neutral-300 bg-neutral-100/70 px-4 py-3 text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-600 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-100"
-                                placeholder="제목"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                            />
-                        </div>
-
-                        {/* 본문 */}
-                        <div className="space-y-2">
-                            <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                                Content
-                            </label>
-                            <div className="rounded border border-neutral-300 bg-neutral-100/50 p-2 dark:border-neutral-700 dark:bg-neutral-900/40">
-                                {/* ✅ ToastEditor 연결 */}
-                                <ToastEditor
-                                    initialValue={body}
-                                    onChange={(value) => setBody(value)}
-                                />
-                            </div>
-                        </div>
-                        {/* 상태 메시지 */}
-                        <div className="min-h-[1rem]">
-                            {error && (
-                                <div className="mt-2 px-3 py-2 text-sm text-red-500">
-                                    {error}
-                                </div>
+                    {/* Title */}
+                    <div className="flex-1 rounded border dark:border-neutral-700">
+                        <input
+                            className={clsx(
+                                "w-full truncate rounded border p-3 text-lg font-bold",
+                                "border-transparent bg-transparent focus:border-neutral-400",
+                                "placeholder:text-neutral-400",
+                                "dark:placeholder:text-neutral-600"
                             )}
-                        </div>
+                            placeholder="Title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                    </div>
 
-                        {/* 버튼들 */}
-                        <div className="flex flex-wrap items-center justify-between gap-3">
+                    {/* Actions */}
+                    <div className="col-span-12 sm:col-span-3 md:col-span-3 flex items-center justify-end gap-2">
+                        {/* Visibility toggle */}
+                        <button
+                            type="button"
+                            onClick={() => setIsPublic(!isPublic)}
+                            className={clsx(
+                                "relative inline-flex h-6 w-11 items-center rounded-full transition",
+                                isPublic ? 'bg-neutral-900 dark:bg-neutral-100' : 'bg-neutral-300 dark:bg-neutral-700'
+                            )}
+                            aria-label={isPublic ? 'Public' : 'Private'}
+                            title={isPublic ? 'Public' : 'Private'}
+                        >
+                          <span
+                              className={clsx(
+                                  "inline-block h-4 w-4 transform rounded-full bg-white transition",
+                                  isPublic ? 'translate-x-6' : 'translate-x-1'
+                              )}
+                          />
+                        </button>
+                        <span className="hidden md:inline text-xs text-neutral-500">{isPublic ? 'Public' : 'Private'}</span>
 
-                            {/* 공개/비공개 토글 */}
-                            <div>
-                                <label className="mb-1 block text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                                    Visibility
-                                </label>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsPublic(!isPublic)}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-                                        isPublic ? 'bg-green-500' : 'bg-gray-400'
-                                    }`}
-                                >
-                                <span
-                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                                        isPublic ? 'translate-x-6' : 'translate-x-1'
-                                    }`}
-                                />
-                                </button>
-                                <span className="ml-3 text-sm text-neutral-700 dark:text-neutral-300">
-                                                {isPublic ? '공개' : '비공개'}
-                                        </span>
-                            </div>
-
-                            <div className="flex gap-2">
-                                {/* Upload (Primary) */}
-                                <button
-                                    type="submit"
-                                    disabled={submitting || !repositoryId}
-                                    className={clsx(
-                                        "group relative inline-flex items-center justify-center gap-2 rounded border px-5 py-2.5 text-sm font-medium transition-all",
-                                        "border-neutral-300 bg-neutral-900 text-neutral-100 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]",
-                                        "disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-100 dark:text-neutral-900"
-                                    )}
-                                >
-                                    {submitting && submittingType === 'upload' && (
-                                        <span className="inline-block h-4 w-4 animate-spin rounded-full border border-neutral-500 border-t-transparent dark:border-neutral-400 dark:border-t-transparent" />
-                                    )}
-                                    {submitting && submittingType === 'upload' ? 'Uploading…' : 'Upload'}
-                                </button>
-
-                                {/* Save Draft (Outline) */}
-                                <button
-                                    type="button"
-                                    onClick={handleSaveDraft}
-                                    disabled={submitting || !repositoryId}
-                                    className={clsx(
-                                        "relative inline-flex items-center justify-center gap-2 rounded border px-5 py-2.5 text-sm font-medium transition-all",
-                                        "border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100/60",
-                                        "disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-900/60"
-                                    )}
-                                >
-                                    {submitting && submittingType === 'save' && (
-                                        <span className="inline-block h-4 w-4 animate-spin rounded-full border border-neutral-500 border-t-transparent dark:border-neutral-400 dark:border-t-transparent" />
-                                    )}
-                                    {submitting && submittingType === 'save' ? 'Saving…' : 'Save'}
-                                </button>
-                            </div>
-
-                            {/* Go to drafts (Ghost) */}
-                            <button
-                                type="button"
-                                onClick={() => router.push('/DiFF/article/drafts')}
-                                className="inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm text-neutral-600 hover:text-neutral-800 hover:underline dark:text-neutral-400 dark:hover:text-neutral-200"
-                            >
-                                <i className="fa-regular fa-file-lines" />
-                                Drafts
-                            </button>
-                        </div>
-                    </form>
+                        <button
+                            type="button"
+                            onClick={() => router.push('/DiFF/article/drafts')}
+                            className={clsx(
+                                "h-9 rounded-md px-3 text-sm text-neutral-600 hover:text-neutral-900 hover:underline",
+                                "dark:text-neutral-400 dark:hover:text-neutral-100"
+                            )}
+                        >
+                            Drafts
+                        </button>
+                    </div>
                 </div>
-            </div>
+
+                {!!error && (
+                    <div className="sticky top-14 z-30 w-full border-b border-red-200/60 bg-red-50/70 px-3 py-1.5 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
+                        {error}
+                    </div>
+                )}
+
+                <div className={clsx(
+                    "absolute inset-x-0 bottom-0",
+                    error ? 'top-[calc(56px+28px)]' : 'top-14'
+                )}>
+                    <div className="h-full w-full overflow-hidden">
+                        <div className="h-full w-full overflow-auto px-0">
+                            <div className="h-full w-full [--editor-padding:0]">
+                                <div className="h-full w-full">
+                                    <ToastEditor
+                                        initialValue={body}
+                                        onChange={(value) => setBody(value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {/* Global tiny CSS to make ToastUI fill its container, keep it borderless for full-bleed feel */}
+            <style jsx global>{`
+                /* Toast UI Editor: fill parent and scroll INSIDE */
+                .toastui-editor-defaultUI{
+                    height:100% !important;
+                    border:0 !important;
+                    display:flex; flex-direction:column;
+                }
+                .toastui-editor-toolbar{ flex:0 0 auto; }
+                .toastui-editor-main{
+                    flex:1 1 0% !important;
+                    min-height:0 !important;
+                    height:auto !important;
+                }
+                /* both WYSIWYG and Markdown containers fill */
+                .toastui-editor-md-container,
+                .toastui-editor-ww-container{
+                    height:100% !important;
+                    min-height:0 !important;
+                }
+                /* WYSIWYG scroll */
+                .toastui-editor-ww-container .ProseMirror{
+                    height:100% !important;
+                    overflow:auto !important;
+                    box-sizing:border-box;
+                }
+                /* Markdown scroll */
+                .toastui-editor-md-container .CodeMirror,
+                .toastui-editor-md-container .CodeMirror-scroll{
+                    height:100% !important;
+                }
+                .toastui-editor-md-container .CodeMirror-scroll{
+                    overflow:auto !important;
+                }
+                
+                .toastui-editor-main-container {
+                    min-height:100% !important;
+                }
+                
+                /* 패딩 유지 – 필요 없으면 줄이세요 */
+                .toastui-editor-defaultUI .ProseMirror{ padding:24px 20px; }
+                @media (min-width:640px){ .toastui-editor-defaultUI .ProseMirror{ padding:12px 12px; 
+                min-height:100% !important;} }
+                @media (min-width:1024px){ .toastui-editor-defaultUI .ProseMirror{ padding:20px 20px; 
+                min-height: 100% !important;} }
+            `}</style>
         </div>
     );
 }
