@@ -455,3 +455,14 @@ li {
 
 #pageScroll { touch-action: pan-y; }
 .article-slider, .swiper { touch-action: pan-x; }
+
+.white-autofill ,
+.white-autofill:-webkit-autofill:hover,
+.white-autofill:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    box-shadow: 0 0 0px 1000px #ffffff inset !important;
+
+    -webkit-text-fill-color: #111827 !important;
+    caret-color: #111827 !important;
+    transition: background-color 9999s ease-out 0s !important;
+}
