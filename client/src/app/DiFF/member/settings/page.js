@@ -322,7 +322,6 @@ function SettingsPage() {
                                     </div>
 
                                     <div className="flex-1 px-2">
-                                        <div className="text-sm text-neutral-500">계정</div>
                                         <div className="mt-1 text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                                             {member?.email || '-'}
                                         </div>
@@ -344,39 +343,33 @@ function SettingsPage() {
                                             />
 
                                         </div>
+                                        <form onSubmit={handleSubmitNickName} className="flex flex-col gap-3 pt-3">
+                                            <input
+                                                name="nickName"
+                                                value={form.nickName ?? ""}
+                                                onChange={handleChange}
+                                                placeholder="nickname"
+                                                className="w-full rounded-lg border border-neutral-300 bg-neutral-100 p-2 text-neutral-900 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={!dirtyNick}
+                                                className={
+                                                    "rounded-lg px-4 py-2 text-sm text-white " +
+                                                    (dirtyNick
+                                                        ? "bg-neutral-900 hover:bg-neutral-800"
+                                                        : "bg-neutral-600/50 cursor-not-allowed")
+                                                }
+                                            >
+                                                UPDATE
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </Card>
 
-                            {/* 닉네임 카드 */}
-                            <Card>
-                                <form onSubmit={handleSubmitNickName} className="flex flex-col gap-3">
-                                    <label
-                                        className="text-sm font-medium text-neutral-600 dark:text-neutral-300">닉네임</label>
-                                    <input
-                                        name="nickName"
-                                        value={form.nickName ?? ""}
-                                        onChange={handleChange}
-                                        placeholder="nickname"
-                                        className="w-full rounded-lg border border-neutral-300 bg-neutral-100 p-2.5 text-neutral-900 outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={!dirtyNick}
-                                        className={
-                                            "rounded-lg px-4 py-2 text-sm text-white " +
-                                            (dirtyNick
-                                                ? "bg-neutral-900 hover:bg-neutral-800"
-                                                : "bg-neutral-600/50 cursor-not-allowed")
-                                        }
-                                    >
-                                        UPDATE
-                                    </button>
-                                </form>
-                            </Card>
-
                             <Card className="p-4 space-y-4">
-                                <h2 className="text-lg font-semibold mb-2">Notification Settings</h2>
+                                <h2 className="text-lg font-semibold mb-2 pt-3">Notification Settings</h2>
 
                                 <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
                                     {items.map((item) => {
@@ -467,7 +460,7 @@ function SettingsPage() {
                                     </div>
                                 </div>
 
-                                <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3">
+                                <form id="introduceForm" onSubmit={handleSubmitIntroduce} className="flex flex-col gap-3 h-full">
                                     {activeMdTab === "write" ? (
                                         <textarea
                                             name="introduce"
@@ -605,8 +598,7 @@ function SettingsPage() {
 
 function Card({children}) {
     return (
-        <div
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950/30">
+        <div>
             {children}
         </div>
     );

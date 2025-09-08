@@ -60,18 +60,22 @@ export default function LayMenu() {
 
                 {/* Following 목록 */}
                 <div className="pt-6 text-sm text-gray-500">
-                    <div className="font-semibold mb-3 px-8 text-gray-600 dark:text-neutral-200">Following</div>
+                    <div className="font-semibold mb-3 px-8 text-gray-600 dark:text-neutral-200">
+                        Following
+                    </div>
+
                     {following.length > 0 ? (
-                        <ul className="">
+                        <ul className="max-h-64 overflow-y-auto">
                             {following.map((f, idx) => (
-                                <li key={idx}
-                                    role="link"
-                                    tabIndex={0}
-                                    onClick={() => router.push(`/DiFF/member/profile?nickName=${f.nickName}`)}
-                                    onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(href)}
-                                    className="px-9 py-1 hover:underline dark:text-neutral-300
-                                    cursor-pointer">
-                                    {f.nickName}
+                                <li key={idx} className="flex items-center gap-3 px-9 py-2 cursor-pointer">
+                                    {f.profileUrl ? (
+                                        <img src={f.profileUrl} className="w-8 h-8 rounded-full object-cover border" />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center border bg-gray-100 dark:bg-neutral-700">
+                                            <i className="fa-solid fa-skull text-gray-400 dark:text-neutral-400" />
+                                        </div>
+                                    )}
+                                    <span>{f.nickName}</span>
                                 </li>
                             ))}
                         </ul>
