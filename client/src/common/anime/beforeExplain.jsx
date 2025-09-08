@@ -158,7 +158,7 @@ export default function BeforeExplain() {
                         {/* STEP 2 */}
                         <div
                             ref={right2Ref}
-                            className="absolute top-40 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
                             <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
@@ -174,7 +174,7 @@ export default function BeforeExplain() {
                                     className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
                                     role="button"
                                 >
-                                    더보기 <span className="ml-1">+</span>
+                                    more <span className="ml-1">+</span>
                                 </Link>
                             </div>
                         </div>
@@ -182,7 +182,7 @@ export default function BeforeExplain() {
                         {/* STEP 3 */}
                         <div
                             ref={right3Ref}
-                            className="absolute top-40 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
                             <h2 className="text-black font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
@@ -198,7 +198,7 @@ export default function BeforeExplain() {
                                     className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50"
                                     role="button"
                                 >
-                                    더보기 <span className="ml-1">+</span>
+                                    more <span className="ml-1">+</span>
                                 </Link>
                             </div>
                         </div>
