@@ -51,11 +51,11 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
         } catch (err) {
 
             if (err.response?.status === 403) {
-                setError("이메일 인증을 완료해야 로그인할 수 있습니다.");
+                setError("Please verify your email before logging in.");
             } else if (err.response?.status === 401) {
-                setError("아이디 또는 비밀번호가 잘못되었습니다.");
+                setError("Incorrect username or password.");
             } else {
-                setError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                setError("서Server error. Please try again later.");
             }
             setSubmitting(false);
         }
@@ -106,7 +106,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                 className="py-3 w-full text-sm font-medium bg-black text-white rounded-lg hover:bg-neutral-800 transition disabled:opacity-50"
                 disabled={submitting}
             >
-                {submitting ? 'LOGGING IN…' : 'Sign Up'}
+                {submitting ? 'Signing up…' : 'Sign Up'}
             </button>
 
             {/* 추가 메뉴 */}

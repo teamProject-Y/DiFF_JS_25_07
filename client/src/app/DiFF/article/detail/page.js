@@ -17,71 +17,47 @@ import {
 } from '@/lib/UserAPI';
 import LoadingOverlay from "@/common/loadingOverlay";
 import ToastViewer from "@/common/toastViewer";
-import {saveReport} from "@/lib/NotionAPI";
-import ConfirmDialog from "@/common/alertModal";
+import {useDialog} from "@/common/commonLayout";
 
 function ArticleDetailInner() {
 
     const searchParams = useSearchParams();
+    const { alert, confirm } = useDialog();
     const router = useRouter();
-    const id = searchParams.get('id');
 
+    const id = searchParams.get('id');
     const [article, setArticle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
-    const [deleting, setDeleting] = useState(false);
 
+    const [deleting, setDeleting] = useState(false);
     // 좋아요
     const [liked, setLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
 
+    const [likeCount, setLikeCount] = useState(0);
     // 댓글 상태
     const [replies, setReplies] = useState([]);
     const [reply, setReply] = useState('');
-    const [replyLoading, setReplyLoading] = useState(false);
 
+    const [replyLoading, setReplyLoading] = useState(false);
     // 드롭다운
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
+
     const menuRef = useRef(null);
 
     const [replyMenuOpen, setReplyMenuOpen] = useState(null);
-
     // === 팔로우 칩용 state ===
     const [authorId, setAuthorId] = useState(null);
     const [myId, setMyId] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const [member, setMember] = useState(null);
     const [isMyPost, setIsMyPost] = useState(false);
-    const [hoverUnfollow, setHoverUnfollow] = useState(false);
 
-    const textareaRef = useRef(null);
+    const [hoverUnfollow, setHoverUnfollow] = useState(false);
     const [loginedMemberId, setLoginedMemberId] = useState(null);
 
-    // 신고
-    // const [isReporting, setIsReporting] = useState(false);
-    // const [reportBody, setReportBody] = useState("");
-    // const [open, setOpen] = useState(false);
-    // const [reason, setReason] = useState("");
-    // const [message, setMessage] = useState("");
-    // const [title, setTitle] = useState("");
-
-    const [alertOpen, setAlertOpen] = useState(false);
-    const [alertCfg, setAlertCfg] = useState({});
-
-    const showAlert = (cfg) => {
-        setAlertCfg({
-            intent: "info",
-            title: "Notice",
-            message: null,
-            confirmText: "OK",
-            showCancel: false,
-            closeOnConfirm: true,
-            closeOnOverlayClick: true,
-            ...cfg,
-        });
-        setAlertOpen(true);
-    };
+    const textareaRef = useRef(null);
 
     const norm = (s) => (s ?? '').toString().trim().toLowerCase();
 
@@ -159,7 +135,7 @@ function ArticleDetailInner() {
                 const like = await fetchArticleLikes(id);
                 console.log("like 불러오기 응답", like);
 
-                // 🔑 이전 상태와 비교 후 다를 때만 업데이트
+                // 이전 상태와 비교 후 다를 때만 업데이트
                 setLiked((prev) => (prev !== like.liked ? like.liked : prev));
                 setLikeCount((prev) => (prev !== like.count ? like.count : prev));
             } catch (e) {
@@ -261,7 +237,7 @@ function ArticleDetailInner() {
                 const authorNickN = norm(article.extra__writer);
                 setAuthorId(targetId);
 
-                // 🔒 ID로 내 글 판정 (myId가 아직 없으면 일단 진행, 다음 렌더에서 막힘)
+                // ID로 내 글 판정
                 if (myId && targetId && myId === targetId) {
                     setIsMyPost(true);
                     setMember(null);
@@ -269,12 +245,10 @@ function ArticleDetailInner() {
                 }
                 setIsMyPost(false);
 
-                // 2) 내 팔로잉 리스트
-                const fl = await getFollowingList(); // <-- 인자 없이 호출 (null 이슈 회피)
+                // 팔로잉 리스트
+                const fl = await getFollowingList();
                 const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
 
-                // 디버깅: 이 블록 "안에서만" 찍어라
-                console.log('[FOLLOW DEBUG] authorId=', targetId, 'authorNick=', article.extra__writer);
                 console.table((list || []).slice(0, 5).map(m => ({
                     rawId: m?.id ?? m?.memberId ?? m?.followingId ?? m?.targetId ?? m?.user?.id,
                     normId: getId(m),
@@ -287,7 +261,6 @@ function ArticleDetailInner() {
                     list.some(m => norm(getNick(m)) === authorNickN);
 
                 setMember({id: targetId || null, isFollowing, nickName: article.extra__writer});
-                console.log('[FOLLOW DEBUG] isFollowing=', isFollowing);
             } catch (e) {
                 console.error('❌ 작성자 member 구성 실패:', e);
                 setMember({id: null, isFollowing: false, nickName: article.extra__writer});
@@ -297,16 +270,17 @@ function ArticleDetailInner() {
 
     // 내 회원 ID 로드
     useEffect(() => {
-        if (!isLoggedIn) {      // 로그아웃이면 호출 자체를 하지 않음
+
+        if (!isLoggedIn) {
+
             setMyId(null);
             return;
         }
         (async () => {
             try {
-                const me = await fetchUser(); // 현재 로그인 사용자
+                const me = await fetchUser();
                 setMyId(Number(me?.member?.id) || null);
             } catch (e) {
-                // 401 등 인증 오류는 조용히 무시하고 null 유지
                 if (e?.response?.status !== 401) {
                     console.error('내 정보 로드 실패:', e);
                 }
@@ -322,19 +296,23 @@ function ArticleDetailInner() {
         setIsFollowing(false);
     }, [id]);
 
+    // confirm 표시
+    const handleDelete = (articleId) => {
+        confirm({
+            title: "Delete this post?",
+            message: "This action cannot be undone.",
+            confirmText: "Delete",
+            intent: "danger",
+            onConfirm: () => doDeleteArticle(articleId),
+        });
+    };
+
     // 게시글 삭제
-    const handleDelete = async (id) => {
-
-        if (!id) return;
-
-        const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
-        if (!ok) return;
-
-        if (!article.userCanDelete) return;
-
+    const doDeleteArticle = async (articleId) => {
+        if (!articleId || !article?.userCanDelete) return;
         try {
             setDeleting(true);
-            const res = await deleteArticle(id);
+            const res = await deleteArticle(articleId);
             const resultCode = res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
             const isSuccess =
                 res?.status === 200 ||
@@ -342,16 +320,12 @@ function ArticleDetailInner() {
                 res?.success === true ||
                 (typeof res?.msg === 'string' && res.msg.includes('성공'));
 
-            if (isSuccess) {
-                showAlert({ intent: "success", title: "Post deleted." });
-                router.push("/DiFF/member/repository");
-            } else {
-                const msg = res?.msg || "Failed to delete. Please try again.";
-                showAlert({ intent: "danger", title: msg });
+            if (!isSuccess)  {
+                alert({ intent: "danger", title: "Failed to delete. Please try again." });
             }
         } catch (e) {
             console.error("[ArticleDetail] delete request error:", e);
-            showAlert({ intent: "danger", title: "Failed to delete. Please try again." });
+            alert({ intent: "danger", title: "Failed to delete. Please try again." });
         } finally {
             setDeleting(false);
         }
@@ -375,7 +349,7 @@ function ArticleDetailInner() {
             }
         } catch (e) {
             console.error("좋아요 토글 실패:", e);
-            showAlert({ intent: "danger", title: "Failed to like at post. Please try again." });
+            alert({ intent: "danger", title: "Failed to like at post. Please try again." });
         }
     };
 
@@ -398,7 +372,7 @@ function ArticleDetailInner() {
             setReplies(withLikes);
         } catch (e) {
             console.error("❌ 댓글 작성 실패:", e);
-            showAlert({ intent: "danger", title: "Failed to write comment. Please try again." });
+            alert({intent: "danger", title: "Failed to write comment. Please try again."});
         }
     };
 
@@ -426,7 +400,7 @@ function ArticleDetailInner() {
             }
         } catch (e) {
             console.error("❌ 댓글 좋아요 토글 실패:", e);
-            showAlert({ intent: "danger", title: "Failed to like at comment. Please try again." });
+            alert({intent: "danger", title: "Failed to like at comment. Please try again."});
         }
     };
 
@@ -477,7 +451,7 @@ function ArticleDetailInner() {
                                     try {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         await navigator.clipboard.writeText(url);
-                                        alert("Link copied.");
+                                        alert({ intent: "success", title: "Link copied." });
                                     } catch {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         const input = document.createElement("input");
@@ -486,14 +460,13 @@ function ArticleDetailInner() {
                                         input.select();
                                         document.execCommand("copy");
                                         document.body.removeChild(input);
-                                        alert("Link copied.");
+                                        alert({ intent: "success", title: "Link copied." });
                                     }
                                 }}
                             >
                                 <i className="fa-solid fa-share-nodes"></i>
                             </button>
                             {/* 옵션 */}
-                            {/*{isMyPost && (*/}
                             <div className="relative">
                                 <button
                                     ref={menuBtnRef}
@@ -531,7 +504,7 @@ function ArticleDetailInner() {
                                                         if (article?.id) {
                                                             router.push(`/DiFF/article/report?id=${article.id}`);
                                                         } else {
-                                                            alert("An error occurred while processing your request. Please try again later.");
+                                                            alert({ intent: "danger", title: "An error occurred. Please try again later." });
                                                         }
                                                     }}
                                                     className="w-full text-left block px-4 py-2 hover:bg-gray-100
@@ -570,7 +543,6 @@ function ArticleDetailInner() {
                                     </div>
                                 )}
                             </div>
-                            {/*)}*/}
                         </div>
                     </div>
 
@@ -618,7 +590,7 @@ function ArticleDetailInner() {
                                                 }
                                             } catch (err) {
                                                 console.error("❌ 팔로우/언팔로우 실패:", err);
-                                                alert("처리 실패");
+                                                alert({ intent: "danger", title: "Failed to process. Please try again." });
                                             }
                                         }}
                                         className={`py-1 text-sm rounded-full border transition w-20 
@@ -949,13 +921,22 @@ function ArticleDetailInner() {
                                                                                 hover:bg-gray-100 dark:hover:bg-neutral-700 "
                                                                             onClick={async () => {
                                                                                 setReplyMenuOpen(null);
-                                                                                if (confirm("Are you sure you want to delete this comment?")) {
-                                                                                    const res = await deleteReply(r.id);
-                                                                                    if (res.resultCode?.startsWith?.("S-")) {
-                                                                                        setReplies((prev) => prev.filter((item) => item.id !== r.id));
-                                                                                        alert("Comment deleted.");
-                                                                                    }
-                                                                                }
+                                                                                confirm({
+                                                                                    title: "Delete this comment?",
+                                                                                    message: "This action cannot be undone.",
+                                                                                    confirmText: "Delete",
+                                                                                    onConfirm: async () => {
+                                                                                        const res = await deleteReply(r.id);
+                                                                                        if (res.resultCode?.startsWith?.("S-")) {
+                                                                                            setReplies((prev) => prev.filter((item) => item.id !== r.id));
+                                                                                        } else {
+                                                                                            alert({
+                                                                                                intent: "warning",
+                                                                                                title: res?.msg || "Failed to delete comment."
+                                                                                            });
+                                                                                        }
+                                                                                    },
+                                                                                });
                                                                             }}
                                                                         >
                                                                             <i className="fa-solid fa-trash-can"></i> Delete
