@@ -1,6 +1,6 @@
 // src/app/layout.js
 import Script from 'next/script';
-import CommonLayout from '@/common/CommonLayout';
+import CommonLayout from '@/common/commonLayout';
 import './globals.css';
 import {Suspense} from 'react';
 

@@ -141,8 +141,6 @@ export default function RepoPost({repoId, isMyRepo}) {
     const [articles, setArticles] = useState([]);
     const [error, setError] = useState('');
 
-    let theme = useTheme();
-
     const mapArticles = (payload) => {
 
         const root = payload ?? {};

@@ -8,7 +8,7 @@ import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
 import RepoPost from "./RepoPost";
 import {AddRepoModal} from './addRepoModal';
-import RepoInfo from './repoInfo';
+import {RepoInfo} from './repoInfo';
 import Link from "next/link";
 
 const getAccessToken = () =>
@@ -69,7 +69,12 @@ export default function RepositoriesPage() {
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
 
-    const [tab, setTab] = useState('info');
+    const [tab, setTab] = useState('posts');
+
+    const handleDeleted = useCallback((deletedId) => {
+        setRepositories(prev => prev.filter(r => String(r.id) !== String(deletedId)));
+        setSelectedRepoId(prev => (String(prev) === String(deletedId) ? null : prev));
+    }, []);
 
     useEffect(() => {
         if (repositories.length > 0 && !selectedRepoId) {
@@ -361,6 +366,7 @@ export default function RepositoriesPage() {
                                                         prev.map((r) => (r.id === id ? { ...r, name: newName } : r))
                                                     );
                                                 }}
+                                                onDeleted={handleDeleted}
                                             />
                                         ) : null}
 

@@ -5,12 +5,11 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import {writeArticle, getMyRepositories} from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
 import clsx from "clsx";
+import {useDialog} from "@/common/commonLayout";
+import {useTheme} from "@/common/thema";
 
 const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
-/**
- * Minimal monochrome Repo dropdown (keyboard-accessible)
- */
 function RepoDropdown({items = [], value, onChange, disabled}) {
     const [open, setOpen] = useState(false);
     const btnRef = useRef(null);
@@ -154,6 +153,7 @@ export default function Page() {
 
 export function WriteArticlePage() {
     const router = useRouter();
+    const { alert } = useDialog();
     const sp = useSearchParams();
 
     // from query
@@ -173,6 +173,8 @@ export function WriteArticlePage() {
     const [diffId, setDiffId] = useState(null);
     const [isPublic, setIsPublic] = useState(true);
 
+    const bg = useTheme() === 'dark' ? '#111214' : '#ffffff';
+
     // auth check
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -191,7 +193,6 @@ export function WriteArticlePage() {
                     setRepositoryId(draft.repositoryId || null);
                     if (draft.diffId) {
                         setDiffId(draft.diffId);
-                        // console.log("draft.diffId:", draft.diffId);
                     }
                 } catch (e) {
                     console.error('Failed to load draft:', e);
@@ -215,7 +216,7 @@ export function WriteArticlePage() {
                     (list.length > 0 ? Number(list[0].id) : null);
                 setRepositoryId(init);
             } catch (e) {
-                setRepoError('리포지토리 목록을 불러오지 못했습니다.');
+                setRepoError('Failed to load repository list.');
             } finally {
                 setLoadingRepos(false);
             }
@@ -238,9 +239,9 @@ export function WriteArticlePage() {
         e.preventDefault();
         setError('');
 
-        if (!repositoryId) return setError('repositoryId가 없습니다.');
-        if (!title.trim()) return setError('제목을 입력하세요.');
-        if (!body.trim()) return setError('내용을 입력하세요.');
+        if (!repositoryId) return setError('Not found repository.');
+        if (!title.trim()) return setError('Please enter the title.');
+        if (!body.trim()) return setError('Please enter the content.');
 
         try {
             setSubmitting(true);
@@ -260,14 +261,14 @@ export function WriteArticlePage() {
                 const articleId = res.data1;
                 router.push(`/DiFF/article/detail?id=${articleId}`);
             } else {
-                setError(res?.msg || '작성 실패');
+                setError(res?.msg || 'Failed to write');
             }
         } catch (err) {
             console.error('upload error', err);
             if (err?.response?.status === 401) {
                 router.replace('/DiFF/member/login');
             } else {
-                setError(err?.response?.data?.msg || err.message || '요청 실패');
+                setError(err?.response?.data?.msg || err.message || 'Failed to request');
             }
         } finally {
             setSubmitting(false);
@@ -297,18 +298,18 @@ export function WriteArticlePage() {
             };
             const res = await saveDraft(data);
             if (res && res.resultCode && res.resultCode.startsWith('S-')) {
-                alert('임시저장 완료!');
+                alert({ intent: "success", title: "Success to save." });
                 if (!draftId && res.data1) setDraftId(res.data1);
                 if (res.data2) setDiffId(res.data2);
             } else {
-                setError(res?.msg || '임시저장 실패');
+                setError(res?.msg || 'Failed to save');
             }
         } catch (err) {
             console.error('saveDraft error', err);
             if (err?.response?.status === 401) {
                 router.replace('/DiFF/member/login');
             } else {
-                setError(err?.response?.data?.msg || err.message || '요청 실패');
+                setError(err?.response?.data?.msg || err.message || 'Failed to reqeust');
             }
         } finally {
             setSubmitting(false);
@@ -326,7 +327,6 @@ export function WriteArticlePage() {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
                 if (!submitting) {
-                    // create a synthetic form submit
                     const form = document.getElementById('writer-form');
                     form?.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));
                 }
@@ -484,7 +484,7 @@ export function WriteArticlePage() {
                 .toastui-editor-ww-container .ProseMirror,
                 .toastui-editor-md-container .CodeMirror,
                 .toastui-editor-md-container .CodeMirror-scroll {
-                    background-color: #111214;
+                    background-color: ${bg};
                 }
                 
                 .toastui-editor-defaultUI {

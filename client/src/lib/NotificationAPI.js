@@ -6,7 +6,7 @@ export const NotificationAPI = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-// ✅ JWT 자동 첨부
+// JWT 자동 첨부
 NotificationAPI.interceptors.request.use((config) => {
     if (typeof window !== "undefined") {
         const type = localStorage.getItem("tokenType") || "Bearer";

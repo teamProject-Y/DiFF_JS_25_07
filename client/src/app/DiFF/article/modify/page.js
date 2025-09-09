@@ -4,9 +4,10 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
-import LoadingOverlay from '@/common/loadingOverlay';
 import ToastEditor from "@/common/toastEditor";
 import clsx from "clsx";
+import {useDialog} from "@/common/commonLayout";
+import {useTheme} from "@/common/thema";
 
 export default function ModifyArticlePage() {
     return (
@@ -18,6 +19,7 @@ export default function ModifyArticlePage() {
 
 function ModifyArticlePageInner() {
     const router = useRouter();
+    const { alert } = useDialog();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
 
@@ -28,6 +30,10 @@ function ModifyArticlePageInner() {
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertCfg, setAlertCfg] = useState({});
+
+    const bg = useTheme() === 'dark' ? '#111214' : '#ffffff';
 
     // Load & permission check
     useEffect(() => {
@@ -36,7 +42,7 @@ function ModifyArticlePageInner() {
             try {
                 const art = await getArticle(id);
                 if (!art?.userCanModify) {
-                    alert('You do not have permission to edit this article.');
+                    alert({ intent: "danger", title: "You do not have permission to edit this article." });
                     router.replace(`/DiFF/article/detail?id=${id}`);
                     return;
                 }
@@ -47,10 +53,10 @@ function ModifyArticlePageInner() {
             } catch (e) {
                 const status = e?.response?.status;
                 if (status === 401) {
-                    alert('You need to sign in.');
+                    alert({ intent: "danger", title: "You need to sign in." });
                     router.replace('/DiFF/member/login');
                 } else if (status === 403) {
-                    alert('You do not have permission to edit this article.');
+                    alert({ intent: "danger", title: "You do not have permission to edit this article." });
                     router.replace(`/DiFF/article/detail?id=${id}`);
                 } else {
                     console.error('[ModifyArticle] load error:', e);
@@ -67,21 +73,21 @@ function ModifyArticlePageInner() {
         e.preventDefault();
         try {
             if (!id) {
-                alert('Invalid access. No article id.');
+                alert({ intent: "danger", title: "Invalid access. Retry again." });
                 return;
             }
             const token = localStorage.getItem('accessToken');
             if (!token) {
-                alert('You need to sign in.');
+                alert({ intent: "danger", title: "You need to sign in." });
                 router.replace('/DiFF/member/login');
                 return;
             }
             if (!title.trim()) {
-                alert('Please enter a title.');
+                alert({ intent: "warning", title: "Please enter title." });
                 return;
             }
             if (!body.trim()) {
-                alert('Please enter content.');
+                alert({ intent: "warning", title: "Please enter content." });
                 return;
             }
 
@@ -96,11 +102,11 @@ function ModifyArticlePageInner() {
             };
 
             await modifyArticle(modifiedArticle, token);
-            alert('Updated successfully.');
+            alert({ intent: "success", title: "Updated successfully." });
             router.push(`/DiFF/article/detail?id=${id}`);
         } catch (e) {
             console.error('❌ Update failed:', e);
-            alert('Failed to update. Please try again.');
+            alert({ intent: "danger", title: "Failed to update. Please try again." });
         } finally {
             setSubmitting(false);
         }
@@ -198,6 +204,12 @@ function ModifyArticlePageInner() {
                 </div>
             </form>
 
+            <ConfirmDialog
+                open={alertOpen}
+                onOpenChange={setAlertOpen}
+                {...alertCfg}
+            />
+
             {/* Global tiny CSS to make ToastUI fill its container, keep it borderless for full-bleed feel */}
             <style jsx global>{`
                 /* Toast UI Editor: fill parent and scroll INSIDE */
@@ -206,7 +218,7 @@ function ModifyArticlePageInner() {
                 .toastui-editor-ww-container .ProseMirror,
                 .toastui-editor-md-container .CodeMirror,
                 .toastui-editor-md-container .CodeMirror-scroll {
-                    background-color: #111214;
+                    background-color: ${bg};
                 }
 
                 .toastui-editor-defaultUI {

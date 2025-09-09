@@ -1,8 +1,8 @@
 'use client';
 
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
-// 날짜 포맷 (KST) — 최초 1회만 고정
+// 날짜 포맷 (KST)
 function getLoginDate() {
     const now = new Date();
     const day = now.toLocaleDateString('en-US', {weekday: 'short', timeZone: 'Asia/Seoul'});
@@ -12,7 +12,7 @@ function getLoginDate() {
     return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
-/** 기본 타자 효과 (타이머 누수 방지) */
+/** 기본 타자 효과 */
 function Typewriter({text, speed = 30, onDone, className = ''}) {
     const [displayed, setDisplayed] = useState('');
     const timersRef = useRef([]);
@@ -43,7 +43,7 @@ function Typewriter({text, speed = 30, onDone, className = ''}) {
 function TypewriterDotsThenDone({
                                     text,
                                     speed = 30,
-                                    delayMs = 500,
+                                    delayMs = 300,
                                     onDone,
                                     className = ''
                                 }) {
@@ -60,7 +60,7 @@ function TypewriterDotsThenDone({
             triple !== -1 ? triple + 3 :
                 (ellip !== -1 ? ellip + 1 : text.length);
 
-        const base = text.slice(0, dotEnd); // 예: "User verifying..."
+        const base = text.slice(0, dotEnd);
         const suffix = ' done.';
 
         setDisplayed('');
@@ -112,7 +112,7 @@ function MirrorPrompt({
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
-            if (e.nativeEvent.isComposing || e.keyCode === 229) return; // IME 조합 중 무시
+            if (e.nativeEvent.isComposing || e.keyCode === 229) return;
             e.preventDefault();
             onSubmit?.(value);
         }
@@ -124,7 +124,7 @@ function MirrorPrompt({
         <div
             className={`prompt-mirror-wrapper ${className}`}
             onClick={() => taRef.current?.focus()}
-            style={{position: 'relative', width: '80%'}}
+            style={{position: 'relative', width: '80%', paddingLeft: '23px'}}
             role="group"
             aria-label="Terminal command input"
         >
@@ -140,7 +140,6 @@ function MirrorPrompt({
                     fontWeight: 1000,
                     fontSize: '2rem',
                     color: '#d1d5db',
-                    fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
                 }}
             >
                 {hasValue ? (
@@ -151,7 +150,7 @@ function MirrorPrompt({
                 ) : (
                     <>
                         <span className="fake-caret before"/>
-                        <span className="placeholder text-gray-500">{placeholder}</span>
+                        <span className="placeholder text-neutral-500">{placeholder}</span>
                     </>
                 )}
             </div>
@@ -196,18 +195,46 @@ export default function BeforeMainPage() {
     const [showResultAnim, setShowResultAnim] = useState(false);
     const [lastDoneStep, setLastDoneStep] = useState(-1);
     const [error, setError] = useState('');
+    const [promptReady, setPromptReady] = useState(false);
+
     const inputRef = useRef(null);
-
     const scrollerRef = useRef(null);
-    const bottomRef = useRef(null);
 
+    const bottomRef = useRef(null);
     const loginTextRef = useRef(`Last\u2009\u2009login:\u2009\u2009${getLoginDate()}\u2009\u2009on\u2009\u2009webtty001`);
+
     const LINES = useMemo(() => ([
         {
             text: loginTextRef.current,
             className: 'text-green-400 font-bold terminal-font text-2xl md:text-4xl pt-2 break-all',
         },
     ]), []);
+
+    const PROMPT_PREFIX = 'user@desktop ~ % ';
+
+    useEffect(() => {
+        if (step < LINES.length) {
+            setShowInput(false);
+        } else if (step === LINES.length) {
+            setShowInput(true);
+            setPromptReady(false);
+        } else {
+            setShowInput(false);
+        }
+    }, [step, LINES.length]);
+
+// 포커스는 프롬프트 타이핑 완료 후에만
+    useEffect(() => {
+        if (!showInput || !promptReady) return;
+        const t = setTimeout(() => {
+            try {
+                inputRef.current?.focus({ preventScroll: true });
+            } catch {
+                inputRef.current?.focus();
+            }
+        }, 0);
+        return () => clearTimeout(t);
+    }, [showInput, promptReady]);
 
     const COMMAND = 'git mkdraft main';
     const RESULTS = [
@@ -247,15 +274,11 @@ export default function BeforeMainPage() {
         else if (step === LINES.length) {
             setShowInput(true);
             requestAnimationFrame(() => {
-                // const scroller = document.getElementById('pageScroll');
-                // const restoreTop = scroller ? scroller.scrollTop : window.scrollY;
                 try {
                     inputRef.current?.focus({preventScroll: true});
                 } catch {
                     inputRef.current?.focus();
                 }
-                // if (scroller) scroller.scrollTop = restoreTop;
-                // else window.scrollTo(0, restoreTop);
             });
         } else {
             setShowInput(false);
@@ -295,7 +318,7 @@ export default function BeforeMainPage() {
     }, [step, lastDoneStep, LINES, RESULTS]);
 
     const submitCommand = useCallback((raw) => {
-        const trimmed = raw; // 공백 포함해 엄격 비교
+        const trimmed = raw;
         if (trimmed === COMMAND) {
             setError('');
             setLog(prev => [...prev, {
@@ -316,12 +339,6 @@ export default function BeforeMainPage() {
         }
     }, [COMMAND, LINES.length]);
 
-    // useEffect(() => {
-    //     const scroller = document.getElementById('pageScroll');
-    //     if (scroller) scroller.scrollTop = scroller.scrollHeight;
-    //     else window.scrollTo({top: document.body.scrollHeight});
-    // }, [log, showResultAnim, currentResultText, showInput, step]);
-
 return (
     <div
         className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
@@ -333,7 +350,7 @@ return (
                 line-height: 1.2;
             }
 
-            /* 굵은 블록 커서 */
+            /* 커서 */
             .fake-caret {
                 display: inline-block;
                 width: 0.14em;
@@ -423,7 +440,7 @@ return (
                             text={currentResultText}
                             speed={30}
                             delayMs={1000}
-                            postDoneDelayMs={500}
+                            postDoneDelayMs={300}
                             onDone={handleAnimDone}
                         />
                     </div>
@@ -433,16 +450,31 @@ return (
             {/* 입력 영역 */}
             {showInput && (
                 <div className="text-left terminal-font text-2xl md:text-4xl pl-6 pr-6 pb-6 break-words flex items-center">
-                    <span className="text-green-400 font-bold" style={{ whiteSpace: 'nowrap' }}>
-                        user@desktop ~ %&nbsp;
-                    </span>
-                    <MirrorPrompt
-                        value={input}
-                        onChange={(v) => { setInput(v); if (error) setError(''); }}
-                        onSubmit={submitCommand}
-                        placeholder={COMMAND}
-                        inputRefExternal={inputRef}
-                    />
+                    {!promptReady ? (
+                        <Typewriter
+                            text={PROMPT_PREFIX}
+                            speed={30}
+                            onDone={() => setPromptReady(true)}
+                            className="text-green-400 font-bold"
+                        />
+                    ) : (
+                        <span
+                            className="text-green-400 font-bold"
+                            style={{ whiteSpace: 'nowrap' }}
+                        >
+                            {PROMPT_PREFIX}
+                        </span>
+                    )}
+
+                    {promptReady && (
+                        <MirrorPrompt
+                            value={input}
+                            onChange={(v) => { setInput(v); if (error) setError(''); }}
+                            onSubmit={submitCommand}
+                            placeholder={COMMAND}
+                            inputRefExternal={inputRef}
+                        />
+                    )}
                 </div>
             )}
 

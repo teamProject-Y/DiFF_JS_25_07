@@ -10,6 +10,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
 import {oneDark} from "react-syntax-highlighter/dist/cjs/styles/prism";
+import {useDialog} from "@/common/commonLayout";
 
 export default function SettingsTab() {
     return (
@@ -21,6 +22,7 @@ export default function SettingsTab() {
 
 function SettingsPage() {
     const router = useRouter();
+    const { alert, confirm } = useDialog();
     const searchParams = useSearchParams();
 
     const [loading, setLoading] = useState(true);
@@ -151,17 +153,27 @@ function SettingsPage() {
 
     const handleRemoveAvatar = async () => {
         if (!isMySetting || !profileUrl) return;
-        if (!confirm("프로필 사진을 삭제할까요?")) return;
+
+        const ok = await confirm({
+            intent: 'Info',
+            title: 'Do you want to delete your profile picture?',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+        });
+        if (!ok) return;
 
         setRemoving(true);
-        setBanner(null);
         try {
             await uploadProfileImg(null);
             setProfileUrl('');
-            setMember((prev) => ({...prev, profileUrl: ''}));
-            setBanner({type: 'success', msg: '프로필 사진을 삭제했습니다'});
+            setMember(prev => ({ ...prev, profileUrl: '' }));
+
         } catch (e) {
-            setBanner({type: 'error', msg: e.message || '삭제에 실패했습니다'});
+            await alert({
+                intent: 'danger',
+                title: 'Failed to delete.',
+                message: e?.response?.data?.msg || e.message || '',
+            });
         } finally {
             setRemoving(false);
         }
@@ -185,13 +197,13 @@ function SettingsPage() {
             const res = await modifyNickName({nickName: form.nickName});
             localStorage.setItem("nickName", form.nickName);
             setMember((prev) => ({...prev, nickName: form.nickName}));
-            setBanner({type: 'success', msg: res.msg || "닉네임이 수정되었습니다"});
+            setBanner({type: 'success', msg: res.msg || "Nickname updated successfully."});
         } catch (err) {
-            console.error("닉네임 수정 실패:", err);
+            console.error("Failed to update nickname:", err);
             if (err.response) {
-                setBanner({type: 'error', msg: err.response.data?.msg || "닉네임 수정에 실패했습니다"});
+                setBanner({type: 'error', msg: err.response.data?.msg || "Failed to update nickname."});
             } else {
-                setBanner({type: 'error', msg: "서버와 연결할 수 없습니다"});
+                setBanner({type: 'error', msg: "Server error. Please try again later."});
             }
         }
     };
@@ -205,13 +217,13 @@ function SettingsPage() {
         try {
             const res = await modifyIntroduce({introduce: form.introduce});
             setMember((prev) => ({...prev, introduce: form.introduce}));
-            setBanner({type: 'success', msg: res.msg || "프로필이 저장되었습니다"});
+            setBanner({type: 'success', msg: res.msg || "README updated successfully."});
         } catch (err) {
             console.error("introduce 수정 실패:", err);
             if (err.response) {
-                setBanner({type: 'error', msg: err.response.data?.msg || "자기소개 수정에 실패했습니다"});
+                setBanner({type: 'error', msg: err.response.data?.msg || "Failed to update README."});
             } else {
-                setBanner({type: 'error', msg: "서버와 연결할 수 없습니다"});
+                setBanner({type: 'error', msg: "Server error. Please try again later."});
             }
         }
     };
@@ -252,14 +264,14 @@ function SettingsPage() {
             const res = await modifyNickName({ nickName: form.nickName });
             localStorage.setItem("nickName", form.nickName);
             setMember((prev) => ({ ...prev, nickName: form.nickName }));
-            setBanner({ type: "success", msg: res.msg || "닉네임이 수정되었습니다" });
+            setBanner({ type: "success", msg: res.msg || "Nickname updated successfully." });
             setEditingNick(false);
         } catch (err) {
             console.error("닉네임 수정 실패:", err);
             if (err.response) {
-                setBanner({ type: "error", msg: err.response.data?.msg || "닉네임 수정에 실패했습니다" });
+                setBanner({ type: "error", msg: err.response.data?.msg || "Failed to update nickname." });
             } else {
-                setBanner({ type: "error", msg: "서버와 연결할 수 없습니다" });
+                setBanner({ type: "error", msg: "Server error. Please try again later." });
             }
         }
     };
@@ -387,7 +399,7 @@ function SettingsPage() {
                                                                 if (e.key === "Escape") cancelEditNick();
                                                             }}
                                                             className="flex-grow min-w-0 px-2 py-1 mr-2 rounded-md border
-                     focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                                                        focus:outline-none focus:ring-1 focus:ring-blue-400"
                                                             placeholder="nickname"
                                                         />
                                                         <button
@@ -592,67 +604,6 @@ function SettingsPage() {
                 </div>
             </div>
 
-            {/*회원 탈퇴 모달*/}
-            {confirmOpen && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center p-4">
-                    {/* overlay */}
-                    <button
-                        aria-hidden
-                        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-                        onClick={() => setConfirmOpen(false)}
-                    />
-                    {/* dialog */}
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="confirm-title"
-                        className="
-                  relative w-full max-w-md rounded-lg
-                  border bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5
-                  dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700 dark:ring-0
-                  transition-transform duration-200
-                "
-                    >
-                        <div className="p-5">
-                            <div id="confirm-title" className="text-lg font-semibold">
-                                Are you sure you want to delete your account?
-                            </div>
-                            <p className="mt-1 px-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                This action cannot be undone.
-                            </p>
-
-                            <div className="mt-6 flex justify-end gap-2">
-                                <button
-                                    onClick={() => setConfirmOpen(false)}
-                                    className="
-                                rounded-md px-4 py-2 text-sm
-                                border border-neutral-200 bg-neutral-100 text-neutral-900 hover:bg-neutral-200
-                                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400
-                                dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
-                                dark:focus-visible:outline-neutral-500
-                              "
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setConfirmOpen(false);
-                                        alert('회원탈퇴 로직 연결 예정');
-                                    }}
-                                    className="
-                                rounded-md px-4 py-2 text-sm
-                                bg-red-600 text-white hover:bg-red-500
-                                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500
-                              "
-                                >
-                                    Confirm
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            )}
         </section>
     );
 }
@@ -664,7 +615,6 @@ function Card({children, className}) {
         </div>
     );
 }
-
 
 function TopTab({href, label, active}) {
     return active ? (

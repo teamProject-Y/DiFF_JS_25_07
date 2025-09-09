@@ -174,8 +174,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
     async function makeDraft(commit) {
         try {
             setDrafting(true);
-            const draft = await mkDraft(safeOwner, safeName, commit.sha);
-            return draft;
+            return await mkDraft(repoId, safeOwner, safeName, commit.sha);
         } finally {
             setDrafting(false);
         }

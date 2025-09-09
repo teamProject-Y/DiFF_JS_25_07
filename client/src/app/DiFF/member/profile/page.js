@@ -1,7 +1,7 @@
 // member/profile/page.js
 'use client';
 import ReactMarkdown from "react-markdown";
-import {useEffect, useState, Suspense} from 'react';
+import {useEffect, useState, Suspense, useRef} from 'react';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import remarkGfm from "remark-gfm";
@@ -18,6 +18,7 @@ import {
     getFollowingList,
     getFollowerList,
 } from '@/lib/UserAPI';
+import {useDialog} from "@/common/commonLayout";
 
 export default function ProfileTab() {
     return (
@@ -29,6 +30,7 @@ export default function ProfileTab() {
 
 function ProfileInner() {
     const router = useRouter();
+    const { alert } = useDialog();
     const searchParams = useSearchParams();
 
     const [loading, setLoading] = useState(true);
@@ -263,7 +265,7 @@ function ProfileInner() {
                                                         }
                                                     } catch (err) {
                                                         console.error("❌ 팔로우/언팔로우 실패:", err);
-                                                        alert("처리 실패");
+                                                        alert({ intent: "danger", title: "Failed to follow request." });
                                                     }
                                                 }}
                                                 className={`py-1 text-sm rounded-full border transition w-20 

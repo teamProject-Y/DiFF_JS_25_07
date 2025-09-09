@@ -17,53 +17,48 @@ import {
 } from '@/lib/UserAPI';
 import LoadingOverlay from "@/common/loadingOverlay";
 import ToastViewer from "@/common/toastViewer";
-import {saveReport} from "@/lib/NotionAPI";
+import {useDialog} from "@/common/commonLayout";
 
 function ArticleDetailInner() {
 
     const searchParams = useSearchParams();
+    const { alert, confirm } = useDialog();
     const router = useRouter();
-    const id = searchParams.get('id');
 
+    const id = searchParams.get('id');
     const [article, setArticle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
-    const [deleting, setDeleting] = useState(false);
 
+    const [deleting, setDeleting] = useState(false);
     // 좋아요
     const [liked, setLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
 
+    const [likeCount, setLikeCount] = useState(0);
     // 댓글 상태
     const [replies, setReplies] = useState([]);
     const [reply, setReply] = useState('');
-    const [replyLoading, setReplyLoading] = useState(false);
 
+    const [replyLoading, setReplyLoading] = useState(false);
     // 드롭다운
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
+
     const menuRef = useRef(null);
 
     const [replyMenuOpen, setReplyMenuOpen] = useState(null);
-
     // === 팔로우 칩용 state ===
     const [authorId, setAuthorId] = useState(null);
     const [myId, setMyId] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const [member, setMember] = useState(null);
     const [isMyPost, setIsMyPost] = useState(false);
-    const [hoverUnfollow, setHoverUnfollow] = useState(false);
 
-    const textareaRef = useRef(null);
+    const [hoverUnfollow, setHoverUnfollow] = useState(false);
     const [loginedMemberId, setLoginedMemberId] = useState(null);
 
-    // 신고
-    const [isReporting, setIsReporting] = useState(false);
-    const [reportBody, setReportBody] = useState("");
-    const [open, setOpen] = useState(false);
-    const [reason, setReason] = useState("");
-    const [message, setMessage] = useState("");
-    const [title, setTitle] = useState("");
+    const textareaRef = useRef(null);
+
     const norm = (s) => (s ?? '').toString().trim().toLowerCase();
 
     const getId = (m) => Number(
@@ -140,14 +135,20 @@ function ArticleDetailInner() {
                 const like = await fetchArticleLikes(id);
                 console.log("like 불러오기 응답", like);
 
-                // 🔑 이전 상태와 비교 후 다를 때만 업데이트
+                // 이전 상태와 비교 후 다를 때만 업데이트
                 setLiked((prev) => (prev !== like.liked ? like.liked : prev));
                 setLikeCount((prev) => (prev !== like.count ? like.count : prev));
             } catch (e) {
-                console.error("❌ 좋아요 상태 불러오기 실패:", e);
+                if (e?.response?.status === 401) {
+                    // 비로그인: liked=false 유지, count는 기존값 유지/혹은 0
+                    setLiked(false);
+                    setLikeCount((c) => c); // 또는 setLikeCount(0);
+                } else {
+                    console.error("❌ 좋아요 상태 불러오기 실패:", e);
+                }
             }
         })();
-    }, [id]);
+    }, [id, isLoggedIn])
 
     // 댓글 목록 불러오기
     useEffect(() => {
@@ -236,7 +237,7 @@ function ArticleDetailInner() {
                 const authorNickN = norm(article.extra__writer);
                 setAuthorId(targetId);
 
-                // 🔒 ID로 내 글 판정 (myId가 아직 없으면 일단 진행, 다음 렌더에서 막힘)
+                // ID로 내 글 판정
                 if (myId && targetId && myId === targetId) {
                     setIsMyPost(true);
                     setMember(null);
@@ -244,12 +245,10 @@ function ArticleDetailInner() {
                 }
                 setIsMyPost(false);
 
-                // 2) 내 팔로잉 리스트
-                const fl = await getFollowingList(); // <-- 인자 없이 호출 (null 이슈 회피)
+                // 팔로잉 리스트
+                const fl = await getFollowingList();
                 const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
 
-                // 디버깅: 이 블록 "안에서만" 찍어라
-                console.log('[FOLLOW DEBUG] authorId=', targetId, 'authorNick=', article.extra__writer);
                 console.table((list || []).slice(0, 5).map(m => ({
                     rawId: m?.id ?? m?.memberId ?? m?.followingId ?? m?.targetId ?? m?.user?.id,
                     normId: getId(m),
@@ -262,7 +261,6 @@ function ArticleDetailInner() {
                     list.some(m => norm(getNick(m)) === authorNickN);
 
                 setMember({id: targetId || null, isFollowing, nickName: article.extra__writer});
-                console.log('[FOLLOW DEBUG] isFollowing=', isFollowing);
             } catch (e) {
                 console.error('❌ 작성자 member 구성 실패:', e);
                 setMember({id: null, isFollowing: false, nickName: article.extra__writer});
@@ -272,16 +270,24 @@ function ArticleDetailInner() {
 
     // 내 회원 ID 로드
     useEffect(() => {
+
+        if (!isLoggedIn) {
+
+            setMyId(null);
+            return;
+        }
         (async () => {
             try {
-                const me = await fetchUser(); // nickName 전달 X → 현재 로그인 사용자
+                const me = await fetchUser();
                 setMyId(Number(me?.member?.id) || null);
             } catch (e) {
-                console.error('내 정보 로드 실패:', e);
+                if (e?.response?.status !== 401) {
+                    console.error('내 정보 로드 실패:', e);
+                }
                 setMyId(null);
             }
         })();
-    }, [id]);
+    }, [id, isLoggedIn]);
 
     // 글 아이디 바뀌면 팔로우 관련 상태 초기화 (잔존 상태 제거)
     useEffect(() => {
@@ -290,19 +296,23 @@ function ArticleDetailInner() {
         setIsFollowing(false);
     }, [id]);
 
+    // confirm 표시
+    const handleDelete = (articleId) => {
+        confirm({
+            title: "Delete this post?",
+            message: "This action cannot be undone.",
+            confirmText: "Delete",
+            intent: "danger",
+            onConfirm: () => doDeleteArticle(articleId),
+        });
+    };
+
     // 게시글 삭제
-    const handleDelete = async (id) => {
-
-        if (!id) return;
-
-        const ok = window.confirm("이 게시글을 삭제하시겠습니까?");
-        if (!ok) return;
-
-        if (!article.userCanDelete) return;
-
+    const doDeleteArticle = async (articleId) => {
+        if (!articleId || !article?.userCanDelete) return;
         try {
             setDeleting(true);
-            const res = await deleteArticle(id);
+            const res = await deleteArticle(articleId);
             const resultCode = res?.resultCode ?? res?.ResultCode ?? res?.code ?? '';
             const isSuccess =
                 res?.status === 200 ||
@@ -310,16 +320,12 @@ function ArticleDetailInner() {
                 res?.success === true ||
                 (typeof res?.msg === 'string' && res.msg.includes('성공'));
 
-            if (isSuccess) {
-                alert("게시물이 삭제되었습니다.");
-                router.push("/DiFF/member/repository");
-            } else {
-                const msg = res?.msg || "삭제에 실패했습니다.";
-                alert(msg);
+            if (!isSuccess)  {
+                alert({ intent: "danger", title: "Failed to delete. Please try again." });
             }
         } catch (e) {
             console.error("[ArticleDetail] delete request error:", e);
-            alert(e?.response?.data?.msg || "삭제 요청에 실패했습니다.");
+            alert({ intent: "danger", title: "Failed to delete. Please try again." });
         } finally {
             setDeleting(false);
         }
@@ -327,6 +333,10 @@ function ArticleDetailInner() {
 
     // 좋아요 토글
     const handleLikeToggle = async () => {
+        if (!isLoggedIn) {
+            window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}));
+            return;
+        }
         try {
             if (liked) {
                 await unlikeArticle(id);
@@ -339,7 +349,7 @@ function ArticleDetailInner() {
             }
         } catch (e) {
             console.error("좋아요 토글 실패:", e);
-            alert("좋아요 처리 중 문제가 발생했습니다.");
+            alert({ intent: "danger", title: "Failed to like at post. Please try again." });
         }
     };
 
@@ -362,12 +372,16 @@ function ArticleDetailInner() {
             setReplies(withLikes);
         } catch (e) {
             console.error("❌ 댓글 작성 실패:", e);
-            alert(e?.response?.data?.msg || "댓글 작성에 실패했습니다.");
+            alert({intent: "danger", title: "Failed to write comment. Please try again."});
         }
     };
 
     // 댓글 좋아요 토글
     const handleReplyLikeToggle = async (replyId, liked) => {
+        if (!isLoggedIn) {
+            window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}));
+            return;
+        }
         try {
             if (liked) {
                 await unlikeReply(replyId);
@@ -386,7 +400,7 @@ function ArticleDetailInner() {
             }
         } catch (e) {
             console.error("❌ 댓글 좋아요 토글 실패:", e);
-            alert("댓글 좋아요 처리 중 오류가 발생했습니다.");
+            alert({intent: "danger", title: "Failed to like at comment. Please try again."});
         }
     };
 
@@ -395,8 +409,8 @@ function ArticleDetailInner() {
         textarea.style.height = "auto";
         textarea.style.height = textarea.scrollHeight + "px";
     };
-    if (!id) return <p className="text-red-500">잘못된 접근입니다 (id 없음)</p>;
-    if (!article) return <p className="text-gray-500">게시글이 존재하지 않습니다.</p>;
+    if (!id) return <p className="text-red-500">Invalid access. Retry again.</p>;
+    if (!article) return <p className="text-gray-500">No post</p>;
 
     return (
         <div className="w-full min-h-screen pt-6 dark:text-neutral-300">
@@ -419,10 +433,10 @@ function ArticleDetailInner() {
 
                             <span className="text-gray-500 dark:text-neutral-400 text-lg">
                                 · {new Date(article.regDate).toLocaleDateString("en-US", {
-                                                        year: "numeric",
-                                                        month: "short",
-                                                        day: "numeric"
-                                                    })}
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                            })}
                               </span>
                         </div>
 
@@ -437,7 +451,7 @@ function ArticleDetailInner() {
                                     try {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         await navigator.clipboard.writeText(url);
-                                        alert("Link copied.");
+                                        alert({ intent: "success", title: "Link copied." });
                                     } catch {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         const input = document.createElement("input");
@@ -446,91 +460,89 @@ function ArticleDetailInner() {
                                         input.select();
                                         document.execCommand("copy");
                                         document.body.removeChild(input);
-                                        alert("Link copied.");
+                                        alert({ intent: "success", title: "Link copied." });
                                     }
                                 }}
                             >
                                 <i className="fa-solid fa-share-nodes"></i>
                             </button>
                             {/* 옵션 */}
-                            {/*{isMyPost && (*/}
-                                <div className="relative">
-                                    <button
-                                        ref={menuBtnRef}
-                                        type="button"
-                                        aria-haspopup="menu"
-                                        aria-expanded={menuOpen}
-                                        onClick={() => setMenuOpen(v => !v)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === "ArrowDown" && !menuOpen) {
-                                                e.preventDefault();
-                                                setMenuOpen(true);
-                                            }
-                                        }}
-                                        className="hover:text-gray-900
+                            <div className="relative">
+                                <button
+                                    ref={menuBtnRef}
+                                    type="button"
+                                    aria-haspopup="menu"
+                                    aria-expanded={menuOpen}
+                                    onClick={() => setMenuOpen(v => !v)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "ArrowDown" && !menuOpen) {
+                                            e.preventDefault();
+                                            setMenuOpen(true);
+                                        }
+                                    }}
+                                    className="hover:text-gray-900
                                         dark:hover:text-neutral-500 dark:text-neutral-400"
-                                    >
-                                        <i className="fa-solid fa-ellipsis-vertical text-xl"></i>
-                                    </button>
+                                >
+                                    <i className="fa-solid fa-ellipsis-vertical text-xl"></i>
+                                </button>
 
-                                    {/*모달 메뉴*/}
-                                    {menuOpen && (
-                                        <div
-                                            ref={menuRef}
-                                            role="menu"
-                                            className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg font-normal shadow-sm
+                                {/*모달 메뉴*/}
+                                {menuOpen && (
+                                    <div
+                                        ref={menuRef}
+                                        role="menu"
+                                        className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg font-normal shadow-sm
                                                     bg-white divide-y divide-gray-100  text-gray-800
                                                     dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
-                                        >
-                                            <ul className="py-1 text-sm">
+                                    >
+                                        <ul className="py-1 text-sm">
+                                            <li>
+                                                <button
+                                                    type="button"
+                                                    role="menuitem"
+                                                    onClick={() => {
+                                                        if (article?.id) {
+                                                            router.push(`/DiFF/article/report?id=${article.id}`);
+                                                        } else {
+                                                            alert({ intent: "danger", title: "An error occurred. Please try again later." });
+                                                        }
+                                                    }}
+                                                    className="w-full text-left block px-4 py-2 hover:bg-gray-100
+                                                            dark:hover:bg-neutral-700"
+                                                >
+                                                    <i className="fa-solid fa-bullhorn"></i> Report
+                                                </button>
+                                            </li>
+                                            {article.userCanModify && (
+                                                <li>
+                                                    <Link
+                                                        href={`/DiFF/article/modify?id=${article.id}`}
+                                                        role="menuitem"
+                                                        className="block px-4 py-2 hover:bg-gray-100
+                                                            dark:hover:bg-neutral-700"
+                                                        onClick={() => setMenuOpen(false)}
+                                                    >
+                                                        <i className="fa-solid fa-pen"></i> Edit
+                                                    </Link>
+                                                </li>
+                                            )}
+                                            {article.userCanDelete && (
                                                 <li>
                                                     <button
                                                         type="button"
                                                         role="menuitem"
-                                                        onClick={() => {
-                                                            if (article?.id) {
-                                                                router.push(`/DiFF/article/report?id=${article.id}`);
-                                                            } else {
-                                                                alert("An error occurred while processing your request. Please try again later.");
-                                                            }
-                                                        }}
-                                                        className="w-full text-left block px-4 py-2 hover:bg-gray-100
+                                                        onClick={() => handleDelete(article.id)}
+                                                        className="w-full text-left block px-4 py-2 hover:bg-gray-100 text-red-500
                                                             dark:hover:bg-neutral-700"
                                                     >
-                                                        <i className="fa-solid fa-bullhorn"></i> Report
+                                                        <i className="fa-solid fa-trash-can"></i> Delete
                                                     </button>
                                                 </li>
-                                                {article.userCanModify && (
-                                                    <li>
-                                                        <Link
-                                                            href={`/DiFF/article/modify?id=${article.id}`}
-                                                            role="menuitem"
-                                                            className="block px-4 py-2 hover:bg-gray-100
-                                                            dark:hover:bg-neutral-700"
-                                                            onClick={() => setMenuOpen(false)}
-                                                        >
-                                                            <i className="fa-solid fa-pen"></i> Edit
-                                                        </Link>
-                                                    </li>
-                                                )}
-                                                {article.userCanDelete && (
-                                                    <li>
-                                                        <button
-                                                            type="button"
-                                                            role="menuitem"
-                                                            onClick={() => handleDelete(article.id)}
-                                                            className="w-full text-left block px-4 py-2 hover:bg-gray-100 text-red-500
-                                                            dark:hover:bg-neutral-700"
-                                                        >
-                                                            <i className="fa-solid fa-trash-can"></i> Delete
-                                                        </button>
-                                                    </li>
-                                                )}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            {/*)}*/}
+                                            )}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -545,13 +557,14 @@ function ArticleDetailInner() {
                                 }}
                                 className="mx-2 hover:underline cursor-pointer text-md font-semibold
                                  hover:text-black dark:hover:text-neutral-300"
-                                                >
-                                                    {article.extra__writer}
-                                                </div>
+                            >
+                                {article.extra__writer}
+                            </div>
 
-                                                {/* 작성자 본인만 공개/비공개 여부 표시 */}
-                                                {isMyPost && (
-                                                    <span className="ml-2 text-xs px-2 py-1 rounded border border-neutral-300 dark:border-neutral-600">
+                            {/* 작성자 본인만 공개/비공개 여부 표시 */}
+                            {isMyPost && (
+                                <span
+                                    className="ml-2 text-xs px-2 py-1 rounded border border-neutral-300 dark:border-neutral-600">
                                                         {article.isPublic ? "public" : "private"}
                                                     </span>
                             )}
@@ -566,18 +579,18 @@ function ArticleDetailInner() {
                                             try {
                                                 if (member.isFollowing) {
                                                     await unfollowMember(member.id);
-                                                    setMember(prev => ({ ...prev, isFollowing: false }));
+                                                    setMember(prev => ({...prev, isFollowing: false}));
                                                     typeof setFollowerCount === 'function' &&
                                                     setFollowerCount(prev => Math.max(0, prev - 1));
                                                 } else {
                                                     await followMember(member.id);
-                                                    setMember(prev => ({ ...prev, isFollowing: true }));
+                                                    setMember(prev => ({...prev, isFollowing: true}));
                                                     typeof setFollowerCount === 'function' &&
                                                     setFollowerCount(prev => prev + 1);
                                                 }
                                             } catch (err) {
                                                 console.error("❌ 팔로우/언팔로우 실패:", err);
-                                                alert("처리 실패");
+                                                alert({ intent: "danger", title: "Failed to process. Please try again." });
                                             }
                                         }}
                                         className={`py-1 text-sm rounded-full border transition w-20 
@@ -603,14 +616,22 @@ function ArticleDetailInner() {
 
                         <div className="flex flex-col items-end gap-2">
                             {/* 좋아요 */}
-                            <div className="flex items-center gap-1 cursor-pointer" onClick={handleLikeToggle}>
+                            <button
+                                type="button"
+                                onClick={isLoggedIn
+                                    ? handleLikeToggle
+                                    : () => window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))}
+                                disabled={!isLoggedIn}
+                                title={isLoggedIn ? "Like" : "Login to like"}
+                                className={`flex items-center gap-1 ${!isLoggedIn ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                            >
                                 <i
                                     className={`${liked ? "fa-solid text-red-500" :
                                         "fa-regular text-gray-500 dark:text-neutral-400"} 
                         fa-heart text-xl`}
                                 ></i>
                                 <span className="text-sm">{likeCount}</span>
-                            </div>
+                            </button>
                         </div>
                     </div>
 
@@ -625,14 +646,14 @@ function ArticleDetailInner() {
                     {/* 댓글 입력 */}
                     <div className="my-10">
                         {isLoggedIn ? (
-                            // ✅ 로그인 상태 → 댓글 입력창
+                            // 로그인 상태 → 댓글 입력창
                             <form onSubmit={handleSubmitreply} className="relative">
                                 <label htmlFor="comment" className="sr-only">댓글 작성</label>
 
                                 <div
                                     className="relative rounded-xl border backdrop-blur-sm shadow-sm transition-all
-                   border-black/10 focus-within:border-black/20 bg-white/80
-                   dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
+                                               border-black/10 focus-within:border-black/20 bg-white/80
+                                               dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
                                 >
                                     {/* textarea */}
                                     <textarea
@@ -650,27 +671,27 @@ function ArticleDetailInner() {
                                         maxLength={1000}
                                         placeholder="What are your thoughts?"
                                         className="block w-full resize-none bg-transparent
-                     p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
-                     text-gray-900 dark:text-neutral-200
-                     placeholder-gray-400 dark:placeholder-neutral-500
-                     focus:outline-none"
+                                                 p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
+                                                 text-gray-900 dark:text-neutral-200
+                                                 placeholder-gray-400 dark:placeholder-neutral-500
+                                                 focus:outline-none"
                                     />
 
                                     {/* 하단 글자수 + 버튼 */}
                                     <div className="absolute bottom-2 right-2 flex items-center gap-3">
-          <span className="text-xs text-gray-500 dark:text-neutral-500">
-            {reply.trim().length}/1000
-          </span>
+                                          <span className="text-xs text-gray-500 dark:text-neutral-500">
+                                            {reply.trim().length}/1000
+                                          </span>
                                         <button
                                             type="submit"
                                             disabled={!reply.trim()}
                                             className="px-4 py-2 rounded-full
-                       bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
-                       text-xs font-medium
-                       shadow-sm hover:shadow-md
-                       transition-all
-                       disabled:opacity-40 disabled:cursor-not-allowed
-                       active:scale-[0.98]"
+                                                   bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
+                                                   text-xs font-medium
+                                                   shadow-sm hover:shadow-md
+                                                   transition-all
+                                                   disabled:opacity-40 disabled:cursor-not-allowed
+                                                   active:scale-[0.98]"
                                         >
                                             Comment
                                         </button>
@@ -682,17 +703,17 @@ function ArticleDetailInner() {
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        window.dispatchEvent(new CustomEvent("open-modal", { detail: "login" }))
+                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))
                                     }
                                     className="font-medium underline hover:text-gray-700 dark:hover:text-neutral-200"
                                 >
                                     LOGIN
-                                </button>{" "}
+                                </button>
+                                {" "}
                                 to write a comment.
                             </p>
                         )}
                     </div>
-
 
 
                     {/* 댓글 목록 */}
@@ -716,7 +737,7 @@ function ArticleDetailInner() {
                                                     alt={`${r.extra__writer} profile`}
                                                     className="w-10 h-10 rounded-full object-cover"
                                                 />
-                                             ) : (
+                                            ) : (
                                                 <div
                                                     className="w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold
                                                      bg-gray-100 border-gray-300
@@ -828,7 +849,9 @@ function ArticleDetailInner() {
                                                 <div className="flex items-center gap-1 shrink-0">
                                                     {/*좋아요*/}
                                                     <button
-                                                        onClick={() => handleReplyLikeToggle(r.id, r.liked)}
+                                                        onClick={() => isLoggedIn
+                                                            ? handleReplyLikeToggle(r.id, r.liked)
+                                                            : window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))}
                                                         aria-label="이 댓글 좋아요"
                                                         aria-pressed={r.liked}
                                                         className="p-1 flex items-center gap-1"
@@ -898,13 +921,22 @@ function ArticleDetailInner() {
                                                                                 hover:bg-gray-100 dark:hover:bg-neutral-700 "
                                                                             onClick={async () => {
                                                                                 setReplyMenuOpen(null);
-                                                                                if (confirm("Are you sure you want to delete this comment?")) {
-                                                                                    const res = await deleteReply(r.id);
-                                                                                    if (res.resultCode?.startsWith?.("S-")) {
-                                                                                        setReplies((prev) => prev.filter((item) => item.id !== r.id));
-                                                                                        alert("Comment deleted.");
-                                                                                    }
-                                                                                }
+                                                                                confirm({
+                                                                                    title: "Delete this comment?",
+                                                                                    message: "This action cannot be undone.",
+                                                                                    confirmText: "Delete",
+                                                                                    onConfirm: async () => {
+                                                                                        const res = await deleteReply(r.id);
+                                                                                        if (res.resultCode?.startsWith?.("S-")) {
+                                                                                            setReplies((prev) => prev.filter((item) => item.id !== r.id));
+                                                                                        } else {
+                                                                                            alert({
+                                                                                                intent: "warning",
+                                                                                                title: res?.msg || "Failed to delete comment."
+                                                                                            });
+                                                                                        }
+                                                                                    },
+                                                                                });
                                                                             }}
                                                                         >
                                                                             <i className="fa-solid fa-trash-can"></i> Delete
