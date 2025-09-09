@@ -4,10 +4,9 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
-import LoadingOverlay from '@/common/loadingOverlay';
 import ToastEditor from "@/common/toastEditor";
 import clsx from "clsx";
-import ConfirmDialog from "@/common/alertModal";
+import {useDialog} from "@/common/commonLayout";
 
 export default function ModifyArticlePage() {
     return (
@@ -19,6 +18,7 @@ export default function ModifyArticlePage() {
 
 function ModifyArticlePageInner() {
     const router = useRouter();
+    const { alert } = useDialog();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
 
@@ -32,20 +32,6 @@ function ModifyArticlePageInner() {
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertCfg, setAlertCfg] = useState({});
 
-    const showAlert = (cfg) => {
-        setAlertCfg({
-            intent: "info",
-            title: "Notice",
-            message: null,
-            confirmText: "OK",
-            showCancel: false,
-            closeOnConfirm: true,
-            closeOnOverlayClick: true,
-            ...cfg,
-        });
-        setAlertOpen(true);
-    };
-
     // Load & permission check
     useEffect(() => {
         if (!id) return;
@@ -53,7 +39,7 @@ function ModifyArticlePageInner() {
             try {
                 const art = await getArticle(id);
                 if (!art?.userCanModify) {
-                    showAlert({ intent: "danger", title: "You do not have permission to edit this article." });
+                    alert({ intent: "danger", title: "You do not have permission to edit this article." });
                     router.replace(`/DiFF/article/detail?id=${id}`);
                     return;
                 }
@@ -64,10 +50,10 @@ function ModifyArticlePageInner() {
             } catch (e) {
                 const status = e?.response?.status;
                 if (status === 401) {
-                    showAlert({ intent: "danger", title: "You need to sign in." });
+                    alert({ intent: "danger", title: "You need to sign in." });
                     router.replace('/DiFF/member/login');
                 } else if (status === 403) {
-                    showAlert({ intent: "danger", title: "You do not have permission to edit this article." });
+                    alert({ intent: "danger", title: "You do not have permission to edit this article." });
                     router.replace(`/DiFF/article/detail?id=${id}`);
                 } else {
                     console.error('[ModifyArticle] load error:', e);
@@ -84,21 +70,21 @@ function ModifyArticlePageInner() {
         e.preventDefault();
         try {
             if (!id) {
-                showAlert({ intent: "danger", title: "Invalid access. Retry again." });
+                alert({ intent: "danger", title: "Invalid access. Retry again." });
                 return;
             }
             const token = localStorage.getItem('accessToken');
             if (!token) {
-                showAlert({ intent: "danger", title: "You need to sign in." });
+                alert({ intent: "danger", title: "You need to sign in." });
                 router.replace('/DiFF/member/login');
                 return;
             }
             if (!title.trim()) {
-                showAlert({ intent: "warning", title: "Please enter title." });
+                alert({ intent: "warning", title: "Please enter title." });
                 return;
             }
             if (!body.trim()) {
-                showAlert({ intent: "warning", title: "Please enter content." });
+                alert({ intent: "warning", title: "Please enter content." });
                 return;
             }
 
@@ -113,11 +99,11 @@ function ModifyArticlePageInner() {
             };
 
             await modifyArticle(modifiedArticle, token);
-            showAlert({ intent: "success", title: "Updated successfully." });
+            alert({ intent: "success", title: "Updated successfully." });
             router.push(`/DiFF/article/detail?id=${id}`);
         } catch (e) {
             console.error('❌ Update failed:', e);
-            showAlert({ intent: "danger", title: "Failed to update. Please try again." });
+            alert({ intent: "danger", title: "Failed to update. Please try again." });
         } finally {
             setSubmitting(false);
         }
@@ -214,12 +200,6 @@ function ModifyArticlePageInner() {
                     </div>
                 </div>
             </form>
-
-            <ConfirmDialog
-                open={alertOpen}
-                onOpenChange={setAlertOpen}
-                {...alertCfg}
-            />
 
             {/* Global tiny CSS to make ToastUI fill its container, keep it borderless for full-bleed feel */}
             <style jsx global>{`

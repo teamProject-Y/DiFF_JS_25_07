@@ -9,7 +9,6 @@ export default function LanguageChart({ languages = [], isMyRepo }) {
     const theme = useTheme();
     const isDark = theme === "dark";
 
-    // ===== 데이터 정리 (항상 실행: 훅 순서 유지) =====
     const MAX = 8; // 상위 7 + Others
     const sorted = [...languages].sort((a, b) => (b.totalLines || 0) - (a.totalLines || 0));
     const head = sorted.slice(0, MAX - 1);
@@ -27,14 +26,14 @@ export default function LanguageChart({ languages = [], isMyRepo }) {
     const topPct = hasData ? Math.round(percents[topIdx] || 0) : 0;
 
     const palette = [
-        "#6C8AE4", // soft blue
-        "#38BDF8", // sky
-        "#34D399", // emerald
-        "#F2C14E", // muted amber
-        "#F2994A", // apricot
-        "#E06C75", // soft red
-        "#A78BFA", // violet
-        "#5AA6E7", // light azure
+        "#6C8AE4",
+        "#38BDF8",
+        "#34D399",
+        "#F2C14E",
+        "#F2994A",
+        "#E06C75",
+        "#A78BFA",
+        "#5AA6E7",
     ].slice(0, dataList.length);
 
     // ===== 차트 데이터 / 옵션 =====
@@ -56,13 +55,13 @@ export default function LanguageChart({ languages = [], isMyRepo }) {
 
     const options = {
         responsive: true,
-        maintainAspectRatio: false, // 부모 크기에 맞춤
-        rotation: -90, // 12시 방향 시작
+        maintainAspectRatio: false,
+        rotation: -90,
         layout: {
             padding: { top: 12, right: 12, bottom: 12, left: 12 },
         },
         plugins: {
-            legend: { display: false }, // 커스텀 레전드 사용
+            legend: { display: false },
             tooltip: {
                 padding: 10,
                 backgroundColor: isDark ? "rgba(17,17,17,0.95)" : "rgba(0,0,0,0.85)",
@@ -96,10 +95,8 @@ export default function LanguageChart({ languages = [], isMyRepo }) {
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
 
-                // 퍼센트 (외곽선 → 채움)
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = outline;
-                // ctx.font = "600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto";
                 ctx.strokeText(`${topPct}%`, x, y - 6);
                 ctx.fillStyle = mainColor;
                 ctx.fillText(`${topPct}%`, x, y - 6);
@@ -162,9 +159,9 @@ export default function LanguageChart({ languages = [], isMyRepo }) {
                         <li key={`${it.label}`} className="flex items-center gap-2 min-w-0">
                             <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: it.color }} />
                             <span className="truncate">
-                {it.label}
+                                {it.label}
                                 <span className="opacity-60"> · {it.pct.toFixed(1)}%</span>
-              </span>
+                            </span>
                         </li>
                     ))}
                 </ul>

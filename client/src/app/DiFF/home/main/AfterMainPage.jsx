@@ -44,7 +44,7 @@ export default function AfterMainPage({me, trendingArticles}) {
             });
     }, []);
 
-    // Following 게시글 목록 불러오기 (최초 1번만)
+    // Following 게시글 목록 불러오기
     useEffect(() => {
         followingArticleList({page: 1, repositoryId: 0, searchItem: 0, keyword: ""})
             .then((res) => {
@@ -55,7 +55,7 @@ export default function AfterMainPage({me, trendingArticles}) {
             });
     }, []); //
 
-// 로컬스토리지에 조회 기록 저장
+    // 로컬스토리지에 조회 기록 저장
     function markAsViewed(articleId) {
         const viewedKey = "viewedArticles";
         const viewed = JSON.parse(localStorage.getItem(viewedKey)) || [];
@@ -176,7 +176,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         {/* 메시지 */}
                                         <p className="text-lg font-medium">No posts from people you follow.</p>
                                         <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
-                                            당신은 DiFF에 글을 작성한 첫반째 사용자 입니다. 그래서 작은 선물을 준비 했어요.
+                                            당신은 DiFF에 글을 작성한 첫번째 사용자 입니다. 그래서 작은 선물을 준비 했어요.
                                             <br />
                                             쿠폰 번호: scew-sdfv-jfj-sdf1
                                         </a>

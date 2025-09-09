@@ -4,9 +4,11 @@ import {useRouter} from 'next/navigation';
 import {saveInquiry} from '@/lib/NotionAPI';
 import {useState, useEffect, useRef, useMemo} from 'react';
 import {useTheme} from "@/common/thema";
+import {useDialog} from "@/common/commonLayout";
 
 export default function InquiryForm() {
     const router = useRouter();
+    const { alert } = useDialog();
     const theme =  useTheme();
 
     const [inquiry, setInquiry] = useState({
@@ -93,7 +95,12 @@ export default function InquiryForm() {
         try {
             setSubmitting(true);
             const res = await saveInquiry(inquiry);
-            alert(res.message);
+
+            if(res.result === "success"){
+                alert({ intent: "success", title: res.message });
+            }else{
+                alert({ intent: "danger", title: res.message });
+            }
             setInquiry(prev => ({...prev, nickName: res.nickName ?? prev.nickName}));
             router.push('/DiFF/member/inquiry');
         } catch (err) {

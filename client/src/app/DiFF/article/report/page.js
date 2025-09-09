@@ -1,12 +1,14 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { saveReport } from '@/lib/NotionAPI';
-import { useState, useRef, useMemo, useEffect } from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
+import {saveReport} from '@/lib/NotionAPI';
+import {useState, useRef, useMemo, useEffect} from 'react';
 import {useTheme} from "@/common/thema";
+import {useDialog} from "@/common/commonLayout";
 
 export default function ReportForm() {
     const router = useRouter();
+    const {alert, confirm} = useDialog();
     const searchParams = useSearchParams();
     const articleId = searchParams.get('id');
     const theme = useTheme();
@@ -31,7 +33,7 @@ export default function ReportForm() {
     useEffect(() => {
         const storedEmail = localStorage.getItem('email');
         if (storedEmail) {
-            setReport((prev) => ({ ...prev, email: storedEmail }));
+            setReport((prev) => ({...prev, email: storedEmail}));
         }
     }, []);
 
@@ -53,18 +55,22 @@ export default function ReportForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setTouched({ title: true, nickName: true, email: true, body: true });
+        setTouched({title: true, nickName: true, email: true, body: true});
 
         if (!isValid) return;
 
         try {
             setSubmitting(true);
             const res = await saveReport(report);
-            alert(res.message || '신고가 접수되었습니다.');
-            router.push('/DiFF/home/main');
+            if (res.resultCode.startsWith("S-")) {
+                alert({intent: "success", title: "Report submitted successfully."});
+                router.push('/DiFF/home/main');
+            } else {
+                alert({intent: "danger", title: "Report submission failed. Please try again."});
+            }
         } catch (err) {
             console.error('신고 저장 실패:', err);
-            alert('신고 처리 중 오류가 발생했습니다.');
+            alert({intent: "danger", title: "Report submission failed. Please try again."});
         } finally {
             setSubmitting(false);
         }
@@ -118,7 +124,8 @@ export default function ReportForm() {
                             <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                 <svg className="w-4 h-4 text-gray-500 dark:text-neutral-400" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
+                                    <path
+                                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
                                 </svg>
                             </div>
                             <input
@@ -150,8 +157,10 @@ export default function ReportForm() {
                             <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                 <svg className="w-4 h-4 text-gray-500 dark:text-neutral-400" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
-                                    <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
-                                    <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
+                                    <path
+                                        d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
+                                    <path
+                                        d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
                                 </svg>
                             </div>
                             <input
