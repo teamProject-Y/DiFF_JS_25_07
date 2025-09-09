@@ -7,6 +7,7 @@ import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
 import ToastEditor from "@/common/toastEditor";
 import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
+import {useTheme} from "@/common/thema";
 
 export default function ModifyArticlePage() {
     return (
@@ -31,6 +32,8 @@ function ModifyArticlePageInner() {
     const [submitting, setSubmitting] = useState(false);
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertCfg, setAlertCfg] = useState({});
+
+    const bg = useTheme() === 'dark' ? '#111214' : '#ffffff';
 
     // Load & permission check
     useEffect(() => {
@@ -209,7 +212,7 @@ function ModifyArticlePageInner() {
                 .toastui-editor-ww-container .ProseMirror,
                 .toastui-editor-md-container .CodeMirror,
                 .toastui-editor-md-container .CodeMirror-scroll {
-                    background-color: #111214;
+                    background-color: ${bg};
                 }
 
                 .toastui-editor-defaultUI {
