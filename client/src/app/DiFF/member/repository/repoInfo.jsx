@@ -13,6 +13,11 @@ import {
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
+import ConfirmDialog from "@/common/alertModal";
+
+export function RepoInfo({
+                             repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
+                         }) {
 
 import { useDialog } from "@/common/commonLayout";
 
@@ -28,6 +33,23 @@ export function RepoInfo({
     const [repoUrl, setRepoUrl] = useState(repo?.url ?? '');
     const [displayName, setDisplayName] = useState(repo?.name ?? '');
     const [commitRefreshKey, setCommitRefreshKey] = useState(0);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertCfg, setAlertCfg] = useState({});
+
+    const showAlert = (cfg) => {
+        setAlertCfg({
+            intent: "info",
+            title: "Notice",
+            message: null,
+            confirmText: "OK",
+            showCancel: false,
+            closeOnConfirm: true,
+            closeOnOverlayClick: true,
+            ...cfg,
+        });
+        setAlertOpen(true);
+    };
 
     useEffect(() => setDisplayName(repo?.name ?? ''), [repo?.name]);
     useEffect(() => setRepoUrl(repo?.url ?? ''), [repo?.url]);
@@ -81,7 +103,8 @@ export function RepoInfo({
         }
     }
 
-    // 언어 비율 데이터
+
+// 언어 비율 데이터
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (!repo?.id) return;
@@ -183,9 +206,9 @@ export function RepoInfo({
                             </div>
 
                             {activeTab === "history" ? (
-                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo} />
+                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo}/>
                             ) : (
-                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo} />
+                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo}/>
                             )}
                         </div>
 
@@ -264,7 +287,8 @@ export function RepoInfo({
                                  focus:outline-none focus:ring-1 focus:ring-blue-400"
                                             placeholder="Repository name"
                                         />
-                                        <button onClick={onSaveName} className="p-1" title="Save" aria-label="Save name">
+                                        <button onClick={onSaveName} className="p-1" title="Save"
+                                                aria-label="Save name">
                                             <i className="fa-solid fa-check"></i>
                                         </button>
                                         <button onClick={cancelEdit} title="Cancel" aria-label="Cancel edit">
