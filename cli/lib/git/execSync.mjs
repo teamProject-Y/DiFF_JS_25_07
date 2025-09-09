@@ -20,7 +20,7 @@ export async function existsGitDirectory(){
     const isGitDirectory = execSync('[ -d .git ] && echo true || echo false').toString().trim();
 
     if(isGitDirectory === 'false') {
-        console.log('fatal: not a git repository (or any of the parent directories): .git');
+        // console.log('fatal: not a git repository (or any of the parent directories): .git');
     }
     return isGitDirectory;
 }
@@ -56,8 +56,8 @@ export async function DiFFinit(memberId, branch) {
         usable = await isUsableRepoName(memberId, repoName);
     }
 
-    console.log(chalk.bgCyanBright(chalk.black("repoName: " + repoName)));
-    console.log(chalk.bgCyanBright(chalk.black("usable: " + usable)));
+    // console.log(chalk.bgCyanBright(chalk.black("repoName: " + repoName)));
+    // console.log(chalk.bgCyanBright(chalk.black("usable: " + usable)));
 
     // 첫 커밋 가져오기
     let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
@@ -127,7 +127,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         form.append('meta', JSON.stringify({
             memberId,
             repositoryId,
-            draftId,       // ✅ 여기 추가
+            draftId,
             diffId,
             lastChecksum,
         }));
@@ -169,17 +169,17 @@ export async function sh(cmd, passthrough = false) {
 }
 
 /** .gitignore 파일을 파싱해서 제외 경로 리스트를 반환 **/
-function getGitIgnoreExcludes(repoPath = process.cwd()) {
-    const ignorePath = path.join(repoPath, '.gitignore');
-    if (!fs.existsSync(ignorePath)) return [];
-
-    const lines = fs.readFileSync(ignorePath, 'utf-8')
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line && !line.startsWith('#'));
-
-    return lines.map(pattern => `:(exclude)${pattern}`);
-}
+// function getGitIgnoreExcludes(repoPath = process.cwd()) {
+//     const ignorePath = path.join(repoPath, '.gitignore');
+//     if (!fs.existsSync(ignorePath)) return [];
+//
+//     const lines = fs.readFileSync(ignorePath, 'utf-8')
+//         .split('\n')
+//         .map(line => line.trim())
+//         .filter(line => line && !line.startsWith('#'));
+//
+//     return lines.map(pattern => `:(exclude)${pattern}`);
+// }
 
 function getGitIgnoreFilter() {
     const ig = ignore();
@@ -194,8 +194,8 @@ function getGitIgnoreFilter() {
 }
 
 export function getDiFF(from, to) {
-    console.log(chalk.bgCyanBright(chalk.black(from)));
-    console.log(chalk.bgCyanBright(chalk.black(to)));
+    // console.log(chalk.bgCyanBright(chalk.black(from)));
+    // console.log(chalk.bgCyanBright(chalk.black(to)));
 
     return new Promise((resolve, reject) => {
         const extensions = ['.mjs', '.jsx', '.java', '.ts', '.tsx', '.jsp', '.js',
@@ -238,15 +238,15 @@ export function getDiFF(from, to) {
         });
 
         child.stderr.on('data', (data) => {
-            console.error(chalk.red('stderr:'), data.toString());
+            // console.error(chalk.red('stderr:'), data.toString());
         });
 
         child.on('close', (code) => {
             if (code === 0) {
                 const preview = output.length > 100 ? output.slice(0, 100) + '...' : output;
-                console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 (앞 100자):')));
-                console.log(preview);
-                console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 끝')));
+                // console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 (앞 100자):')));
+                // console.log(preview);
+                // console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 끝')));
 
                 resolve(output);
             } else {

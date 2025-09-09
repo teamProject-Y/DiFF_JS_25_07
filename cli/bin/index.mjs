@@ -35,7 +35,7 @@ program
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if (checkIsRepo === 'false') {
-            console.log(chalk.red("Is not git repository."));
+            console.log(chalk.red("fatal: not a git repository (or any of the parent directories): .git"));
             process.exit(1);
         }
 

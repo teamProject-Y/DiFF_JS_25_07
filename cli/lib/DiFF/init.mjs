@@ -93,7 +93,7 @@ async function createBranchLog(branchName) {
 
     const logsDir = ".DiFF/logs";
     if (!fs.existsSync(logsDir)) {
-        console.error(".DiFF directory doesn't exist.");
+        // console.error(".DiFF directory doesn't exist.");
         return false;
     }
 
