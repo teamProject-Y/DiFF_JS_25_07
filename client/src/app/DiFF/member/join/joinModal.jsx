@@ -51,11 +51,11 @@ export default function JoinForm() {
                 // 메인 페이지로 강제 이동 (SSR 새로고침 보장)
                 window.location.href = '/DiFF/home/main';
             } else {
-                setError(serverMsg || '회원가입에 실패했습니다');
+                setError(serverMsg || 'Failed to join');
                 setSubmitting(false);
             }
         } catch (err) {
-            setError(err?.response?.data?.msg || '서버 요청 중 오류가 발생했습니다');
+            setError(err?.response?.data?.msg || 'Server error. Please try again later.');
             setSubmitting(false);
         }
     };
@@ -153,7 +153,7 @@ export default function JoinForm() {
                 disabled={submitting}
                 className="w-full py-3 font-medium bg-black text-white rounded-lg hover:bg-neutral-800 disabled:opacity-60"
             >
-                {submitting ? '처리 중…' : 'Sign In'}
+                {submitting ? 'Signing in…' : 'Sign In'}
             </button>
 
             <div className="text-center mt-6 space-y-2">

@@ -29,7 +29,7 @@ export default function ModalLayout({ children }) {
     // 닫기
     const closeModal = () => setMode(null);
 
-    // ✅ Header에서 이벤트 받아서 열기
+    // Header에서 이벤트 받아서 열기
     useEffect(() => {
         const handler = (e) => {
             console.log("👉 모달 열기 이벤트 감지:", e.detail);

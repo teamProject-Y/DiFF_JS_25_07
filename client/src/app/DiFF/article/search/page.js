@@ -171,7 +171,7 @@ export default function SearchPage() {
                                     );
                                 })
                             ) : (
-                                <div>게시글 검색 결과가 없습니다.</div>
+                                <div>No post results found.</div>
                             )
                         ) : members.length > 0 ? (
                             members.map((m) => (
@@ -210,7 +210,7 @@ export default function SearchPage() {
                                 </li>
                             ))
                         ) : (
-                            <div>프로필 검색 결과가 없습니다.</div>
+                            <div>No profile results found.</div>
                         )}
                     </main>
                 </div>

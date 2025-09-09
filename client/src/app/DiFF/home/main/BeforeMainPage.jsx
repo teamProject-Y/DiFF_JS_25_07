@@ -1,8 +1,8 @@
 'use client';
 
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
-// 날짜 포맷 (KST) — 최초 1회만 고정
+// 날짜 포맷 (KST)
 function getLoginDate() {
     const now = new Date();
     const day = now.toLocaleDateString('en-US', {weekday: 'short', timeZone: 'Asia/Seoul'});
@@ -12,7 +12,7 @@ function getLoginDate() {
     return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
-/** 기본 타자 효과 (타이머 누수 방지) */
+/** 기본 타자 효과 */
 function Typewriter({text, speed = 30, onDone, className = ''}) {
     const [displayed, setDisplayed] = useState('');
     const timersRef = useRef([]);
@@ -217,7 +217,7 @@ export default function BeforeMainPage() {
             setShowInput(false);
         } else if (step === LINES.length) {
             setShowInput(true);
-            setPromptReady(false); // 프롬프트부터 타이핑
+            setPromptReady(false);
         } else {
             setShowInput(false);
         }
@@ -338,7 +338,6 @@ export default function BeforeMainPage() {
             setInput('');
         }
     }, [COMMAND, LINES.length]);
-
 
 return (
     <div
@@ -463,8 +462,8 @@ return (
                             className="text-green-400 font-bold"
                             style={{ whiteSpace: 'nowrap' }}
                         >
-        {PROMPT_PREFIX}
-      </span>
+                            {PROMPT_PREFIX}
+                        </span>
                     )}
 
                     {promptReady && (
