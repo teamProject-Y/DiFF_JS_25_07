@@ -961,11 +961,6 @@ function ArticleDetailInner() {
                     </div>
                 </div>
             )}
-            <ConfirmDialog
-                open={alertOpen}
-                onOpenChange={setAlertOpen}
-                {...alertCfg}
-            />
         </div>
     );
 }

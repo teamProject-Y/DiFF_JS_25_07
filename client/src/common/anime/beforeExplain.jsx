@@ -58,7 +58,7 @@ export default function BeforeExplain() {
                 if (!el) return;
                 const on = (i === step);
                 el.style.opacity = on ? '1' : '0';
-                el.style.transform = on ? 'translateY(0px)' : 'translateY(-16px)';
+                el.style.transform = on ? 'translateY(0px)' : 'translateY(-15px)';
                 el.style.transition = 'opacity 300ms ease, transform 300ms ease';
             });
         };
@@ -75,62 +75,70 @@ export default function BeforeExplain() {
         const ro = new ResizeObserver(update);
         ro.observe(wrap);
 
+        // 뷰포트 리사이즈 시에도 업데이트 (폰트/레이아웃 반응)
+        const onResize = () => update();
+        window.addEventListener('resize', onResize);
+
         return () => {
             scroller.removeEventListener('scroll', onScroll);
             ro.disconnect();
+            window.removeEventListener('resize', onResize);
         };
     }, []);
 
     return (
         <section ref={wrapRef} className="relative w-full h-[350vh] bg-white overflow-visible">
             <div className="sticky top-0 h-screen">
-                {/* 상단 고정 버튼 제거됨 */}
-
                 <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-10 px-8 md:px-20 pt-8 max-w-[1400px] mx-auto">
                     {/* LEFT */}
                     <div className="max-w-none text-black">
                         <div className="space-y-12">
                             <div className="flex items-center gap-3">
                                 <span className="w-5 h-5 rounded-full border-[6px] border-blue-600" />
-                                <span className="text-base md:text-lg font-semibold text-blue-600">
+                                {/* 🔤 상단 보조 타이틀: 14px~18px 사이에서 유동 */}
+                                <span className="text-[clamp(14px,1.6vw,18px)] font-semibold text-blue-600">
                   DiFF – Git 히스토리에서 블로그 초안까지
                 </span>
                             </div>
 
-                            <h1 className="font-bold leading-[1.03] text-[clamp(30px,5.0vw,50px)]">
-                                <span className="block whitespace-nowrap break-keep">
-                                    당신의&nbsp;
-                                    <span className="text-blue-600">개발 기록</span>을</span>
-                                <span className="block whitespace-nowrap break-keep mt-5">
-                                    <span className="bg-blue-600 text-white">콘텐츠</span>로 바꿔주는 스마트 워크플로우</span>
+                            {/* 🔤 메인 타이틀: 28px~54px 유동, 모바일에선 줄바꿈 허용 / 데스크탑에선 유지 */}
+                            <h1 className="font-bold leading-[1.08] text-[clamp(28px,5vw,54px)] tracking-tight">
+                <span className="block break-keep whitespace-normal md:whitespace-nowrap">
+                  당신의&nbsp;<span className="text-blue-600">개발 기록</span>을
+                </span>
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap mt-4">
+                  <span className="bg-blue-600 text-white">콘텐츠</span>로 바꿔주는 스마트 워크플로우
+                </span>
                             </h1>
                         </div>
 
+                        {/* 🔤 왼쪽 단계 타이틀들: 16px~22px 유동 */}
                         <div ref={text1Ref} className="space-y-4 mt-10">
                             <div className="flex items-center gap-3">
                                 <span className="dot w-2.5 h-2.5 rounded-full bg-black" />
-                                <span className="font-bold text-lg">Draft from CLI or Commit</span>
+                                <span className="font-bold text-[clamp(16px,2.3vw,22px)]">Draft from CLI or Commit</span>
                             </div>
                         </div>
                         <div ref={text2Ref} className="space-y-4 mt-5">
                             <div className="flex items-center gap-3">
                                 <span className="dot2 w-2.5 h-2.5 rounded-full bg-black" />
-                                <span className="font-bold text-lg">Repo-Native Blogging</span>
+                                <span className="font-bold text-[clamp(16px,2.3vw,22px)]">Repo-Native Blogging</span>
                             </div>
                         </div>
                         <div ref={text3Ref} className="space-y-4 mt-5">
                             <div className="flex items-center gap-3">
                                 <span className="dot3 w-2.5 h-2.5 rounded-full bg-black" />
-                                <span className="font-bold text-lg">Code Quality Insights</span>
+                                <span className="font-bold text-[clamp(16px,2.3vw,22px)]">Code Quality Insights</span>
                             </div>
                         </div>
                     </div>
 
                     {/* RIGHT */}
                     <div className="relative md:pl-10 mt-10">
+                        {/* 중앙 빈 타이핑용 라인 유지 (원하면 같은 방식으로 clamp 추가 가능) */}
                         <div className="leading-none">
-                            <p className="font-black tracking-tight text-gray-900 text-[clamp(40px,8vw,120px)]"></p>
-                            <p className="font-black tracking-tight text-gray-900 text-[clamp(48px,9vw,140px)]"></p>
+                            <p className="font-black tracking-tight text-gray-900 text-[clamp(32px,8vw,96px)]"></p>
+                            <p className="font-black tracking-tight text-gray-900 text-[clamp(36px,9vw,108px)]"></p>
                         </div>
 
                         {/* STEP 1 */}
@@ -139,20 +147,20 @@ export default function BeforeExplain() {
                             className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
-                            {/*CLI 한 줄 또는 선택한 커밋으로 블로그 초안을 자동 생성합니다.*/}
-                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
-                                <span className="block"># 숨쉬기보다 쉬운</span>
-                                <span className="block">블로그 쓰기</span>
+                            {/* 🔤 섹션 헤드라인: 30px~84px 유동 */}
+                            <h2 className="font-semibold tracking-tight leading-[1.0] text-[clamp(30px,7.2vw,84px)]">
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap"># 숨쉬기보다 쉬운</span>
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap">&nbsp;블로그 쓰기</span>
                             </h2>
-                            <p className="leading-tight text-[clamp(16px,2.2vw,30px)] mt-8">
+                            {/* 🔤 본문: 14px~24px 유동 */}
+                            <p className="leading-tight text-[clamp(14px,2.1vw,24px)] mt-6">
                                 CLI 한 줄, 커밋 하나로 블로그 초안이 완성.
                             </p>
 
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-5 inline-flex items-center px-4 py-2 rounded-full border
-                                    border-blue-600 text-blue-600 text-sm hover:bg-gray-50"
+                                    className="mt-5 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-gray-50"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
@@ -166,19 +174,18 @@ export default function BeforeExplain() {
                             className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
-                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
-                                <span className="block"># 눕기보다 쉬운</span>
-                                <span className="block">리포지토리 관리</span>
+                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(30px,7.2vw,84px)]">
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap"># 눕기보다 쉬운</span>
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap">리포지토리 관리</span>
                             </h2>
-                            <p className="leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
-                                리포지토리 별로 글을 작성하고 <br/>
+                            <p className="leading-tight text-[clamp(14px,2.0vw,22px)] mt-6">
+                                리포지토리 별로 글을 작성하고 <br />
                                 원격 리포지토리와 연결해 통합하여 관리.
                             </p>
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border
-                                    border-blue-600 text-blue-600 text-sm hover:bg-gray-50"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-gray-50"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
@@ -192,19 +199,18 @@ export default function BeforeExplain() {
                             className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
                             aria-hidden="true"
                         >
-                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(36px,7.2vw,96px)]">
-                                <span className="block"># 자는 것보다 쉬운</span>
-                                <span className="block">코드 품질 성장</span>
+                            <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(30px,7.2vw,84px)]">
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap"># 자는 것보다 쉬운</span>
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap">코드 품질 성장</span>
                             </h2>
-                            <p className="leading-tight text-[clamp(16px,2.2vw,28px)] mt-8">
-                                글마다 6가지 코드 지표, <br/>
+                            <p className="leading-tight text-[clamp(14px,2.0vw,22px)] mt-6">
+                                글마다 6가지 코드 지표, <br />
                                 리포별 성장 그래프까지.
                             </p>
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border
-                                    border-blue-600 text-blue-600 text-sm hover:bg-gray-50"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-gray-50"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>

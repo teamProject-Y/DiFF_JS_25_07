@@ -154,6 +154,8 @@ export default function Page() {
     }, []);
 
     // page.js
+    const thresholds = Array.from({ length: 21 }, (_, i) => i / 20); // 0,0.05,...,1
+    const didInitRef = useRef(false);
     const lastColorRef = useRef(null);
 
     useEffect(() => {
@@ -230,11 +232,13 @@ export default function Page() {
                 <BeforeMainPage/>
             </div>
 
-            <div id="docs" className="is-light-bg min-h-screen w-full pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
+            <div id="docs" className="is-light-bg min-h-screen w-full pt-20 dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
                 <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-0 mb-4">
 
                 </div>
-                <BeforeExplain />
+                <div className="snap-center">
+                    <BeforeExplain />
+                </div>
                 <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-0 py-10">
 
                 </div>
