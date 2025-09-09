@@ -21,16 +21,24 @@ export const createRepository = async (data) => {
     }
 };
 
-export const renameRepository = async (data) => {
+export const renameRepository = async (id, name) => {
+    const payload = { id, name };
+
     try {
-        const res = await ArticleAPI.post("/api/DiFF/repository/rename", data);
+        const res = await ArticleAPI.post(
+            "/api/DiFF/repository/rename",
+            payload,
+            { headers: { "Content-Type": "application/json" } }
+        );
         console.log("[API][renameRepository] status:", res.status, "data:", res.data);
         return res.data;
     } catch (err) {
-        console.error("[API][renameRepository] error:", err);
+        const msg = err?.response?.data ?? err.message;
+        console.error("[API][renameRepository] error:", msg);
         throw err;
     }
-}
+};
+
 
 export const getAnalysisHistory = async (repoId) => {
     console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/history");
@@ -58,7 +66,6 @@ export const importGithubRepo = async (ghRepo) => {
         aPrivate: ghRepo?.aPrivate ?? !!ghRepo?.private ?? false,
         url: ghRepo?.url ?? ghRepo?.html_url ?? '',
         defaultBranch: ghRepo?.defaultBranch ?? ghRepo?.default_branch ?? '',
-        // owner: ghRepo?.owner ?? ghRepo?.ownerLogin ?? ghRepo?.owner?.login ?? '',
         githubOwner: ghRepo?.githubOwner ?? null,
         githubName: ghRepo?.githubName ?? null,
     };
@@ -140,21 +147,31 @@ export const connectRepository = async (repoId, url) => {
         }
     );
 
-    return data; // {resultCode, msg, ...}
+    return data;
 };
 
-export const mkDraft = async (owner, repoName, sha) => {
+export const mkDraft = async (repoId, owner, repoName, sha) => {
 
-    if (!owner || !repoName || !sha) {
+    if (!repoId || !owner || !repoName || !sha) {
         throw new Error(
-            `mkDraft: missing required fields. owner=${owner}, repoName=${repoName}, sha=${sha}`
+            `mkDraft: missing required fields. repoId=${repoId} owner=${owner}, repoName=${repoName}, sha=${sha}`
         );
     }
 
-    const res = await UserAPI.get(`/api/DiFF/github/commit/${owner}/${repoName}/${sha}`,);
+    const res = await UserAPI.get(`/api/DiFF/github/commit/${repoId}/${owner}/${repoName}/${sha}`,);
     return res.data;
 };
 
-export const deleteRepository = async (ghRepo) => {
-
-}
+export const deleteRepository = async (id) => {
+    try {
+        const res = await UserAPI.delete(`/api/DiFF/repository/${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error deleting repository:", error);
+        return { resultCode: "F-ERROR", msg: error.message };
+    }
+};

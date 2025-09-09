@@ -13,25 +13,40 @@ import {
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
+import ConfirmDialog from "@/common/alertModal";
 
-export default function RepoInfo({
-                                     repo,
-                                     isMyRepo,
-                                     onClose,
-                                     useExternalSidebar = false,
-                                     onDeleted,
-                                 }) {
+export function RepoInfo({
+                             repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
+                         }) {
+
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
     const [history, setHistory] = useState([]);
     const [activeTab, setActiveTab] = useState("history");
-
     const [deleteRequested, setDeleteRequested] = useState(false);
-
     const [repoUrl, setRepoUrl] = useState(repo?.url ?? '');
-    useEffect(() => setRepoUrl(repo?.url ?? ''), [repo?.url]);
+    const [displayName, setDisplayName] = useState(repo?.name ?? '');
     const [commitRefreshKey, setCommitRefreshKey] = useState(0);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertCfg, setAlertCfg] = useState({});
 
+    const showAlert = (cfg) => {
+        setAlertCfg({
+            intent: "info",
+            title: "Notice",
+            message: null,
+            confirmText: "OK",
+            showCancel: false,
+            closeOnConfirm: true,
+            closeOnOverlayClick: true,
+            ...cfg,
+        });
+        setAlertOpen(true);
+    };
+
+    useEffect(() => setDisplayName(repo?.name ?? ''), [repo?.name]);
+    useEffect(() => setRepoUrl(repo?.url ?? ''), [repo?.url]);
     useEffect(() => {
         if (repo?.id) {
             getAnalysisHistory(repo.id).then(setHistory);
@@ -43,19 +58,33 @@ export default function RepoInfo({
     }, [repo?.name]);
 
     const onSaveName = async () => {
-        try {
-            const response = await renameRepository(repo.id, nameInput);
-            console.log("res: ", response);
+        const next = nameInput.trim();
+        if (!next || next === displayName) { // 빈 문자열/동일명 처리
             setEditingName(false);
+            setNameInput(displayName);
+            return;
+        }
+
+        try {
+            const res = await renameRepository(repo.id, next);
+            if (res?.resultCode?.startsWith("S-")) {
+                setDisplayName(next);
+                setEditingName(false);
+                setNameInput(next);
+                onRenamed?.(repo.id, next);
+
+                showAlert({ intent: "success", title: "Repository name updated." });
+            } else {
+                showAlert({ intent: "warning", title: res?.msg ?? "Couldn’t save changes." });
+            }
         } catch (e) {
             console.error(e);
-            alert('이름 저장 중 오류가 발생했습니다.');
+            showAlert({ intent: "danger", title: "Something went wrong while saving." });
         }
     };
 
     // 깃허브 리포 연결
     async function connectionUrl(url) {
-
         console.log("repoId: ", repo.id);
 
         try {
@@ -63,16 +92,19 @@ export default function RepoInfo({
             if (res?.resultCode === "S-1") {
                 setRepoUrl(url);
                 setCommitRefreshKey(k => k + 1);
+
+                showAlert({ intent: "success", title: "Repository connected." });
             } else {
-                alert(res?.msg ?? "연결 실패");
+                showAlert({ intent: "warning", title: res?.msg ?? "Failed to connect repository." });
             }
         } catch (e) {
             console.error(e);
-            alert("연결 중 오류가 발생했습니다.");
+            showAlert({ intent: "danger", title: "Connection error. Please try again." });
         }
     }
 
-    // 언어 비율 데이터
+
+// 언어 비율 데이터
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (repo?.id) {
@@ -103,7 +135,7 @@ export default function RepoInfo({
         if (e.key === 'Escape') cancelEdit();
     };
 
-    // 삭제 로직을 useEffect로 실행
+    // 삭제
     useEffect(() => {
         if (!deleteRequested || !repo?.id) return;
 
@@ -111,20 +143,25 @@ export default function RepoInfo({
             try {
                 const res = await deleteRepository(repo.id);
                 if (res.resultCode?.startsWith("S-")) {
-                    alert("리포지토리 삭제 성공!");
-                    onDeleted?.(repo.id); // 부모에서 리스트 갱신하도록 콜백 실행
-                    onClose?.(); // 상세 뷰 닫기
+                  showAlert({
+                        intent: "success",
+                        title: "Repository deleted.",
+                        // OK 누르면 리스트 갱신 + 상세 뷰 닫기
+                            onConfirm: () => {
+                          onDeleted?.(repo.id);
+                          onClose?.();
+                        },
+                      });       // 상세 뷰 닫기
                 } else {
-                    alert("삭제 실패: " + res.msg);
+                    showAlert({ intent: "warning", title: res?.msg ?? "Couldn’t delete repository." });
                 }
             } catch (err) {
-                console.error("❌ 삭제 오류:", err);
-                alert("삭제 요청 중 오류가 발생했습니다.");
+                console.error("Deletion failed: ", err);
+                showAlert({ intent: "danger", title: "Error while deleting. Please try again." });
             } finally {
                 setDeleteRequested(false); // 상태 초기화
             }
         };
-
         doDelete();
     }, [deleteRequested, repo?.id, onDeleted, onClose]);
 
@@ -184,9 +221,9 @@ export default function RepoInfo({
                             </div>
 
                             {activeTab === "history" ? (
-                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo} />
+                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo}/>
                             ) : (
-                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo} />
+                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo}/>
                             )}
                         </div>
 
@@ -276,7 +313,8 @@ export default function RepoInfo({
                                                         focus:outline-none focus:ring-1 focus:ring-blue-400"
                                             placeholder="Repository name"
                                         />
-                                        <button onClick={onSaveName} className="p-1" title="Save" aria-label="Save name">
+                                        <button onClick={onSaveName} className="p-1" title="Save"
+                                                aria-label="Save name">
                                             <i className="fa-solid fa-check"></i>
                                         </button>
                                         <button onClick={cancelEdit} title="Cancel" aria-label="Cancel edit">
@@ -286,7 +324,7 @@ export default function RepoInfo({
                                 ) : (
                                     <>
                                         <p className="text-xl font-semibold break-all pl-1">
-                                            {repo?.name ?? 'Repository'}
+                                            {displayName}
                                         </p>
                                         <button
                                             onClick={enterEdit}
@@ -329,17 +367,13 @@ export default function RepoInfo({
                           flex flex-col min-h-0 overflow-hidden">
                         <div className="font-semibold">Languages</div>
                         <div className="mt-2 grow min-h-0 /* overflow-y-auto 로 바꾸면 내부 스크롤 가능 */">
-                            <LanguageChart languages={languages} isMyRepo={isMyRepo} />
+                            <LanguageChart languages={languages} isMyRepo={isMyRepo}/>
                         </div>
                     </div>
 
                     {/* 삭제 버튼 (auto 높이) */}
                     <button
-                        onClick={() => {
-                            if (confirm("정말 이 리포지토리를 삭제하시겠습니까?")) {
-                                setDeleteRequested(true);
-                            }
-                        }}
+                        onClick={() => setDeleteConfirmOpen(true)}
                         className="w-full p-2 border rounded-xl transition-colors
                            shadow-sm text-red-500 hover:bg-red-500 hover:text-white
                            bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
@@ -347,7 +381,22 @@ export default function RepoInfo({
                         Delete Repository
                     </button>
                 </div>
+                <ConfirmDialog
+                    open={deleteConfirmOpen}
+                    onOpenChange={setDeleteConfirmOpen}
+                    intent="danger"
+                    title="Delete this repository?"
+                    message={<span>{displayName} will be permanently deleted. This action cannot be undone.</span>}
 
+                    cancelText="Cancel"
+                    confirmText="Delete"
+                    onConfirm={() => setDeleteRequested(true)}
+                />
+                <ConfirmDialog
+                    open={alertOpen}
+                    onOpenChange={setAlertOpen}
+                    {...alertCfg}
+                />
 
             </div>
         </motion.div>
