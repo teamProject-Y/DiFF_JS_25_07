@@ -69,20 +69,19 @@ export default function RepositoriesPage() {
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
 
-    const [tab, setTab] = useState('posts');
-
-    const handleDeleted = useCallback((deletedId) => {
-        setRepositories(prev => prev.filter(r => String(r.id) !== String(deletedId)));
-        setSelectedRepoId(prev => (String(prev) === String(deletedId) ? null : prev));
-    }, []);
-
+    const [tab, setTab] = useState('posts');const visibleRepos = useMemo(
+        () => (isMyRepos ? repositories : repositories.filter(r => !r.aprivate)),
+        [repositories, isMyRepos]
+    );
     useEffect(() => {
-        if (repositories.length > 0 && !selectedRepoId) {
-            setSelectedRepoId(repositories[0].id);
-        } else if (repositories.length === 0) {
-
+        if (visibleRepos.length === 0) {
+            setSelectedRepoId(null);
+            return;
         }
-    }, [repositories, selectedRepoId]);
+        if (!selectedRepoId || !visibleRepos.some(r => r.id === selectedRepoId)) {
+            setSelectedRepoId(visibleRepos[0].id);
+        }
+    }, [visibleRepos, selectedRepoId]);
 
     useEffect(() => {
         const accessToken = getAccessToken();
@@ -94,6 +93,7 @@ export default function RepositoriesPage() {
         const nickName = searchParams.get('nickName');
         const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
         setIsMyRepos(!nickName || nickName === myNickName);
+
         fetchUser(nickName)
             .then((res) => {
                 setRepositories(normalizeRepos(res?.repositories || []));
@@ -116,12 +116,12 @@ export default function RepositoriesPage() {
             });
     }, [router, searchParams]);
 
+    // ⬇️ 교체: 선택된 레포도 보이는 목록 기준
     const selectedRepo = useMemo(
-        () => repositories.find((r) => r.id === selectedRepoId) || repositories[0],
-        [repositories, selectedRepoId]
+        () => visibleRepos.find((r) => r.id === selectedRepoId) || null,
+        [visibleRepos, selectedRepoId]
     );
 
-    console.log("selectedRepo: ", selectedRepo);
 
     useEffect(() => {
         if (selectedRepo) setTab('posts');
@@ -137,17 +137,17 @@ export default function RepositoriesPage() {
     }, [openChoice, closeModal]);
 
     const handleCreate = async ({name, description, visibility}) => {
+
         const repoName = (name ?? '').trim();
         const aPrivate = visibility === 'Private';
-
         if (!repoName) {
-            setError('리포지토리 이름을 입력하세요.');
-            return {ok: false, msg: '리포지토리 이름을 입력하세요.'};
+
+            setError('Pleas enter the repository name.');
+            return {ok: false, msg: 'Pleas enter the repository name.'};
         }
-
         setLoading(true);
-        setError('');
 
+        setError('');
         try {
             const payload = {
                 name: repoName,
@@ -155,8 +155,6 @@ export default function RepositoriesPage() {
                 aPrivate: aPrivate,
                 aprivate: aPrivate,
             };
-
-            console.log('[createRepository] payload =', payload);
 
             const res = await createRepository(payload);
 
@@ -172,12 +170,12 @@ export default function RepositoriesPage() {
                 setSelectedRepoId(newRepo.id);
                 return {ok: true};
             } else {
-                const msg = res?.msg || '생성 실패';
+                const msg = res?.msg || 'Failed to add repository.';
                 setError(msg);
                 return {ok: false, msg};
             }
         } catch (err) {
-            const msg = err?.response?.data?.msg || '요청 실패';
+            const msg = err?.response?.data?.msg || 'Failed to request.';
             setError(msg);
             return {ok: false, msg};
         } finally {
@@ -185,9 +183,12 @@ export default function RepositoriesPage() {
         }
     };
 
-    const handleImportRepo = async (payload) => {
+    const handleDeleted = useCallback((deletedId) => {
+        setRepositories(prev => prev.filter(r => String(r.id) !== String(deletedId)));
+        setSelectedRepoId(prev => (String(prev) === String(deletedId) ? null : prev));
+    }, []);
 
-        console.log("import payload: ", payload);
+    const handleImportRepo = async (payload) => {
 
         try {
             const res = await importGithubRepo(payload);
@@ -247,7 +248,7 @@ export default function RepositoriesPage() {
 
                     <div className="relative">
                         {/* 탭 */}
-                        {repositories.length !== 0 && (
+                        {visibleRepos.length !== 0 && (
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
                                 {key: 'posts', label: 'Posts'},
@@ -283,7 +284,7 @@ export default function RepositoriesPage() {
                                             <span className="truncate">add repository</span>
                                         </li>
                                     }
-                                    {repositories.map((r) => {
+                                    {visibleRepos.map((r) => {
                                         const sel = r.id === selectedRepoId;
                                         return (
                                             <li
@@ -310,7 +311,7 @@ export default function RepositoriesPage() {
                                  bg-gray-50 border-gray-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700">
 
                                 {/* 리포 없을 때 */}
-                                {repositories.length === 0 ? (
+                                {visibleRepos.length === 0 ? (
                                     <div className="absolute inset-0 flex items-center justify-center p-8">
                                         <div
                                             className="relative w-full max-w-lg rounded-2xl border-2 border-dashed p-12 text-center shadow-sm transition-all
