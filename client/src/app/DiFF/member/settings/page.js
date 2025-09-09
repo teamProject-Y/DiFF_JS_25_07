@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
 import {oneDark} from "react-syntax-highlighter/dist/cjs/styles/prism";
-import ConfirmDialog from "@/common/alertModal";
+import {useDialog} from "@/common/commonLayout";
 
 export default function SettingsTab() {
     return (
@@ -22,6 +22,7 @@ export default function SettingsTab() {
 
 function SettingsPage() {
     const router = useRouter();
+    const { alert, confirm } = useDialog();
     const searchParams = useSearchParams();
 
     const [loading, setLoading] = useState(true);
@@ -152,17 +153,27 @@ function SettingsPage() {
 
     const handleRemoveAvatar = async () => {
         if (!isMySetting || !profileUrl) return;
-        if (!confirm("프로필 사진을 삭제할까요?")) return;
+
+        const ok = await confirm({
+            intent: 'Info',
+            title: 'Do you want to delete your profile picture?',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+        });
+        if (!ok) return;
 
         setRemoving(true);
-        setBanner(null);
         try {
             await uploadProfileImg(null);
             setProfileUrl('');
-            setMember((prev) => ({...prev, profileUrl: ''}));
-            setBanner({type: 'success', msg: '프로필 사진을 삭제했습니다'});
+            setMember(prev => ({ ...prev, profileUrl: '' }));
+
         } catch (e) {
-            setBanner({type: 'error', msg: e.message || '삭제에 실패했습니다'});
+            await alert({
+                intent: 'danger',
+                title: 'Failed to delete.',
+                message: e?.response?.data?.msg || e.message || '',
+            });
         } finally {
             setRemoving(false);
         }
@@ -186,13 +197,13 @@ function SettingsPage() {
             const res = await modifyNickName({nickName: form.nickName});
             localStorage.setItem("nickName", form.nickName);
             setMember((prev) => ({...prev, nickName: form.nickName}));
-            setBanner({type: 'success', msg: res.msg || "닉네임이 수정되었습니다"});
+            setBanner({type: 'success', msg: res.msg || "Nickname updated successfully."});
         } catch (err) {
-            console.error("닉네임 수정 실패:", err);
+            console.error("Failed to update nickname:", err);
             if (err.response) {
-                setBanner({type: 'error', msg: err.response.data?.msg || "닉네임 수정에 실패했습니다"});
+                setBanner({type: 'error', msg: err.response.data?.msg || "Failed to update nickname."});
             } else {
-                setBanner({type: 'error', msg: "서버와 연결할 수 없습니다"});
+                setBanner({type: 'error', msg: "Server error. Please try again later."});
             }
         }
     };
@@ -206,13 +217,13 @@ function SettingsPage() {
         try {
             const res = await modifyIntroduce({introduce: form.introduce});
             setMember((prev) => ({...prev, introduce: form.introduce}));
-            setBanner({type: 'success', msg: res.msg || "프로필이 저장되었습니다"});
+            setBanner({type: 'success', msg: res.msg || "README updated successfully."});
         } catch (err) {
             console.error("introduce 수정 실패:", err);
             if (err.response) {
-                setBanner({type: 'error', msg: err.response.data?.msg || "자기소개 수정에 실패했습니다"});
+                setBanner({type: 'error', msg: err.response.data?.msg || "Failed to update README."});
             } else {
-                setBanner({type: 'error', msg: "서버와 연결할 수 없습니다"});
+                setBanner({type: 'error', msg: "Server error. Please try again later."});
             }
         }
     };
@@ -253,14 +264,14 @@ function SettingsPage() {
             const res = await modifyNickName({ nickName: form.nickName });
             localStorage.setItem("nickName", form.nickName);
             setMember((prev) => ({ ...prev, nickName: form.nickName }));
-            setBanner({ type: "success", msg: res.msg || "닉네임이 수정되었습니다" });
+            setBanner({ type: "success", msg: res.msg || "Nickname updated successfully." });
             setEditingNick(false);
         } catch (err) {
             console.error("닉네임 수정 실패:", err);
             if (err.response) {
-                setBanner({ type: "error", msg: err.response.data?.msg || "닉네임 수정에 실패했습니다" });
+                setBanner({ type: "error", msg: err.response.data?.msg || "Failed to update nickname." });
             } else {
-                setBanner({ type: "error", msg: "서버와 연결할 수 없습니다" });
+                setBanner({ type: "error", msg: "Server error. Please try again later." });
             }
         }
     };
@@ -592,22 +603,6 @@ function SettingsPage() {
                     </div>
                 </div>
             </div>
-
-            {/* 회원 탈퇴 모달 */}
-            <ConfirmDialog
-                open={confirmOpen}
-                onOpenChange={setConfirmOpen}
-                intent="danger"
-                title="Are you sure you want to delete your account?"
-                message="This action cannot be undone."
-                cancelText="Cancel"
-                confirmText="Confirm"
-                onConfirm={() => {
-                    // confirm 클릭 시 실행할 로직
-                    alert("회원탈퇴 로직 연결 예정");
-                    // 기본값(closeOnConfirm=true)이므로 완료 후 자동으로 닫힘
-                }}
-            />
 
         </section>
     );
