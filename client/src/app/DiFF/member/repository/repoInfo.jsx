@@ -81,7 +81,6 @@ export function RepoInfo({
         }
     }
 
-
 // 언어 비율 데이터
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
@@ -124,8 +123,8 @@ export function RepoInfo({
                     intent: "success",
                     title: "Repository deleted.",
                     onConfirm: () => {
-                        onDeleted?.(repo.id); // 부모 목록 갱신 콜백 (부모에서 꼭 넘겨주세요)
-                        onClose?.();          // 상세 닫기
+                        onDeleted?.(repo.id);
+                        onClose?.();
                     },
                 });
             } else {
