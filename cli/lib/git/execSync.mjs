@@ -221,7 +221,7 @@ export function getDiFF(from, to) {
         files = gitignoreFilter.filter(files);
 
         if (files.length === 0) {
-            console.log(chalk.gray('🚫 No matching files to diff.'));
+            // console.log(chalk.gray('🚫 No matching files to diff.'));
             return resolve('');
         }
 

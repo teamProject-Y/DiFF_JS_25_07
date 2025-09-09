@@ -19,7 +19,7 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
     const repositoryId = await getRepositoryId();
 
     if (!diff || diff.trim().length === 0) {
-        console.log(chalk.bgRedBright(chalk.black("diff 내용이 비어있습니다.")));
+        console.log(chalk.bgRedBright(chalk.black("diff is empty.")));
         return null;
     }
 
