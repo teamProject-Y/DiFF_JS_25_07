@@ -11,7 +11,6 @@ import rehypeRaw from "rehype-raw";
 import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
 import {oneDark} from "react-syntax-highlighter/dist/cjs/styles/prism";
 import {useDialog} from "@/common/commonLayout";
-import {deleteRepository} from "@/lib/RepositoryAPI";
 
 export default function SettingsTab() {
     return (
