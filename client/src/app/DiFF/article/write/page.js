@@ -6,6 +6,7 @@ import {writeArticle, getMyRepositories} from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
 import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
+import {useTheme} from "@/common/thema";
 
 const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
@@ -171,6 +172,8 @@ export function WriteArticlePage() {
     const [draftId, setDraftId] = useState(sp.get('draftId'));
     const [diffId, setDiffId] = useState(null);
     const [isPublic, setIsPublic] = useState(true);
+
+    const bg = useTheme() === 'dark' ? '#111214' : '#ffffff';
 
     // auth check
     useEffect(() => {
@@ -481,7 +484,7 @@ export function WriteArticlePage() {
                 .toastui-editor-ww-container .ProseMirror,
                 .toastui-editor-md-container .CodeMirror,
                 .toastui-editor-md-container .CodeMirror-scroll {
-                    background-color: #111214;
+                    background-color: ${bg};
                 }
                 
                 .toastui-editor-defaultUI {
