@@ -7,19 +7,14 @@ import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {
     connectRepository,
     getAnalysisHistory,
+    getAnalysisRecent,
     getLanguageDistribution,
     renameRepository,
     deleteRepository,
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
-import {useDialog} from "@/common/commonLayout";
-
-
-export function RepoInfo({
-                             repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
-                         }) {
-    const {alert, confirm} = useDialog();
+import AnalysisRecentChart from "@/app/DiFF/member/repository/analysisRecentChart";
 
 import { useDialog } from "@/common/commonLayout";
 
@@ -31,7 +26,7 @@ export function RepoInfo({
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
     const [history, setHistory] = useState([]);
-    const [activeTab, setActiveTab] = useState("history");
+    const [activeTab, setActiveTab] = useState("recent");
     const [repoUrl, setRepoUrl] = useState(repo?.url ?? '');
     const [displayName, setDisplayName] = useState(repo?.name ?? '');
     const [commitRefreshKey, setCommitRefreshKey] = useState(0);
@@ -88,8 +83,7 @@ export function RepoInfo({
         }
     }
 
-
-// 언어 비율 데이터
+    // 언어 비율 데이터
     const [languages, setLanguages] = useState([]);
     useEffect(() => {
         if (!repo?.id) return;
@@ -176,6 +170,13 @@ export function RepoInfo({
                             <div
                                 className="absolute top-4 right-5 z-30 flex items-center gap-2 pointer-events-none">
                                 <button
+                                    onClick={() => setActiveTab("recent")}
+                                    className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
+                                    ${activeTab === "recent" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
+                                >
+                                    <i className="fa-solid fa-circle text-[0.3rem]"></i>Recent
+                                </button>
+                                <button
                                     onClick={() => setActiveTab("history")}
                                     className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
                     ${activeTab === "history" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
@@ -192,10 +193,13 @@ export function RepoInfo({
                             </div>
 
                             {activeTab === "history" ? (
-                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo}/>
+                                <AnalysisHistoryChart history={history} isMyRepo={isMyRepo} />
+                            ) : activeTab === "total" ? (
+                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo} />
                             ) : (
-                                <TotalAnalysisChart history={history} isMyRepo={isMyRepo}/>
+                                <AnalysisRecentChart history={history} isMyRepo={isMyRepo} />
                             )}
+
                         </div>
 
                         {/* 하단 박스 */}
@@ -275,8 +279,7 @@ export function RepoInfo({
                                  focus:outline-none focus:ring-1 focus:ring-blue-400"
                                             placeholder="Repository name"
                                         />
-                                        <button onClick={onSaveName} className="p-1" title="Save"
-                                                aria-label="Save name">
+                                        <button onClick={onSaveName} className="p-1" title="Save" aria-label="Save name">
                                             <i className="fa-solid fa-check"></i>
                                         </button>
                                         <button onClick={cancelEdit} title="Cancel" aria-label="Cancel edit">
@@ -347,4 +350,3 @@ export function RepoInfo({
         </motion.div>
     );
 }
-
