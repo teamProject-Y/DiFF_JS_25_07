@@ -213,16 +213,6 @@ export default function BeforeExplain() {
                         </div>
                     </div>
                 </div>
-
-                {/* 인디케이터 */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-400 text-sm z-30">
-                    <div className="flex flex-col items-center">
-                        <span className="mb-2 text-xs opacity-60">Scroll to animate</span>
-                        <div className="w-5 h-8 border border-gray-300 rounded-full flex justify-center opacity-60">
-                            <div className="w-0.5 h-2 bg-gray-400 rounded-full mt-1.5" />
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     );

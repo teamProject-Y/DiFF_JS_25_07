@@ -115,11 +115,6 @@ function extractFirstImage(body) {
     return match ? match[1] : null;
 }
 
-function trimByChars(str = '', max = 15) {
-    const arr = Array.from(String(str).trim());
-    return arr.length > max ? arr.slice(0, max).join('') + '…' : arr.join('');
-}
-
 export default function Page() {
     const inputRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -322,8 +317,7 @@ export default function Page() {
                                                         )}
                                                     </div>
                                                     <div className="h-1/2 p-5 flex flex-col">
-                                                        <h3 className="text-xl font-semibold clamp-1 mb-2"
-                                                            title={article.title ?? 'Untitled'}>{article.title ?? 'Untitled'}</h3>
+                                                        <h3 className="text-xl font-semibold clamp-1 mb-2">{article.title}</h3>
                                                         <p className="clamp-2 text-sm text-gray-600">
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
@@ -376,8 +370,8 @@ export default function Page() {
             <div className="pointer-events-none">
                 <button onClick={() =>
                     window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"})) }
-                     className="fixed right-5 bottom-5 z-50 pointer-events-auto">
-                        <i className="fa-solid fa-power-off text-white cursor-pointer text-3xl hover:text-red-500"></i>
+                        className="fixed right-5 bottom-5 z-50 pointer-events-auto">
+                    <i className="fa-solid fa-power-off text-white cursor-pointer text-3xl hover:text-red-500"></i>
                 </button>
             </div>
         </div>
