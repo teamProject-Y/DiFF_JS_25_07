@@ -227,11 +227,11 @@ export default function Header() {
             case 'like':
                 return 'fa-regular fa-thumbs-up';
             case 'follow':
-                return 'fa-solid fa-user-plus';
+                return 'fa-regular fa-user-plus';
             case 'system':
                 return 'fa-regular fa-bell';
             case 'draft':
-                return 'fa-solid fa-pen';
+                return 'fa-regular fa-pen';
             default:
                 return 'fa-regular fa-bell';
         }
@@ -403,26 +403,26 @@ export default function Header() {
                             </li>
                         </>
                     ) : (
-                        <>
-                            <li>
-                                <button
-                                    onClick={() =>
-                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))
-                                    }
-                                >
-                                    LOGIN
-                                </button>
+                         <>
+                             <li>
+                                 {/*<button*/}
+                        {/*//             onClick={() =>*/}
+                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))*/}
+                        {/*//             }*/}
+                        {/*//         >*/}
+                        {/*//             LOGIN*/}
+                        {/*//         </button>*/}
+                        {/*//     </li>*/}
+                        {/*//     <li>*/}
+                        {/*//         <button*/}
+                        {/*//             onClick={() =>*/}
+                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))*/}
+                        {/*//             }*/}
+                        {/*//         >*/}
+                        {/*//             JOIN*/}
+                        {/*//         </button>*/}
                             </li>
-                            <li>
-                                <button
-                                    onClick={() =>
-                                        window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))
-                                    }
-                                >
-                                    JOIN
-                                </button>
-                            </li>
-                        </>
+                         </>
                     )}
                 </ul>
             </HeaderWrap>
