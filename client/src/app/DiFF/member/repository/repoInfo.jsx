@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useEffect, useState, useRef } from 'react';
+import {motion} from 'framer-motion';
+import {useEffect, useState, useRef} from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {
@@ -13,18 +13,13 @@ import {
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
-import ConfirmDialog from "@/common/alertModal";
+import {useDialog} from "@/common/commonLayout";
+
 
 export function RepoInfo({
                              repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
                          }) {
-
-import { useDialog } from "@/common/commonLayout";
-
-export function RepoInfo({
-                             repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
-                         }) {
-    const { alert, confirm } = useDialog();
+    const {alert, confirm} = useDialog();
 
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
@@ -33,23 +28,6 @@ export function RepoInfo({
     const [repoUrl, setRepoUrl] = useState(repo?.url ?? '');
     const [displayName, setDisplayName] = useState(repo?.name ?? '');
     const [commitRefreshKey, setCommitRefreshKey] = useState(0);
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [alertOpen, setAlertOpen] = useState(false);
-    const [alertCfg, setAlertCfg] = useState({});
-
-    const showAlert = (cfg) => {
-        setAlertCfg({
-            intent: "info",
-            title: "Notice",
-            message: null,
-            confirmText: "OK",
-            showCancel: false,
-            closeOnConfirm: true,
-            closeOnOverlayClick: true,
-            ...cfg,
-        });
-        setAlertOpen(true);
-    };
 
     useEffect(() => setDisplayName(repo?.name ?? ''), [repo?.name]);
     useEffect(() => setRepoUrl(repo?.url ?? ''), [repo?.url]);
@@ -76,13 +54,13 @@ export function RepoInfo({
                 setEditingName(false);
                 setNameInput(next);
                 onRenamed?.(repo.id, next);
-                alert({ intent: "success", title: "Repository name updated." });
+                alert({intent: "success", title: "Repository name updated."});
             } else {
-                alert({ intent: "warning", title: res?.msg ?? "Couldn’t save changes." });
+                alert({intent: "warning", title: res?.msg ?? "Couldn’t save changes."});
             }
         } catch (e) {
             console.error(e);
-            alert({ intent: "danger", title: "Something went wrong while saving." });
+            alert({intent: "danger", title: "Something went wrong while saving."});
         }
     };
 
@@ -93,13 +71,13 @@ export function RepoInfo({
             if (res?.resultCode === "S-1") {
                 setRepoUrl(url);
                 setCommitRefreshKey(k => k + 1);
-                alert({ intent: "success", title: "Repository connected." });
+                alert({intent: "success", title: "Repository connected."});
             } else {
-                alert({ intent: "warning", title: res?.msg ?? "Failed to connect repository." });
+                alert({intent: "warning", title: res?.msg ?? "Failed to connect repository."});
             }
         } catch (e) {
             console.error(e);
-            alert({ intent: "danger", title: "Connection error. Please try again." });
+            alert({intent: "danger", title: "Connection error. Please try again."});
         }
     }
 
@@ -151,11 +129,11 @@ export function RepoInfo({
                     },
                 });
             } else {
-                alert({ intent: "warning", title: res?.msg ?? "Couldn’t delete repository." });
+                alert({intent: "warning", title: res?.msg ?? "Couldn’t delete repository."});
             }
         } catch (err) {
             console.error("Deletion failed: ", err);
-            alert({ intent: "danger", title: "Error while deleting. Please try again." });
+            alert({intent: "danger", title: "Error while deleting. Please try again."});
         }
     };
 
@@ -188,7 +166,8 @@ export function RepoInfo({
                         {/* 탭 내용 */}
                         <div className="h-[35%] relative rounded-xl border shadow-sm p-3
                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 pt-9">
-                            <div className="absolute top-4 right-5 z-30 flex items-center gap-2 pointer-events-none">
+                            <div
+                                className="absolute top-4 right-5 z-30 flex items-center gap-2 pointer-events-none">
                                 <button
                                     onClick={() => setActiveTab("history")}
                                     className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
@@ -218,13 +197,15 @@ export function RepoInfo({
                             {repoUrl ? (
                                 <CommitList
                                     key={`commits-${repo?.id}-${repoUrl}-${commitRefreshKey}`}
-                                    repo={{ ...repo, url: repoUrl }}
+                                    repo={{...repo, url: repoUrl}}
                                     refreshSignal={commitRefreshKey}
                                 />
                             ) : (
-                                <div className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
-                                    <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
-                                        <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400" />
+                                <div
+                                    className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
+                                    <div
+                                        className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
+                                        <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400"/>
                                     </div>
 
                                     <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
@@ -245,7 +226,7 @@ export function RepoInfo({
                                     >
                                         <div className="relative flex-1">
                       <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                        <i className="fa-brands fa-github text-neutral-400" />
+                        <i className="fa-brands fa-github text-neutral-400"/>
                       </span>
                                             <input
                                                 type="url"
@@ -341,7 +322,7 @@ export function RepoInfo({
                           flex flex-col min-h-0 overflow-hidden">
                         <div className="font-semibold">Languages</div>
                         <div className="mt-2 grow min-h-0">
-                            <LanguageChart languages={languages} isMyRepo={isMyRepo} />
+                            <LanguageChart languages={languages} isMyRepo={isMyRepo}/>
                         </div>
                     </div>
 
@@ -359,3 +340,4 @@ export function RepoInfo({
         </motion.div>
     );
 }
+
