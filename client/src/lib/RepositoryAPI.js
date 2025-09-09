@@ -47,6 +47,13 @@ export const getAnalysisHistory = async (repoId) => {
     return res.data?.data1 || [];
 };
 
+export const getAnalysisRecent = async (repoId) => {
+    console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/recent");
+    const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/recent`);
+    console.log("[API] 응답:", res.data);
+    return res.data?.data1 || [];
+};
+
 export const getLanguageDistribution = async (repoId) => {
     try {
         console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/languages");

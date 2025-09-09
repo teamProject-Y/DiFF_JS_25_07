@@ -18,6 +18,7 @@ import {
     getFollowingList,
     getFollowerList,
 } from '@/lib/UserAPI';
+import {useDialog} from "@/common/commonLayout";
 
 export default function ProfileTab() {
     return (
