@@ -13,14 +13,6 @@ import {
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
 import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
-import {useDialog} from "@/common/commonLayout";
-
-
-export function RepoInfo({
-                             repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
-                         }) {
-    const {alert, confirm} = useDialog();
-
 import { useDialog } from "@/common/commonLayout";
 
 export function RepoInfo({
