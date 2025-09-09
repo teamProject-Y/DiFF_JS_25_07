@@ -204,12 +204,6 @@ function ModifyArticlePageInner() {
                 </div>
             </form>
 
-            <ConfirmDialog
-                open={alertOpen}
-                onOpenChange={setAlertOpen}
-                {...alertCfg}
-            />
-
             {/* Global tiny CSS to make ToastUI fill its container, keep it borderless for full-bleed feel */}
             <style jsx global>{`
                 /* Toast UI Editor: fill parent and scroll INSIDE */
