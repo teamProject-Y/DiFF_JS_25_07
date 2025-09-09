@@ -1,7 +1,7 @@
 'use client';
 
-import {motion} from 'framer-motion';
-import {useEffect, useState, useRef} from 'react';
+import { motion } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {
@@ -20,6 +20,13 @@ export function RepoInfo({
                              repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
                          }) {
     const {alert, confirm} = useDialog();
+
+import { useDialog } from "@/common/commonLayout";
+
+export function RepoInfo({
+                             repo, isMyRepo, onClose, useExternalSidebar = false, onDeleted, onRenamed,
+                         }) {
+    const { alert, confirm } = useDialog();
 
     const [editingName, setEditingName] = useState(false);
     const [nameInput, setNameInput] = useState(repo?.name ?? '');
