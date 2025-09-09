@@ -270,7 +270,9 @@ function ArticleDetailInner() {
 
     // 내 회원 ID 로드
     useEffect(() => {
+
         if (!isLoggedIn) {
+
             setMyId(null);
             return;
         }
@@ -959,6 +961,11 @@ function ArticleDetailInner() {
                     </div>
                 </div>
             )}
+            <ConfirmDialog
+                open={alertOpen}
+                onOpenChange={setAlertOpen}
+                {...alertCfg}
+            />
         </div>
     );
 }
