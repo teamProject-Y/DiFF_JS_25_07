@@ -10,6 +10,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
 import {oneDark} from "react-syntax-highlighter/dist/cjs/styles/prism";
+import ConfirmDialog from "@/common/alertModal";
 
 export default function SettingsTab() {
     return (
@@ -387,7 +388,7 @@ function SettingsPage() {
                                                                 if (e.key === "Escape") cancelEditNick();
                                                             }}
                                                             className="flex-grow min-w-0 px-2 py-1 mr-2 rounded-md border
-                     focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                                                        focus:outline-none focus:ring-1 focus:ring-blue-400"
                                                             placeholder="nickname"
                                                         />
                                                         <button
@@ -592,67 +593,22 @@ function SettingsPage() {
                 </div>
             </div>
 
-            {/*회원 탈퇴 모달*/}
-            {confirmOpen && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center p-4">
-                    {/* overlay */}
-                    <button
-                        aria-hidden
-                        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-                        onClick={() => setConfirmOpen(false)}
-                    />
-                    {/* dialog */}
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="confirm-title"
-                        className="
-                  relative w-full max-w-md rounded-lg
-                  border bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5
-                  dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700 dark:ring-0
-                  transition-transform duration-200
-                "
-                    >
-                        <div className="p-5">
-                            <div id="confirm-title" className="text-lg font-semibold">
-                                Are you sure you want to delete your account?
-                            </div>
-                            <p className="mt-1 px-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                This action cannot be undone.
-                            </p>
+            {/* 회원 탈퇴 모달 */}
+            <ConfirmDialog
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                intent="danger"
+                title="Are you sure you want to delete your account?"
+                message="This action cannot be undone."
+                cancelText="Cancel"
+                confirmText="Confirm"
+                onConfirm={() => {
+                    // confirm 클릭 시 실행할 로직
+                    alert("회원탈퇴 로직 연결 예정");
+                    // 기본값(closeOnConfirm=true)이므로 완료 후 자동으로 닫힘
+                }}
+            />
 
-                            <div className="mt-6 flex justify-end gap-2">
-                                <button
-                                    onClick={() => setConfirmOpen(false)}
-                                    className="
-                                rounded-md px-4 py-2 text-sm
-                                border border-neutral-200 bg-neutral-100 text-neutral-900 hover:bg-neutral-200
-                                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400
-                                dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
-                                dark:focus-visible:outline-neutral-500
-                              "
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setConfirmOpen(false);
-                                        alert('회원탈퇴 로직 연결 예정');
-                                    }}
-                                    className="
-                                rounded-md px-4 py-2 text-sm
-                                bg-red-600 text-white hover:bg-red-500
-                                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500
-                              "
-                                >
-                                    Confirm
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            )}
         </section>
     );
 }
@@ -664,7 +620,6 @@ function Card({children, className}) {
         </div>
     );
 }
-
 
 function TopTab({href, label, active}) {
     return active ? (
