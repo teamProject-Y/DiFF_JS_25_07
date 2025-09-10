@@ -152,7 +152,7 @@ export async function runAnimation(isRunningRef) {
 
     process.stdout.write(`\x1B[${maxLines}A`); // 맨 위로
     process.stdout.write('\x1B[2K');           // 줄 클리어
-    process.stdout.write('analysis success.\n');
+    // process.stdout.write('analysis success.\n');
 
     // 커서 다시 보이기
     process.stdout.write('\x1B[?25h');

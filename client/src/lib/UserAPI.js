@@ -136,8 +136,9 @@ export const checkPwUser = async (data) => {
 }
 
 // 5-5. 회원 탈퇴
-export const deleteUser = async () => {
-    await UserAPI.delete(`/DiFF/member`);
+export const deleteUser = async (id) => {
+    const response = await UserAPI.delete(`/api/DiFF/member/${id}`);
+    return response.data;
 };
 
 // 닉네임으로 특정 회원 팔로잉 리스트 조회

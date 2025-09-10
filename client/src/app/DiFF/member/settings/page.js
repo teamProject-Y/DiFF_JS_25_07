@@ -3,7 +3,7 @@
 import {useEffect, useMemo, useRef, useState, Suspense} from 'react';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
-import {fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce} from "@/lib/UserAPI";
+import {fetchUser, uploadProfileImg, modifyNickName, modifyIntroduce, deleteUser} from "@/lib/UserAPI";
 import { updateNotificationSetting } from "@/lib/NotificationAPI";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -95,12 +95,34 @@ function SettingsPage() {
         window.location.href = url;
     };
 
-    const onClickRemove = () => {
-        setProfileUrl('');
-        setBanner({type: 'info', msg: '프로필 제거 로직 연결 예정'});
-    };
+    // const onClickRemove = () => {
+    //     setProfileUrl('');
+    //     setBanner({type: 'info', msg: '프로필 제거 로직 연결 예정'});
+    // };
 
-    const onClickWithdraw = () => setConfirmOpen(true);
+    const onClickRemove = async () => {
+        const ok = await confirm({
+            intent: "danger",
+            title: "Are you sure you want to delete your account?",
+            message: "This action cannot be undone.",
+            confirmText: "Delete account",
+            cancelText: "Cancel",
+        });
+        if (!ok) return;
+
+        try {
+            const res = await deleteUser(member.id);
+            if (res?.resultCode?.startsWith("S-")) {
+                alert({intent: "neutral", title: "Goodbye, see you next time."});
+                router.push("/DiFF/member/logout")
+            } else {
+                alert({intent: "warning", title: res?.msg ?? "Server error. Please try again later."});
+            }
+        } catch (err) {
+            console.error("Deletion failed: ", err);
+            alert({intent: "danger", title: "Server error. Please try again later."});
+        }
+    };
 
     useEffect(() => {
         const accessToken = typeof window !== 'undefined' && localStorage.getItem('accessToken');
@@ -364,28 +386,7 @@ function SettingsPage() {
                                         />
                                     </div>
 
-                                    <div className="flex-1 px-2">
-                                        <div className="mt-1 text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-                                            {member?.email || '-'}
-                                        </div>
-
-                                        {/* 소셜 연동 */}
-                                        <div className="mt-4 flex items-center gap-2">
-                                            <LinkBtn
-                                                brand="google"
-                                                label={linked.google ? "Connected" : "Connect"}
-                                                onClick={() => !linked.google && startLink("google")}
-                                                disabled={linked.google}
-                                            />
-
-                                            <LinkBtn
-                                                brand="github"
-                                                label={linked.github ? "Connected" : "Connect"}
-                                                onClick={() => !linked.github && startLink("github")}
-                                                disabled={linked.github}
-                                            />
-
-                                        </div>
+                                    <div className="flex-1">
                                         <div className="flex items-center gap-3">
                                             <div className="flex items-center min-w-0 flex-grow h-11">
                                                 {editingNick ? (
@@ -398,7 +399,7 @@ function SettingsPage() {
                                                                 if (e.key === "Enter") onSaveNick();
                                                                 if (e.key === "Escape") cancelEditNick();
                                                             }}
-                                                            className="flex-grow min-w-0 px-2 py-1 mr-2 rounded-md border
+                                                            className="flex-grow min-w-0 w-[80%] px-2 py-1 mr-2 rounded-md border text-xl font-semibold
                                                                         focus:outline-none focus:ring-1 focus:ring-blue-400"
                                                             placeholder="nickname"
                                                         />
@@ -421,12 +422,12 @@ function SettingsPage() {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <p className="text-lg font-semibold break-all pl-1">
+                                                        <p className="break-all pr-2 text-3xl font-bold">
                                                             {member?.nickName ?? "nickname"}
                                                         </p>
                                                         <button
                                                             onClick={() => setEditingNick(true)}
-                                                            className="pl-2 pb-1 text-xs text-neutral-400"
+                                                            className="pb-1 text-base text-neutral-400"
                                                             title="Rename"
                                                             aria-label="Rename nickname"
                                                         >
@@ -435,6 +436,27 @@ function SettingsPage() {
                                                     </>
                                                 )}
                                             </div>
+                                        </div>
+                                        <div className="my-1 text-base text-neutral-500 dark:text-neutral-500">
+                                            {member?.email || '-'}
+                                        </div>
+
+                                        {/* 소셜 연동 */}
+                                        <div className="flex items-center gap-2">
+                                            <LinkBtn
+                                                brand="google"
+                                                label={linked.google ? "Connected" : "Connect"}
+                                                onClick={() => !linked.google && startLink("google")}
+                                                disabled={linked.google}
+                                            />
+
+                                            <LinkBtn
+                                                brand="github"
+                                                label={linked.github ? "Connected" : "Connect"}
+                                                onClick={() => !linked.github && startLink("github")}
+                                                disabled={linked.github}
+                                            />
+
                                         </div>
                                     </div>
                                 </div>
@@ -484,7 +506,7 @@ function SettingsPage() {
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={onClickWithdraw}
+                                        onClick={onClickRemove}
                                         className="rounded px-3 py-1.5 text-sm self-end border
                                     border-gray-300 hover:border-red-500 hover:text-red-500
                                     dark:border-gray-400 dark:hover:border-red-500"
@@ -638,8 +660,8 @@ function LinkBtn({label, onClick, disabled, brand}) {
         "border-neutral-300 dark:border-neutral-700";
 
     const enabled =
-        "bg-neutral-900 text-white shadow-sm hover:bg-neutral-800 active:bg-neutral-800 " +
-        "dark:bg-neutral-900 dark:text-white";
+        "bg-neutral-100 shadow-sm hover:bg-neutral-300 active:bg-neutral-800 " +
+        "dark:bg-neutral-900 dark:text-white dark:hover:neutral-800";
 
     const blocked =
         "bg-neutral-100 text-neutral-400 border-neutral-200 " +

@@ -154,6 +154,8 @@ export default function Page() {
     }, []);
 
     // page.js
+    const thresholds = Array.from({ length: 21 }, (_, i) => i / 20); // 0,0.05,...,1
+    const didInitRef = useRef(false);
     const lastColorRef = useRef(null);
 
     useEffect(() => {
@@ -186,7 +188,7 @@ export default function Page() {
 
         els.forEach(el => io.observe(el));
         return () => io.disconnect();
-    }, [mounted, loggedIn]); // ✅ deps 유지
+    }, [mounted, loggedIn]);
 
     // background
     // useEffect(() => {
@@ -230,11 +232,13 @@ export default function Page() {
                 <BeforeMainPage/>
             </div>
 
-            <div id="docs" className="is-light-bg min-h-screen w-full pt-20 snap-start dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
+            <div id="docs" className="is-light-bg min-h-screen w-full pt-20 dark:is-dark-bg" ref={el => sectionRefs.current[1] = el}>
                 <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-0 mb-4">
 
                 </div>
-                <BeforeExplain />
+                <div className="snap-center">
+                    <BeforeExplain />
+                </div>
                 <div className="max-w-[1400px] mx-auto px-8 md:px-20 h-0 py-10">
 
                 </div>
@@ -273,10 +277,8 @@ export default function Page() {
                         isClient && (
                             <SwiperWrapper
                                 modules={[Navigation, Pagination, A11y, Autoplay]}
-                                spaceBetween={30}
                                 loop={true}
                                 autoplay={{delay: 3000}}
-                                slidesPerView={4}
                                 navigation={{
                                     prevEl: ".custom-prev",
                                     nextEl: ".custom-next",
@@ -286,6 +288,13 @@ export default function Page() {
                                 observer={true}
                                 observeParents={true}
                                 resizeObserver={true}
+
+                                breakpoints={{
+                                    0:     { slidesPerView: 1, spaceBetween: 12 },
+                                    640:   { slidesPerView: 2, spaceBetween: 16 },   // sm
+                                    1024:  { slidesPerView: 3, spaceBetween: 20 },   // lg
+                                    1280:  { slidesPerView: 4, spaceBetween: 24 },   // xl 이상
+                                }}
                             >
                                 {trendingArticles.length > 0 ? (
                                     trendingArticles.slice(0, 10).map((article, index) => {
@@ -313,7 +322,7 @@ export default function Page() {
                                                     </div>
                                                     <div className="h-1/2 p-5 flex flex-col">
                                                         <h3 className="text-xl font-semibold clamp-1 mb-2">{article.title}</h3>
-                                                        <p className="clamp-3 text-sm text-gray-600">
+                                                        <p className="clamp-2 text-sm text-gray-600">
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
                                                         <div className="flex-grow"></div>
@@ -365,8 +374,8 @@ export default function Page() {
             <div className="pointer-events-none">
                 <button onClick={() =>
                     window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"})) }
-                     className="fixed right-5 bottom-5 z-50 pointer-events-auto">
-                        <i className="fa-solid fa-power-off text-white cursor-pointer text-3xl hover:text-red-500"></i>
+                        className="fixed right-5 bottom-5 z-50 pointer-events-auto">
+                    <i className="fa-solid fa-power-off text-white cursor-pointer text-3xl hover:text-red-500"></i>
                 </button>
             </div>
         </div>

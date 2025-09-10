@@ -8,6 +8,7 @@ import ToastEditor from "@/common/toastEditor";
 import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
 import {useTheme} from "@/common/thema";
+import { Globe, Lock } from "lucide-react";
 
 export default function ModifyArticlePage() {
     return (
@@ -147,28 +148,31 @@ function ModifyArticlePageInner() {
                         />
                     </div>
 
-                    <div className="flex justify-between items-center">
-                        <Link
-                            href={`/DiFF/article/detail?id=${id}`}
-                            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm border-neutral-300 text-neutral-700 hover:bg-neutral-100/60 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                        >
-                            <i className="fa-solid fa-angle-left"/>
-                            Detail
-                        </Link>
-
                         {/* Visibility */}
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setIsPublic(!isPublic)}
-                                aria-label={isPublic ? 'Public' : 'Private'}
-                                title={isPublic ? 'Public' : 'Private'}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${isPublic ? 'bg-neutral-900 dark:bg-neutral-100' : 'bg-neutral-300 dark:bg-neutral-700'}`}
-                            >
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${isPublic ? 'translate-x-6' : 'translate-x-1'}`} />
-                            </button>
-                            <span className="hidden md:inline text-xs text-neutral-500">{isPublic ? 'Public' : 'Private'}</span>
-                        </div>
+                    <div className="flex items-center gap-2 mx-5">
+                        <button
+                            type="button"
+                            onClick={() => setIsPublic(!isPublic)}
+                            aria-pressed={isPublic}
+                            aria-label={isPublic ? 'Public' : 'Private'}
+                            title={isPublic ? 'Public' : 'Private'}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border w-24 py-1.5 text-sm transition border-neutral-200 bg-white text-neutral-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:focus-visible:ring-neutral-600"
+                        >
+                            {isPublic ? (
+                                // Globe icon for Public
+                                <Globe
+                                className={`w-4 h-4`}
+                                strokeWidth={2}
+                                />
+                            ) : (
+                                // Lock icon for Private
+                                <Lock
+                                    className={`w-4 h-4`}
+                                    strokeWidth={2}
+                                />
+                            )}
+                            <span>{isPublic ? 'Public' : 'Private'}</span>
+                        </button>
                     </div>
                 </div>
 
@@ -184,13 +188,13 @@ function ModifyArticlePageInner() {
                     </div>
                 </div>
 
-                <div className="sticky bottom-0 z-50 w-full p-3 border-t bg-white dark:bg-neutral-900 dark:border-neutral-700">
+                <div className="sticky bottom-0 z-50 w-full p-3 border-t bg-gray-100 dark:bg-neutral-900 dark:border-neutral-700">
                     <div className="flex justify-end gap-5">
                         <Link
                             href={`/DiFF/article/detail?id=${id}`}
-                            className="rounded-md border px-5 py-2 font-medium border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100/60 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                            className="rounded-md border px-5 py-2 font-medium border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-100/60 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
                         >
-                            Discard
+                            Cancel
                         </Link>
                         <button
                             type="submit"
@@ -203,12 +207,6 @@ function ModifyArticlePageInner() {
                     </div>
                 </div>
             </form>
-
-            <ConfirmDialog
-                open={alertOpen}
-                onOpenChange={setAlertOpen}
-                {...alertCfg}
-            />
 
             {/* Global tiny CSS to make ToastUI fill its container, keep it borderless for full-bleed feel */}
             <style jsx global>{`
