@@ -55,7 +55,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
             } else if (err.response?.status === 401) {
                 setError("Incorrect username or password.");
             } else {
-                setError("서Server error. Please try again later.");
+                setError("Server error. Please try again later.");
             }
             setSubmitting(false);
         }
