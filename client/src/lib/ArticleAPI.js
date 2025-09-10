@@ -17,22 +17,19 @@ ArticleAPI.interceptors.request.use(
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            // console.log("📦 accessToken:", ACCESS_TOKEN);
 
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
 
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-            // console.log("📦 refreshToken:", REFRESH_TOKEN);
-            // console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-
+/** 헤더 토큰 설정 */
 export const setAuthHeader = () => {
     if (typeof window !== "undefined") {
         const TOKEN_TYPE = localStorage.getItem("tokenType") || 'Bearer';
@@ -55,8 +52,7 @@ export const setAuthHeader = () => {
     }
 };
 
-
-/** 3. 토큰 자동 재발급 (Refresh) */
+/** 토큰 자동 재발급 (Refresh) */
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
@@ -70,7 +66,7 @@ const refreshAccessToken = async () => {
     }
 };
 
-/** 4. 인터셉터로 토큰 만료 자동 처리 */
+/** 인터셉터로 토큰 만료 자동 처리 */
 ArticleAPI.interceptors.response.use(
     response => response,
     async error => {
@@ -89,6 +85,7 @@ ArticleAPI.interceptors.response.use(
     }
 );
 
+/** 게시물 정규화 */
 function normalizeArticlePayload(data) {
     const payload = { ...(data || {}) };
 
@@ -117,17 +114,17 @@ function normalizeArticlePayload(data) {
     return payload;
 }
 
-/** 5. Auth/회원 관련 API들 */
+/** Auth/회원 관련 API들 */
 export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyword = "", page = 1 }) => {
     const rid = repositoryId ?? repoId;
     const res = await ArticleAPI.get('/api/DiFF/article/list', {
         params: { repositoryId: rid, searchItem, keyword, page }
 
     });
-    console.log("🛰 [fetchArticles] res.data:", res.data);
     return res.data;
 };
 
+/** 인기글 */
 export const trendingArticle = async ({ count, days }) => {
     const response = await ArticleAPI.get(`/api/DiFF/article/trending`, {
         params: { count, days }
@@ -135,7 +132,7 @@ export const trendingArticle = async ({ count, days }) => {
     return response.data;
 }
 
-// lib/ArticleAPI.js
+/** 글 작성 */
 export const writeArticle = async (data) => {
     if (data?.repositoryId != null) {
         data = { ...data, repositoryId: Number(data.repositoryId) };
@@ -147,26 +144,20 @@ export const writeArticle = async (data) => {
     const res = await ArticleAPI.post('/api/DiFF/article/doWrite', normalizeArticlePayload(data));
     const result = res.data;
 
-    return result; // ResultData
+    return result;
 };
 
+/** 리포 불러오기 */
 export const getMyRepositories = async () => {
     const res = await ArticleAPI.get('/api/DiFF/repository/my');
     const repos =
         res.data?.data1?.repositories ??
         res.data?.repositories ??
         [];
-    // 타입 보정
     return Array.isArray(repos) ? repos : [];
 };
 
-export async function getAverageMetrics(repositoryId) {
-    const res = await ArticleAPI.get(`/api/DiFF/repository/average/${repositoryId}`);
-    return res.data;
-}
-
-
-// ArticleAPI.js
+/** 글 상세보기 */
 export async function getArticle(id) {
     const res = await ArticleAPI.get(`/api/DiFF/article/detail`, {
         params: { id }
@@ -174,24 +165,25 @@ export async function getArticle(id) {
     return res.data.data1;
 }
 
-// 게시글 수정
+/** 글 수정 */
 export async function modifyArticle(article, token) {
     const res = await axios.post(`/api/DiFF/article/modify`, normalizeArticlePayload(article), {
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // 🔑 토큰 추가
+            "Authorization": `Bearer ${token}`
         }
     });
     return res.data;
 }
 
+/** 글 삭제 */
 export const deleteArticle = async (id) => {
     const url = `/article/${id}`;
     const res = await DraftAPI.delete(url);
-    console.log('[API][deleteArticle] status:', res.status, 'data:', res.data);
     return { status: res.status, data: res.data };
 };
 
+/** 팔로잉의 글 */
 export const followingArticleList = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
     const res = await ArticleAPI.get('/api/DiFF/article/followingArticleList', {
         params: { repositoryId, searchItem, keyword, page }
@@ -199,14 +191,7 @@ export const followingArticleList = async ({ repositoryId, searchItem = 0, keywo
     return res.data;
 };
 
-export const repositoryArticles = async ({ repositoryId }) => {
-    const response = await ArticleAPI.get(`/api/DiFF/repository/articles`, {
-        params: { repositoryId }
-    });
-    return response.data;
-}
-
-// 댓글 작성
+/** 댓글 작성 */
 export const postReply = async (articleId, comment) => {
     const response = await UserAPI.post(`/api/DiFF/reply/doWrite`, {
         articleId: articleId,
@@ -215,16 +200,16 @@ export const postReply = async (articleId, comment) => {
     return response.data;
 };
 
-// 댓글 목록 불러오기
+/** 댓글 리스트 */
 export const fetchReplies = async (articleId) => {
     const response = await UserAPI.get(`/api/DiFF/reply/list`, {
         params: { articleId },
     });
-    console.log(response.data.replies);
 
     return response.data;
 };
 
+/** 조회수 */
 export async function increaseArticleHits(articleId) {
     const res = await fetch(`/api/DiFF/article/hits/${articleId}`, {
         method: "POST",
@@ -233,9 +218,10 @@ export async function increaseArticleHits(articleId) {
     return res.json();
 }
 
+/** 검색 */
 export const searchArticles = async (keyword) => {
     const res = await ArticleAPI.get(`/api/DiFF/article/search`, {
-        params: { keyword }  // 자동 인코딩됨
+        params: { keyword }
     });
     return res.data;
 };

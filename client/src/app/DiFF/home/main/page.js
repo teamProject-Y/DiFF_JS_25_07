@@ -142,8 +142,6 @@ export default function Page() {
             .catch(() => setLoading(false));
     }, []);
 
-    console.log("profile: ", trendingArticles[0]);
-
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const token = localStorage.getItem('accessToken');
@@ -232,7 +230,7 @@ export default function Page() {
                         <p className="text-[clamp(20px,1.6vw,24px)] font-semibold text-blue-600 tracking-tight
                         flex items-center gap-3">
                             Repository Management
-                            <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600" />
+                            <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
                         </p>
                         <p className="text-neutral-700 truncate">
                             Draft from CLI or commits · Repo-native blogging · Code quality insights
@@ -246,25 +244,17 @@ export default function Page() {
             <div id="trending"
                  className="is-light-bg w-full h-screen snap-start bg-gray-100 px-20 pt-20"
                  ref={el => sectionRefs.current[3] = el}>
-                <div>
-                    <div
-                        className="inline-flex items-center gap-2 rounded-full ring-1 ring-neutral-300 px-2.5 py-1 bg-white text-[11px] font-medium tracking-[0.18em] text-neutral-600">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-300"/>
-                        DISCOVER
-                    </div>
 
-                    <h2 className="mt-3 relative text-4xl md:text-5xl font-extrabold tracking-tight text-neutral-900">
-                        <span className="relative inline-block">
-                          <span className="relative z-10">TRENDING</span>
-                            {/* 솔리드 컬러 하이라이터 (그라데이션 아님) */}
-                            <span className="absolute inset-x-0 -bottom-1 h-3 bg-blue-300 rounded-md -rotate-1"/>
-                        </span>
-                    </h2>
+                {/* Title */}
 
-                    <p className="mt-3 text-sm text-neutral-500">
+                    <p className="text-[clamp(20px,1.6vw,24px)] font-bold text-blue-600 tracking-tight
+                        flex items-center gap-3">
+                        <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
+                        TRENDING
+                    </p>
+                    <p className="text-neutral-700 truncate font-semibold">
                         What the community is reading right now
                     </p>
-                </div>
 
                 <div className="article-slider h-2/3 w-full mt-8 flex relative">
                     <div className="flex absolute right-0 -top-16  font-extralight text-3xl text-neutral-500 z-10">

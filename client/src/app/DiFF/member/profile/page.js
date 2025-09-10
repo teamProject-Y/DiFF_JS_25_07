@@ -72,28 +72,21 @@ function ProfileInner() {
                 setGithubUrl(normalizeUrl(pickGithubUrl(fetchedMember)));
                 setLoading(false);
 
-                console.log(fetchedMember);
-
                 if (!nickName || nickName === myNickName) {
                     setIsMyProfile(true);
                 } else {
                     setIsMyProfile(false);
 
                     const followRes = await getFollowingList(myNickName);
-                    console.log("팔로잉 API 응답:", followRes);
 
                     const list = followRes.followingList || followRes.data1 || [];
-                    console.log("팔로잉 리스트:", list);
 
                     const following = list.some(m => m.id === fetchedMember.id);
-
-                    console.log(`👉 로그인 사용자(${myNickName}) → target(${fetchedMember.nickName}) 팔로잉 여부 =`, following);
 
                     setMember(prev => ({...prev, isFollowing: following}));
                 }
             })
             .catch(err => {
-                console.error("마이페이지 오류:", err);
                 setLoading(false);
                 router.replace('/DiFF/home/main');
             });
@@ -116,11 +109,7 @@ function ProfileInner() {
 
                 setFollowingCount(followingList.length);
                 setFollowerCount(followerList.length);
-
-                console.log("📌 Following Count:", followingList.length);
-                console.log("📌 Follower Count:", followerList.length);
             } catch (err) {
-                console.error("❌ 팔로워/팔로잉 카운트 조회 실패:", err);
             }
         };
 
@@ -133,25 +122,21 @@ function ProfileInner() {
         if (openModal === "follower") {
             getFollowerList(nickName)
                 .then((res) => {
-                    console.log("팔로워 API 응답:", res);
-                    // 올바른 키로 파싱
                     setFollowerList(res.followerList || res.data1 || []);
                 })
-                .catch((err) => console.error("팔로워 목록 로딩 오류:", err));
+                .catch((err) => null);
         }
 
         if (openModal === "following") {
             getFollowingList(nickName)
                 .then((res) => {
-                    console.log("팔로잉 API 응답:", res);
-                    // 올바른 키로 파싱
                     setFollowingList(res.followingList || res.data1 || []);
                 })
-                .catch((err) => console.error("팔로잉 목록 로딩 오류:", err));
+                .catch((err) => null);
         }
     }, [openModal, searchParams]);
 
-    if (loading) return <div>로딩...</div>;
+    if (loading) return <div>loading...</div>;
     if (!member) return null;
 
     const repoHref =

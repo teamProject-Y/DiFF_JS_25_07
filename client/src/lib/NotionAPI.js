@@ -13,16 +13,11 @@ NotionAPI.interceptors.request.use(
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            console.log("📦 accessToken:", ACCESS_TOKEN);
 
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
-
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-            console.log("📦 refreshToken:", REFRESH_TOKEN);
-
-            console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
@@ -35,18 +30,16 @@ export const setAuthHeader = () => {
         const ACCESS_TOKEN = localStorage.getItem("accessToken");
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
 
-        // accessToken이 있을 때만 Authorization 헤더 설정
         if (ACCESS_TOKEN) {
             NotionAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         } else {
-            delete NotionAPI.defaults.headers['Authorization'];  // 없으면 제거
+            delete NotionAPI.defaults.headers['Authorization'];
         }
 
-        // refreshToken도 마찬가지
         if (REFRESH_TOKEN) {
             NotionAPI.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         } else {
-            delete NotionAPI.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
+            delete NotionAPI.defaults.headers['REFRESH_TOKEN'];
         }
     }
 };

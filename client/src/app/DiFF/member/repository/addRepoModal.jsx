@@ -178,18 +178,16 @@ export function AddRepoModal({
                 githubOwner: repo?.githubOwner || '',
             };
 
-            console.log("payload: ", payload);
-
             const res = await onImport?.(payload);
             if (res?.ok) {
                 onClose();
                 setGhSelectedId(null);
                 setGhQuery('');
             } else {
-                setGhErr(res?.msg || '가져오기 실패');
+                setGhErr(res?.msg || 'Failed fetching repositories');
             }
         } catch (e) {
-            setGhErr(e?.message || '요청 실패');
+            setGhErr(e?.message || 'Failed requesting repositories');
         } finally {
             setSubmitting(false);
         }

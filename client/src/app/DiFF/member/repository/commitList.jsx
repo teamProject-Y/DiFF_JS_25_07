@@ -36,8 +36,6 @@ function extractResult(eOrData) {
         eOrData?.message ??
         'Failed to load commits.';
 
-    console.log("data: ", data, " code: ", code, " message : ", message);
-
     return { code, message };
 }
 

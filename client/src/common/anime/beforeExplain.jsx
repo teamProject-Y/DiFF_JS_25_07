@@ -112,7 +112,7 @@ export default function BeforeExplain() {
                         <div className="space-y-12">
                             <div className="flex items-center gap-3">
                                 <span className="w-5 h-5 rounded-full border-[6px] border-blue-600" />
-                                <span className="text-[clamp(14px,1.6vw,18px)] font-semibold text-blue-600">
+                                <span className="text-[clamp(14px,1.6vw,18px)] font-bold text-blue-600">
                                   DiFF — From Git history to blog draft
                                 </span>
                             </div>
