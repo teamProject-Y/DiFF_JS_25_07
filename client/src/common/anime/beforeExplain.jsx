@@ -14,10 +14,27 @@ export default function BeforeExplain() {
     const right2Ref = useRef(null);
     const right3Ref = useRef(null);
 
+    const prevInlineSnapRef = useRef(null);
+
     useEffect(() => {
         const scroller = document.getElementById('pageScroll');
         const wrap = wrapRef.current;
         if (!scroller || !wrap) return;
+
+        const setSnapDisabled = (disabled) => {
+            if (disabled) {
+                if (prevInlineSnapRef.current == null) {
+                    prevInlineSnapRef.current = scroller.style.scrollSnapType || '';
+                }
+                scroller.style.scrollSnapType = 'none';
+                scroller.style.webkitScrollSnapType = 'none';
+            } else {
+                const prev = prevInlineSnapRef.current ?? '';
+                scroller.style.scrollSnapType = prev;
+                scroller.style.webkitScrollSnapType = prev;
+                prevInlineSnapRef.current = null;
+            }
+        };
 
         let ticking = false;
         const update = () => {
@@ -32,8 +49,8 @@ export default function BeforeExplain() {
             if (progress >= 2/3) step = 2;
             else if (progress >= 1/3) step = 1;
 
-            const activePin = y >= wrapTop && y < (wrapTop + (wrapHeight - viewH));
-            scroller.classList.toggle('snap-none', activePin);
+            // const activePin = y >= wrapTop && y < (wrapTop + (wrapHeight - viewH));
+            // scroller.classList.toggle('snap-none', activePin);
 
             const sets = [
                 { text: text1Ref.current, dot: '.dot',  active: step === 0 },
@@ -87,32 +104,31 @@ export default function BeforeExplain() {
     }, []);
 
     return (
-        <section ref={wrapRef} className="relative w-full h-[350vh] bg-white overflow-visible">
+        <section ref={wrapRef} className="relative w-full h-[300vh] bg-white overflow-visible snap-start snap-always">
             <div className="sticky top-0 h-screen">
-                <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-10 px-8 md:px-20 pt-8 max-w-[1400px] mx-auto">
+                <div className="relative z-10 grid h-full md:grid-cols-[1.05fr_1fr] items-start gap-10 px-8 md:px-20 pt-20 max-w-[1400px] mx-auto">
                     {/* LEFT */}
                     <div className="max-w-none text-black">
                         <div className="space-y-12">
                             <div className="flex items-center gap-3">
                                 <span className="w-5 h-5 rounded-full border-[6px] border-blue-600" />
-                                {/* 🔤 상단 보조 타이틀: 14px~18px 사이에서 유동 */}
                                 <span className="text-[clamp(14px,1.6vw,18px)] font-semibold text-blue-600">
-                  DiFF – Git 히스토리에서 블로그 초안까지
-                </span>
+                                  DiFF — From Git history to blog draft
+                                </span>
                             </div>
 
-                            {/* 🔤 메인 타이틀: 28px~54px 유동, 모바일에선 줄바꿈 허용 / 데스크탑에선 유지 */}
+                            {/* 메인 타이틀 */}
                             <h1 className="font-bold leading-[1.08] text-[clamp(28px,5vw,54px)] tracking-tight">
-                <span className="block break-keep whitespace-normal md:whitespace-nowrap">
-                  당신의&nbsp;<span className="text-blue-600">개발 기록</span>을
-                </span>
+                                <span className="block break-keep whitespace-normal md:whitespace-nowrap">
+                                  당신의&nbsp;<span className="text-blue-600">개발 기록</span>을
+                                </span>
                                 <span className="block break-keep whitespace-normal md:whitespace-nowrap mt-4">
-                  <span className="bg-blue-600 text-white">콘텐츠</span>로 바꿔주는 스마트 워크플로우
-                </span>
+                                  <span className="bg-blue-600 text-white">콘텐츠</span>로 바꿔주는 스마트 워크플로우
+                                </span>
                             </h1>
                         </div>
 
-                        {/* 🔤 왼쪽 단계 타이틀들: 16px~22px 유동 */}
+                        {/* 왼쪽 단계 타이틀 */}
                         <div ref={text1Ref} className="space-y-4 mt-10">
                             <div className="flex items-center gap-3">
                                 <span className="dot w-2.5 h-2.5 rounded-full bg-black" />

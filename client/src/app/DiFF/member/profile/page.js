@@ -58,7 +58,7 @@ function ProfileInner() {
         const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
 
         if (!accessToken) {
-            router.replace('/DiFF/member/login');
+            router.replace('/DiFF/home/main');
             return;
         }
 
