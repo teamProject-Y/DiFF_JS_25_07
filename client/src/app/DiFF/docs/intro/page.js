@@ -1,4 +1,5 @@
 import DocsSidebar from "@/app/DiFF/docs/docsSide";
+import {ChevronRight} from "lucide-react";
 
 export const metadata = { title: 'DiFF Docs — 1. 소개' };
 
@@ -52,7 +53,7 @@ export default function IntroPage() {
 
                     <div className="docsNavi">
                         <a href="/DiFF/docs/start">
-                            다음글: 2. 시작하기 <i className="fa-solid fa-arrow-right" />
+                            다음글: 2. 시작하기 <ChevronRight className="w-5 h-5 inline-block"/>
                         </a>
                     </div>
                 </main>

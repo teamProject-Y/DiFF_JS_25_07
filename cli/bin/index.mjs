@@ -35,7 +35,7 @@ program
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if (checkIsRepo === 'false') {
-            console.log(chalk.red("Is not git repository."));
+            console.log(chalk.red("fatal: not a git repository (or any of the parent directories): .git"));
             process.exit(1);
         }
 
@@ -77,7 +77,7 @@ program
 
         /** 코드 분석 **/
         if (options.analysis) {
-            // console.log(chalk.bgCyanBright(chalk.black('분석 시작')));
+            console.log("Starting analysis...");
             const isRunning = {value: true};
             const animationPromise = runAnimation(isRunning);
 

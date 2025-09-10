@@ -17,16 +17,15 @@ ArticleAPI.interceptors.request.use(
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            console.log("📦 accessToken:", ACCESS_TOKEN);
+            // console.log("📦 accessToken:", ACCESS_TOKEN);
 
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
 
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-            console.log("📦 refreshToken:", REFRESH_TOKEN);
-
-            console.log("🚀 최종 요청 헤더:", config.headers);
+            // console.log("📦 refreshToken:", REFRESH_TOKEN);
+            // console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },

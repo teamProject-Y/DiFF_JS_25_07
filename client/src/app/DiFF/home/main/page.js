@@ -188,7 +188,7 @@ export default function Page() {
 
         els.forEach(el => io.observe(el));
         return () => io.disconnect();
-    }, [mounted, loggedIn]); // ✅ deps 유지
+    }, [mounted, loggedIn]);
 
     // background
     // useEffect(() => {

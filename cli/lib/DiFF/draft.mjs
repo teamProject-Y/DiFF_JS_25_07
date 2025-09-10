@@ -11,7 +11,7 @@ import axios from "axios";
 
 // mkDraft 함수
 export async function mkDraft(memberId, branch, draftId, diffId) {
-    console.log('🚀 mkDraft started...');
+    // console.log('🚀 mkDraft started...');
 
     const from = await getLastRequestChecksum(branch);
     const to = await getLastChecksum(branch);
@@ -19,7 +19,7 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
     const repositoryId = await getRepositoryId();
 
     if (!diff || diff.trim().length === 0) {
-        console.log(chalk.bgRedBright(chalk.black("diff 내용이 비어있습니다.")));
+        console.log(chalk.red("diff is empty."));
         return null;
     }
 
@@ -43,24 +43,24 @@ export async function createDraft(memberId, repositoryId) {
             isPublic: true,
         };
 
-        console.log("📤 draft 생성 요청:", payload);
+        // console.log("📤 draft 생성 요청:", payload);
 
         const { data } = await axios.post(
             "http://localhost:8080/api/DiFF/draft/mkDraft",
             payload
         );
 
-        console.log("📥 draft 생성 응답:", data);
+        // console.log("📥 draft 생성 응답:", data);
 
         if (data.resultCode?.startsWith("S-")) {
             const { draftId, diffId } = data.data1;
             return { draftId, diffId };
         } else {
-            console.log("❌ draft 생성 실패:", data.msg);
+            // console.log("❌ draft 생성 실패:", data.msg);
             return null;
         }
     } catch (err) {
-        console.error("⚠️ draft 생성 중 오류:", err.message);
+        // console.error("⚠️ draft 생성 중 오류:", err.message);
         return null;
     }
 }
@@ -74,7 +74,7 @@ export async function updateMeta(branchName, lastChecksum) {
 
         const branch = meta.find(b => b.branchName === branchName);
         if (!branch) {
-            console.log(chalk.bgBlueBright(`meta에 branch가 존재하지 않아 새로 생성합니다.`));
+            // console.log(chalk.bgBlueBright(`meta에 branch가 존재하지 않아 새로 생성합니다.`));
             await appendMeta({ name: branchName, toHash: lastChecksum });
         }
 
@@ -84,7 +84,7 @@ export async function updateMeta(branchName, lastChecksum) {
 
         await fsp.writeFile('.DiFF/meta', JSON.stringify(meta, null, 2), { encoding: 'utf-8' });
     } catch (err) {
-        console.log(chalk.bgRedBright(`메타 업데이트 실패: ${err.message}`));
+        // console.log(chalk.bgRedBright(`메타 업데이트 실패: ${err.message}`));
         throw err;
     }
 }
@@ -129,7 +129,7 @@ export async function getRepositoryId() {
 
         return json.repositoryId;
     } catch (err) {
-        console.error('getRepositoryId 오류:', err.message);
+        // console.error('getRepositoryId 오류:', err.message);
         return null;
     }
 }
@@ -140,12 +140,12 @@ export async function getLastRequestChecksum(branch){
     const DiFFexists = execSync('[ -d .DiFF ] && echo true || echo false').toString().trim();
 
     if(DiFFexists === 'false') {
-        console.err('fatal: not a DiFF repository: .DiFF');
+        // console.err('fatal: not a DiFF repository: .DiFF');
         return null;
     }
     const metaPath = '.DiFF/meta';
     if (!fs.existsSync(metaPath)) {
-        console.err('fatal: .DiFF/meta not found');
+        // console.err('fatal: .DiFF/meta not found');
         return null;
     }
 
@@ -153,7 +153,7 @@ export async function getLastRequestChecksum(branch){
     const entry = meta.find(e => e.branchName === branch);
 
     if (!entry) {
-        console.err(`no metadata found for branch: ${branch}`);
+        // console.err(`no metadata found for branch: ${branch}`);
         return null;
     }
 
