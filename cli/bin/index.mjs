@@ -102,6 +102,7 @@ program
         const draft = await mkDraft(memberId, selectedBranch, draftId, diffId, lastChecksum);
         console.log("Starting draft creation...");
 
+
         if (draft === null) {
             console.log(chalk.red('Failed to make draft.'));
         } else {
