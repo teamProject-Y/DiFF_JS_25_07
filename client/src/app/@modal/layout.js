@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, CheckCircle2, ShieldCheck, Zap, X } from "lucide-react";
+import { Sparkles, CheckCircle2, ShieldCheck, Zap, X, GitFork } from "lucide-react";
 
 import LoginForm from "@/app/DiFF/member/login/loginModal";
 import JoinForm from "@/app/DiFF/member/join/joinModal";
@@ -211,14 +211,15 @@ function PanelBG() {
     );
 }
 
-// -------------------- Content that adapts to mode --------------------
 function PanelContent({ mode, dir, onToggle }) {
     const [tipIdx, setTipIdx] = useState(0);
 
     const tips = [
-        "Press ⌘K / Ctrl+K to quick search.",
-        "You can paste a repo URL to connect instantly.",
-        "Draft posts from commit ranges in seconds.",
+        "You can paste a remote repository URL to connect instantly.",
+        "Turn remote commits into draft posts.",
+        "Track code quality over time.",
+        "Draft generates in the background—keep working.",
+        "CLI drafts are much faster than remote commits."
     ];
 
     useEffect(() => {
@@ -231,7 +232,7 @@ function PanelContent({ mode, dir, onToggle }) {
         <div className="h-full px-10 md:px-12 py-9 flex flex-col justify-between">
             {/* Top brand */}
             <div className="flex items-center gap-2 text-white/90">
-                <Sparkles className="w-5 h-5" />
+                <GitFork className="w-5 h-5" />
                 <span className="font-semibold tracking-wide">DiFF</span>
             </div>
 
