@@ -1,4 +1,5 @@
 import DocsSidebar from "@/app/DiFF/docs/docsSide";
+import {ChevronLeft, ChevronRight} from "lucide-react";
 
 export const metadata = { title: 'DiFF Docs — 6. 계정/보안' };
 
@@ -35,8 +36,8 @@ export default function StartPage() {
                         Git을 사용해보지 않은 사용자라면 Git과 DiFF를 배우는 것을 강력히 추천합니다. 이 둘은 생각보다 간단하고 유용합니다.
                     </div>
                     <div className="docsNavi">
-                        <a href="../docs/display"><i className="fa-solid fa-arrow-left"></i> 이전글: 5. 화면별 안내</a>
-                        <a href="../docs/support">다음글: 7. 지원 <i className="fa-solid fa-arrow-right"></i></a>
+                        <a href="../docs/display"><ChevronLeft className="w-5 h-5 inline-block"/> 이전글: 5. 화면별 안내</a>
+                        <a href="../docs/support">다음글: 7. 지원 <ChevronRight className="w-5 h-5 inline-block"/></a>
                     </div>
                 </main>
             </div>
