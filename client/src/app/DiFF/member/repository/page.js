@@ -3,7 +3,7 @@
 import {useRouter, useSearchParams} from 'next/navigation';
 import {fetchUser} from "@/lib/UserAPI";
 import {useEffect, useMemo, useState, useCallback} from "react";
-import {LayoutGroup, AnimatePresence} from "framer-motion";
+import {LayoutGroup} from "framer-motion";
 import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
 import RepoPost from "./RepoPost";

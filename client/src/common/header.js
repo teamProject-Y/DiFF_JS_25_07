@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import {useEffect, useMemo, useRef, useState} from 'react';
+import { Bell, FileText, ThumbsUp, UserPlus, BookmarkCheck } from "lucide-react";
 import styled from 'styled-components';
 import {motion, useMotionValue, useTransform} from 'framer-motion';
 import {fetchUser} from '@/lib/UserAPI';
@@ -58,13 +59,7 @@ export default function Header() {
     const [notifications, setNotifications] = useState([]);
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const [mode, setMode] = useState(null); // 'login' | 'join' | null
-
-    const [onEditMode, setOnEditMode] = useState(false);
-
-    const openLogin = () => setMode('login');
-    const openJoin = () => setMode('join');
-    const closeModal = () => setMode(null);
+    const [mode, setMode] = useState(null);
 
     const isEditMode = useMemo(() => {
         if (!pathname) return false;
@@ -220,23 +215,23 @@ export default function Header() {
         setOpen(!open);
     };
 
-    const iconFor = (t) => {
-        switch ((t || '').toLowerCase()) {
-            case 'comment':
-                return 'fa-regular fa-comment';
-            case 'like':
-                return 'fa-regular fa-thumbs-up';
-            case 'follow':
-                return 'fa-regular fa-user';
-            case 'system':
-                return 'fa-regular fa-bell';
-            case 'draft':
-                return 'fa-regular fa-pen-to-square';
+    const iconFor = (t = '') => {
+        switch (t.toUpperCase()) {
+            case 'REPLY':
+            case 'COMMENT':
+                return <MessageCircle className="h-6 w-6" strokeWidth={2} aria-hidden="true" />;
+            case 'LIKE':
+                return <ThumbsUp className="h-6 w-6" strokeWidth={2} aria-hidden="true" />;
+            case 'FOLLOW':
+                return <UserPlus className="h-6 w-6" strokeWidth={2} aria-hidden="true" />;
+            case 'DRAFT':
+                return <BookmarkCheck className="h-6 w-6" strokeWidth={2} aria-hidden="true" />;
+            case 'ARTICLE':
+                return <FileText className="h-6 w-6" strokeWidth={2} aria-hidden="true" />;
             default:
-                return 'fa-regular fa-bell';
+                return <Bell className="h-6 w-6" strokeWidth={2} aria-hidden="true" />;
         }
     };
-
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -315,9 +310,9 @@ export default function Header() {
                                     onClick={handleBellClick}
                                     className="relative rounded-full p-2 hover:bg-neutral-100/60 dark:hover:bg-neutral-800/60"
                                 >
-                                    <i className="fa-solid fa-bell"/>
+                                    <i className="fa-regular fa-bell text-2xl"/>
                                     {unread && (
-                                        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"/>
+                                        <span className="absolute top-2 right-0 h-2 w-2 rounded-full bg-red-500"/>
                                     )}
                                 </button>
 
@@ -369,16 +364,16 @@ export default function Header() {
                                                                 hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
                                                             >
                                                                   <span
-                                                                      className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full
-                                                                      border border-neutral-300 bg-neutral-100 text-neutral-600
-                                                                      dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+                                                                      className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full
+                                                                      border border-neutral-300 text-neutral-500
+                                                                      dark:border-neutral-700 dark:text-neutral-400"
                                                                   >
-                                                                    <i className={iconFor(n.type)} aria-hidden/>
+                                                                    {iconFor(n.type)}
                                                                   </span>
 
                                                                 <div className="min-w-0 flex-1">
                                                                     <div
-                                                                        className="truncate text-sm text-neutral-800 dark:text-neutral-200"
+                                                                        className="truncate text-sm text-neutral-800 dark:text-neutral-300"
                                                                         title={n.message}
                                                                     >
                                                                         {n.message}
@@ -386,7 +381,7 @@ export default function Header() {
                                                                     {n.type && (
                                                                         <div
                                                                             className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                                                                            {n.type}
+                                                                            {n.type === 'ARTICLE' ? 'POST' : n.type}
                                                                         </div>
                                                                     )}
                                                                 </div>
@@ -405,22 +400,6 @@ export default function Header() {
                     ) : (
                          <>
                              <li>
-                                 {/*<button*/}
-                        {/*//             onClick={() =>*/}
-                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))*/}
-                        {/*//             }*/}
-                        {/*//         >*/}
-                        {/*//             LOGIN*/}
-                        {/*//         </button>*/}
-                        {/*//     </li>*/}
-                        {/*//     <li>*/}
-                        {/*//         <button*/}
-                        {/*//             onClick={() =>*/}
-                        {/*//                 window.dispatchEvent(new CustomEvent("open-modal", {detail: "join"}))*/}
-                        {/*//             }*/}
-                        {/*//         >*/}
-                        {/*//             JOIN*/}
-                        {/*//         </button>*/}
                             </li>
                          </>
                     )}

@@ -2,6 +2,7 @@
 "use client";
 
 import {useEffect, useRef, useState} from "react";
+import { TextSelect, Pencil } from 'lucide-react';
 import Link from "next/link";
 import {motion, AnimatePresence} from "framer-motion";
 import ThemeToggle, {useTheme} from "@/common/thema";
@@ -61,14 +62,14 @@ export default function LoginSpeedDial({
                                 href={writeHref}
                                 onClick={() => setOpen(false)}
                                 variant="neutral"
-                                icon={<i className="fa-solid fa-pen" aria-hidden="true"/>}
+                                icon={<Pencil className="h-5 w-5" strokeWidth="2" aria-hidden="true"/>}
                             />
                             <SpeedDialItem
                                 label="Drafts"
                                 href={draftsHref}
                                 onClick={() => setOpen(false)}
                                 variant="neutral"
-                                icon={<i className="fa-solid fa-list" aria-hidden="true"/>}
+                                icon={<TextSelect className="h-5 w-5" strokeWidth="2" aria-hidden="true"/>}
                             />
                             <SpeedDialItem
                                 label="Theme"

@@ -77,7 +77,7 @@ program
 
         /** 코드 분석 **/
         if (options.analysis) {
-            // console.log(chalk.bgCyanBright(chalk.black('분석 시작')));
+            console.log("Starting analysis...");
             const isRunning = {value: true};
             const animationPromise = runAnimation(isRunning);
 
@@ -101,7 +101,6 @@ program
 
         const draft = await mkDraft(memberId, selectedBranch, draftId, diffId, lastChecksum);
         console.log("Starting draft creation...");
-
 
         if (draft === null) {
             console.log(chalk.red('Failed to make draft.'));

@@ -1,4 +1,5 @@
 import DocsSidebar from "@/app/DiFF/docs/docsSide";
+import {ChevronLeft} from "lucide-react";
 
 export const metadata = { title: 'DiFF Docs — 7. 지원' };
 
@@ -33,7 +34,7 @@ export default function StartPage() {
                         address: The Wall of Shiganshina
                     </div>
                     <div className="docsNavi">
-                        <a href="../docs/account"><i className="fa-solid fa-arrow-left"></i> 이전글: 6. 계정 및 보안</a>
+                        <a href="../docs/account"><ChevronLeft className="w-5 h-5 inline-block"/> 이전글: 6. 계정 및 보안</a>
                     </div>
                 </main>
             </div>
