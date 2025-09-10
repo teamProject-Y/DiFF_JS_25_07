@@ -46,7 +46,7 @@ export async function createDraft(memberId, repositoryId) {
         console.log("📤 draft 생성 요청:", payload);
 
         const { data } = await axios.post(
-            "http://localhost:8080/api/DiFF/draft/mkDraft",
+            "http://13.124.33.233:8080/api/DiFF/draft/mkDraft",
             payload
         );
 

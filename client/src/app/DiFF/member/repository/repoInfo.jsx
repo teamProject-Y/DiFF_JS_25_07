@@ -7,7 +7,6 @@ import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
 import {
     connectRepository,
     getAnalysisHistory,
-    getAnalysisRecent,
     getLanguageDistribution,
     renameRepository,
     deleteRepository,

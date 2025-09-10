@@ -71,7 +71,7 @@ export async function saveFcmTokenToServer() {
 
     const accessToken = localStorage.getItem("accessToken"); // JWT
 
-    const res = await fetch("http://localhost:8080/api/DiFF/member/saveFcmToken", {
+    const res = await fetch("http://13.124.33.233:8080/api/DiFF/member/saveFcmToken", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

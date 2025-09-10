@@ -1,32 +1,30 @@
+// src/lib/UserAPI.js
 import axios from "axios";
 
-/** 1. 커스텀 Axios 인스턴스 */
+/** EC2 배포 서버 주소 */
+const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+
+/** axios custom **/
 export const UserAPI = axios.create({
-    baseURL: "http://localhost:8080",
-    headers: {
-        "Content-Type": "application/json"
-    }
+    baseURL: BACKEND,
+    headers: { "Content-Type": "application/json" },
 });
 
-/** 2. 요청 인터셉터: AccessToken 자동 추가 */
+/** 요청 인터셉터: AccessToken 자동 첨부 */
 UserAPI.interceptors.request.use(
     (config) => {
-        if (typeof window !== "undefined") {
-            const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
-            const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            if (ACCESS_TOKEN) {
-                config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
-            }
+        const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
+        const ACCESS_TOKEN = localStorage.getItem("accessToken");
+        if (ACCESS_TOKEN) {
+            config.headers.Authorization = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         }
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-/** 3. AccessToken 자동 갱신 (Refresh) */
+/** AccessToken 갱신 */
 const refreshAccessToken = async () => {
-    if (typeof window === "undefined") return null;
-
     const REFRESH_TOKEN = localStorage.getItem("refreshToken");
     if (!REFRESH_TOKEN) {
         console.warn("❌ refreshToken 없음 → 다시 로그인 필요");
@@ -34,23 +32,20 @@ const refreshAccessToken = async () => {
     }
 
     try {
-        // ✅ POST + body 로 맞춤
-        const res = await axios.post("http://localhost:8080/api/DiFF/auth/refresh", {
-            refreshToken: REFRESH_TOKEN
+        const res = await axios.post(`${BACKEND}/auth/refresh`, {
+            refreshToken: REFRESH_TOKEN,
         });
 
         const ACCESS_TOKEN = res.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
 
-        // ✅ 새 토큰 저장
         localStorage.setItem("accessToken", ACCESS_TOKEN);
-        UserAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
+        UserAPI.defaults.headers.Authorization = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 
         console.log("🔑 새 AccessToken 갱신:", ACCESS_TOKEN);
         return ACCESS_TOKEN;
     } catch (err) {
         console.error("❌ 토큰 갱신 실패:", err.response?.data || err.message);
-        // refreshToken도 무효화 → 재로그인 필요
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         window.location.href = "/DiFF/member/login";
@@ -58,16 +53,19 @@ const refreshAccessToken = async () => {
     }
 };
 
-/** 4. 응답 인터셉터: 토큰 만료 시 자동 재시도 */
+/** 응답 인터셉터: 토큰 만료 시 자동 재시도 */
 UserAPI.interceptors.response.use(
     (res) => res,
     async (error) => {
         const originalRequest = error.config;
-        if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+        if (
+            (error.response?.status === 401 || error.response?.status === 403) &&
+            !originalRequest._retry
+        ) {
             originalRequest._retry = true;
             const newToken = await refreshAccessToken();
             if (newToken) {
-                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return UserAPI(originalRequest);
             }
         }
@@ -75,13 +73,14 @@ UserAPI.interceptors.response.use(
     }
 );
 
-/** 5. Auth/회원 관련 API들 */
+//
+// === Auth & 회원 관련 API ===
+//
 
 // 로그인
 export const login = async ({ email, loginPw }) => {
-    const res = await UserAPI.post("/api/DiFF/auth/login", { email, loginPw });
+    const res = await UserAPI.post("/auth/login", { email, loginPw });
     const { accessToken, refreshToken } = res.data;
-
 
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
@@ -93,25 +92,30 @@ export const login = async ({ email, loginPw }) => {
 
 // 회원가입
 export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
-    const res = await UserAPI.post("/api/DiFF/auth/join", { loginPw, checkLoginPw, nickName, email });
+    const res = await UserAPI.post("/auth/join", {
+        loginPw,
+        checkLoginPw,
+        nickName,
+        email,
+    });
     const { accessToken, refreshToken } = res.data;
-
 
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("tokenType", "Bearer");
 
-    console.log("✅ 회원가입 + 자동 로그인 성공 → 토큰 저장 완료");
+    console.log("✅ 회원가입 성공 → 토큰 저장 완료");
     return res.data;
 };
 
-// 5-3. 회원 페이지
+// 회원 정보 조회
 export const fetchUser = async (nickName) => {
-    const response = await UserAPI.get(`/api/DiFF/member/profile`, {
-        params: nickName ? { nickName } : {}
+    const response = await UserAPI.get(`/member/profile`, {
+        params: nickName ? { nickName } : {},
     });
     return response.data;
 };
+
 
 // 5-4. 회원 수정
 export const modifyNickName = async ({ nickName }) => {
