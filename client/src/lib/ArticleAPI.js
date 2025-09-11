@@ -61,7 +61,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`http://13.124.33.233:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;
@@ -184,7 +184,7 @@ export const deleteArticle = async (id) => {
 };
 
 export const followingArticleList = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
-    const res = await ArticleAPI.get('/api/DiFF/article/followingArticleList', {
+    const res = await ArticleAPI.get('/article/followingArticleList', {
         params: { repositoryId, searchItem, keyword, page }
     });
     return res.data;
