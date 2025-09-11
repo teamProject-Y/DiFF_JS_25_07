@@ -103,7 +103,6 @@ function ArticleDetailInner() {
 
             try {
                 const art = await getArticle(id);
-                console.log("api 응답: ", art)
                 if (!alive) return;
                 if (!art) {
                     setErrMsg('게시글을 불러오지 못했습니다.');
@@ -133,9 +132,7 @@ function ArticleDetailInner() {
         (async () => {
             try {
                 const like = await fetchArticleLikes(id);
-                console.log("like 불러오기 응답", like);
 
-                // 이전 상태와 비교 후 다를 때만 업데이트
                 setLiked((prev) => (prev !== like.liked ? like.liked : prev));
                 setLikeCount((prev) => (prev !== like.count ? like.count : prev));
             } catch (e) {
@@ -248,12 +245,6 @@ function ArticleDetailInner() {
                 // 팔로잉 리스트
                 const fl = await getFollowingList();
                 const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
-
-                console.table((list || []).slice(0, 5).map(m => ({
-                    rawId: m?.id ?? m?.memberId ?? m?.followingId ?? m?.targetId ?? m?.user?.id,
-                    normId: getId(m),
-                    nick: getNick(m)
-                })));
 
                 // ID 우선 → 닉네임 보강
                 const isFollowing =

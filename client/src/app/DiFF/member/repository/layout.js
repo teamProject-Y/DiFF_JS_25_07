@@ -7,7 +7,6 @@ import { Sparkles, CheckCircle2, ShieldCheck, Zap, X, GitFork } from "lucide-rea
 import LoginForm from "@/app/DiFF/member/login/loginModal";
 import JoinForm from "@/app/DiFF/member/join/joinModal";
 import ModalOpenIntro from "@/common/anime/modalOpenIntro";
-import RepoLayoutSample from "@/app/DiFF/home/main/repository";
 
 export default function ModalLayout({ children }) {
     // 'login' | 'join' | null
@@ -172,8 +171,6 @@ export default function ModalLayout({ children }) {
                                 </div>
                             </div>
 
-                            <RepoLayoutSample />
-                            <ModalLayout />
                             <ModalOpenIntro open={isModalOpen} brandText="DiFF" />
                         </div>
                     </motion.div>

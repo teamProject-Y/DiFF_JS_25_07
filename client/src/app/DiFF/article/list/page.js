@@ -34,7 +34,6 @@ function ArticleListInner() {
             try {
                 const res = await fetchArticles({ repositoryId, searchItem, keyword, page });
                 if (!alive) return;
-                console.log(res.data);
                 setArticles(res.articles || []);
             } catch (err) {
                 console.error(' 게시글 로딩 실패:', err);

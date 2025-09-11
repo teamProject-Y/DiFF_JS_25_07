@@ -1,10 +1,9 @@
-import {execSync} from 'child_process';
-import path from "path";
-import fs from "fs";
-import axios from "axios";
+import {execSync, spawn, spawnSync} from 'node:child_process';
+import path from "node:path";
+import fs from "node:fs";
 import FormData from 'form-data';
+import axios from "axios";
 import ignore from 'ignore';
-import { spawnSync, spawn } from 'child_process';
 import chalk from 'chalk';
 
 import {getResponse} from "../util/interaction.mjs";
@@ -17,12 +16,7 @@ let repoId = 0;
 /** git repository 여부 **/
 export async function existsGitDirectory(){
 
-    const isGitDirectory = execSync('[ -d .git ] && echo true || echo false').toString().trim();
-
-    if(isGitDirectory === 'false') {
-        // console.log('fatal: not a git repository (or any of the parent directories): .git');
-    }
-    return isGitDirectory;
+    return execSync('[ -d .git ] && echo true || echo false').toString().trim();
 }
 
 /** .DiFF 디렉토리 존재 여부 **/
@@ -56,22 +50,18 @@ export async function DiFFinit(memberId, branch) {
         usable = await isUsableRepoName(memberId, repoName);
     }
 
-    // console.log(chalk.bgCyanBright(chalk.black("repoName: " + repoName)));
-    // console.log(chalk.bgCyanBright(chalk.black("usable: " + usable)));
-
     // 첫 커밋 가져오기
     let firstCommit = execSync(`git log --reverse ${branch} --oneline | head -n 1`)
         .toString().trim();
 
     const firstChecksum = firstCommit.split(' ')[0];
-    console.log(chalk.bgCyanBright(chalk.black("first commit: ", firstCommit)));
 
     // 서버에 리포지토리 DB 데이터 생성 요청
     repoId = await mkRepo(memberId, repoName, firstChecksum);
     if(repoId === null){
+        console.log(chalk.red("Server error. Please try again later."));
         return null;
     }
-    console.log(chalk.bgCyanBright(chalk.black("repoID: ", repoId)));
 
     // .DiFF 생성
     await mkDiFFdirectory(repoId);
@@ -118,7 +108,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         }
 
         if (!fs.existsSync('difftest.zip')) {
-            throw new Error('difftest.zip 파일이 존재하지 않습니다.');
+            throw new Error('difftest.zip is not exist.');
         }
 
         // FormData 생성 및 전송
@@ -132,14 +122,14 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             lastChecksum,
         }));
 
-        const res = await axios.post('http://13.124.33.233:8080/upload', form, {
+        await axios.post('http://localhost:8080/upload', form, {
             headers: form.getHeaders(),
         });
 
         fs.unlinkSync('difftest.zip');
         return true;
     } catch (err) {
-        console.error(chalk.redBright(`doAnalysis 실패: ${err.message}`));
+        console.error(chalk.red(`Analysis failed: ${err.message}`));
         console.error(err.stack);
         return false;
     }
@@ -168,19 +158,6 @@ export async function sh(cmd, passthrough = false) {
     });
 }
 
-/** .gitignore 파일을 파싱해서 제외 경로 리스트를 반환 **/
-// function getGitIgnoreExcludes(repoPath = process.cwd()) {
-//     const ignorePath = path.join(repoPath, '.gitignore');
-//     if (!fs.existsSync(ignorePath)) return [];
-//
-//     const lines = fs.readFileSync(ignorePath, 'utf-8')
-//         .split('\n')
-//         .map(line => line.trim())
-//         .filter(line => line && !line.startsWith('#'));
-//
-//     return lines.map(pattern => `:(exclude)${pattern}`);
-// }
-
 function getGitIgnoreFilter() {
     const ig = ignore();
     const ignorePath = path.join(process.cwd(), '.gitignore');
@@ -194,8 +171,6 @@ function getGitIgnoreFilter() {
 }
 
 export function getDiFF(from, to) {
-    // console.log(chalk.bgCyanBright(chalk.black(from)));
-    // console.log(chalk.bgCyanBright(chalk.black(to)));
 
     return new Promise((resolve, reject) => {
         const extensions = ['.mjs', '.jsx', '.java', '.ts', '.tsx', '.jsp', '.js',
@@ -214,20 +189,15 @@ export function getDiFF(from, to) {
 
         let files = diffNameResult.stdout.trim().split('\n').filter(f => !!f);
 
-        // 2. 확장자 필터링
         files = files.filter(file => extensions.some(ext => file.endsWith(ext)));
 
-        // 3. .gitignore 필터 적용
         files = gitignoreFilter.filter(files);
 
         if (files.length === 0) {
-            // console.log(chalk.gray('🚫 No matching files to diff.'));
+            console.log(chalk.red('No matching files to DiFF.'));
             return resolve('');
         }
 
-        const wow = '99d6c0fd8f1fce2ac3a4d53c4bc2b2291bc6d31c';
-
-        // 4. git diff 실행
         const args = ['diff', '-W', from, to, '--', ...files];
         const child = spawn('git', args, { shell: false });
 
@@ -243,14 +213,9 @@ export function getDiFF(from, to) {
 
         child.on('close', (code) => {
             if (code === 0) {
-                const preview = output.length > 100 ? output.slice(0, 100) + '...' : output;
-                // console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 (앞 100자):')));
-                // console.log(preview);
-                // console.log(chalk.bgCyanBright(chalk.black('/// diff 미리보기 끝')));
-
                 resolve(output);
             } else {
-                reject(new Error(`git diff exited with code ${code}`));
+                reject(new Error(`err: ${code}`));
             }
         });
     });

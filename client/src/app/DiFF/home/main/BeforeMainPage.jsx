@@ -409,7 +409,7 @@ export default function BeforeMainPage() {
             </div>
 
             {/* 로그 */}
-            <div ref={scrollerRef} id="pageScroll" className="h-[calc(100%-3rem)] overflow-y-auto">
+            <div ref={scrollerRef} id="terminalScroll" className="h-[calc(100%-3rem)] overflow-y-auto">
                 <div
                     className="pt-6 pl-6 pb-4 pr-6 text-left terminal-font text-2xl md:text-4xl break-words"
                     role="log"

@@ -61,7 +61,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await axios.get(`http://13.124.33.233:8080/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;
@@ -123,6 +123,7 @@ export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyw
     const rid = repositoryId ?? repoId;
     const res = await ArticleAPI.get('/article/list', {
         params: { repositoryId: rid, searchItem, keyword, page }
+
     });
     console.log("🛰 [fetchArticles] res.data:", res.data);
     return res.data;
@@ -138,7 +139,6 @@ export const trendingArticle = async ({ count, days }) => {
 
 /** 글 작성 */
 export const writeArticle = async (data) => {
-    console.log('[API][writeArticle] data:', data);
     if (data?.repositoryId != null) data = { ...data, repositoryId: Number(data.repositoryId) };
     if (data?.draftId != null) data = { ...data, draftId: Number(data.draftId) };
 
@@ -163,20 +163,19 @@ export const getAverageMetrics = async (repositoryId) => {
 export const getArticle = async (id) => {
     const res = await ArticleAPI.get('/article/detail', { params: { id } });
     return res.data.data1;
-};
+}
 
 /** 글 수정 */
 export const modifyArticle = async (article, token) => {
     const res = await ArticleAPI.post('/article/modify', article, {
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}` // 🔑 토큰 추가
         }
     });
     return res.data;
-};
+}
 
-/** 글 삭제 */
 export const deleteArticle = async (id) => {
     const url = `/article/${id}`;
     const res = await DraftAPI.delete(url);
@@ -184,9 +183,8 @@ export const deleteArticle = async (id) => {
     return { status: res.status, data: res.data };
 };
 
-/** 팔로잉 글 목록 */
 export const followingArticleList = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
-    const res = await ArticleAPI.get('/article/followingArticleList', {
+    const res = await ArticleAPI.get('/api/DiFF/article/followingArticleList', {
         params: { repositoryId, searchItem, keyword, page }
     });
     return res.data;
@@ -217,7 +215,6 @@ export const increaseArticleHits = async (articleId) => {
     return res.data;
 };
 
-/** 글 검색 */
 export const searchArticles = async (keyword) => {
     const res = await ArticleAPI.get('/article/search', { params: { keyword } });
     return res.data;
