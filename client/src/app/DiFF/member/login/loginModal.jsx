@@ -10,13 +10,6 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
     const [submitting, setSubmitting] = useState(false);
     const router = useRouter();
 
-    // 로그인 성공 후 이동할 URI
-    // const afterLoginUri = useMemo(() => {
-    //     if (afterLoginUriFromPage) return afterLoginUriFromPage;
-    //     if (typeof window !== 'undefined') return window.location.pathname + window.location.search;
-    //     return callbackUrl;
-    // }, [afterLoginUriFromPage, callbackUrl]);
-
     const onChange = (e) => setValues(v => ({...v, [e.target.name]: e.target.value}));
 
     const onSubmit = async (e) => {
@@ -55,7 +48,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
             } else if (err.response?.status === 401) {
                 setError("Incorrect username or password.");
             } else {
-                setError("서Server error. Please try again later.");
+                setError("Server error. Please try again later.");
             }
             setSubmitting(false);
         }
