@@ -13,9 +13,8 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// ✅ 백그라운드 알림 수신 (브라우저 꺼져있거나 비활성 탭)
+// 백그라운드 알림 수신
 messaging.onBackgroundMessage((payload) => {
-    console.log("📩 [SW] 백그라운드 알림 수신:", payload);
 
     const notificationTitle = payload.data?.title || "알림";
     const notificationOptions = {

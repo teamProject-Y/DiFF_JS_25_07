@@ -8,15 +8,10 @@ export const getGithubRepos = async () => {
 };
 
 export const createRepository = async (data) => {
-
-    console.log("repo create 요청 : " + data);
-
     try {
         const res = await ArticleAPI.post("/api/DiFF/repository/createRepository", data);
-        console.log("[API][createRepository] status:", res.status, "data:", res.data);
         return res.data;
     } catch (err) {
-        console.error("[API][createRepository] error:", err);
         throw err;
     }
 };
@@ -30,7 +25,6 @@ export const renameRepository = async (id, name) => {
             payload,
             { headers: { "Content-Type": "application/json" } }
         );
-        console.log("[API][renameRepository] status:", res.status, "data:", res.data);
         return res.data;
     } catch (err) {
         const msg = err?.response?.data ?? err.message;
@@ -41,25 +35,13 @@ export const renameRepository = async (id, name) => {
 
 
 export const getAnalysisHistory = async (repoId) => {
-    console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/history");
     const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/history`);
-    console.log("[API] 응답:", res.data);
-    return res.data?.data1 || [];
-};
-
-export const getAnalysisRecent = async (repoId) => {
-    console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/recent");
-    const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/recent`);
-    console.log("[API] 응답:", res.data);
     return res.data?.data1 || [];
 };
 
 export const getLanguageDistribution = async (repoId) => {
     try {
-        console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/languages");
         const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/languages`);
-        console.log("[API] 응답:", res.data);
-
         return res.data?.data1 ?? [];
     } catch (err) {
         console.error("[API] getLanguageDistribution error:", err);
@@ -86,7 +68,6 @@ export const getGithubCommitList = async (repo, opts = {}) => {
         throw new Error('Missing repository');
     }
 
-    // https://github.com/teamProject-Y/DiFF
     const owner = repo.githubOwner ?? repo.url.split('/')[3];
     const repoName = repo.githubName ?? repo.url.split('/')[4];
 
@@ -129,17 +110,17 @@ export const getGithubCommitList = async (repo, opts = {}) => {
 };
 
 export const connectRepository = async (repoId, url) => {
-    // 1) validate
+    // validate
     const v = await ArticleAPI.get(`/api/DiFF/github/validate`, { params: { url } });
     const code = String(v.data?.resultCode ?? v.data?.msg ?? "");
-    if (code.startsWith("F-")) return v.data; // 실패면 그대로 반환
+    if (code.startsWith("F-")) return v.data;
 
-    // 2) validate 응답에서 owner/name/defaultBranch 꺼내기
+    // validate 응답에서 owner/name/defaultBranch 꺼내기
     const owner         = v.data?.data?.owner         ?? v.data?.data1?.owner         ?? "";
     const name          = v.data?.data?.name          ?? v.data?.data1?.name          ?? "";
     const defaultBranch = v.data?.data?.defaultBranch ?? v.data?.data1?.defaultBranch ?? "";
 
-    // 3) connect: POST + 쿼리 파라미터 (바디 없음이면 data 자리에 null)
+    // connect: POST + 쿼리 파라미터 (바디 없음이면 data 자리에 null)
     const { data } = await ArticleAPI.post(
         `/api/DiFF/repository/connect`,
         null,

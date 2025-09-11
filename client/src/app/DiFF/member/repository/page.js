@@ -92,6 +92,7 @@ export default function RepositoriesPage() {
 
         const nickName = searchParams.get('nickName');
         const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
+      
         setIsMyRepos(!nickName || nickName === myNickName);
 
         fetchUser(nickName)
@@ -106,6 +107,7 @@ export default function RepositoriesPage() {
             });
 
         const base = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      
         fetch(`${base}/api/DiFF/auth/linked`, {
             headers: {Authorization: `Bearer ${accessToken}`},
             credentials: 'include',
@@ -116,13 +118,12 @@ export default function RepositoriesPage() {
             });
     }, [router, searchParams]);
 
-    // ⬇️ 교체: 선택된 레포도 보이는 목록 기준
+    // 교체: 선택된 레포도 보이는 목록 기준
     const selectedRepo = useMemo(
         () => visibleRepos.find((r) => r.id === selectedRepoId) || null,
         [visibleRepos, selectedRepoId]
     );
-
-
+  
     useEffect(() => {
         if (selectedRepo) setTab('posts');
     }, [selectedRepo?.id]);

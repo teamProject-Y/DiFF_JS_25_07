@@ -22,11 +22,8 @@ export default function AfterMainPage({me, trendingArticles}) {
     useEffect(() => {
         const run = async () => {
             try {
-                console.log("🔔 MainPage 진입 → FCM 토큰 저장 시도");
                 await saveFcmTokenToServer();
-                console.log("✅ MainPage 진입 → FCM 토큰 저장 완료");
             } catch (err) {
-                console.error("❌ MainPage 진입 → FCM 저장 실패:", err);
             }
         };
         run();
@@ -36,11 +33,9 @@ export default function AfterMainPage({me, trendingArticles}) {
     useEffect(() => {
         getFollowingList()
             .then((res) => {
-                console.log("팔로잉 API 응답:", res);
                 setFollowing(res.data1 || []);
             })
             .catch((err) => {
-                console.error("팔로잉 목록 로딩 오류:", err);
             });
     }, []);
 
@@ -51,7 +46,6 @@ export default function AfterMainPage({me, trendingArticles}) {
                 setFollowingArticles(res.followingArticles || []);
             })
             .catch((err) => {
-                console.error("팔로잉 로딩 오류:", err);
             });
     }, []); //
 
@@ -60,27 +54,18 @@ export default function AfterMainPage({me, trendingArticles}) {
         const viewedKey = "viewedArticles";
         const viewed = JSON.parse(localStorage.getItem(viewedKey)) || [];
 
-        console.log("📌 기존 viewed 목록:", viewed);
-
         if (!viewed.includes(articleId)) {
             const updated = [...viewed, articleId];
             localStorage.setItem(viewedKey, JSON.stringify(updated));
-            console.log(`✅ ${articleId} 추가됨. 저장된 목록:`, updated);
         } else {
-            console.log(`⚠️ ${articleId}는 이미 본 글입니다.`);
         }
     }
 
     const handleArticleClick = (id) => {
-        console.log('handleArticleClick 호출됨:', id);
         try {
-            console.log("🖱️ 클릭한 articleId:", id);
-
             markAsViewed(id);
-
             window.location.href = `/DiFF/article/detail?id=${id}`;
         } catch (err) {
-            console.error("❌ 로컬스토리지 저장 실패:", err);
             window.location.href = `/DiFF/article/detail?id=${id}`;
         }
     };

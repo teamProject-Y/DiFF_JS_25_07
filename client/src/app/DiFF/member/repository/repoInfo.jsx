@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import {useEffect, useState, useRef, useMemo} from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
+import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
+import AnalysisRecentChart from "@/app/DiFF/member/repository/analysisRecentChart";
 import {
     connectRepository,
     getAnalysisHistory,
@@ -12,8 +14,6 @@ import {
     deleteRepository,
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
-import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
-import AnalysisRecentChart from "@/app/DiFF/member/repository/analysisRecentChart";
 
 import { useDialog } from "@/common/commonLayout";
 
@@ -221,14 +221,14 @@ export function RepoInfo({
                                 <button
                                     onClick={() => setActiveTab("history")}
                                     className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
-                    ${activeTab === "history" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
+                                    ${activeTab === "history" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
                                 >
                                     <i className="fa-solid fa-circle text-[0.3rem]"></i>History
                                 </button>
                                 <button
                                     onClick={() => setActiveTab("total")}
                                     className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
-                    ${activeTab === "total" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
+                                    ${activeTab === "total" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
                                 >
                                     <i className="fa-solid fa-circle text-[0.3rem]"></i>Total
                                 </button>
