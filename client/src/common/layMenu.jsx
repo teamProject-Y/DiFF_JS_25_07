@@ -32,7 +32,7 @@ export default function LayMenu() {
     ];
 
     return (
-        <nav className="top-20 h-[calc(100vh-80px)] mx-auto max-w-7xl flex justify-around">
+        <nav className="content top-20 h-[calc(100vh-80px)] mx-auto max-w-7xl flex justify-around">
             {/* 왼쪽 메뉴 */}
             <aside className="py-3 w-64 relative"> {/* relative 추가 */}
                 <nav className=" text-gray-600 mb-6">
