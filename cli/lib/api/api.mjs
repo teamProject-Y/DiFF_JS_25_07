@@ -8,7 +8,7 @@ export async function verifyGitUser() {
     const email = await getGitEmail();
 
     if(email === null) {
-        console.error(chalk.red('Git email not configured.'));
+        // console.error(chalk.red('Git email not configured.'));
         return null;
     }
 
@@ -22,11 +22,10 @@ export async function verifyGitUser() {
             return data.data1;
 
         } else { // 인증 실패
-            console.log(chalk.red("Join DiFF first."));
             return null;
         }
     } catch (err) {
-        console.error(chalk.red('error:'), err.message);
+        // console.error(chalk.red('error:'), err.message);
         return null;
     }
 }

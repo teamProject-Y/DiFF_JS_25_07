@@ -95,7 +95,6 @@ export async function runAnimation(isRunningRef) {
 
     process.stdout.write(`\x1B[${maxLines}A`);
     process.stdout.write('\x1B[2K');
-    // process.stdout.write('analysis success.\n');
 
     process.stdout.write('\x1B[?25h');
 }

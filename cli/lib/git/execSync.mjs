@@ -208,7 +208,7 @@ export function getDiFF(from, to) {
         });
 
         child.stderr.on('data', (data) => {
-            console.error(chalk.red('stderr:'), data.toString());
+            // console.error(chalk.red('stderr:'), data.toString());
         });
 
         child.on('close', (code) => {
