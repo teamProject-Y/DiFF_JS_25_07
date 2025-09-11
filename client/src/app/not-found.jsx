@@ -37,7 +37,7 @@ export default function NotFound() {
 
             <ErrorScreen
                 code="404"
-                title="Error"
+                title="not found"
                 message="The page you are looking for might have been removed, had its name changed or is temporarily unavailable."
                 homeHref="/DiFF/home/main"
             />

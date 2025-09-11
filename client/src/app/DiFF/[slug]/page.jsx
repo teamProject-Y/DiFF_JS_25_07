@@ -2,6 +2,8 @@
 import { redirect, notFound } from 'next/navigation'
 import { bff } from '@/lib/bff'
 
+export const dynamic = 'force-dynamic'; // 캐시/정적최적화 회피(안전장치)
+
 export default async function Page({ params }) {
     const { slug } = params
 
@@ -14,33 +16,33 @@ export default async function Page({ params }) {
 
     let res
     try {
-        // Node 18+ 지원: fetch 타임아웃
-        res = await bff(apiPath, { cache: 'no-store', signal: AbortSignal.timeout(8000) })
+        res = await bff(apiPath, { signal: AbortSignal.timeout(8000) })
     } catch (e) {
-        // 네트워크/타임아웃
         throw Object.assign(new Error('Upstream unreachable'), {
             status: e?.name === 'TimeoutError' ? 504 : 502
         })
     }
 
-    if (res.status === 401) {
-        redirect(`/DiFF/member/login?next=${encodeURIComponent(`/DiFF/${slug}`)}`)
+    console.log('[status]', res.status,
+        'location:', res.headers.get('location'),
+        'ctype:', res.headers.get('content-type'));
+
+    // 🔎 여기서 3xx를 직접 잡아 404로 보낼 수 있음
+    if (res.status >= 300 && res.status < 400) {
+        console.error('[redirect caught]', res.status, res.headers.get('location'))
+        notFound() // (원하면 여기서 로그인 redirect로 바꿔도 됨)
     }
-    if (res.status === 403) {
-        redirect('/DiFF/member/forbidden') // 전용 페이지를 만들었을 때
-    }
-    if (res.status === 404) {
+
+    if (res.status === 401 || res.status === 403 || res.status === 404) {
         notFound()
-    }
-    if (res.status === 204) {
-        // 본문 없음
-        return <article><h1>{slug}</h1></article>
     }
     if (res.status === 429) {
         throw Object.assign(new Error('Too Many Requests'), { status: 429 })
     }
+    if (res.status === 204) {
+        return <article><h1>{slug}</h1></article>
+    }
     if (!res.ok) {
-        // 나머지 4xx/5xx
         throw Object.assign(new Error('Upstream error'), { status: res.status })
     }
 

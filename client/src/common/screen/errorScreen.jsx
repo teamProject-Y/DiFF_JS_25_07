@@ -21,10 +21,9 @@ export default function ErrorScreen({
 
     return (
         <div className={`${styles.crt} ${inconsolata.className}`}>
-            <div className={styles.noise} />
             <div className={styles.overlay} />
             <div className={styles.terminal}>
-                <h1 className={styles.title}>
+                <h1 className={styles.safeTitle}>
                     {title} <span className={styles.errorcode}>{c}</span>
                 </h1>
 
