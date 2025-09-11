@@ -226,13 +226,20 @@ export function WriteArticlePage() {
         };
     }, [repoFromQuery]);
 
-    // checksum
-    const makeChecksum = useCallback(async (text) => {
-        if (!text) return '';
+    async function makeChecksum(text) {
+        if (!text) return "";
+
+        if (typeof window === "undefined" || !window.crypto?.subtle) {
+            console.warn("❌ crypto.subtle 미지원");
+            return "";
+        }
+
         const enc = new TextEncoder().encode(text);
-        const buf = await crypto.subtle.digest('SHA-256', enc);
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }, []);
+        const buf = await crypto.subtle.digest("SHA-256", enc);
+        return Array.from(new Uint8Array(buf))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+    }
 
     // submit (upload)
     const handleSubmit = async (e) => {

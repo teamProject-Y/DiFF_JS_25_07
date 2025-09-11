@@ -6,7 +6,7 @@ import {useEffect, useMemo, useState, useCallback} from "react";
 import {LayoutGroup} from "framer-motion";
 import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
-import RepoPost from "./RepoPost";
+import RepoPost from "./repoPost";
 import {AddRepoModal} from './addRepoModal';
 import {RepoInfo} from './repoInfo';
 import Link from "next/link";

@@ -8,7 +8,7 @@ import {deleteReply, modifyReply} from "@/lib/ReplyAPI";
 import {
     likeArticle, unlikeArticle, fetchArticleLikes,
     likeReply, unlikeReply, fetchReplyLikes
-} from "@/lib/reactionAPI";
+} from "@/lib/ReactionAPI";
 import {
     fetchUser,
     followMember,

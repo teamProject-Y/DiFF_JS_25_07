@@ -88,7 +88,7 @@ NotionAPI.interceptors.response.use(
 
 export const saveInquiry = async (inquiry) => {
     const response = await NotionAPI.post(
-        '/api/DiFF/notionInquiry/saveInquiry',
+        '/notionInquiry/saveInquiry',
         inquiry
     );
     return response.data;
@@ -96,7 +96,7 @@ export const saveInquiry = async (inquiry) => {
 
 export const saveReport = async (report) => {
     const response = await NotionAPI.post(
-        '/api/DiFF/notionReport/saveReport',
+        '/notionReport/saveReport',
         report
     );
     return response.data;

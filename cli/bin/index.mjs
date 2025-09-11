@@ -21,7 +21,7 @@ program
     .action(async (branch, options) => {
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
-        const url = "http://localhost:3000/";
+        const url = "http://13.124.33.233:3000/";
 
         // console.log(chalk.bgCyanBright(chalk.black("selectedBranch: ", selectedBranch)));
         /** 브랜치 존재 여부 **/

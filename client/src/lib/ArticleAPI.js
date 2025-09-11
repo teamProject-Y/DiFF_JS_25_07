@@ -138,6 +138,7 @@ export const trendingArticle = async ({ count, days }) => {
 
 /** 글 작성 */
 export const writeArticle = async (data) => {
+    console.log('[API][writeArticle] data:', data);
     if (data?.repositoryId != null) data = { ...data, repositoryId: Number(data.repositoryId) };
     if (data?.draftId != null) data = { ...data, draftId: Number(data.draftId) };
 

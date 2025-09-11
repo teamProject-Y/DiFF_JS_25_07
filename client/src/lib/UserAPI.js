@@ -9,6 +9,7 @@ export const UserAPI = axios.create({
     baseURL: BACKEND,
     headers: { "Content-Type": "application/json" },
 });
+console.log("🌍 BACKEND baseURL:", BACKEND);
 
 /** 요청 인터셉터: AccessToken 자동 첨부 */
 UserAPI.interceptors.request.use(
@@ -73,12 +74,12 @@ UserAPI.interceptors.response.use(
     }
 );
 
-//
 // === Auth & 회원 관련 API ===
-//
 
 // 로그인
 export const login = async ({ email, loginPw }) => {
+    console.log("📡 login 요청 URL:", UserAPI.defaults.baseURL + "/auth/login");
+
     const res = await UserAPI.post("/auth/login", { email, loginPw });
     const { accessToken, refreshToken } = res.data;
 
@@ -92,6 +93,8 @@ export const login = async ({ email, loginPw }) => {
 
 // 회원가입
 export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
+    console.log("📡 signUp 요청 URL:", UserAPI.defaults.baseURL + "/auth/join");
+
     const res = await UserAPI.post("/auth/join", {
         loginPw,
         checkLoginPw,
@@ -108,6 +111,7 @@ export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
     return res.data;
 };
 
+
 // 회원 정보 조회
 export const fetchUser = async (nickName) => {
     const response = await UserAPI.get(`/member/profile`, {
@@ -120,32 +124,32 @@ export const fetchUser = async (nickName) => {
 // 5-4. 회원 수정
 export const modifyNickName = async ({ nickName }) => {
     const data = { nickName };
-    const response = await UserAPI.put(`/api/DiFF/member/doModifyNickName`, data);
+    const response = await UserAPI.put(`/member/doModifyNickName`, data);
     return response.data;
 };
 
 export const modifyIntroduce = async ({ introduce }) => {
     const data = { introduce };
-    const response = await UserAPI.put(`/api/DiFF/member/doModifyIntroduce`, data);
+    const response = await UserAPI.put(`/member/doModifyIntroduce`, data);
     return response.data;
 };
 
 export const checkPwUser = async (data) => {
-    const response = await UserAPI.put(`/api/DiFF/member/checkPw`, data);
+    const response = await UserAPI.put(`/member/checkPw`, data);
     return response.data;
 }
 
 // 5-5. 회원 탈퇴
 export const deleteUser = async (id) => {
-    const response = await UserAPI.delete(`/api/DiFF/member/${id}`);
+    const response = await UserAPI.delete(`/member/${id}`);
     return response.data;
 };
 
 // 닉네임으로 특정 회원 팔로잉 리스트 조회
 export const getFollowingList = async (nickName) => {
     const url = nickName
-        ? `/api/DiFF/member/followingList?nickName=${encodeURIComponent(nickName)}`
-        : `/api/DiFF/member/followingList`;
+        ? `/member/followingList?nickName=${encodeURIComponent(nickName)}`
+        : `/member/followingList`;
 
     const response = await UserAPI.get(url);
     return response.data;
@@ -154,8 +158,8 @@ export const getFollowingList = async (nickName) => {
 // 닉네임으로 특정 회원 팔로워 리스트 조회
 export const getFollowerList = async (nickName) => {
     const url = nickName
-        ? `/api/DiFF/member/followerList?nickName=${encodeURIComponent(nickName)}`
-        : `/api/DiFF/member/followerList`;
+        ? `/member/followerList?nickName=${encodeURIComponent(nickName)}`
+        : `/member/followerList`;
 
     const response = await UserAPI.get(url);
     return response.data;
@@ -163,7 +167,7 @@ export const getFollowerList = async (nickName) => {
 
 // 상대방을 팔로우
 export const followMember = async (fromMemberId) => {
-    const response = await UserAPI.post(`/api/DiFF/member/follow`, null, {
+    const response = await UserAPI.post(`/member/follow`, null, {
         params: { fromMemberId },
     });
     return response.data;
@@ -171,7 +175,7 @@ export const followMember = async (fromMemberId) => {
 
 // 상대방을 언팔로우
 export const unfollowMember = async (fromMemberId) => {
-    const response = await UserAPI.delete(`/api/DiFF/member/unfollow`, {
+    const response = await UserAPI.delete(`/member/unfollow`, {
         params: { fromMemberId },
     });
     return response.data;
@@ -182,7 +186,7 @@ export const uploadProfileImg = async (file) => {
     formData.append("file", file);
 
     try {
-        const res = await axios.post(`/api/DiFF/member/uploadProfileImg`, formData, {
+        const res = await axios.post(`/member/uploadProfileImg`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -198,7 +202,7 @@ export const uploadProfileImg = async (file) => {
 export const requestPasswordReset = async (email) => {
     console.log("📩 [UserAPI.requestPasswordReset] 요청 값:", { email });
 
-    return axios.post(`/api/DiFF/member/findPw`, null, {
+    return axios.post(`/member/findPw`, null, {
         params: { email },
     });
 };
@@ -206,12 +210,12 @@ export const requestPasswordReset = async (email) => {
 export const updatePassword = async (token, newPw) => {
     console.log("📩 [UserAPI.updatePassword] 요청 값:", { token, newPw });
 
-    return axios.post(`/api/DiFF/member/updatePassword`, null, {
+    return axios.post(`/member/updatePassword`, null, {
         params: { token, newPw },
     });
 };
 
 export const searchMembers = async (keyword) => {
-    const res = await UserAPI.get(`/api/DiFF/member/search`, { params: { keyword } });
+    const res = await UserAPI.get(`/member/search`, { params: { keyword } });
     return res.data;
 };
