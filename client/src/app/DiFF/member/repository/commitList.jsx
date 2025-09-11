@@ -36,8 +36,6 @@ function extractResult(eOrData) {
         eOrData?.message ??
         'Failed to load commits.';
 
-    console.log("data: ", data, " code: ", code, " message : ", message);
-
     return { code, message };
 }
 
@@ -369,14 +367,14 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                         <span>{c.authorName || c.authorLogin || 'unknown'}</span>
                                         <span>·</span>
                                         <span>
-                      {c.authoredAt
-                          ? new Date(c.authoredAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: '2-digit',
-                              year: 'numeric',
-                          })
-                          : ''}
-                    </span>
+                                          {c.authoredAt
+                                              ? new Date(c.authoredAt).toLocaleDateString('en-US', {
+                                                  month: 'short',
+                                                  day: '2-digit',
+                                                  year: 'numeric',
+                                              })
+                                              : ''}
+                                        </span>
                                         <span>·</span>
                                         <span>{String(c.sha).slice(0, 6)}</span>
                                     </div>

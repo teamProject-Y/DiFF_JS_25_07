@@ -80,10 +80,7 @@ function SettingsPage() {
 
         try {
             await updateNotificationSetting(type, newValue);
-            console.log(`✅ ${type} 알림 변경:`, newValue);
         } catch (err) {
-            console.error("❌ 알림 설정 실패:", err);
-            // 실패 시 롤백
             setSettings((prev) => ({ ...prev, [type]: !newValue }));
         }
     };
@@ -94,11 +91,6 @@ function SettingsPage() {
         const url = `/api/DiFF/auth/link/${provider}?mode=link`;
         window.location.href = url;
     };
-
-    // const onClickRemove = () => {
-    //     setProfileUrl('');
-    //     setBanner({type: 'info', msg: '프로필 제거 로직 연결 예정'});
-    // };
 
     const onClickRemove = async () => {
         const ok = await confirm({

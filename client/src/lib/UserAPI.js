@@ -42,15 +42,11 @@ const refreshAccessToken = async () => {
         const ACCESS_TOKEN = res.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
 
-        // ✅ 새 토큰 저장
         localStorage.setItem("accessToken", ACCESS_TOKEN);
         UserAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
-
-        console.log("🔑 새 AccessToken 갱신:", ACCESS_TOKEN);
         return ACCESS_TOKEN;
+
     } catch (err) {
-        console.error("❌ 토큰 갱신 실패:", err.response?.data || err.message);
-        // refreshToken도 무효화 → 재로그인 필요
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         window.location.href = "/DiFF/member/login";
@@ -82,12 +78,10 @@ export const login = async ({ email, loginPw }) => {
     const res = await UserAPI.post("/api/DiFF/auth/login", { email, loginPw });
     const { accessToken, refreshToken } = res.data;
 
-
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("tokenType", "Bearer");
 
-    console.log("✅ 로그인 성공 → 토큰 저장 완료");
     return res.data;
 };
 
@@ -96,16 +90,14 @@ export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
     const res = await UserAPI.post("/api/DiFF/auth/join", { loginPw, checkLoginPw, nickName, email });
     const { accessToken, refreshToken } = res.data;
 
-
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("tokenType", "Bearer");
 
-    console.log("✅ 회원가입 + 자동 로그인 성공 → 토큰 저장 완료");
     return res.data;
 };
 
-// 5-3. 회원 페이지
+// 회원 페이지
 export const fetchUser = async (nickName) => {
     const response = await UserAPI.get(`/api/DiFF/member/profile`, {
         params: nickName ? { nickName } : {}
@@ -113,31 +105,27 @@ export const fetchUser = async (nickName) => {
     return response.data;
 };
 
-// 5-4. 회원 수정
+// 회원 수정
 export const modifyNickName = async ({ nickName }) => {
     const data = { nickName };
     const response = await UserAPI.put(`/api/DiFF/member/doModifyNickName`, data);
     return response.data;
 };
 
+// 소개 수정
 export const modifyIntroduce = async ({ introduce }) => {
     const data = { introduce };
     const response = await UserAPI.put(`/api/DiFF/member/doModifyIntroduce`, data);
     return response.data;
 };
 
-export const checkPwUser = async (data) => {
-    const response = await UserAPI.put(`/api/DiFF/member/checkPw`, data);
-    return response.data;
-}
-
-// 5-5. 회원 탈퇴
+// 회원 탈퇴
 export const deleteUser = async (id) => {
     const response = await UserAPI.delete(`/api/DiFF/member/${id}`);
     return response.data;
 };
 
-// 닉네임으로 특정 회원 팔로잉 리스트 조회
+// 팔로잉 리스트 조회
 export const getFollowingList = async (nickName) => {
     const url = nickName
         ? `/api/DiFF/member/followingList?nickName=${encodeURIComponent(nickName)}`
@@ -147,7 +135,7 @@ export const getFollowingList = async (nickName) => {
     return response.data;
 };
 
-// 닉네임으로 특정 회원 팔로워 리스트 조회
+// 팔로워 리스트 조회
 export const getFollowerList = async (nickName) => {
     const url = nickName
         ? `/api/DiFF/member/followerList?nickName=${encodeURIComponent(nickName)}`
@@ -173,6 +161,7 @@ export const unfollowMember = async (fromMemberId) => {
     return response.data;
 };
 
+// 프로필 이미지 업로드
 export const uploadProfileImg = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -191,22 +180,23 @@ export const uploadProfileImg = async (file) => {
     }
 };
 
+// 계정 찾기 요청
 export const requestPasswordReset = async (email) => {
-    console.log("📩 [UserAPI.requestPasswordReset] 요청 값:", { email });
 
     return axios.post(`/api/DiFF/member/findPw`, null, {
         params: { email },
     });
 };
 
+// 비번 수정
 export const updatePassword = async (token, newPw) => {
-    console.log("📩 [UserAPI.updatePassword] 요청 값:", { token, newPw });
 
     return axios.post(`/api/DiFF/member/updatePassword`, null, {
         params: { token, newPw },
     });
 };
 
+// 검색
 export const searchMembers = async (keyword) => {
     const res = await UserAPI.get(`/api/DiFF/member/search`, { params: { keyword } });
     return res.data;
