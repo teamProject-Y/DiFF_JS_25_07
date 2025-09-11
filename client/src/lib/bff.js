@@ -1,5 +1,5 @@
 // src/lib/bff.js
-const ORIGIN = process.env.BACKEND_ORIGIN || 'http://localhost:8080';
+const ORIGIN = process.env.BACKEND_ORIGIN || 'http://13.124.33.233:8080';
 
 // 브라우저에서 토큰 가져오기 (cookie > localStorage)
 function getClientToken() {
@@ -51,7 +51,6 @@ export async function bff(path, opts = {}) {
         });
     }
 
-    // ✅ 브라우저: /_bff 프록시로 (Next rewrites가 BE로 전달)
     const proxied = apiPath.replace(/^\/api\//, '/_bff/');
 
     // 브라우저 토큰 주입

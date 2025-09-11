@@ -14,7 +14,7 @@ export async function verifyGitUser() {
 
     try {
         const { data } = await axios.post(
-            'http://localhost:8080/api/DiFF/draft/verifyGitUser', {
+            'http://13.124.33.233:8080/api/DiFF/draft/verifyGitUser', {
                 email
             });
 
@@ -34,7 +34,7 @@ export async function verifyGitUser() {
 export async function isUsableRepoName(memberId, repoName){
 
     const { data } = await axios.post(
-        'http://localhost:8080/api/DiFF/draft/isUsableRepoName', {
+        'http://13.124.33.233:8080/api/DiFF/draft/isUsableRepoName', {
             memberId: memberId,
             repoName: repoName
         });
@@ -45,7 +45,7 @@ export async function isUsableRepoName(memberId, repoName){
 export async function mkRepo(memberId, repoName, commitHash){
 
     const { data } = await axios.post(
-        'http://localhost:8080/api/DiFF/draft/mkRepo', {
+        'http://13.124.33.233:8080/api/DiFF/draft/mkRepo', {
             memberId: memberId,
             repoName: repoName,
             firstCommit: commitHash
@@ -63,7 +63,7 @@ export async function mkRepo(memberId, repoName, commitHash){
 export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     try {
         const { data } = await axios.post(
-            "http://localhost:8080/api/DiFF/draft/receiveDiff",
+            "http://13.124.33.233:8080/api/DiFF/draft/receiveDiff",
             {
                 memberId,
                 repositoryId,

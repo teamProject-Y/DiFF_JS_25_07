@@ -74,6 +74,7 @@ export default function ReportForm() {
         } finally {
             setSubmitting(false);
         }
+
     };
 
     return (

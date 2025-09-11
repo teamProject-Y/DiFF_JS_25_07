@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {useEffect, useMemo, useRef, useState} from 'react';
-import { Bell, FileText, ThumbsUp, UserPlus, BookmarkCheck } from "lucide-react";
+import {MessageCircle, Bell, FileText, ThumbsUp, UserPlus, BookmarkCheck } from "lucide-react";
 import styled from 'styled-components';
 import {motion, useMotionValue, useTransform} from 'framer-motion';
 import {fetchUser} from '@/lib/UserAPI';
@@ -398,10 +398,10 @@ export default function Header() {
                             </li>
                         </>
                     ) : (
-                         <>
-                             <li>
+                        <>
+                            <li>
                             </li>
-                         </>
+                        </>
                     )}
                 </ul>
             </HeaderWrap>

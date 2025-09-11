@@ -1,10 +1,13 @@
 // src/lib/DraftAPI.js
 import axios from "axios";
 
+/** EC2 배포 서버 주소 */
+const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+
+/** axios custom **/
 export const DraftAPI = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080/api/DiFF",
+    baseURL: BACKEND,
     headers: { "Content-Type": "application/json" },
-    timeout: 15000,
 });
 
 DraftAPI.interceptors.request.use(
