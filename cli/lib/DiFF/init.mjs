@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from "path";
+import fs from 'node:fs';
+import path from "node:path";
 import {getRemoteUrl} from "../git/simpleGit.mjs";
 import {DateTime} from "luxon";
 
@@ -93,7 +93,6 @@ async function createBranchLog(branchName) {
 
     const logsDir = ".DiFF/logs";
     if (!fs.existsSync(logsDir)) {
-        console.error(".DiFF directory doesn't exist.");
         return false;
     }
 

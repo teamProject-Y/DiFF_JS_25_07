@@ -1,10 +1,13 @@
 // src/lib/DraftAPI.js
 import axios from "axios";
 
+/** EC2 배포 서버 주소 */
+const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+
+/** axios custom **/
 export const DraftAPI = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080/api/DiFF",
+    baseURL: BACKEND,
     headers: { "Content-Type": "application/json" },
-    timeout: 15000,
 });
 
 DraftAPI.interceptors.request.use(
@@ -26,10 +29,6 @@ DraftAPI.interceptors.request.use(
             } else {
                 delete config.headers["REFRESH_TOKEN"];
             }
-
-            // 디버그
-            console.log("🚀 [REQ]", config.method?.toUpperCase(), config.baseURL + (config.url || ""));
-            console.log("🧾 headers:", config.headers);
         }
         return config;
     },
@@ -74,7 +73,6 @@ DraftAPI.interceptors.response.use(
 export const deleteDraft = async (id) => {
     const url = `/draft/${id}`;
     const res = await DraftAPI.delete(url);
-    console.log('[API][deleteDraft] status:', res.status, 'data:', res.data);
     // 상태/바디 둘 다 넘겨서 상위에서 정확히 판단
     return { status: res.status, data: res.data };
 };
@@ -92,7 +90,6 @@ export const getDraftById = async (id) => {
 
 export const saveDraft = async (data) => {
     const res = await DraftAPI.post('/draft/save', data);
-    console.log('[API][saveDraft] response:', res.data);
     return res.data;
 }
 

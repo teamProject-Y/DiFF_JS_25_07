@@ -1,17 +1,16 @@
 import {getDiFF, getLastChecksum} from "../git/execSync.mjs";
-import {execSync} from "child_process";
-import {sendDiFF} from "../api/api.mjs";
-import fs from 'fs';
-import fsp from 'fs/promises';
+import {execSync} from "node:child_process";
+import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import {DateTime} from "luxon";
 import chalk from "chalk";
-import {appendMeta} from "./init.mjs";
-import path from "path";
 import axios from "axios";
+
+import {sendDiFF} from "../api/api.mjs";
+import {appendMeta} from "./init.mjs";
 
 // mkDraft 함수
 export async function mkDraft(memberId, branch, draftId, diffId) {
-    console.log('🚀 mkDraft started...');
 
     const from = await getLastRequestChecksum(branch);
     const to = await getLastChecksum(branch);
@@ -19,7 +18,7 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
     const repositoryId = await getRepositoryId();
 
     if (!diff || diff.trim().length === 0) {
-        console.log(chalk.bgRedBright(chalk.black("diff 내용이 비어있습니다.")));
+        console.log(chalk.red("diff is empty."));
         return null;
     }
 
@@ -43,28 +42,23 @@ export async function createDraft(memberId, repositoryId) {
             isPublic: true,
         };
 
-        console.log("📤 draft 생성 요청:", payload);
-
         const { data } = await axios.post(
-            "http://localhost:8080/api/DiFF/draft/mkDraft",
+            "http://13.124.33.233:8080/api/DiFF/draft/mkDraft",
             payload
         );
-
-        console.log("📥 draft 생성 응답:", data);
 
         if (data.resultCode?.startsWith("S-")) {
             const { draftId, diffId } = data.data1;
             return { draftId, diffId };
         } else {
-            console.log("❌ draft 생성 실패:", data.msg);
+            console.log(chalk.red("Server error. Please try again later."));
             return null;
         }
     } catch (err) {
-        console.error("⚠️ draft 생성 중 오류:", err.message);
+        console.log(chalk.red("err: ", err.message));
         return null;
     }
 }
-
 
 /** meta 마지막 체크섬 업데이트 **/
 export async function updateMeta(branchName, lastChecksum) {
@@ -74,7 +68,6 @@ export async function updateMeta(branchName, lastChecksum) {
 
         const branch = meta.find(b => b.branchName === branchName);
         if (!branch) {
-            console.log(chalk.bgBlueBright(`meta에 branch가 존재하지 않아 새로 생성합니다.`));
             await appendMeta({ name: branchName, toHash: lastChecksum });
         }
 
@@ -84,7 +77,6 @@ export async function updateMeta(branchName, lastChecksum) {
 
         await fsp.writeFile('.DiFF/meta', JSON.stringify(meta, null, 2), { encoding: 'utf-8' });
     } catch (err) {
-        console.log(chalk.bgRedBright(`메타 업데이트 실패: ${err.message}`));
         throw err;
     }
 }
@@ -124,12 +116,12 @@ export async function getRepositoryId() {
         const json = JSON.parse(data);
 
         if (!json.repositoryId) {
-            throw new Error('repositoryId not found in config');
+            throw new Error("Server error. Please try again later.");
         }
 
         return json.repositoryId;
     } catch (err) {
-        console.error('getRepositoryId 오류:', err.message);
+        console.error('err: ', err.message);
         return null;
     }
 }
@@ -140,12 +132,12 @@ export async function getLastRequestChecksum(branch){
     const DiFFexists = execSync('[ -d .DiFF ] && echo true || echo false').toString().trim();
 
     if(DiFFexists === 'false') {
-        console.err('fatal: not a DiFF repository: .DiFF');
+        // console.err('fatal: not a DiFF repository: .DiFF');
         return null;
     }
     const metaPath = '.DiFF/meta';
     if (!fs.existsSync(metaPath)) {
-        console.err('fatal: .DiFF/meta not found');
+        // console.err('fatal: .DiFF/meta not found');
         return null;
     }
 
@@ -153,7 +145,7 @@ export async function getLastRequestChecksum(branch){
     const entry = meta.find(e => e.branchName === branch);
 
     if (!entry) {
-        console.err(`no metadata found for branch: ${branch}`);
+        // console.err(`no metadata found for branch: ${branch}`);
         return null;
     }
 

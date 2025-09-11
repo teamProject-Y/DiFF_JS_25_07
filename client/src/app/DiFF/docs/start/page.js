@@ -1,4 +1,5 @@
 import DocsSidebar from "@/app/DiFF/docs/docsSide";
+import {ChevronLeft, ChevronRight} from "lucide-react";
 
 export const metadata = { title: 'DiFF Docs — 2. 시작' };
 
@@ -21,7 +22,7 @@ export default function StartPage() {
                         <br/><br/>
                         DiFF는 토큰을 사용하여 로그인을 유지합니다. DiFF 사이트에 재접속을 해도 다시 로그인할 필요가 없습니다.
                         <br/><br/>
-                        <a href="../member/join" className="hover:underline"><i className="fa-solid fa-arrow-right mr-2"></i>회원가입</a>
+                        <a href="../member/join" className="hover:underline">회원가입 <ChevronRight className="w-5 h-5 inline-block mb-1"/></a>
                     </div>
                     <div className="title2">2-2. Git 설치</div>
                     <div className="content1">
@@ -32,7 +33,7 @@ export default function StartPage() {
                         <a href="https://git-scm.com/downloads" className="hover:underline">
                         <img src="https://git-scm.com/images/logos/downloads/Git-Logo-White.png" alt="git logo"
                              className="w-1/2 mx-auto my-3"/>
-                        <i className="fa-solid fa-arrow-right mr-2"></i>Git 설치</a>
+                        Git 설치 <ChevronRight className="w-5 h-5 inline-block mb-1"/></a>
                     </div>
                     <div className="title2">2-3. .DiFF 설치</div>
                     <div className="content1">
@@ -45,8 +46,8 @@ export default function StartPage() {
                         <br/><br/>
                     </div>
                     <div className="docsNavi">
-                        <a href="../docs/intro"><i className="fa-solid fa-arrow-left"></i> 이전글: 1. 소개</a>
-                        <a href="../docs/howto">다음글: 3. 사용법 <i className="fa-solid fa-arrow-right"></i></a>
+                        <a href="../docs/intro" className="flex items-center gap-2"><ChevronLeft className="w-5 h-5"/> 이전글: 1. 소개</a>
+                        <a href="../docs/howto" className="flex items-center gap-2">다음글: 3. 사용법 <ChevronRight className="w-5 h-5"/></a>
                     </div>
                 </main>
             </div>

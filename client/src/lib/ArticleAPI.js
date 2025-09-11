@@ -4,12 +4,13 @@ import {DraftAPI} from "@/lib/DraftAPI";
 import { UserAPI } from "@/lib/UserAPI";
 import {ReflectAdapter as RepositoryAPI} from "next/dist/server/web/spec-extension/adapters/reflect";
 
-/** 커스텀 Axios 인스턴스 */
+/** EC2 배포 서버 주소 (api/DiFF 까지 포함) */
+const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+
+/** axios custom **/
 export const ArticleAPI = axios.create({
-    baseURL: "http://localhost:8080",
-    headers: {
-        "Content-Type": "application/json"
-    }
+    baseURL: BACKEND,
+    headers: { "Content-Type": "application/json" },
 });
 
 ArticleAPI.interceptors.request.use(
@@ -17,16 +18,15 @@ ArticleAPI.interceptors.request.use(
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            console.log("📦 accessToken:", ACCESS_TOKEN);
+            // console.log("📦 accessToken:", ACCESS_TOKEN);
 
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
 
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-            console.log("📦 refreshToken:", REFRESH_TOKEN);
-
-            console.log("🚀 최종 요청 헤더:", config.headers);
+            // console.log("📦 refreshToken:", REFRESH_TOKEN);
+            // console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
@@ -61,7 +61,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`http://13.124.33.233:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;
@@ -121,7 +121,7 @@ function normalizeArticlePayload(data) {
 /** 5. Auth/회원 관련 API들 */
 export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyword = "", page = 1 }) => {
     const rid = repositoryId ?? repoId;
-    const res = await ArticleAPI.get('/api/DiFF/article/list', {
+    const res = await ArticleAPI.get('/article/list', {
         params: { repositoryId: rid, searchItem, keyword, page }
 
     });
@@ -129,55 +129,45 @@ export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyw
     return res.data;
 };
 
+/** 트렌딩 글 */
 export const trendingArticle = async ({ count, days }) => {
-    const response = await ArticleAPI.get(`/api/DiFF/article/trending`, {
+    const res = await ArticleAPI.get('/article/trending', {
         params: { count, days }
     });
-    return response.data;
-}
-
-// lib/ArticleAPI.js
-export const writeArticle = async (data) => {
-    if (data?.repositoryId != null) {
-        data = { ...data, repositoryId: Number(data.repositoryId) };
-    }
-    if (data?.draftId != null) {
-        data = { ...data, draftId: Number(data.draftId) };
-    }
-
-    const res = await ArticleAPI.post('/api/DiFF/article/doWrite', normalizeArticlePayload(data));
-    const result = res.data;
-
-    return result; // ResultData
+    return res.data;
 };
 
+/** 글 작성 */
+export const writeArticle = async (data) => {
+    if (data?.repositoryId != null) data = { ...data, repositoryId: Number(data.repositoryId) };
+    if (data?.draftId != null) data = { ...data, draftId: Number(data.draftId) };
+
+    const res = await ArticleAPI.post('/article/doWrite', data);
+    return res.data; // ResultData
+};
+
+/** 내 레포지토리 조회 */
 export const getMyRepositories = async () => {
-    const res = await ArticleAPI.get('/api/DiFF/repository/my');
-    const repos =
-        res.data?.data1?.repositories ??
-        res.data?.repositories ??
-        [];
-    // 타입 보정
+    const res = await ArticleAPI.get('/repository/my');
+    const repos = res.data?.data1?.repositories ?? res.data?.repositories ?? [];
     return Array.isArray(repos) ? repos : [];
 };
 
-export async function getAverageMetrics(repositoryId) {
-    const res = await ArticleAPI.get(`/api/DiFF/repository/average/${repositoryId}`);
+/** 평균 메트릭 조회 */
+export const getAverageMetrics = async (repositoryId) => {
+    const res = await ArticleAPI.get(`/repository/average/${repositoryId}`);
     return res.data;
-}
+};
 
-
-// ArticleAPI.js
-export async function getArticle(id) {
-    const res = await ArticleAPI.get(`/api/DiFF/article/detail`, {
-        params: { id }
-    });
+/** 글 상세 조회 */
+export const getArticle = async (id) => {
+    const res = await ArticleAPI.get('/article/detail', { params: { id } });
     return res.data.data1;
 }
 
-// 게시글 수정
-export async function modifyArticle(article, token) {
-    const res = await axios.post(`/api/DiFF/article/modify`, normalizeArticlePayload(article), {
+/** 글 수정 */
+export const modifyArticle = async (article, token) => {
+    const res = await ArticleAPI.post('/article/modify', article, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}` // 🔑 토큰 추가
@@ -194,49 +184,38 @@ export const deleteArticle = async (id) => {
 };
 
 export const followingArticleList = async ({ repositoryId, searchItem = 0, keyword = "", page = 1 }) => {
-    const res = await ArticleAPI.get('/api/DiFF/article/followingArticleList', {
+    const res = await ArticleAPI.get('/article/followingArticleList', {
         params: { repositoryId, searchItem, keyword, page }
     });
     return res.data;
 };
 
+/** 특정 레포의 글 목록 */
 export const repositoryArticles = async ({ repositoryId }) => {
-    const response = await ArticleAPI.get(`/api/DiFF/repository/articles`, {
-        params: { repositoryId }
-    });
-    return response.data;
-}
+    const res = await ArticleAPI.get('/repository/articles', { params: { repositoryId } });
+    return res.data;
+};
 
-// 댓글 작성
+/** 댓글 작성 */
 export const postReply = async (articleId, comment) => {
-    const response = await UserAPI.post(`/api/DiFF/reply/doWrite`, {
-        articleId: articleId,
-        body: comment
-    });
-    return response.data;
+    const res = await UserAPI.post('/reply/doWrite', { articleId, body: comment });
+    return res.data;
 };
 
-// 댓글 목록 불러오기
+/** 댓글 목록 조회 */
 export const fetchReplies = async (articleId) => {
-    const response = await UserAPI.get(`/api/DiFF/reply/list`, {
-        params: { articleId },
-    });
-    console.log(response.data.replies);
-
-    return response.data;
+    const res = await UserAPI.get('/reply/list', { params: { articleId } });
+    console.log(res.data.replies);
+    return res.data;
 };
 
-export async function increaseArticleHits(articleId) {
-    const res = await fetch(`/api/DiFF/article/hits/${articleId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-    });
-    return res.json();
-}
+/** 조회수 증가 */
+export const increaseArticleHits = async (articleId) => {
+    const res = await ArticleAPI.post(`/article/hits/${articleId}`);
+    return res.data;
+};
 
 export const searchArticles = async (keyword) => {
-    const res = await ArticleAPI.get(`/api/DiFF/article/search`, {
-        params: { keyword }  // 자동 인코딩됨
-    });
+    const res = await ArticleAPI.get('/article/search', { params: { keyword } });
     return res.data;
 };

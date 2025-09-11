@@ -1,6 +1,6 @@
 // public/firebase-messaging-sw.js
-importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js");
-importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js");
+importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
 
 firebase.initializeApp({
     apiKey: "AIzaSyBrTgvnzTDErEcUYajR9yX6h8As8F2tT2s",
@@ -13,7 +13,6 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// ✅ 백그라운드 알림 수신 (브라우저 꺼져있거나 비활성 탭)
 messaging.onBackgroundMessage((payload) => {
     console.log("📩 [SW] 백그라운드 알림 수신:", payload);
 
@@ -25,3 +24,4 @@ messaging.onBackgroundMessage((payload) => {
 
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
+a

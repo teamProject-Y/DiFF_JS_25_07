@@ -1,11 +1,12 @@
 import axios from "axios";
 
+/** EC2 배포 서버 주소 */
+const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+
 /** axios custom **/
 export const NotionAPI = axios.create({
-    baseURL: "http://localhost:8080",
-    headers: {
-        "Content-Type": "application/json"
-    }
+    baseURL: BACKEND,
+    headers: { "Content-Type": "application/json" },
 });
 
 NotionAPI.interceptors.request.use(
@@ -13,16 +14,11 @@ NotionAPI.interceptors.request.use(
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            console.log("📦 accessToken:", ACCESS_TOKEN);
 
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
-
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-            console.log("📦 refreshToken:", REFRESH_TOKEN);
-
-            console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
@@ -35,18 +31,16 @@ export const setAuthHeader = () => {
         const ACCESS_TOKEN = localStorage.getItem("accessToken");
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
 
-        // accessToken이 있을 때만 Authorization 헤더 설정
         if (ACCESS_TOKEN) {
             NotionAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         } else {
-            delete NotionAPI.defaults.headers['Authorization'];  // 없으면 제거
+            delete NotionAPI.defaults.headers['Authorization'];
         }
 
-        // refreshToken도 마찬가지
         if (REFRESH_TOKEN) {
             NotionAPI.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         } else {
-            delete NotionAPI.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
+            delete NotionAPI.defaults.headers['REFRESH_TOKEN'];
         }
     }
 };
@@ -56,7 +50,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`http://13.124.33.233:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;
@@ -87,7 +81,7 @@ NotionAPI.interceptors.response.use(
 
 export const saveInquiry = async (inquiry) => {
     const response = await NotionAPI.post(
-        '/api/DiFF/notionInquiry/saveInquiry',
+        '/notionInquiry/saveInquiry',
         inquiry
     );
     return response.data;
@@ -95,7 +89,7 @@ export const saveInquiry = async (inquiry) => {
 
 export const saveReport = async (report) => {
     const response = await NotionAPI.post(
-        '/api/DiFF/notionReport/saveReport',
+        '/notionReport/saveReport',
         report
     );
     return response.data;

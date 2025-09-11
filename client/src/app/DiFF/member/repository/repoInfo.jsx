@@ -1,20 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useEffect, useState, useRef } from 'react';
+import {useEffect, useState, useRef, useMemo} from 'react';
 import LanguageChart from "./languageChart";
 import AnalysisHistoryChart from "./analysisHistoryChart.jsx";
+import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
+import AnalysisRecentChart from "@/app/DiFF/member/repository/analysisRecentChart";
 import {
     connectRepository,
     getAnalysisHistory,
-    getAnalysisRecent,
     getLanguageDistribution,
     renameRepository,
     deleteRepository,
 } from "@/lib/RepositoryAPI";
 import CommitList from "@/app/DiFF/member/repository/commitList";
-import TotalAnalysisChart from "@/app/DiFF/member/repository/totalAnalysisChart";
-import AnalysisRecentChart from "@/app/DiFF/member/repository/analysisRecentChart";
 
 import { useDialog } from "@/common/commonLayout";
 
@@ -138,6 +137,49 @@ export function RepoInfo({
         }
     };
 
+    // 공통 복사 헬퍼
+    const copyToClipboard = async (text, okMsg = "Copied!") => {
+        try {
+            await navigator.clipboard.writeText(text);
+            alert?.({ intent: "success", title: okMsg });
+        } catch (e) {
+            console.error(e);
+            alert?.({ intent: "warning", title: "Copy failed. Please try again." });
+        }
+    };
+
+    // GitHub 링크/클론 문자열 파생
+    const useGitHubLinks = (repoUrl) => {
+        return useMemo(() => {
+            try {
+                const u = new URL(repoUrl);
+                const [owner, repoName] = u.pathname.replace(/^\/|\/$/g, "").split("/");
+                const base = `${u.origin}/${owner}/${repoName}`;
+                return {
+                    owner,
+                    repoName,
+                    base,
+                    issues: `${base}/issues`,
+                    pulls: `${base}/pulls`,
+                    commits: `${base}/commits`,
+                    branches: `${base}/branches`,
+                    releases: `${base}/releases`,
+                    insights: `${base}/pulse`,
+                    contributors: `${base}/graphs/contributors`,
+                    readme: `${base}#readme`,
+                    desktop: `x-github-client://openRepo/${base}`,
+                    vscode: `vscode://vscode.git/clone?url=${encodeURIComponent(base)}`,
+                    httpsClone: `${base}.git`,
+                    sshClone: `git@github.com:${owner}/${repoName}.git`,
+                };
+            } catch {
+                return null;
+            }
+        }, [repoUrl]);
+    };
+
+    const gh = useGitHubLinks(repoUrl);
+
     return (
         <motion.div
             key={`detail-${repo?.id ?? 'none'}`}
@@ -179,14 +221,14 @@ export function RepoInfo({
                                 <button
                                     onClick={() => setActiveTab("history")}
                                     className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
-                    ${activeTab === "history" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
+                                    ${activeTab === "history" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
                                 >
                                     <i className="fa-solid fa-circle text-[0.3rem]"></i>History
                                 </button>
                                 <button
                                     onClick={() => setActiveTab("total")}
                                     className={`mx-1 text-sm flex items-center gap-1 pointer-events-auto
-                    ${activeTab === "total" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
+                                    ${activeTab === "total" ? "text-blue-500" : "text-gray-400 dark:text-neutral-600"}`}
                                 >
                                     <i className="fa-solid fa-circle text-[0.3rem]"></i>Total
                                 </button>
@@ -205,60 +247,120 @@ export function RepoInfo({
                         {/* 하단 박스 */}
                         <div className="flex-grow overflow-y-scroll rounded-xl border shadow-sm
                             bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700">
-                            {repoUrl ? (
-                                <CommitList
-                                    key={`commits-${repo?.id}-${repoUrl}-${commitRefreshKey}`}
-                                    repo={{...repo, url: repoUrl}}
-                                    refreshSignal={commitRefreshKey}
-                                />
-                            ) : (
-                                <div
-                                    className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
-                                    <div
-                                        className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
-                                        <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400"/>
-                                    </div>
 
-                                    <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
-                                        Connect a GitHub repository
-                                    </div>
-                                    <div className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                        Link your repo to enable analysis and commit history.
-                                    </div>
-
-                                    {/* URL 입력 + 연결 버튼 */}
-                                    <form
-                                        className="mt-4 w-full max-w-md flex items-center gap-2"
-                                        onSubmit={async (e) => {
-                                            e.preventDefault();
-                                            const url = e.currentTarget.repoUrl.value.trim();
-                                            await connectionUrl(url);
-                                        }}
-                                    >
-                                        <div className="relative flex-1">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                        <i className="fa-brands fa-github text-neutral-400"/>
-                      </span>
-                                            <input
-                                                type="url"
-                                                name="repoUrl"
-                                                placeholder="https://github.com/owner/repo"
-                                                className="w-full pl-10 pr-3 py-2 rounded-lg bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-600"
-                                                required
-                                                pattern="https?://(www\.)?github\.com/[^/\s]+/[^/\s]+/?"
-                                                aria-label="GitHub Repository URL"
-                                            />
+                            {isMyRepo ? (
+                                // editor
+                                repoUrl ? (
+                                    <CommitList
+                                        key={`commits-${repo?.id}-${repoUrl}-${commitRefreshKey}`}
+                                        repo={{ ...repo, url: repoUrl }}
+                                        refreshSignal={commitRefreshKey}
+                                    />
+                                ) : (
+                                    <div className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
+                                        <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
+                                            <i className="fa-brands fa-github text-3xl text-gray-600 dark:text-neutral-400" />
                                         </div>
-                                        <button
-                                            type="submit"
-                                            className="px-3 py-2 rounded-lg bg-gray-100 dark:text-neutral-300 dark:bg-neutral-700 font-medium hover:opacity-60 transition"
+
+                                        <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+                                            Connect a GitHub repository
+                                        </div>
+                                        <div className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                            Link your repo to enable analysis and commit history.
+                                        </div>
+
+                                        <form
+                                            className="mt-4 w-full max-w-md flex items-center gap-2"
+                                            onSubmit={async (e) => {
+                                                e.preventDefault();
+                                                const url = e.currentTarget.repoUrl.value.trim();
+                                                await connectionUrl(url);
+                                            }}
                                         >
-                                            Connect
-                                        </button>
-                                    </form>
-                                </div>
+                                            <div className="relative flex-1">
+                                                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+                                                      <i className="fa-brands fa-github text-neutral-400" />
+                                                    </span>
+                                                <input
+                                                    type="url"
+                                                    name="repoUrl"
+                                                    placeholder="https://github.com/owner/repo"
+                                                    className="w-full pl-10 pr-3 py-2 rounded-lg bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-700 focus:outline-none focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-600"
+                                                    required
+                                                    pattern="https?://(www\.)?github\.com/[^/\s]+/[^/\s]+/?"
+                                                    aria-label="GitHub Repository URL"
+                                                />
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                className="px-3 py-2 rounded-lg bg-gray-100 dark:text-neutral-300 dark:bg-neutral-700 font-medium hover:opacity-60 transition"
+                                            >
+                                                Connect
+                                            </button>
+                                        </form>
+                                    </div>
+                                )
+                            ) : (
+                                // viewer
+                                repoUrl ? (
+                                    <div className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
+                                        <i className="fa-brands fa-github text-6xl text-gray-600 dark:text-neutral-400" />
+
+                                        <div className="mt-5 text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+                                            This repository is managed by the owner.
+                                        </div>
+                                        <div className="mt-1 text-sm text-neutral-500 dark:text-neutral-400 max-w-md">
+                                            You can jump to GitHub, open it directly in your tools, or copy a clone command.
+                                        </div>
+
+                                        {/* Primary CTAs */}
+                                        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                                            <a
+                                                href={repoUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-3 py-2 rounded-lg border  dark:border-neutral-600 dark:text-neutral-200 font-medium hover:opacity-80 transition"
+                                                title="Open on GitHub"
+                                                aria-label="Open on GitHub"
+                                            >
+                                                <i className="fa-brands fa-github mr-2" />
+                                                Visit on GitHub
+                                            </a>
+                                        </div>
+
+                                        {/* Quick links */}
+                                        {gh && (
+                                            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg">
+                                                <a href={gh.readme} target="_blank" rel="noopener noreferrer"
+                                                   className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:opacity-80 transition text-sm">
+                                                    <i className="fa-regular fa-file-lines mr-2" /> README
+                                                </a>
+                                                <a href={gh.commits} target="_blank" rel="noopener noreferrer"
+                                                   className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:opacity-80 transition text-sm">
+                                                    <i className="fa-solid fa-clock-rotate-left mr-2" /> Commits
+                                                </a>
+                                                <a href={gh.branches} target="_blank" rel="noopener noreferrer"
+                                                   className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:opacity-80 transition text-sm">
+                                                    <i className="fa-solid fa-code-branch mr-2" /> Branches
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div> ) : (
+                                    <div className="relative h-full w-full flex flex-col items-center justify-center p-6 text-center">
+                                        <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 mb-3">
+                                            <i className="fa-solid fa-lock text-2xl text-gray-600 dark:text-neutral-400" />
+                                        </div>
+                                        <div className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+                                            The owner hasn’t linked a GitHub repo yet.
+                                        </div>
+                                        <div className="mt-1 text-sm text-neutral-500 dark:text-neutral-400 max-w-md">
+                                            Once the owner connects a GitHub URL, you’ll be able to view the commit history here.
+                                        </div>
+                                    </div>
+                                )
                             )}
                         </div>
+
                     </div>
                 </div>
 
@@ -291,6 +393,7 @@ export function RepoInfo({
                                         <p className="text-xl font-semibold break-all pl-1">
                                             {displayName}
                                         </p>
+                                        {isMyRepo &&
                                         <button
                                             onClick={enterEdit}
                                             className="pl-2 pb-1 text-xs text-neutral-300"
@@ -299,6 +402,7 @@ export function RepoInfo({
                                         >
                                             <i className="fa-solid fa-pen"></i>
                                         </button>
+                                        }
                                     </>
                                 )}
                             </div>
@@ -337,6 +441,7 @@ export function RepoInfo({
                     </div>
 
                     {/* 삭제 버튼 */}
+                    {isMyRepo &&
                     <button
                         onClick={handleDelete}
                         className="w-full p-2 border rounded-xl transition-colors
@@ -345,6 +450,7 @@ export function RepoInfo({
                     >
                         Delete Repository
                     </button>
+                    }
                 </div>
             </div>
         </motion.div>

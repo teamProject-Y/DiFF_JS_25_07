@@ -1,0 +1,106 @@
+.crt {
+    position: relative;
+    min-height: 100vh;
+    box-sizing: border-box;
+    background-color: #000000;
+    background-image:
+            radial-gradient(#222426, #041607);
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    font-size: 3rem;
+    color: rgba(208, 45, 35, 0.6);
+    text-shadow:
+            0 0 1ex rgba(208, 45, 35, 1),
+            0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.overlay {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background:
+            repeating-linear-gradient(
+                    180deg,
+                    rgba(0, 0, 0, 0) 0,
+                    rgba(0, 0, 0, 0.3) 50%,
+                    rgba(0, 0, 0, 0) 100%
+            );
+    background-size: auto 4px;
+    z-index: 1;
+}
+
+.overlay::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+}
+
+@keyframes scan {
+    0%        { background-position: 0 -100vh; }
+    35%, 100% { background-position: 0 100vh; }
+}
+
+.terminal {
+    box-sizing: inherit;
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
+    padding: 4rem;
+    text-transform: uppercase;
+}
+
+.output {
+    font-size: 1.5rem;
+    color: rgba(240, 236, 235, 0.8);
+    text-shadow:
+            0 0 1px rgba(240, 236, 235, 0.4),
+            0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.output::before {
+    content: "> ";
+}
+
+.errorcode {
+    font-size: 3rem;
+    color: rgba(208, 45, 35, 0.8);
+}
+
+/* 링크 모양(버튼 포함) */
+.link,
+.crt a {
+    color: rgba(208, 45, 35, 0.8);
+    text-decoration: none;
+    text-shadow:
+            0 0 1ex rgba(208, 45, 35, 1),
+            0 0 2px rgba(255, 255, 255, 0.8);
+    position: relative;
+}
+
+.link::before,
+.crt a::before {
+    content: "[";
+}
+
+.link::after,
+.crt a::after {
+    content: "]";
+}
+
+/* 버튼 리셋 */
+.link {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    text-transform: inherit;
+    color: rgba(208, 45, 35, 0.8);
+}
+
+.safeTitle {
+    margin: 0 0 1rem 0;
+}

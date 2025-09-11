@@ -48,8 +48,8 @@ function EmptyState(isMyRepo) {
                         <div className="space-y-2">
                             <h3 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Nothing
                                 here yet.</h3>
-                            <p className="text-sm text-neutral-500 dark:text-neutral-400">Start your first post and keep
-                                it
+                            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                Start your first post and keep it
                                 clean, bold, and yours.</p>
                         </div>
                         <Link

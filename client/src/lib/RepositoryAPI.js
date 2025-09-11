@@ -3,7 +3,7 @@ import {ArticleAPI} from "@/lib/ArticleAPI";
 
 // fetch github repository
 export const getGithubRepos = async () => {
-    const response = await UserAPI.get(`/api/DiFF/github/repos`, {});
+    const response = await UserAPI.get(`/github/repos`, {});
     return response.data;
 };
 
@@ -12,7 +12,7 @@ export const createRepository = async (data) => {
     console.log("repo create 요청 : " + data);
 
     try {
-        const res = await ArticleAPI.post("/api/DiFF/repository/createRepository", data);
+        const res = await ArticleAPI.post("/repository/createRepository", data);
         console.log("[API][createRepository] status:", res.status, "data:", res.data);
         return res.data;
     } catch (err) {
@@ -26,7 +26,7 @@ export const renameRepository = async (id, name) => {
 
     try {
         const res = await ArticleAPI.post(
-            "/api/DiFF/repository/rename",
+            "/repository/rename",
             payload,
             { headers: { "Content-Type": "application/json" } }
         );
@@ -42,14 +42,14 @@ export const renameRepository = async (id, name) => {
 
 export const getAnalysisHistory = async (repoId) => {
     console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/history");
-    const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/history`);
+    const res = await ArticleAPI.get(`/repository/${repoId}/history`);
     console.log("[API] 응답:", res.data);
     return res.data?.data1 || [];
 };
 
 export const getAnalysisRecent = async (repoId) => {
     console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/recent");
-    const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/recent`);
+    const res = await ArticleAPI.get(`/repository/${repoId}/recent`);
     console.log("[API] 응답:", res.data);
     return res.data?.data1 || [];
 };
@@ -57,7 +57,7 @@ export const getAnalysisRecent = async (repoId) => {
 export const getLanguageDistribution = async (repoId) => {
     try {
         console.log("[API] 요청 시작: /api/DiFF/repository/" + repoId + "/languages");
-        const res = await ArticleAPI.get(`/api/DiFF/repository/${repoId}/languages`);
+        const res = await ArticleAPI.get(`/repository/${repoId}/languages`);
         console.log("[API] 응답:", res.data);
 
         return res.data?.data1 ?? [];
@@ -98,7 +98,7 @@ export const getGithubCommitList = async (repo, opts = {}) => {
         perPage: opts.perPage ?? null,
     };
 
-    const res = await UserAPI.get(`/api/DiFF/github/commits`, {params});
+    const res = await UserAPI.get(`/github/commits`, {params});
 
     const data = res?.data ?? {};
     const code = data.resultCode || data.code || '';
@@ -130,7 +130,7 @@ export const getGithubCommitList = async (repo, opts = {}) => {
 
 export const connectRepository = async (repoId, url) => {
     // 1) validate
-    const v = await ArticleAPI.get(`/api/DiFF/github/validate`, { params: { url } });
+    const v = await ArticleAPI.get(`/github/validate`, { params: { url } });
     const code = String(v.data?.resultCode ?? v.data?.msg ?? "");
     if (code.startsWith("F-")) return v.data; // 실패면 그대로 반환
 
@@ -141,7 +141,7 @@ export const connectRepository = async (repoId, url) => {
 
     // 3) connect: POST + 쿼리 파라미터 (바디 없음이면 data 자리에 null)
     const { data } = await ArticleAPI.post(
-        `/api/DiFF/repository/connect`,
+        `/repository/connect`,
         null,
         {
             params: {
@@ -165,13 +165,13 @@ export const mkDraft = async (repoId, owner, repoName, sha) => {
         );
     }
 
-    const res = await UserAPI.get(`/api/DiFF/github/commit/${repoId}/${owner}/${repoName}/${sha}`,);
+    const res = await UserAPI.get(`/github/commit/${repoId}/${owner}/${repoName}/${sha}`,);
     return res.data;
 };
 
 export const deleteRepository = async (id) => {
     try {
-        const res = await UserAPI.delete(`/api/DiFF/repository/${id}`, {
+        const res = await UserAPI.delete(`/repository/${id}`, {
             headers: {
                 "Content-Type": "application/json",
             },
