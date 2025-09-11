@@ -51,7 +51,6 @@ export async function bff(path, opts = {}) {
         });
     }
 
-    // ✅ 브라우저: /_bff 프록시로 (Next rewrites가 BE로 전달)
     const proxied = apiPath.replace(/^\/api\//, '/_bff/');
 
     // 브라우저 토큰 주입
