@@ -2,30 +2,17 @@
     position: relative;
     min-height: 100vh;
     box-sizing: border-box;
-
     background-color: #000000;
     background-image:
-            radial-gradient(#3C3E40, #041607)
-            ;
+            radial-gradient(#222426, #041607);
     background-repeat: no-repeat;
     background-size: cover;
 
-    font-size: 1.5rem;
-    color: rgba(128, 255, 128, 0.8);
+    font-size: 3rem;
+    color: rgba(208, 45, 35, 0.6);
     text-shadow:
-            0 0 1ex rgba(51, 255, 51, 1),
+            0 0 1ex rgba(208, 45, 35, 1),
             0 0 2px rgba(255, 255, 255, 0.8);
-}
-
-.noise {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    background-image: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
-    background-repeat: no-repeat;
-    background-size: cover;
-    z-index: -1;
-    opacity: .02;
 }
 
 .overlay {
@@ -48,16 +35,6 @@
     pointer-events: none;
     position: absolute;
     inset: 0;
-    background-image: linear-gradient(
-            0deg,
-            transparent 0%,
-            rgba(0, 0, 0, 0.2) 2%,
-            rgba(0, 0, 0, 0.8) 3%,
-            rgba(0, 0, 0, 0.2) 3%,
-            transparent 100%
-    );
-    background-repeat: no-repeat;
-    animation: scan 7.5s linear 0s infinite;
 }
 
 @keyframes scan {
@@ -67,7 +44,7 @@
 
 .terminal {
     box-sizing: inherit;
-    position: relative; /* overlay(1) 아래 레이어 */
+    position: relative;
     width: 100%;
     max-width: 1000px;
     height: 100%;
@@ -76,9 +53,10 @@
 }
 
 .output {
-    color: rgba(128, 255, 128, 0.8);
+    font-size: 1.5rem;
+    color: rgba(240, 236, 235, 0.8);
     text-shadow:
-            0 0 1px rgba(51, 255, 51, 0.4),
+            0 0 1px rgba(240, 236, 235, 0.4),
             0 0 2px rgba(255, 255, 255, 0.8);
 }
 
@@ -87,14 +65,18 @@
 }
 
 .errorcode {
-    color: #fff;
+    font-size: 3rem;
+    color: rgba(208, 45, 35, 0.8);
 }
 
 /* 링크 모양(버튼 포함) */
 .link,
 .crt a {
-    color: #fff;
+    color: rgba(208, 45, 35, 0.8);
     text-decoration: none;
+    text-shadow:
+            0 0 1ex rgba(208, 45, 35, 1),
+            0 0 2px rgba(255, 255, 255, 0.8);
     position: relative;
 }
 
@@ -116,7 +98,7 @@
     cursor: pointer;
     font: inherit;
     text-transform: inherit;
-    color: inherit;
+    color: rgba(208, 45, 35, 0.8);
 }
 
 .title {

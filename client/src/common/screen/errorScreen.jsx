@@ -8,20 +8,24 @@ import styles from './errorScreen.module.css';
 const inconsolata = Inconsolata({ subsets: ['latin'], weight: ['400','700'] });
 
 export default function ErrorScreen({
-                                      code = '404',
+                                      code,
                                       title = 'Error',
                                       message = 'The page you are looking for might have been removed, had its name changed or is temporarily unavailable.',
                                       homeHref = '/',          // 필요하면 '/DiFF/home/main'로 바꿔서 사용
                                       showRetry = false,       // error.js에서 reset 버튼 보일지
                                       onRetry = null,          // error.js에서 reset 핸들러 주입
                                   }) {
+
+    const c = String(code ?? '500');
+    const safeTitle = title ?? (c === '404' ? 'Not Found' : 'Error');
+
     return (
         <div className={`${styles.crt} ${inconsolata.className}`}>
             <div className={styles.noise} />
             <div className={styles.overlay} />
             <div className={styles.terminal}>
                 <h1 className={styles.title}>
-                    {title} <span className={styles.errorcode}>{code}</span>
+                    {title} <span className={styles.errorcode}>{c}</span>
                 </h1>
 
                 <p className={styles.output}>{message}</p>
