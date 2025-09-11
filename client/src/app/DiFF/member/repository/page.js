@@ -6,7 +6,7 @@ import {useEffect, useMemo, useState, useCallback} from "react";
 import {LayoutGroup} from "framer-motion";
 import {createRepository, importGithubRepo} from "@/lib/RepositoryAPI"
 
-import RepoPost from "./RepoPost";
+import RepoPost from "./repoPost";
 import {AddRepoModal} from './addRepoModal';
 import {RepoInfo} from './repoInfo';
 import Link from "next/link";
@@ -92,6 +92,7 @@ export default function RepositoriesPage() {
 
         const nickName = searchParams.get('nickName');
         const myNickName = typeof window !== 'undefined' && localStorage.getItem('nickName');
+      
         setIsMyRepos(!nickName || nickName === myNickName);
 
         fetchUser(nickName)
@@ -106,6 +107,7 @@ export default function RepositoriesPage() {
             });
 
         const base = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      
         fetch(`${base}/api/DiFF/auth/linked`, {
             headers: {Authorization: `Bearer ${accessToken}`},
             credentials: 'include',
@@ -121,7 +123,7 @@ export default function RepositoriesPage() {
         () => visibleRepos.find((r) => r.id === selectedRepoId) || null,
         [visibleRepos, selectedRepoId]
     );
-
+  
     useEffect(() => {
         if (selectedRepo) setTab('posts');
     }, [selectedRepo?.id]);

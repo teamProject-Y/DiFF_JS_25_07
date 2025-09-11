@@ -4,7 +4,8 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getArticle, modifyArticle } from '@/lib/ArticleAPI';
-import ToastEditor from "@/common/toastEditor";
+import dynamic from "next/dynamic";
+
 import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
 import {useTheme} from "@/common/thema";
@@ -23,7 +24,7 @@ function ModifyArticlePageInner() {
     const { alert } = useDialog();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
-
+    const ToastEditor = dynamic(() => import("@/common/toastEditor"), { ssr: false });
     const [article, setArticle] = useState(null);
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');

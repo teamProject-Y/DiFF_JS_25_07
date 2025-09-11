@@ -43,7 +43,7 @@ export async function createDraft(memberId, repositoryId) {
         };
 
         const { data } = await axios.post(
-            "http://localhost:8080/api/DiFF/draft/mkDraft",
+            "http://13.124.33.233:8080/api/DiFF/draft/mkDraft",
             payload
         );
 

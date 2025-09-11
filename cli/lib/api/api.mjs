@@ -8,13 +8,13 @@ export async function verifyGitUser() {
     const email = await getGitEmail();
 
     if(email === null) {
-        console.error(chalk.red('Git email not configured.'));
+        // console.error(chalk.red('Git email not configured.'));
         return null;
     }
 
     try {
         const { data } = await axios.post(
-            'http://localhost:8080/api/DiFF/draft/verifyGitUser', {
+            'http://13.124.33.233:8080/api/DiFF/draft/verifyGitUser', {
                 email
             });
 
@@ -22,11 +22,10 @@ export async function verifyGitUser() {
             return data.data1;
 
         } else { // 인증 실패
-            console.log(chalk.red("Join DiFF first."));
             return null;
         }
     } catch (err) {
-        console.error(chalk.red('error:'), err.message);
+        // console.error(chalk.red('error:'), err.message);
         return null;
     }
 }
@@ -35,7 +34,7 @@ export async function verifyGitUser() {
 export async function isUsableRepoName(memberId, repoName){
 
     const { data } = await axios.post(
-        'http://localhost:8080/api/DiFF/draft/isUsableRepoName', {
+        'http://13.124.33.233:8080/api/DiFF/draft/isUsableRepoName', {
             memberId: memberId,
             repoName: repoName
         });
@@ -46,7 +45,7 @@ export async function isUsableRepoName(memberId, repoName){
 export async function mkRepo(memberId, repoName, commitHash){
 
     const { data } = await axios.post(
-        'http://localhost:8080/api/DiFF/draft/mkRepo', {
+        'http://13.124.33.233:8080/api/DiFF/draft/mkRepo', {
             memberId: memberId,
             repoName: repoName,
             firstCommit: commitHash
@@ -64,7 +63,7 @@ export async function mkRepo(memberId, repoName, commitHash){
 export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     try {
         const { data } = await axios.post(
-            "http://localhost:8080/api/DiFF/draft/receiveDiff",
+            "http://13.124.33.233:8080/api/DiFF/draft/receiveDiff",
             {
                 memberId,
                 repositoryId,

@@ -122,7 +122,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             lastChecksum,
         }));
 
-        await axios.post('http://localhost:8080/upload', form, {
+        await axios.post('http://13.124.33.233:8080/upload', form, {
             headers: form.getHeaders(),
         });
 
@@ -208,7 +208,7 @@ export function getDiFF(from, to) {
         });
 
         child.stderr.on('data', (data) => {
-            console.error(chalk.red('stderr:'), data.toString());
+            // console.error(chalk.red('stderr:'), data.toString());
         });
 
         child.on('close', (code) => {
