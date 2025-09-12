@@ -10,7 +10,7 @@ import {getResponse} from "../util/interaction.mjs";
 import {isUsableRepoName, mkRepo} from "../api/api.mjs";
 import {mkDiFFdirectory} from "../DiFF/init.mjs";
 import {getRepositoryId} from "../DiFF/draft.mjs";
-
+const BASE_URL = process.env.BACKEND_URL;
 let repoId = 0;
 
 /** git repository 여부 **/
@@ -120,9 +120,10 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             lastChecksum,
         }));
 
-        await axios.post('http://13.124.33.233:8080/upload', form, {
+        await axios.post(`${BASE_URL.replace(/\/api\/DiFF$/, "")}/upload`, form, {
             headers: form.getHeaders(),
         });
+
 
         fs.unlinkSync('difftest.zip');
         return true;

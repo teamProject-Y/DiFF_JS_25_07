@@ -19,6 +19,9 @@ NotionAPI.interceptors.request.use(
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
+            if (REFRESH_TOKEN) {
+                config.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
+            }
         }
         return config;
     },
@@ -50,7 +53,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await axios.get(`http://13.124.33.233:8080/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`${BACKEND}/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;

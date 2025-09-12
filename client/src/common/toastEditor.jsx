@@ -1,28 +1,28 @@
 "use client";
-
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
 import "highlight.js/styles/atom-one-dark.css";
+import codeSyntaxHighlight from "@toast-ui/editor-plugin-code-syntax-highlight";
 import { useTheme } from "@/common/thema";
 
-// 이미지 업로드 (Cloudinary)
-const handleUpload = async (file) => {
+// --- Cloudinary upload helper -------------------------------------------------
+async function handleUpload(file) {
     const data = new FormData();
     data.append("file", file);
     data.append("upload_preset", "teamproject_Y");
     data.append("cloud_name", "dc12fahac");
 
-    const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dc12fahac/image/upload",
-        { method: "POST", body: data }
-    );
+    const res = await fetch("https://api.cloudinary.com/v1_1/dc12fahac/image/upload", {
+        method: "POST",
+        body: data,
+    });
     const result = await res.json();
     return result.secure_url;
-};
+}
 
-// 에디터 레이아웃 패치 CSS (툴바 sticky + 아래만 스크롤)
+// --- Sticky layout CSS (toolbar stays fixed; only editor body scrolls) --------
 const STICKY_CSS = `
 [data-sticky-editor] .toastui-editor-defaultUI{
   height:100% !important; display:flex; flex-direction:column; border:0 !important;
@@ -31,7 +31,7 @@ const STICKY_CSS = `
   position:sticky; top:0; z-index:40; background:inherit; flex:0 0 auto;
 }
 [data-sticky-editor] .toastui-editor-main{
-  flex:1 1 auto !important; min-height:0 !important; overflow:auto !important; /* ← 여기만 스크롤 */
+  flex:1 1 auto !important; min-height:0 !important; overflow:auto !important; /* only this scrolls */
 }
 [data-sticky-editor] .toastui-editor-main-container{
   display:flex !important; height:100% !important; min-height:0 !important;
@@ -40,7 +40,7 @@ const STICKY_CSS = `
 [data-sticky-editor] .toastui-editor-preview.toastui-editor-vertical-style{
   flex:1 1 0% !important; min-width:0 !important; height:auto !important; min-height:100% !important;
 }
-/* 내부 세로 스크롤 제거 (클릭 영역 전체 확보) */
+/* remove inner vertical scroll to maximize click area */
 [data-sticky-editor] .toastui-editor-md-container .CodeMirror{ height:auto !important; }
 [data-sticky-editor] .toastui-editor-md-container .CodeMirror-scroll{
   min-height:100% !important; overflow-y:hidden !important; overflow-x:auto !important;
@@ -48,51 +48,79 @@ const STICKY_CSS = `
 [data-sticky-editor] .toastui-editor-ww-container .ProseMirror{
   height:auto !important; min-height:100% !important; overflow:visible !important;
 }
-/* 탭/모드 스위치 완전 제거(혹시 생겨도) */
+/* remove any tabs/mode switches entirely (safety) */
 [data-sticky-editor] .toastui-editor-tabs,
 [data-sticky-editor] .toastui-editor-mode-switch{
   display:none !important; pointer-events:none !important; width:0 !important; height:0 !important; overflow:hidden !important;
 }
 `;
+const STICKY_STYLE_ID = "toast-sticky-css";
 
-export default function ToastEditor({ initialValue = "", onChange }) {
-    const editorRef = useRef(null);
+// --- Component ----------------------------------------------------------------
+const ToastEditor = forwardRef(function ToastEditor(
+    {
+        initialValue = "",
+        onChange,
+        height = "100%",
+        sticky = true,
+    },
+    ref
+) {
+    const editorEl = useRef(null);
     const instanceRef = useRef(null);
-    const theme = useTheme();
+    const currTheme = useTheme(); // expected 'dark' | 'light'
+
+    // Expose imperative API
+    useImperativeHandle(ref, () => ({
+        getMarkdown: () => instanceRef.current?.getMarkdown?.() ?? "",
+        getHTML: () => instanceRef.current?.getHTML?.() ?? "",
+        setMarkdown: (v) => instanceRef.current?.setMarkdown?.(v ?? "", false),
+        reset: () => instanceRef.current?.setMarkdown?.("", false),
+    }));
 
     useEffect(() => {
-        if (!editorRef.current) return;
+        if (!editorEl.current) return;
 
-        // 0) 마운트 컨테이너에 스코프 속성 + 패치 CSS 1회 주입
-        editorRef.current.setAttribute("data-sticky-editor", "1");
-        if (!document.getElementById("toast-sticky-css")) {
-            const s = document.createElement("style");
-            s.id = "toast-sticky-css";
-            s.textContent = STICKY_CSS;
-            document.head.appendChild(s);
+        // Prepare container & inject sticky CSS once
+        if (sticky) {
+            editorEl.current.setAttribute("data-sticky-editor", "1");
+            if (!document.getElementById(STICKY_STYLE_ID)) {
+                const style = document.createElement("style");
+                style.id = STICKY_STYLE_ID;
+                style.textContent = STICKY_CSS;
+                document.head.appendChild(style);
+            }
         }
 
-        // 1) 컨테이너 잔여 텍스트/노드 제거(유저 콘텐츠 아님)
-        editorRef.current.textContent = "";
-        editorRef.current.innerHTML = "";
+        // Ensure container is empty before mounting the editor
+        editorEl.current.textContent = "";
+        editorEl.current.innerHTML = "";
 
-        const initEditor = async () => {
-            const highlightJs = (await import("highlight.js")).default;
+        (async () => {
+            // dynamic import to keep bundle slim
+            const hljs = (await import("highlight.js")).default;
 
-            // 2) 에디터 생성 (초기값은 그대로 넣음)
             instanceRef.current = new Editor({
-                el: editorRef.current,
-                height: "100%",
+                el: editorEl.current,
+                height,
                 initialEditType: "markdown",
                 previewStyle: "vertical",
-                hideModeSwitch: true,
-                usageStatistics: false,
                 initialValue: typeof initialValue === "string" ? initialValue : "",
-                theme: theme,
+                theme: currTheme === "dark" ? "dark" : undefined,
+                hideModeSwitch: true, // we force vertical layout; tabs removed
+                usageStatistics: false,
                 codeBlockLanguages: ["javascript", "java", "python", "bash", "sql", "json"],
+                plugins: [[codeSyntaxHighlight, { highlighter: hljs }]],
+                toolbarItems: [
+                    ["heading", "bold", "italic", "strike"],
+                    ["hr", "quote"],
+                    ["ul", "ol", "task", "indent", "outdent"],
+                    ["table", "image", "link"],
+                    ["code", "codeblock"],
+                ],
             });
 
-            // 3) initialValue가 비어있을 때만 'Write/Preview' 쓰레기 텍스트 제거
+            // Clean up placeholder like "Write\nPreview" that can appear with empty init
             if (!initialValue) {
                 const md0 = (instanceRef.current.getMarkdown() || "").trim();
                 if (/^(write\s*\n\s*preview|preview\s*\n\s*write)$/i.test(md0)) {
@@ -100,54 +128,61 @@ export default function ToastEditor({ initialValue = "", onChange }) {
                 }
             }
 
-            // 4) 탭 DOM이 생겼다면 즉시 제거(안전망으로 여러 번 시도)
+            // Remove tabs/mode-switch if any (belt & suspenders)
             const killTabs = () => {
-                editorRef.current
+                editorEl.current
                     ?.querySelectorAll(".toastui-editor-tabs, .toastui-editor-mode-switch")
                     ?.forEach((el) => el.remove());
             };
             killTabs();
             requestAnimationFrame(killTabs);
             setTimeout(killTabs, 0);
-            setTimeout(killTabs, 100);
+            setTimeout(killTabs, 120);
 
-            // 5) highlight.js 적용
+            // Manual highlight for preview pane as a fallback (plugin should handle code blocks)
             const applyHL = () => {
-                editorRef.current?.querySelectorAll("pre code")?.forEach((block) => {
-                    highlightJs.highlightElement(block);
+                editorEl.current?.querySelectorAll("pre code")?.forEach((block) => {
+                    try { hljs.highlightElement(block); } catch {}
                 });
             };
-            applyHL();
+
+            // Change handler → bubble markdown + keep highlighting fresh
             instanceRef.current.on("change", () => {
                 onChange?.(instanceRef.current.getMarkdown());
                 applyHL();
             });
 
-            // 6) 이미지 업로드 hook
-            instanceRef.current.addHook("addImageBlobHook", async (blob) => {
+            // Image upload via official callback signature (works in WYSIWYG + MD)
+            instanceRef.current.addHook("addImageBlobHook", async (blob, callback) => {
                 try {
                     const url = await handleUpload(blob);
-                    instanceRef.current.insertText(`![image](${url})`);
+                    callback(url, blob?.name || "image");
                 } catch (e) {
-                    console.error("이미지 업로드 실패:", e);
+                    console.error("Image upload failed:", e);
                 }
             });
+        })();
+
+        return () => {
+            try { instanceRef.current?.destroy(); } catch {}
+            instanceRef.current = null;
         };
+    }, []); // mount once
 
-        initEditor();
-
-        return () => instanceRef.current?.destroy();
-    }, []); // mount only
-
-    // 외부에서 initialValue가 "진짜로 바뀐" 경우만 반영(덮어쓰기 방지)
+    // Sync external initialValue only when it really changes to avoid clobbering edits
     useEffect(() => {
         if (!instanceRef.current) return;
         if (typeof initialValue !== "string") return;
         const curr = instanceRef.current.getMarkdown();
-        if (initialValue && initialValue !== curr) {
+        if (initialValue !== curr) {
             instanceRef.current.setMarkdown(initialValue, false);
         }
     }, [initialValue]);
 
-    return <div ref={editorRef} />;
-}
+    // Respond to theme changes live (optional; re-theming requires full remount in TUI)
+    // If live switching is needed, callers can key the component by theme.
+
+    return <div ref={editorEl} />;
+});
+
+export default ToastEditor;
