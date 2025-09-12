@@ -13,16 +13,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-
 export async function requestFCMToken() {
     if (typeof window === "undefined") return null;
 
     try {
-        const { getMessaging, getToken } = await import("firebase/messaging");
+        const { getMessaging, getToken } = await import("firebase/messaging/sw");
+
         const messaging = getMessaging(app);
 
         const token = await getToken(messaging, {
-            vapidKey: "BLQ2UAfCF3FZRkouiNSd2na7cpbc24Tov1NZjf5UIALy6SbmkkewZ5QpShHtaXmGe2FjiA4Ouq-H1Umsq2L10_8",
+            vapidKey: "BLQ2U...",
         });
 
         console.log("✅ FCM Token:", token);
@@ -67,7 +67,7 @@ export async function saveFcmTokenToServer() {
 
     const accessToken = localStorage.getItem("accessToken"); // JWT
 
-    const res = await fetch("http://localhost:8080/api/DiFF/member/saveFcmToken", {
+    const res = await fetch("http://44.206.130.144:8080/api/DiFF/member/saveFcmToken", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

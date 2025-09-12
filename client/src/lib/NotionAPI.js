@@ -1,11 +1,12 @@
 import axios from "axios";
 
+/** EC2 배포 서버 주소 */
+const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+
 /** axios custom **/
 export const NotionAPI = axios.create({
-    baseURL: "http://localhost:8080",
-    headers: {
-        "Content-Type": "application/json"
-    }
+    baseURL: BACKEND,
+    headers: { "Content-Type": "application/json" },
 });
 
 NotionAPI.interceptors.request.use(
@@ -49,7 +50,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await axios.get(`http://localhost:8080/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`http://44.206.130.144:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;
@@ -80,7 +81,7 @@ NotionAPI.interceptors.response.use(
 
 export const saveInquiry = async (inquiry) => {
     const response = await NotionAPI.post(
-        '/api/DiFF/notionInquiry/saveInquiry',
+        '/notionInquiry/saveInquiry',
         inquiry
     );
     return response.data;
@@ -88,7 +89,7 @@ export const saveInquiry = async (inquiry) => {
 
 export const saveReport = async (report) => {
     const response = await NotionAPI.post(
-        '/api/DiFF/notionReport/saveReport',
+        '/notionReport/saveReport',
         report
     );
     return response.data;
