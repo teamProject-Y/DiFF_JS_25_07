@@ -2,13 +2,13 @@
 import { initializeApp } from "firebase/app";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBrTgvnzTDErEcUYajR9yX6h8As8F2tT2s",
-    authDomain: "diff-8b0c9.firebaseapp.com",
-    projectId: "diff-8b0c9",
-    storageBucket: "diff-8b0c9.firebasestorage.app",
-    messagingSenderId: "604856083137",
-    appId: "1:604856083137:web:229c1f85d8cbd87daeaa40",
-    measurementId: "G-E6QDLRJE20"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -18,11 +18,10 @@ export async function requestFCMToken() {
 
     try {
         const { getMessaging, getToken } = await import("firebase/messaging/sw");
-
         const messaging = getMessaging(app);
 
         const token = await getToken(messaging, {
-            vapidKey: "BLQ2U...",
+            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
         });
 
         console.log("✅ FCM Token:", token);
@@ -41,12 +40,11 @@ export async function initOnMessageListener() {
         const messaging = getMessaging(app);
 
         onMessage(messaging, (payload) => {
-
             try {
                 const title = payload.data?.title || payload.notification?.title || "알림";
                 const body  = payload.data?.body  || payload.notification?.body  || "내용 없음";
 
-                const notification = new Notification(title, { body });
+                new Notification(title, { body });
             } catch (e) {
                 console.warn("❌ 알림 띄우기 실패:", e.message);
             }
@@ -66,8 +64,9 @@ export async function saveFcmTokenToServer() {
     localStorage.setItem("fcmToken", token);
 
     const accessToken = localStorage.getItem("accessToken"); // JWT
+    const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
 
-    const res = await fetch("http://44.206.130.144:8080/api/DiFF/member/saveFcmToken", {
+    const res = await fetch(`${BACKEND}/member/saveFcmToken`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -76,8 +75,7 @@ export async function saveFcmTokenToServer() {
         body: JSON.stringify({ fcmToken: token }),
     });
 
-    if (res.ok) {
-    } else {
+    if (!res.ok) {
         console.error("❌ 서버 저장 실패:", await res.text());
     }
 }
