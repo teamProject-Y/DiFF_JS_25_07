@@ -71,7 +71,8 @@ export default function AfterMainPage({me, trendingArticles}) {
     };
 
     return (
-        <div className="w-full h-screen overflow-hidden bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">
+        <div className="w-full h-screen overflow-hidden
+                    bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">
             <div className="h-full pb-20">
                 <div className="mx-auto px-32 flex h-full">
                     <main className="flex-1 flex flex-col min-h-0">
@@ -103,7 +104,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                 className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                                 onClick={() => handleArticleClick(article.id)}
                                             >
-                                                <div className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                                <div className="flex h-52 border-b p-4 justify-center items-center transition
+                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                     <div className="h-full w-[70%] pr-8 flex flex-col">
                                                         <div className="text-sm ">
                                                             in Trending · by{" "}

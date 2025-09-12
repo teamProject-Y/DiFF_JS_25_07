@@ -8,9 +8,11 @@ import { updateNotificationSetting } from "@/lib/NotificationAPI";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
-import {oneDark} from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {useDialog} from "@/common/commonLayout";
+import {useTheme} from "@/common/thema";
 
 export default function SettingsTab() {
     return (
@@ -34,12 +36,10 @@ function SettingsPage() {
 
     const [banner, setBanner] = useState(null);
     const [activeMdTab, setActiveMdTab] = useState('write');
-    const [confirmOpen, setConfirmOpen] = useState(false);
 
     const [removing, setRemoving] = useState(false);
 
     const fileInputRef = useRef(null);
-    const textareaRef = useRef(null);
     const [editingNick, setEditingNick] = useState(false);
     const nickRef = useRef(null);
 
@@ -73,6 +73,19 @@ function SettingsPage() {
             desc: "When your post is saved as a draft.",
         },
     ];
+
+    const theme = useTheme();
+    const syntaxStyle = useMemo(() => (String(theme).toLowerCase() === "dark" ? oneDark : oneLight), [theme]);
+
+    function normalizeLanguage(lang) {
+        if (!lang) return "text";
+        const m = lang.toLowerCase();
+        if (m === "js" || m === "jsx") return "javascript";
+        if (m === "ts" || m === "tsx") return "typescript";
+        if (m === "sh" || m === "zsh") return "bash";
+        if (m === "c++") return "cpp";
+        return m;
+    }
 
     const handleToggle = async (type) => {
         const newValue = !settings[type];
@@ -560,16 +573,19 @@ function SettingsPage() {
                                     ) : (
                                         <div className="markdown flex-1 rounded-md border border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
                                             <ReactMarkdown
+                                                key={String(theme)}
                                                 remarkPlugins={[remarkGfm]}
                                                 rehypePlugins={[rehypeRaw]}
                                                 components={{
                                                     code({ node, inline, className, children, ...props }) {
                                                         const match = /language-(\w+)/.exec(className || "");
-                                                        return !inline && match ? (
+                                                        const lang = match ? normalizeLanguage(match[1]) : undefined;
+                                                        return !inline && lang ? (
                                                             <SyntaxHighlighter
-                                                                style={oneDark}
+                                                                style={syntaxStyle}
                                                                 language={match[1]}
                                                                 PreTag="div"
+                                                                wrapLongLines
                                                                 {...props}
                                                             >
                                                                 {String(children).replace(/\n$/, "")}
@@ -588,7 +604,7 @@ function SettingsPage() {
                                                     ),
                                                 }}
                                             >
-                                                {member.introduce}
+                                                {form.introduce ?? ""}
                                             </ReactMarkdown>
                                         </div>
                                     )}
@@ -689,18 +705,100 @@ function LinkBtn({label, onClick, disabled, brand}) {
 
 function PageSkeleton() {
     return (
-        <section className="px-4 pb-16">
-            <div className="mx-auto max-w-6xl animate-pulse">
-                <div className="h-9 w-64 bg-neutral-200 dark:bg-neutral-800 rounded mb-6"/>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="space-y-6">
-                        <div className="h-44 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
-                        <div className="h-40 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
-                        <div className="h-24 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
+        <section className="h-screen flex flex-col px-4 overflow-hidden">
+            {/* Top tabs + divider */}
+            <div className="shrink-0">
+                <div className="mx-auto max-w-6xl">
+                    <div className="flex items-center">
+                        <div className="p-4 -mb-px">
+                            <div className="h-6 w-24 rounded bg-neutral-200 dark:bg-neutral-800 animate-pulse" />
+                        </div>
+                        <div className="p-4 -mb-px">
+                            <div className="h-6 w-28 rounded bg-neutral-200 dark:bg-neutral-800 animate-pulse" />
+                        </div>
+                        <div className="p-4 -mb-px">
+                            <div className="h-6 w-20 rounded bg-neutral-200 dark:bg-neutral-800 animate-pulse" />
+                        </div>
                     </div>
-                    <div className="space-y-6">
-                        <div className="h-96 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
-                        <div className="h-24 rounded-2xl bg-neutral-200 dark:bg-neutral-800"/>
+                    <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
+                </div>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 min-h-0 overflow-y-auto pt-10">
+                <div className="mx-auto max-w-6xl pb-16">
+                    <div className="flex gap-6 px-2">
+                        {/* LEFT: 고정 폭 컬럼 (아바타/알림/탈퇴) */}
+                        <div className="w-[380px] shrink-0 space-y-4">
+                            {/* Avatar card */}
+                            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 animate-pulse">
+                                <div className="flex items-start gap-4">
+                                    <div className="h-28 w-28 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+                                    <div className="flex-1 space-y-3">
+                                        <div className="h-7 w-56 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                        <div className="h-4 w-40 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                        <div className="flex gap-2 pt-1">
+                                            <div className="h-8 w-24 rounded-lg bg-neutral-200 dark:bg-neutral-800" />
+                                            <div className="h-8 w-24 rounded-lg bg-neutral-200 dark:bg-neutral-800" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Notification settings */}
+                            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 animate-pulse">
+                                <div className="h-5 w-40 rounded bg-neutral-200 dark:bg-neutral-800 mb-3" />
+                                {[...Array(4)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className={`flex items-center justify-between py-3 ${
+                                            i !== 0 ? "border-t border-neutral-200 dark:border-neutral-700" : ""
+                                        }`}
+                                    >
+                                        <div className="space-y-2 pr-4">
+                                            <div className="h-4 w-28 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                            <div className="h-3 w-48 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                        </div>
+                                        <div className="h-8 w-16 rounded border border-neutral-300 dark:border-neutral-700" />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Delete account */}
+                            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 animate-pulse">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-2 pr-4">
+                                        <div className="h-5 w-36 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                        <div className="h-3 w-60 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                    </div>
+                                    <div className="h-8 w-28 rounded border border-neutral-300 dark:border-neutral-700" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT: 가변 컬럼 (README 카드 + 여분 카드) */}
+                        <div className="flex-1 flex flex-col gap-4 min-w-0">
+                            {/* Profile README */}
+                            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 animate-pulse">
+                                <div className="mb-3 flex items-center justify-between">
+                                    <div className="h-7 w-44 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                    <div className="flex items-center overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700">
+                                        <div className="h-7 w-16 bg-neutral-200 dark:bg-neutral-800" />
+                                        <div className="h-7 w-16 bg-neutral-200/80 dark:bg-neutral-800/80" />
+                                    </div>
+                                </div>
+                                <div className="h-[420px] w-full rounded-md bg-neutral-200 dark:bg-neutral-800" />
+                                <div className="mt-3 flex justify-end">
+                                    <div className="h-9 w-20 rounded bg-neutral-200 dark:bg-neutral-800" />
+                                </div>
+                            </div>
+
+                            {/* extra card placeholder */}
+                            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 animate-pulse">
+                                <div className="h-6 w-32 rounded bg-neutral-200 dark:bg-neutral-800 mb-3" />
+                                <div className="h-16 w-full rounded bg-neutral-200 dark:bg-neutral-800" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
