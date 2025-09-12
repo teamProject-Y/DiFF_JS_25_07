@@ -13,6 +13,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@toast-ui/editor": "^3.2.2",
     "@toast-ui/editor-plugin-code-syntax-highlight": "^3.1.0",
+    "@toast-ui/react-editor": "^3.2.3",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "eslint-config-next": "^15.5.2",

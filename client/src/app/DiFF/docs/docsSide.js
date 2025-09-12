@@ -10,6 +10,7 @@ const NAV_ITEMS = [
     { href: `${BASE}/start`,  label: '2. 시작하기' },
     { href: `${BASE}/howto`,  label: '3. 주요 기능 사용법' },
     { href: `${BASE}/option`, label: '4. 옵션' },
+    { href: `${BASE}/analysis`, label: '5. 분석' },
     { href: `${BASE}/display`,label: '5. 화면별 안내' },
     { href: `${BASE}/account`,label: '6. 계정 및 보안' },
     { href: `${BASE}/support`,label: '7. 고객 지원' },

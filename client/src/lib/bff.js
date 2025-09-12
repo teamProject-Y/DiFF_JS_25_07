@@ -1,5 +1,9 @@
 // src/lib/bff.js
-const ORIGIN = process.env.BACKEND_ORIGIN || 'http://44.206.130.144:8080';
+const ORIGIN = process.env.BACKEND_ORIGIN;
+
+if (!ORIGIN) {
+    console.warn("⚠️ BACKEND_ORIGIN 환경변수가 설정되지 않았습니다. 기본값을 사용하세요.");
+}
 
 // 브라우저에서 토큰 가져오기 (cookie > localStorage)
 function getClientToken() {
@@ -24,13 +28,10 @@ export async function bff(path, opts = {}) {
     const h = new Headers(opts.headers);
 
     if (typeof window === 'undefined') {
-        // ✅ 서버(SSR/RSC): 절대 URL로 직접 호출
-        // next/headers는 서버 분기에서만 동적 import
         const { cookies, headers: nextHeaders } = await import('next/headers');
         const cookieStr = cookies().toString();
         if (cookieStr && !h.has('cookie')) h.set('cookie', cookieStr);
 
-        // Authorization 전파 (요 프로젝트 쿠키/헤더 키에 맞춰 자동 탐색)
         const incomingAuth = nextHeaders().get('authorization');
         const cookieAuth =
             cookies().get('Authorization')?.value ||
@@ -61,7 +62,7 @@ export async function bff(path, opts = {}) {
         ...opts,
         headers: h,
         cache: 'no-store',
-        credentials: 'include',   // 프록시 경유 시 쿠키 포함
-        redirect: 'manual',       // ★ 302 자동 추적 금지
+        credentials: 'include',
+        redirect: 'manual',
     });
 }
