@@ -8,7 +8,7 @@ export async function verifyGitUser() {
     const email = await getGitEmail();
 
     if(email === null) {
-        // console.error(chalk.red('Git email not configured.'));
+        console.error(chalk.red('Git email not configured.'));
         return null;
     }
 
@@ -21,11 +21,12 @@ export async function verifyGitUser() {
         if (data.resultCode.startsWith('S-')) {
             return data.data1;
 
-        } else { // 인증 실패
+        } else {
+            console.error(chalk.red('Failed to verify git user.'));
             return null;
         }
     } catch (err) {
-        // console.error(chalk.red('error:'), err.message);
+        console.error(chalk.red('error:'), err.message);
         return null;
     }
 }

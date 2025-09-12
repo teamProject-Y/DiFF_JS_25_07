@@ -17,15 +17,12 @@ export async function requestFCMToken() {
     if (typeof window === "undefined") return null;
 
     try {
-        const { getMessaging, getToken } = await import("firebase/messaging/sw");
-
+        const { getMessaging, getToken } = await import("firebase/messaging");
         const messaging = getMessaging(app);
 
         const token = await getToken(messaging, {
-            vapidKey: "BLQ2U...",
+            vapidKey: "BLQ2UAfCF3FZRkouiNSd2na7cpbc24Tov1NZjf5UIALy6SbmkkewZ5QpShHtaXmGe2FjiA4Ouq-H1Umsq2L10_8",
         });
-
-        console.log("✅ FCM Token:", token);
         return token;
     } catch (err) {
         console.error("❌ FCM 토큰 발급 실패:", err);
@@ -41,12 +38,11 @@ export async function initOnMessageListener() {
         const messaging = getMessaging(app);
 
         onMessage(messaging, (payload) => {
-
             try {
                 const title = payload.data?.title || payload.notification?.title || "알림";
                 const body  = payload.data?.body  || payload.notification?.body  || "내용 없음";
 
-                const notification = new Notification(title, { body });
+                new Notification(title, { body });
             } catch (e) {
                 console.warn("❌ 알림 띄우기 실패:", e.message);
             }
@@ -66,8 +62,9 @@ export async function saveFcmTokenToServer() {
     localStorage.setItem("fcmToken", token);
 
     const accessToken = localStorage.getItem("accessToken"); // JWT
+    const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
 
-    const res = await fetch("http://44.206.130.144:8080/api/DiFF/member/saveFcmToken", {
+    const res = await fetch(`${BACKEND}/member/saveFcmToken`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -76,8 +73,7 @@ export async function saveFcmTokenToServer() {
         body: JSON.stringify({ fcmToken: token }),
     });
 
-    if (res.ok) {
-    } else {
+    if (!res.ok) {
         console.error("❌ 서버 저장 실패:", await res.text());
     }
 }

@@ -77,6 +77,11 @@ export default function BeforeExplain() {
                 el.style.opacity = on ? '1' : '0';
                 el.style.transform = on ? 'translateY(0px)' : 'translateY(-15px)';
                 el.style.transition = 'opacity 300ms ease, transform 300ms ease';
+
+                el.classList.toggle('pointer-events-auto', on);
+                el.classList.toggle('pointer-events-none', !on);
+
+                el.setAttribute('aria-hidden', on ? 'false' : 'true');
             });
         };
 
@@ -160,15 +165,15 @@ export default function BeforeExplain() {
                         {/* STEP 1 */}
                         <div
                             ref={right1Ref}
-                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)] pointer-events-none"
                             aria-hidden="true"
                         >
-                            {/* 🔤 섹션 헤드라인: 30px~84px 유동 */}
+
                             <h2 className="font-semibold tracking-tight leading-[1.0] text-[clamp(30px,7.2vw,84px)]">
                                 <span className="block break-keep whitespace-normal md:whitespace-nowrap"># 숨쉬기보다 쉬운</span>
                                 <span className="block break-keep whitespace-normal md:whitespace-nowrap">&nbsp;블로그 쓰기</span>
                             </h2>
-                            {/* 🔤 본문: 14px~24px 유동 */}
+
                             <p className="leading-tight text-[clamp(14px,2.1vw,24px)] mt-6">
                                 CLI 한 줄, 커밋 하나로 블로그 초안이 완성.
                             </p>
@@ -176,7 +181,7 @@ export default function BeforeExplain() {
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-5 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-gray-50"
+                                    className="mt-5 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-blue-100"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
@@ -187,7 +192,7 @@ export default function BeforeExplain() {
                         {/* STEP 2 */}
                         <div
                             ref={right2Ref}
-                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)] pointer-events-none"
                             aria-hidden="true"
                         >
                             <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(30px,7.2vw,84px)]">
@@ -201,7 +206,7 @@ export default function BeforeExplain() {
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-gray-50"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-blue-100"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
@@ -212,7 +217,7 @@ export default function BeforeExplain() {
                         {/* STEP 3 */}
                         <div
                             ref={right3Ref}
-                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)]"
+                            className="absolute top-52 right-2 text-right z-20 opacity-0 w-[min(52vw,980px)] pointer-events-none"
                             aria-hidden="true"
                         >
                             <h2 className="font-semibold tracking-tight leading-[1.1] text-[clamp(30px,7.2vw,84px)]">
@@ -226,7 +231,7 @@ export default function BeforeExplain() {
                             <div className="flex justify-end">
                                 <Link
                                     href="/DiFF/docs/intro"
-                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-gray-50"
+                                    className="mt-4 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-blue-100"
                                     role="button"
                                 >
                                     more <span className="ml-1">+</span>
