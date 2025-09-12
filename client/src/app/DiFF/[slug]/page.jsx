@@ -8,7 +8,7 @@ export default async function Page({ params }) {
     const { slug } = params
 
     const map = {
-        myProfile:  '/DiFF/member/myProfile',
+        myProfile:  '/DiFF/member/profile',
         repository: '/DiFF/member/repository',
         settings:   '/DiFF/member/settings',
     }
