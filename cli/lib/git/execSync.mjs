@@ -120,7 +120,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             lastChecksum,
         }));
 
-        await axios.post('http://13.124.33.233:8080/upload', form, {
+        await axios.post('http://44.206.130.144:8080/upload', form, {
             headers: form.getHeaders(),
         });
 

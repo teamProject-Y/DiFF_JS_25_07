@@ -1,4 +1,3 @@
-
 const BACKEND = process.env.NEXT_PUBLIC_HOMEPAGE_URL || 'http://localhost:8080';
 
 module.exports = {
@@ -24,7 +23,7 @@ module.exports = {
             },
             // 메인 페이지를 바로 열고 싶으면
             {
-                source: '/home',          // /home → /home/main
+                source: '/home',
                 destination: '/DiFF/home/main',
                 permanent: false,
             },

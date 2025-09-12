@@ -1,5 +1,5 @@
 // src/lib/bff.js
-const ORIGIN = process.env.BACKEND_ORIGIN || 'http://13.124.33.233:8080';
+const ORIGIN = process.env.BACKEND_ORIGIN || 'http://44.206.130.144:8080';
 
 // 브라우저에서 토큰 가져오기 (cookie > localStorage)
 function getClientToken() {
