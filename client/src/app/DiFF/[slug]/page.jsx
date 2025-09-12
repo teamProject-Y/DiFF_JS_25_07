@@ -11,6 +11,7 @@ export default async function Page({ params }) {
         myProfile:  '/DiFF/member/myProfile',
         repository: '/DiFF/member/repository',
         settings:   '/DiFF/member/settings',
+
     }
     const apiPath = map[slug] ?? `/DiFF/home/${slug}`
 
