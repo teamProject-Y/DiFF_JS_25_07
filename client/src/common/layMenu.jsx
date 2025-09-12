@@ -15,7 +15,6 @@ export default function LayMenu() {
     useEffect(() => {
         getFollowingList()
             .then((res) => {
-                console.log("팔로잉 API 응답:", res);
                 setFollowing(res.data1 || []);
             })
             .catch((err) => {

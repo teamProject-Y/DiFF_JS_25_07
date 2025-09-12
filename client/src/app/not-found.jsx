@@ -14,10 +14,10 @@ export default function NotFound() {
         const prevBg = main.style.backgroundColor;
         const prevScheme = main.style.colorScheme;
 
-        main.classList.add('dark');              // Tailwind dark: 변형
-        main.setAttribute('data-theme', 'dark'); // DaisyUI 토큰
-        main.style.backgroundColor = '#0b0b0b';  // 배경 톤
-        main.style.colorScheme = 'dark';         // 스크롤바/폼 컨트롤 다크 힌트
+        main.classList.add('dark');
+        main.setAttribute('data-theme', 'dark');
+        main.style.backgroundColor = '#0b0b0b';
+        main.style.colorScheme = 'dark';
 
         return () => {
             if (!hadDark) main.classList.remove('dark');

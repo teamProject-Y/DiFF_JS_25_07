@@ -2,13 +2,13 @@
 import { initializeApp } from "firebase/app";
 
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+    apiKey: "AIzaSyBrTgvnzTDErEcUYajR9yX6h8As8F2tT2s",
+    authDomain: "diff-8b0c9.firebaseapp.com",
+    projectId: "diff-8b0c9",
+    storageBucket: "diff-8b0c9.firebasestorage.app",
+    messagingSenderId: "604856083137",
+    appId: "1:604856083137:web:229c1f85d8cbd87daeaa40",
+    measurementId: "G-E6QDLRJE20"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -17,14 +17,12 @@ export async function requestFCMToken() {
     if (typeof window === "undefined") return null;
 
     try {
-        const { getMessaging, getToken } = await import("firebase/messaging/sw");
+        const { getMessaging, getToken } = await import("firebase/messaging");
         const messaging = getMessaging(app);
 
         const token = await getToken(messaging, {
-            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+            vapidKey: "BLQ2UAfCF3FZRkouiNSd2na7cpbc24Tov1NZjf5UIALy6SbmkkewZ5QpShHtaXmGe2FjiA4Ouq-H1Umsq2L10_8",
         });
-
-        console.log("✅ FCM Token:", token);
         return token;
     } catch (err) {
         console.error("❌ FCM 토큰 발급 실패:", err);
