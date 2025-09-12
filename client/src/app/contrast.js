@@ -18,13 +18,11 @@ function toRGB(color) {
             const r = parseInt(hex.slice(0, 2), 16);
             const g = parseInt(hex.slice(2, 4), 16);
             const b = parseInt(hex.slice(4, 6), 16);
-            // 알파(hex 8자리)는 무시(불투명 배경 가정). 필요하면 합성 로직 추가.
             return [r, g, b];
         }
         return null;
     }
 
-    // rgb / rgba
     const m = c.match(/rgba?\s*\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)(?:\s*,\s*([0-9.]+))?\s*\)/i);
     if (m) {
         const r = Math.min(255, parseFloat(m[1]));
@@ -33,7 +31,7 @@ function toRGB(color) {
         return [r, g, b];
     }
 
-    return null; // 다른 형식은 지원 X (hsl, color name 등)
+    return null;
 }
 
 function luminanceFromRGB([r, g, b]) {

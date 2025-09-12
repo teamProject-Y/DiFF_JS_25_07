@@ -39,7 +39,6 @@ export async function getLastChecksum(branch) {
 export async function DiFFinit(memberId, branch) {
 
     const q = await getResponse();
-    console.log(' Your repository isn\'t connected.');
 
     // repository 이름 입력, 중복 확인
     let repoName = await q.ask(' Please enter your new DiFF repository name: ');
