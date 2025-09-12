@@ -8,7 +8,7 @@ import axios from "axios";
 
 import {sendDiFF} from "../api/api.mjs";
 import {appendMeta} from "./init.mjs";
-
+const BASE_URL = process.env.BACKEND_URL;
 // mkDraft 함수
 export async function mkDraft(memberId, branch, draftId, diffId) {
 
@@ -42,10 +42,7 @@ export async function createDraft(memberId, repositoryId) {
             isPublic: true,
         };
 
-        const { data } = await axios.post(
-            "http://44.206.130.144:8080/api/DiFF/draft/mkDraft",
-            payload
-        );
+        const { data } = await axios.post(`${BASE_URL}/draft/mkDraft`, payload);
 
         if (data.resultCode?.startsWith("S-")) {
             const { draftId, diffId } = data.data1;
