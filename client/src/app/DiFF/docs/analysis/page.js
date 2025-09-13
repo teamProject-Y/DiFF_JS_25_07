@@ -1,6 +1,6 @@
 import DocsSidebar from "../docsSide";
+import DocsViewer from "../docsViewer";
 import { ChevronRight } from "lucide-react";
-import DocsViewer from "../DocsViewer";
 
 export const metadata = { title: "DiFF Docs — 5. 분석" };
 
@@ -23,8 +23,8 @@ export default function AnalysisPage() {
 - **Complexity (복잡도)**: 함수/메서드의 순환 복잡도  
 - **Duplicated Lines Density (중복 코드 비율)**: 전체 코드에서 중복된 라인의 비율  
 
-각 지표는 A~E 등급으로 환산된 뒤 점수화되어 평균이 산출되며,  
-최종적으로 프로젝트의 총합 품질 등급이 전체, 최근, 게시물별로 표시된다.  
+    각 지표는 A~E 등급으로 환산된 뒤 점수화되어 평균이 산출되며,  
+    최종적으로 프로젝트의 총합 품질 등급이 전체, 최근, 게시물별로 표시된다.  
 
 3. **분석 언어**  
 DiFF는 현재 다음 언어들을 지원한다.  
@@ -34,21 +34,22 @@ C언어 계열은 지원하지 않는다.
 
     return (
         <div className="min-h-screen dark:text-neutral-300">
-            <div className="max-w-7xl px-8 flex">
+            <div className="px-8 flex">
                 {/* 사이드바 */}
                 <div className="w-1/5">
                     <DocsSidebar activeKey="/DiFF/docs/analysis" />
                 </div>
 
                 {/* 메인 컨텐츠 */}
-                <main className="w-3/4 p-10">
+                <main className="flex-1 flex flex-col py-20 items-center
+                max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
                     {/* Toast UI Viewer */}
-                    <div className="toast-viewer dark:text-neutral-300">
+                    <div className="toast-viewer">
                         <DocsViewer content={docContent} />
                     </div>
 
                     {/* 네비게이션 */}
-                    <div className="docsNavi mt-8">
+                    <div className="docsNavi mt-8 w-full">
                         <a href="../docs/account">
                             <ChevronRight className="w-5 h-5 inline-block" /> 이전글: 6. 계정 및 보안
                         </a>
