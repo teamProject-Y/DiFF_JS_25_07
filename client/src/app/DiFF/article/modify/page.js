@@ -183,7 +183,7 @@ function ModifyArticlePageInner() {
                     </div>
                 )}
 
-                <div className="flex-1 overflow-auto pb-20">
+                <div className="flex-1 overflow-auto">
                     <div className="h-full w-full">
                         <ToastEditor key={id} initialValue={body} onChange={setBody} height="100%" />
                     </div>

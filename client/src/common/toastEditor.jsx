@@ -1,28 +1,28 @@
 "use client";
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+
+import React, { useEffect, useRef } from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
 import "highlight.js/styles/atom-one-dark.css";
-import codeSyntaxHighlight from "@toast-ui/editor-plugin-code-syntax-highlight";
 import { useTheme } from "@/common/thema";
 
-// --- Cloudinary upload helper -------------------------------------------------
-async function handleUpload(file) {
+// 이미지 업로드 (Cloudinary)
+const handleUpload = async (file) => {
     const data = new FormData();
     data.append("file", file);
     data.append("upload_preset", "teamproject_Y");
     data.append("cloud_name", "dc12fahac");
 
-    const res = await fetch("https://api.cloudinary.com/v1_1/dc12fahac/image/upload", {
-        method: "POST",
-        body: data,
-    });
+    const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dc12fahac/image/upload",
+        { method: "POST", body: data }
+    );
     const result = await res.json();
     return result.secure_url;
-}
+};
 
-// --- Sticky layout CSS (toolbar stays fixed; only editor body scrolls) --------
+// 에디터 레이아웃 패치 CSS
 const STICKY_CSS = `
 [data-sticky-editor] .toastui-editor-defaultUI{
   height:100% !important; display:flex; flex-direction:column; border:0 !important;
@@ -31,7 +31,7 @@ const STICKY_CSS = `
   position:sticky; top:0; z-index:40; background:inherit; flex:0 0 auto;
 }
 [data-sticky-editor] .toastui-editor-main{
-  flex:1 1 auto !important; min-height:0 !important; overflow:auto !important; /* only this scrolls */
+  flex:1 1 auto !important; min-height:0 !important; overflow:auto !important; /* ← 여기만 스크롤 */
 }
 [data-sticky-editor] .toastui-editor-main-container{
   display:flex !important; height:100% !important; min-height:0 !important;
@@ -40,7 +40,7 @@ const STICKY_CSS = `
 [data-sticky-editor] .toastui-editor-preview.toastui-editor-vertical-style{
   flex:1 1 0% !important; min-width:0 !important; height:auto !important; min-height:100% !important;
 }
-/* remove inner vertical scroll to maximize click area */
+/* 내부 세로 스크롤 제거 (클릭 영역 전체 확보) */
 [data-sticky-editor] .toastui-editor-md-container .CodeMirror{ height:auto !important; }
 [data-sticky-editor] .toastui-editor-md-container .CodeMirror-scroll{
   min-height:100% !important; overflow-y:hidden !important; overflow-x:auto !important;
@@ -48,79 +48,47 @@ const STICKY_CSS = `
 [data-sticky-editor] .toastui-editor-ww-container .ProseMirror{
   height:auto !important; min-height:100% !important; overflow:visible !important;
 }
-/* remove any tabs/mode switches entirely (safety) */
+/* 탭/모드 스위치 완전 제거(혹시 생겨도) */
 [data-sticky-editor] .toastui-editor-tabs,
 [data-sticky-editor] .toastui-editor-mode-switch{
   display:none !important; pointer-events:none !important; width:0 !important; height:0 !important; overflow:hidden !important;
 }
 `;
-const STICKY_STYLE_ID = "toast-sticky-css";
 
-// --- Component ----------------------------------------------------------------
-const ToastEditor = forwardRef(function ToastEditor(
-    {
-        initialValue = "",
-        onChange,
-        height = "100%",
-        sticky = true,
-    },
-    ref
-) {
-    const editorEl = useRef(null);
+export default function ToastEditor({ initialValue = "", onChange }) {
+    const editorRef = useRef(null);
     const instanceRef = useRef(null);
-    const currTheme = useTheme(); // expected 'dark' | 'light'
-
-    // Expose imperative API
-    useImperativeHandle(ref, () => ({
-        getMarkdown: () => instanceRef.current?.getMarkdown?.() ?? "",
-        getHTML: () => instanceRef.current?.getHTML?.() ?? "",
-        setMarkdown: (v) => instanceRef.current?.setMarkdown?.(v ?? "", false),
-        reset: () => instanceRef.current?.setMarkdown?.("", false),
-    }));
+    const theme = useTheme();
 
     useEffect(() => {
-        if (!editorEl.current) return;
+        if (!editorRef.current) return;
 
-        // Prepare container & inject sticky CSS once
-        if (sticky) {
-            editorEl.current.setAttribute("data-sticky-editor", "1");
-            if (!document.getElementById(STICKY_STYLE_ID)) {
-                const style = document.createElement("style");
-                style.id = STICKY_STYLE_ID;
-                style.textContent = STICKY_CSS;
-                document.head.appendChild(style);
-            }
+        editorRef.current.setAttribute("data-sticky-editor", "1");
+        if (!document.getElementById("toast-sticky-css")) {
+            const s = document.createElement("style");
+            s.id = "toast-sticky-css";
+            s.textContent = STICKY_CSS;
+            document.head.appendChild(s);
         }
 
-        // Ensure container is empty before mounting the editor
-        editorEl.current.textContent = "";
-        editorEl.current.innerHTML = "";
+        editorRef.current.textContent = "";
+        editorRef.current.innerHTML = "";
 
-        (async () => {
-            // dynamic import to keep bundle slim
-            const hljs = (await import("highlight.js")).default;
+        const initEditor = async () => {
+            const highlightJs = (await import("highlight.js")).default;
 
             instanceRef.current = new Editor({
-                el: editorEl.current,
-                height,
+                el: editorRef.current,
+                height: "100%",
                 initialEditType: "markdown",
                 previewStyle: "vertical",
-                initialValue: typeof initialValue === "string" ? initialValue : "",
-                theme: currTheme === "dark" ? "dark" : undefined,
-                hideModeSwitch: true, // we force vertical layout; tabs removed
+                hideModeSwitch: true,
                 usageStatistics: false,
+                initialValue: typeof initialValue === "string" ? initialValue : "",
+                theme: theme,
                 codeBlockLanguages: ["javascript", "java", "python", "bash", "sql", "json"],
-                plugins: [[codeSyntaxHighlight, { highlighter: hljs }]],
-                toolbarItems: [
-                    ["heading", "bold", "italic", "strike"],
-                    ["hr", "quote"],
-                    ["ul", "ol", "task", "indent", "outdent"],
-                    ["table", "image", "link"],
-                    ["code", "codeblock"],
-                ],
             });
 
-            // Clean up placeholder like "Write\nPreview" that can appear with empty init
             if (!initialValue) {
                 const md0 = (instanceRef.current.getMarkdown() || "").trim();
                 if (/^(write\s*\n\s*preview|preview\s*\n\s*write)$/i.test(md0)) {
@@ -128,61 +96,50 @@ const ToastEditor = forwardRef(function ToastEditor(
                 }
             }
 
-            // Remove tabs/mode-switch if any (belt & suspenders)
             const killTabs = () => {
-                editorEl.current
+                editorRef.current
                     ?.querySelectorAll(".toastui-editor-tabs, .toastui-editor-mode-switch")
                     ?.forEach((el) => el.remove());
             };
             killTabs();
             requestAnimationFrame(killTabs);
             setTimeout(killTabs, 0);
-            setTimeout(killTabs, 120);
+            setTimeout(killTabs, 100);
 
-            // Manual highlight for preview pane as a fallback (plugin should handle code blocks)
             const applyHL = () => {
-                editorEl.current?.querySelectorAll("pre code")?.forEach((block) => {
-                    try { hljs.highlightElement(block); } catch {}
+                editorRef.current?.querySelectorAll("pre code")?.forEach((block) => {
+                    highlightJs.highlightElement(block);
                 });
             };
-
-            // Change handler → bubble markdown + keep highlighting fresh
+            applyHL();
             instanceRef.current.on("change", () => {
                 onChange?.(instanceRef.current.getMarkdown());
                 applyHL();
             });
 
-            // Image upload via official callback signature (works in WYSIWYG + MD)
-            instanceRef.current.addHook("addImageBlobHook", async (blob, callback) => {
+            instanceRef.current.addHook("addImageBlobHook", async (blob) => {
                 try {
                     const url = await handleUpload(blob);
-                    callback(url, blob?.name || "image");
+                    instanceRef.current.insertText(`![image](${url})`);
                 } catch (e) {
-                    console.error("Image upload failed:", e);
+                    console.error("이미지 업로드 실패:", e);
                 }
             });
-        })();
-
-        return () => {
-            try { instanceRef.current?.destroy(); } catch {}
-            instanceRef.current = null;
         };
-    }, []); // mount once
 
-    // Sync external initialValue only when it really changes to avoid clobbering edits
+        initEditor();
+
+        return () => instanceRef.current?.destroy();
+    }, []); // mount only
+
     useEffect(() => {
         if (!instanceRef.current) return;
         if (typeof initialValue !== "string") return;
         const curr = instanceRef.current.getMarkdown();
-        if (initialValue !== curr) {
+        if (initialValue && initialValue !== curr) {
             instanceRef.current.setMarkdown(initialValue, false);
         }
     }, [initialValue]);
 
-    // Respond to theme changes live (optional; re-theming requires full remount in TUI)
-    // If live switching is needed, callers can key the component by theme.
-
-    return <div ref={editorEl} />;
-});
-
-export default ToastEditor;
+    return <div ref={editorRef} />;
+}
