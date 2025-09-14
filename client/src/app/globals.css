@@ -462,6 +462,12 @@ li {
 }
 
 /* 제목 */
+.toast-viewer .toastui-editor-contents h1,
+.toast-viewer .toastui-editor-contents h2,
+.toast-viewer .toastui-editor-contents h3 {
+    border-bottom: none !important; /* 밑줄 제거 */
+}
+
 .toast-viewer .toastui-editor-contents h1 {
     @apply text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-neutral-300;
 }
@@ -473,6 +479,7 @@ li {
 .toast-viewer .toastui-editor-contents h3 {
     @apply text-lg font-medium mt-4 mb-2 text-gray-900 dark:text-white;
 }
+
 
 /* 문단 */
 .toast-viewer .toastui-editor-contents p {
