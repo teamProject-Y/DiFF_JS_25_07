@@ -4,7 +4,6 @@ import DocsViewer from "@/app/DiFF/docs/docsViewer";
 
 export const metadata = { title: 'DiFF Docs — 3. 사용법' };
 
-<<<<<<< HEAD
 export default function howToPage() {
 
     const docContent = `
@@ -133,12 +132,6 @@ npx git-mkdraft --no-analysis
 - 현재 **GitHub만 지원**.  
 - 같은 커밋(또는 같은 범위) 기준이면 **UI/CLI 결과는 동일**하다.
 <br>
-=======
-export default function StartPage() {
-
-    const docContent = `
-# 어뜨케
->>>>>>> main
 `;
 
     return (
