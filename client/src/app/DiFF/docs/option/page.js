@@ -6,8 +6,7 @@ export const metadata = { title: 'DiFF Docs — 4. 옵션' };
 
 export default function StartPage() {
     const docContent = `
-# 4. 옵션
-아 이거 합칠까
+# 이 페이지 없앨 것
 `;
 
     return (
