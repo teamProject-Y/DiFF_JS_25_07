@@ -19,6 +19,7 @@
     "firebase": "^12.2.1",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
+    "lucide-react": "^0.544.0",
     "next": "^15.5.2",
     "next-auth": "^4.24.11",
     "react": "^19.1.1",
@@ -26,6 +27,7 @@
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
     "react-simple-typewriter": "^5.0.1",
+    "react-syntax-highlighter": "^15.6.6",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "remove-markdown": "^0.6.2",
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@flydotio/dockerfile": "^0.7.10",
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@tailwindcss/postcss": "^4.1.11",
     "autoprefixer": "^10.4.21",
