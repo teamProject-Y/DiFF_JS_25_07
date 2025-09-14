@@ -183,7 +183,7 @@ function ModifyArticlePageInner() {
                     </div>
                 )}
 
-                <div className="flex-1 overflow-auto pb-20">
+                <div className="flex-1 overflow-auto">
                     <div className="h-full w-full">
                         <ToastEditor key={id} initialValue={body} onChange={setBody} height="100%" />
                     </div>
@@ -209,79 +209,62 @@ function ModifyArticlePageInner() {
                 </div>
             </form>
 
-            {/* Global tiny CSS to make ToastUI fill its container, keep it borderless for full-bleed feel */}
             <style jsx global>{`
-                /* Toast UI Editor: fill parent and scroll INSIDE */
-                .toastui-editor-defaultUI,
-                .toastui-editor-main,
-                .toastui-editor-ww-container .ProseMirror,
-                .toastui-editor-md-container .CodeMirror,
-                .toastui-editor-md-container .CodeMirror-scroll {
-                    background-color: ${bg};
-                }
-
+                /* ---- Frame: editor full height + sticky toolbar ---- */
                 .toastui-editor-defaultUI {
                     height: 100% !important;
-                    border: 0 !important;
                     display: flex;
                     flex-direction: column;
-
+                    border: 0 !important;
                 }
-
                 .toastui-editor-toolbar {
+                    position: sticky;
+                    top: 0;
+                    z-index: 30;
                     flex: 0 0 auto;
+                    background: inherit;
                 }
 
+                /* ---- Main takes the scroll (ONLY here) ---- */
                 .toastui-editor-main {
-                    flex: 1 1 0% !important;
+                    flex: 1 1 auto !important;
                     min-height: 0 !important;
-                    height: auto !important;
+                    overflow: auto !important;   /* ← 여기만 스크롤 */
                 }
 
-                /* both WYSIWYG and Markdown containers fill */
-                .toastui-editor-md-container,
-                .toastui-editor-ww-container {
-                    height: 100% !important;
-                    min-height: 0 !important;
-                }
-
-                /* WYSIWYG scroll */
-                .toastui-editor-ww-container .ProseMirror {
-                    height: 100% !important;
-                    overflow: auto !important;
-                    box-sizing: border-box;
-                }
-
-                /* Markdown scroll */
-                .toastui-editor-md-container .CodeMirror,
-                .toastui-editor-md-container .CodeMirror-scroll {
-                    height: 100% !important;
-                }
-
-                .toastui-editor-md-container .CodeMirror-scroll {
-                    overflow: auto !important;
-                }
-
+                /* 메인 내부 컨테이너/패널이 메인 높이를 정확히 채우도록 */
                 .toastui-editor-main-container {
+                    display: flex !important;
+                    height: 100% !important;
+                    min-height: 0 !important;
+                }
+                .toastui-editor-md-container.toastui-editor-md-vertical-style,
+                .toastui-editor-preview.toastui-editor-vertical-style {
+                    flex: 1 1 0% !important;
+                    height: 100% !important;
+                    min-height: 0 !important;
+                }
+
+                /* ---- Markdown pane: CodeMirror는 'auto-height', 내부 스크롤 제거 ---- */
+                .toastui-editor-md-container .CodeMirror {
+                    height: auto !important;              /* 내용 길이에 맞춰 늘어남 */
+                }
+                .toastui-editor-md-container .CodeMirror-scroll {
+                    overflow-y: hidden !important;        /* 내부 스크롤 금지 (수직) */
+                    overflow-x: auto !important;          /* 수평 스크롤만 허용 */
+                    min-height: 100% !important;          /* 클릭 영역이 패널 높이만큼 확보 */
+                }
+
+                /* ---- WYSIWYG pane도 내부 스크롤 제거 ---- */
+                .toastui-editor-ww-container .ProseMirror {
+                    height: auto !important;
                     min-height: 100% !important;
+                    overflow: visible !important;
                 }
 
-                .toastui-editor-defaultUI .ProseMirror {
-                    padding: 24px 20px;
-                }
-
-                @media (min-width: 640px) {
-                    .toastui-editor-defaultUI .ProseMirror {
-                        padding: 12px 12px;
-                        min-height: 100% !important;
-                    }
-                }
-
-                @media (min-width: 1024px) {
-                    .toastui-editor-defaultUI .ProseMirror {
-                        padding: 20px 20px;
-                        min-height: 100% !important;
-                    }
+                /* 탭(Write/Preview) 숨김 */
+                .toastui-editor-defaultUI .toastui-editor-tabs {
+                    display: none !important;
                 }
             `}</style>
         </div>

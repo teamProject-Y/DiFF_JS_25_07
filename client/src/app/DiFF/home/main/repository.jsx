@@ -328,7 +328,7 @@ const REPO_INFO = {
             {language: "JavaScript", totalLines: 31230},
             {language: "CSS", totalLines: 7230},
             {language: "HTML", totalLines: 6320},
-            {language: "Shell", totalLines: 3870},
+            {language: "Java", totalLines: 3870},
             {language: "SQL", totalLines: 1060},
         ],
         history: [
