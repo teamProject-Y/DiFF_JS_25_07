@@ -1,49 +1,29 @@
 import DocsSidebar from "@/app/DiFF/docs/docsSide";
 import {ChevronLeft, ChevronRight} from "lucide-react";
+import DocsViewer from "@/app/DiFF/docs/docsViewer";
 
-export const metadata = { title: 'DiFF Docs — 2. 시작' };
+export const metadata = { title: 'DiFF Docs — 2. 시작하기' };
 
 export default function StartPage() {
+    const docContent = `
+# 시작하기
+로그인 하고 회원가입하고
+`;
+
     return (
         <div className="min-h-screen dark:text-neutral-300">
-            <div className="max-w-7xl px-8 flex">
+            <div className="px-8 flex">
+                {/* 사이드바 */}
                 <div className="w-1/5">
-                    <DocsSidebar />
+                    <DocsSidebar activeKey="/DiFF/docs/start" />
                 </div>
-                <main className="prose prose-invert w-3/4 p-10">
-                    <div className="title1">2. 시작하기</div>
-                    <hr/>
-                    <div className="content1">DiFF를 시작하기 위한 절차를 소개합니다. DiFF 사용을 위해 초기 세팅이 필요합니다.</div>
 
-                    <div className="title2">2-1. 회원가입/로그인
-                    </div>
-                    <div className="content1">
-                        DiFF의 메인 페이지에서 회원가입 버튼을 클릭하거나 또는 google, github 사용자라면 간단하게 소셜 회원가입을 할 수 있습니다.
-                        <br/><br/>
-                        DiFF는 토큰을 사용하여 로그인을 유지합니다. DiFF 사이트에 재접속을 해도 다시 로그인할 필요가 없습니다.
-                        <br/><br/>
-                        <a href="../member/join" className="hover:underline">회원가입 <ChevronRight className="w-5 h-5 inline-block mb-1"/></a>
-                    </div>
-                    <div className="title2">2-2. Git 설치</div>
-                    <div className="content1">
-                        DiFF는 코드 변경사항을 Git을 통해 추출하기 때문에 DiFF를 사용하기 위해서는 Git 설치가 필수입니다.
-                        <br/><br/>
-                        아직 Git을 사용해본적 없다면 Git을 사용해 버전을 관리하세요. Git과 함께 DiFF는 사용자의 개발 학습에 큰 도움을 줄 것입니다.
-                        <br/><br/>
-                        <a href="https://git-scm.com/downloads" className="hover:underline">
-                        <img src="https://git-scm.com/images/logos/downloads/Git-Logo-White.png" alt="git logo"
-                             className="w-1/2 mx-auto my-3"/>
-                        Git 설치 <ChevronRight className="w-5 h-5 inline-block mb-1"/></a>
-                    </div>
-                    <div className="title2">2-3. .DiFF 설치</div>
-                    <div className="content1">
-
-                        <br/><br/>
-                    </div>
-                    <div className="title2">2-4. Git 계정 연동하기</div>
-                    <div className="content1">
-
-                        <br/><br/>
+                {/* 메인 컨텐츠 */}
+                <main className="flex-1 flex flex-col py-20 items-center
+                    max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
+                    {/* Toast UI Viewer */}
+                    <div className="toast-viewer">
+                        <DocsViewer content={docContent} />
                     </div>
                     <div className="docsNavi">
                         <a href="../docs/intro" className="flex items-center gap-2"><ChevronLeft className="w-5 h-5"/> 이전글: 1. 소개</a>

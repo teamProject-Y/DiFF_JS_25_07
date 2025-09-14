@@ -310,7 +310,7 @@ function PanelContent({ mode, dir, onToggle }) {
             </div>
 
             {/* Bottom tiny disclaimer + toggle */}
-            <div className="flex items-center justify-between text-xs text-white/60 z-50">
+            <div className="flex items-center justify-between text-white/90 z-50">
                 <span>By continuing, you agree to our Terms & Privacy.</span>
                 <a
                     href="#"

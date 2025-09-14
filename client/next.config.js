@@ -1,5 +1,4 @@
-const u = (process.env.NEXT_PUBLIC_BACKEND || '').trim();
-const BACKEND = u ? u : 'http://localhost:8080';
+const BACKEND = process.env.NEXT_PUBLIC_HOMEPAGE_URL || 'http://localhost:8080';
 
 module.exports = {
     // 브라우저 URL 자체를 바꿀 필요가 있을 때 redirects 사용
@@ -24,7 +23,7 @@ module.exports = {
             },
             // 메인 페이지를 바로 열고 싶으면
             {
-                source: '/home',          // /home → /home/main
+                source: '/home',
                 destination: '/DiFF/home/main',
                 permanent: false,
             },

@@ -144,24 +144,26 @@ function ProfileInner() {
             : `/DiFF/member/repository?nickName=${encodeURIComponent(member?.nickName ?? '')}`;
 
     return (
-        <section className="min-h-full px-4 pb-16 dark:text-neutral-300">
-            <div className="mx-auto max-w-6xl">
+        <div className="w-full h-screen overflow-hidden mx-4 dark:text-neutral-300">
+                <div className="h-full">
+                    <div className="mx-auto flex h-full">
+                        <main className="flex-1 flex flex-col min-h-0 max-w-6xl">
 
                 {err && (
                     <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>
                 )}
 
                 {/* Tabs */}
-                <div className="flex items-center text-neutral-500">
+                <div className="bg-white dark:bg-neutral-900 flex items-center text-neutral-500">
                     <TopTab active href="#" label="Profile"/>
                     <TopTab href={`${repoHref}`} label="Repositories"/>
                     <TopTab href="/DiFF/member/settings" label="Settings"
                             visible={isMyProfile}/>
                 </div>
 
-                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700 mb-10"/>
+                <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700"/>
 
-                <div className="flex w-full">
+                <div className="flex w-full overflow-y-auto min-h-0 pt-10">
 
                     <aside className="w-[20%] min-w-[180px] mx-8">
                         <div className="flex flex-col items-start">
@@ -323,14 +325,12 @@ function ProfileInner() {
                     </aside>
 
                     {/* Right */}
-                    <main className="flex-1 ml-8">
+                    <div className="flex-1 ml-8">
                         <section className="mb-8">
                             <span className="text-sm rounded-full py-1 px-3 bg-gray-200 dark:bg-neutral-700 dark:text-neutral-400">
                                 Introduction written by {member.nickName}
                             </span>
-
-
-                            <div className="min-h-[120px] prose dark:prose-invert max-w-none markdown dark:text-neutral-300">
+                            <div className="min-h-[120px] prose dark:prose-invert max-w-none markdown dark:text-neutral-300 mb-20">
                                 {member?.introduce ? (
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
@@ -362,15 +362,17 @@ function ProfileInner() {
                                         }}
                                     >
                                         {member.introduce}
+
                                     </ReactMarkdown>
                                 ) : (
                                     <div className="h-20 w-full mx-10 flex items-center">
                                     No README Yet.
                                     </div>
                                 )}
+                                <div className="h-20 w-full"/>
                             </div>
                         </section>
-                    </main>
+                    </div>
                 </div>
 
                 {/* 목록 모달 */}
@@ -481,8 +483,10 @@ function ProfileInner() {
                         </div>
                     </div>
                 )}
-            </div>
-        </section>
+            </main>
+                    </div>
+                </div>
+        </div>
     );
 }
 

@@ -360,14 +360,12 @@ li {
     font-size: 2rem;
     font-weight: bold;
     margin: 1rem 0;
-    border-bottom: 2px solid #e5e7eb;
     padding-bottom: 0.3rem;
 }
 .markdown h2 {
     font-size: 1.75rem;
     font-weight: bold;
     margin: 1rem 0;
-    border-bottom: 1px solid #e5e7eb;
 }
 .markdown h3 {
     font-size: 1.5rem;
@@ -451,6 +449,69 @@ li {
 .markdown th {
     background-color: #f9fafb;
     font-weight: bold;
+}
+/* ============================
+   Toast UI Viewer Tailwind 스타일 오버라이드
+   ============================ */
+
+/* 기본 본문 스타일 */
+.toast-viewer .toastui-editor-contents,
+.toast-viewer .toastui-editor-contents p,
+.toast-viewer .toastui-editor-contents li {
+    @apply dark:text-neutral-300 text-base leading-relaxed;
+}
+
+/* 제목 */
+.toast-viewer .toastui-editor-contents h1,
+.toast-viewer .toastui-editor-contents h2,
+.toast-viewer .toastui-editor-contents h3 {
+    border-bottom: none !important; /* 밑줄 제거 */
+}
+
+.toast-viewer .toastui-editor-contents h1 {
+    @apply text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-neutral-300;
+}
+
+.toast-viewer .toastui-editor-contents h2 {
+    @apply text-xl font-semibold mt-5 mb-2 text-gray-900 dark:text-neutral-300;
+}
+
+.toast-viewer .toastui-editor-contents h3 {
+    @apply text-lg font-medium mt-4 mb-2 text-gray-900 dark:text-white;
+}
+
+
+/* 문단 */
+.toast-viewer .toastui-editor-contents p {
+    @apply text-base my-2;
+}
+
+/* 리스트 */
+.toast-viewer .toastui-editor-contents ul {
+    @apply list-disc pl-6 my-2;
+}
+
+.toast-viewer .toastui-editor-contents ol {
+    @apply list-decimal pl-6 my-2;
+}
+
+.toast-viewer .toastui-editor-contents li {
+    @apply text-base my-1;
+}
+
+/* 인라인 코드 */
+.toast-viewer .toastui-editor-contents code {
+    @apply bg-gray-100 dark:bg-gray-800 text-red-600 dark:text-red-400 px-1 rounded;
+}
+
+/* 코드 블록 */
+.toast-viewer .toastui-editor-contents pre {
+    @apply bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-neutral-300 p-3 rounded-md overflow-x-auto my-3;
+}
+
+/* 인용구 */
+.toast-viewer .toastui-editor-contents blockquote {
+    @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-neutral-400 my-3;
 }
 
 #pageScroll { touch-action: pan-y; }
