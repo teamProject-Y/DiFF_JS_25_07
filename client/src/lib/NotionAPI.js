@@ -50,7 +50,7 @@ export const setAuthHeader = () => {
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-        const response = await axios.get(`http://44.206.130.144:8080/api/DiFF/auth/refresh`, {
+        const response = await axios.get(`http://13.124.33.233:8080/api/DiFF/auth/refresh`, {
             headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
         });
         const ACCESS_TOKEN = response.data.accessToken;

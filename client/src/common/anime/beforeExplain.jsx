@@ -169,18 +169,18 @@ export default function BeforeExplain() {
                                 <span className="block break-keep whitespace-normal md:whitespace-nowrap">&nbsp;블로그 쓰기</span>
                             </h2>
                             {/* 🔤 본문: 14px~24px 유동 */}
-                            <p className="leading-tight text-[clamp(14px,2.1vw,24px)] mt-6">
+                            <p className="leading-tight text-[clamp(14px,2.1vw,24px)] mt-5">
                                 CLI 한 줄, 커밋 하나로 블로그 초안이 완성.
                             </p>
 
                             <div className="flex justify-end">
-                                <Link
-                                    href="/DiFF/docs/intro"
+                                <button
+                                    type="button"
+                                    onClick={() => "/DiFF/docs/intro"}
                                     className="mt-5 inline-flex items-center px-4 py-2 rounded-full border border-blue-600 text-blue-600 text-[clamp(12px,1.6vw,14px)] hover:bg-gray-50"
-                                    role="button"
                                 >
                                     more <span className="ml-1">+</span>
-                                </Link>
+                                </button>
                             </div>
                         </div>
 
