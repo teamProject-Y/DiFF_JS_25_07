@@ -1,6 +1,6 @@
 import DocsSidebar from "../docsSide";
 import { ChevronRight } from "lucide-react";
-import DocsViewer from "../DocsViewer";
+import DocsViewer from "../docsViewer";
 
 export const metadata = { title: "DiFF Docs — 5. 분석" };
 
