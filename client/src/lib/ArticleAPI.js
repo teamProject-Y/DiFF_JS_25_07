@@ -5,14 +5,14 @@ import { UserAPI } from "@/lib/UserAPI";
 import {ReflectAdapter as RepositoryAPI} from "next/dist/server/web/spec-extension/adapters/reflect";
 
 /** EC2 배포 서버 주소 (api/DiFF 까지 포함) */
-const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+const BACKEND = "https://api.diff.io.kr/api/DiFF";
 
+console.log("🌍 런타임 BACKEND (env):", process.env.NEXT_PUBLIC_API_BASE);
 /** axios custom **/
 export const ArticleAPI = axios.create({
     baseURL: BACKEND,
     headers: { "Content-Type": "application/json" },
 });
-
 ArticleAPI.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
@@ -134,10 +134,11 @@ export const trendingArticle = async ({ count, days }) => {
     const res = await ArticleAPI.get('/article/trending', {
         params: { count, days }
     });
-    console.log("🛰 [trendingArticle] BACKEND:", BACKEND);
-    console.log(res.data);
+    console.log("🛰 [trendingArticle] 요청 URL:", res.config.baseURL + res.config.url);
+    console.log("🛰 [trendingArticle] 응답:", res.data);
     return res.data;
 };
+
 
 /** 글 작성 */
 export const writeArticle = async (data) => {
