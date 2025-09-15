@@ -1,53 +1,41 @@
-const BACKEND = process.env.NEXT_PUBLIC_HOMEPAGE_URL || 'http://localhost:8080';
+// next.config.js
+const BACKEND = 'https://api.diff.io.kr';
+
+// 🔍 빌드 타임 로그 (빌드 중에만 출력됨)
+console.log("🚀 BUILD TIME ENV");
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+console.log("GITHUB_ID:", process.env.GITHUB_ID);
+console.log("GITHUB_SECRET:", process.env.GITHUB_SECRET);
+console.log("NEXT_PUBLIC_HOMEPAGE_URL:", process.env.NEXT_PUBLIC_HOMEPAGE_URL);
+console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+console.log("NEXTAUTH_COOKIE_SECURE:", process.env.NEXTAUTH_COOKIE_SECURE);
+console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
+console.log("NEXT_PUBLIC_API_BASE:", process.env.NEXT_PUBLIC_API_BASE);
+console.log("BACKEND (computed):", BACKEND);
 
 module.exports = {
-    // 브라우저 URL 자체를 바꿀 필요가 있을 때 redirects 사용
+    env: {
+        NEXT_PUBLIC_API_BASE: BACKEND,
+    },
+
     async redirects() {
         return [
-            // 루트 → 메인 페이지
-            {
-                source: '/',
-                destination: '/DiFF/home/main',
-                permanent: false,
-            },
-            // OAuth2 로그인 라우트
-            {
-                source: '/login/github',
-                destination: `${BACKEND}/oauth2/authorization/github`,
-                permanent: false
-            },
-            {
-                source: '/login/google',
-                destination: `${BACKEND}/oauth2/authorization/google`,
-                permanent: false
-            },
-            // 메인 페이지를 바로 열고 싶으면
-            {
-                source: '/home',
-                destination: '/DiFF/home/main',
-                permanent: false,
-            },
+            { source: '/', destination: '/DiFF/home/main', permanent: false },
+            { source: '/login/github', destination: `${BACKEND}/oauth2/authorization/github`, permanent: false },
+            { source: '/login/google', destination: `${BACKEND}/oauth2/authorization/google`, permanent: false },
+            { source: '/home', destination: '/DiFF/home/main', permanent: false },
         ];
     },
 
-    // API 호출처럼 내부 경로만 프록시하고 싶을 때 rewrites 사용
     async rewrites() {
         return [
+            { source: '/api/DiFF/:path*', destination: `${BACKEND}/api/DiFF/:path*` },
             { source: '/_bff/DiFF/:path*', destination: `${BACKEND}/api/DiFF/:path*` },
-
-            // 1) NextAuth 엔드포인트는 Next.js가 처리
-            { source: '/_bff/:path*', destination: `${BACKEND}/api/DiFF/:path*` },
-
-            // // 2) OAuth2 콜백은 백엔드로
             { source: '/login/oauth2/code/:provider', destination: `${BACKEND}/login/oauth2/code/:provider` },
-
-            // // 4) 정적 리소스
             { source: '/resource/:path*', destination: '/resource/:path*' },
-
         ];
     },
 
-    compiler: {
-        styledComponents: true
-    }
+    compiler: { styledComponents: true },
 };

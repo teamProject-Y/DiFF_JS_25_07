@@ -2,14 +2,18 @@
 import axios from "axios";
 
 /** EC2 배포 서버 주소 */
-const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+const BACKEND = "https://api.diff.io.kr/api/DiFF";
 
+/** axios custom **/
 /** axios custom **/
 export const UserAPI = axios.create({
     baseURL: BACKEND,
     headers: { "Content-Type": "application/json" },
 });
+
+// 실제 요청 URL 확인용 로그
 console.log("🌍 BACKEND baseURL:", BACKEND);
+
 
 /** 요청 인터셉터: AccessToken 자동 첨부 */
 UserAPI.interceptors.request.use(
