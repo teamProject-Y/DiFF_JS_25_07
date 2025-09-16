@@ -108,7 +108,7 @@ export default function RepositoriesPage() {
 
         const base = "https://api.diff.io.kr/api/DiFF";
       
-        fetch(`${base}/api/DiFF/auth/linked`, {
+        fetch(`${base}/auth/linked`, {
             headers: {Authorization: `Bearer ${accessToken}`},
             credentials: 'include',
         })
