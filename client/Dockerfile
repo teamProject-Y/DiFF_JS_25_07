@@ -10,17 +10,16 @@ FROM base AS build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
-#COPY package-lock.json package.json ./
+# package.json / lockfile 복사
 COPY client/package-lock.json client/package.json ./
 
 # 🔑 peer dependency 충돌 무시
 RUN npm ci --include=dev --legacy-peer-deps
 
+# 앱 소스 복사
 COPY client/ .
 
-# .env.local도 루트 기준 경로로 지정
-COPY client/.env.production .env.production
-
+# Next.js 빌드
 RUN npx next build --experimental-build-mode compile
 
 # 🔑 prune 시에도 충돌 무시

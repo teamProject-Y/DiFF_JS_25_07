@@ -9,6 +9,7 @@ import AnalysisRecentChart from "@/app/DiFF/member/repository/analysisRecentChar
 import {
     connectRepository,
     getAnalysisHistory,
+    getAnalysisRecent,
     getLanguageDistribution,
     renameRepository,
     deleteRepository,
