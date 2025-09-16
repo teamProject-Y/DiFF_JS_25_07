@@ -10,7 +10,7 @@ import {getResponse} from "../util/interaction.mjs";
 import {isUsableRepoName, mkRepo} from "../api/api.mjs";
 import {mkDiFFdirectory} from "../DiFF/init.mjs";
 import {getRepositoryId} from "../DiFF/draft.mjs";
-const BASE_URL = process.env.BACKEND_URL;
+const BASE_URL = "https://api.diff.io.kr/api/DiFF";
 let repoId = 0;
 
 /** git repository 여부 **/

@@ -5,14 +5,13 @@ import { UserAPI } from "@/lib/UserAPI";
 import {ReflectAdapter as RepositoryAPI} from "next/dist/server/web/spec-extension/adapters/reflect";
 
 /** EC2 배포 서버 주소 (api/DiFF 까지 포함) */
-const BACKEND = process.env.NEXT_PUBLIC_API_BASE;
+const BACKEND = "https://api.diff.io.kr/api/DiFF";
 
 /** axios custom **/
 export const ArticleAPI = axios.create({
     baseURL: BACKEND,
     headers: { "Content-Type": "application/json" },
 });
-
 ArticleAPI.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
@@ -125,7 +124,6 @@ export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyw
         params: { repositoryId: rid, searchItem, keyword, page }
 
     });
-    console.log("🛰 [fetchArticles] res.data:", res.data);
     return res.data;
 };
 
@@ -134,10 +132,9 @@ export const trendingArticle = async ({ count, days }) => {
     const res = await ArticleAPI.get('/article/trending', {
         params: { count, days }
     });
-    console.log("🛰 [trendingArticle] BACKEND:", BACKEND);
-    console.log(res.data);
     return res.data;
 };
+
 
 /** 글 작성 */
 export const writeArticle = async (data) => {
@@ -181,7 +178,6 @@ export const modifyArticle = async (article, token) => {
 export const deleteArticle = async (id) => {
     const url = `/article/${id}`;
     const res = await DraftAPI.delete(url);
-    console.log('[API][deleteArticle] status:', res.status, 'data:', res.data);
     return { status: res.status, data: res.data };
 };
 
@@ -207,7 +203,6 @@ export const postReply = async (articleId, comment) => {
 /** 댓글 목록 조회 */
 export const fetchReplies = async (articleId) => {
     const res = await UserAPI.get('/reply/list', { params: { articleId } });
-    console.log(res.data.replies);
     return res.data;
 };
 
