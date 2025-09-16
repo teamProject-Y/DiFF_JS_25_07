@@ -19,7 +19,7 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm install
         working-directory: ./client
 
       - name: Build
@@ -30,5 +30,12 @@ jobs:
         uses: superfly/flyctl-actions@1.5
         with:
           args: "deploy --remote-only -a diff-front"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Ensure at least 1 machine is always running
+        uses: superfly/flyctl-actions@1.5
+        with:
+          args: "scale count 1 -a diff-front"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
