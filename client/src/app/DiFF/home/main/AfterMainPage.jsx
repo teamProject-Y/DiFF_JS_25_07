@@ -125,7 +125,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                             <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">
                                                                 {article.title}
                                                             </h2>
-                                                            <p className="clamp-2 text-sm overflow-hidden">
+                                                            <p className="clamp-2 text-sm overflow-hidden line-clamp-2 break-all">
                                                                 {article.body ? removeMd(article.body) : ""}
                                                             </p>
                                                         </div>
