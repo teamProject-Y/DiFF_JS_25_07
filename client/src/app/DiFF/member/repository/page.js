@@ -280,7 +280,7 @@ export default function RepositoriesPage() {
                                     {isMyRepos &&
                                         <li onClick={openModal}
                                             className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
-                                            hover:bg-gray-100 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400">
+                                            hover:bg-gray-200 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400">
                                             <i className="fa-solid fa-folder-plus text-neutral-400"/>
                                             <span className="truncate">add repository</span>
                                         </li>
@@ -293,7 +293,7 @@ export default function RepositoriesPage() {
                                                 onClick={() => setSelectedRepoId(r.id)}
                                                 className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer 
                                                 ${sel ? 'bg-gray-200 text-gray-900 dark:bg-neutral-800/80 dark:text-neutral-300'
-                                                    : 'hover:bg-gray-100 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400'}`}
+                                                    : 'hover:bg-gray-200 text-gray-700 dark:hover:bg-neutral-800/50 dark:text-neutral-400'}`}
                                                 title={r.name}
                                             >
                                                 <i className={`fa-solid ${sel ? 'fa-folder-open text-blue-400'
