@@ -106,7 +106,7 @@ export default function RepositoriesPage() {
                 router.replace('/DiFF/home/main');
             });
 
-        const base = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const base = "https://api.diff.io.kr/api/DiFF";
       
         fetch(`${base}/api/DiFF/auth/linked`, {
             headers: {Authorization: `Bearer ${accessToken}`},
