@@ -14,7 +14,6 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-    console.log("📩 [SW] 백그라운드 알림 수신:", payload);
 
     const notificationTitle = payload.data?.title || "알림";
     const notificationOptions = {
