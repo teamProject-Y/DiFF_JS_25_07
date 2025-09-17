@@ -8,7 +8,7 @@ export default function Footer() {
             <p className="mt-10 text-gray-600">
                 email:{' '}
                 <a href={mailtoHref} className="hover:text-gray-400 duration-100">
-                    {OPS_EMAIL}
+                    { OPS_EMAIL }
                 </a>
             </p>
             <br />
