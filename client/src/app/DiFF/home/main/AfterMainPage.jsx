@@ -142,11 +142,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                                 {article.title}
                                                             </h2>
                                                             <p className="text-sm overflow-hidden whitespace-normal [overflow-wrap:anywhere] [word-break:break-word]"
-                                                               style={{
-                                                                   display: '-webkit-box',
-                                                                   WebkitBoxOrient: 'vertical',
-                                                                   WebkitLineClamp: 2
-                                                               }}>
+                                                               style={{ display:'-webkit-box', WebkitBoxOrient:'vertical', WebkitLineClamp:2 }}>
                                                                 {article.body ? removeMd(article.body) : ""}
                                                             </p>
                                                         </div>
@@ -159,14 +155,11 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                                 })}
                                                             </span>
                                                             <span>view: {article.hits}</span>
-                                                            <span><i
-                                                                className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
-                                                            <span><i
-                                                                className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
+                                                            <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                            <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                         </div>
                                                     </div>
-                                                    <div
-                                                        className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
+                                                    <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
                                                         {imgSrc ? (
                                                             <img src={imgSrc} alt="thumbnail"
                                                                  className="w-full h-full object-cover"/>
@@ -179,20 +172,17 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         );
                                     })
                                 ) : (
-                                    <div
-                                        className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
+                                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
                                         {/* 아이콘 */}
-                                        <div
-                                            className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
                                             <i className="fa-solid fa-newspaper text-2xl text-gray-400"></i>
                                         </div>
 
                                         {/* 메시지 */}
                                         <p className="text-lg font-medium">No posts from people you follow.</p>
-                                        <a href="/DiFF/member/explore"
-                                           className="text-sm text-blue-500 mt-2 hover:underline">
+                                        <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
                                             당신은 DiFF에 글을 작성한 첫번째 사용자 입니다. 그래서 작은 선물을 준비 했어요.
-                                            <br/>
+                                            <br />
                                             쿠폰 번호: scew-sdfv-jfj-sdf1
                                         </a>
                                     </div>
@@ -236,26 +226,22 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                     <div className="flex items-center gap-4 text-sm ">
                                                         <span>
                                                             {new Date(article.regDate).toLocaleDateString("en-US", {
-                                                                year: "numeric",
-                                                                month: "short",
-                                                                day: "numeric",
+                                                             year: "numeric",
+                                                             month: "short",
+                                                             day: "numeric",
                                                             })}
                                                         </span>
                                                         <span>view: {article.hits}</span>
-                                                        <span><i
-                                                            className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
-                                                        <span><i
-                                                            className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
+                                                        <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                        <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                     </div>
                                                 </div>
                                                 <div
                                                     className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
-                                                        <img src={imgSrc} alt="thumbnail"
-                                                             className="w-full h-full object-cover"/>
+                                                        <img src={imgSrc} alt="thumbnail" className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <span
-                                                            className="dark:text-neutral-400 text-gray-400">No Image</span>
+                                                        <span className="dark:text-neutral-400 text-gray-400">No Image</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -263,18 +249,15 @@ export default function AfterMainPage({me, trendingArticles}) {
                                     );
                                 })
                             ) : (
-                                <div
-                                    className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
+                                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
                                     {/* 아이콘 */}
-                                    <div
-                                        className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
                                         <i className="fa-solid fa-user-plus text-2xl text-gray-400"></i>
                                     </div>
 
                                     {/* 메시지 */}
                                     <p className="text-lg font-medium">No posts from people you follow.</p>
-                                    <a href="/DiFF/member/explore"
-                                       className="text-sm text-blue-500 mt-2 hover:underline">
+                                    <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
                                         Start following someone to see their posts here.
                                     </a>
                                 </div>
