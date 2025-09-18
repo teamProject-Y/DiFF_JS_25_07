@@ -124,7 +124,6 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             headers: form.getHeaders(),
         });
 
-
         fs.unlinkSync('difftest.zip');
         return true;
     } catch (err) {
