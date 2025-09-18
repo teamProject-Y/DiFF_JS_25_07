@@ -82,14 +82,30 @@ export default function AfterMainPage({me, trendingArticles}) {
                                 <button
                                     key={t}
                                     onClick={() => setActiveTab(t)}
-                                    className={`p-4 -mb-px ${
-                                        activeTab === t
-                                            ? "border-b-2 font-semibold border-black dark:border-neutral-400"
-                                            : "text-gray-500 dark:text-neutral-600"
-                                    }`}
+                                    className={`group relative grid item-end p-4 pb-4 ml-2 -mb-px whitespace-nowrap duration-100
+                                     ${activeTab === t
+                                        ? "border-b-2 border-black dark:border-neutral-400"
+                                        : "hover:border-b-2 hover:border-gray-500 dark:hover:border-neutral-400"}`}
                                 >
-                                    {t}
+
+                                    <span
+                                        aria-hidden
+                                        className="col-start-1 row-start-1 font-semibold h-0 overflow-hidden pointer-events-none select-none duration-100"
+                                    >
+                                        {t}
+                                    </span>
+
+                                    {/* 실제 보이는 라벨: 같은 그리드 셀에 겹치기 */}
+                                    <span
+                                        className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
+                                            ${activeTab === t
+                                            ? "font-semibold"
+                                            : "text-gray-500 dark:text-neutral-600 group-hover:font-semibold group-hover:text-gray-700 dark:group-hover:text-gray-300"}`}
+                                    >
+                                     {t}
+                                    </span>
                                 </button>
+
                             ))}
                         </div>
 
@@ -133,7 +149,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                         <div className="flex items-center gap-4 text-sm ">
                                                             <span>
                                                                 {new Date(article.regDate).toLocaleDateString("en-US", {
-                                                                      year: "numeric",
+                                                                    year: "numeric",
                                                                     month: "short",
                                                                     day: "numeric",
                                                                 })}
@@ -145,7 +161,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                     </div>
                                                     <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
                                                         {imgSrc ? (
-                                                            <img src={imgSrc} alt="thumbnail" className="w-full h-full object-cover" />
+                                                            <img src={imgSrc} alt="thumbnail"
+                                                                 className="w-full h-full object-cover"/>
                                                         ) : (
                                                             <span className="dark:text-neutral-400 text-gray-400">No Image</span>
                                                         )}
@@ -181,7 +198,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                             className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                             onClick={() => handleArticleClick(article.id)}
                                         >
-                                            <div className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                            <div
+                                                className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
                                                     <div className="text-sm ">
                                                         in Following · by{" "}
@@ -218,7 +236,8 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                         <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                     </div>
                                                 </div>
-                                                <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
+                                                <div
+                                                    className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
                                                         <img src={imgSrc} alt="thumbnail" className="w-full h-full object-cover" />
                                                     ) : (

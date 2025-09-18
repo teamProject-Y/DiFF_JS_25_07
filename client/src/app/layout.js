@@ -6,7 +6,8 @@ import { Suspense } from 'react';
 
 export const metadata = { title: 'DiFF', description: 'DiFF' };
 
-export default function RootLayout({ children, modal }) {
+export default function RootLayout({children, modal}) {
+
     return (
         <html lang="ko" suppressHydrationWarning>
         <head>

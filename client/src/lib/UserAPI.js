@@ -181,7 +181,7 @@ export const uploadProfileImg = async (file) => {
     formData.append("file", file);
 
     try {
-        const res = await axios.post(`/member/uploadProfileImg`, formData, {
+        const res = await UserAPI.post(`/member/uploadProfileImg`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,

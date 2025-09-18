@@ -211,7 +211,6 @@ function ProfileInner() {
                                         </a>
                                     )}
 
-                                    {/* mailto:) */}
                                     {member.email && (
                                         <a
                                             href={`mailto:${member.email}`}
