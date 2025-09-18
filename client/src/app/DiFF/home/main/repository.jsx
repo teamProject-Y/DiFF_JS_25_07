@@ -803,7 +803,7 @@ export default function SampleRepoLayout() {
                                     className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition ${
                                         tab === t.key
                                             ? "-mb-px bg-gray-50 text-gray-900 z-10"
-                                            : "bg-gray-200 text-gray-400"
+                                            : "bg-gray-200 text-gray-400 hover:bg-gray-100"
                                     }`}
                                 >
                                     {t.label}
@@ -816,7 +816,7 @@ export default function SampleRepoLayout() {
                         {/* Left Sidebar */}
                         <aside className="h-full overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-100">
                             <ul className="p-4 space-y-2">
-                                <li className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 text-gray-700"
+                                <li className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-200 text-gray-700"
                                     title="add repository" onClick={openAddRepoModal}>
                                     <i className="fa-solid fa-folder-plus text-neutral-400"
                                        title="add repository"
@@ -830,7 +830,7 @@ export default function SampleRepoLayout() {
                                             key={r.id}
                                             onClick={() => setSelectedRepoId(r.id)}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${
-                                                sel ? "bg-gray-200 text-gray-900" : "hover:bg-gray-100 text-gray-700"
+                                                sel ? "bg-gray-200 text-gray-900" : "hover:bg-gray-200 text-gray-700"
                                             }`}
                                             title={r.name}
                                         >
