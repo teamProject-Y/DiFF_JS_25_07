@@ -8,9 +8,6 @@ import AnalysisGraph from "@/app/DiFF/member/repository/analysisGraph";
 import {AddRepoModal} from "@/app/DiFF/member/repository/addRepoModal";
 import {useDialog} from "@/common/commonLayout";
 
-// -------------------------------------------------------------
-// META DATA (Info/Posts)
-// -------------------------------------------------------------
 const DATA = {
     repositories: [
         {
@@ -321,7 +318,6 @@ const DATA = {
     ]
 };
 
-// INFO datasets per repo
 const REPO_INFO = {
     r1: {
         languages: [
@@ -956,7 +952,7 @@ function InfoView({repo, kickToLogin}) {
                                     <button
                                         key={x.k}
                                         onClick={() => setChartTab(x.k)}
-                                        className={`mx-1 text-sm ${chartTab === x.k ? "text-blue-600" : "text-gray-400"}`}
+                                        className={`mx-1 text-sm ${chartTab === x.k ? "text-blue-600" : "text-gray-400 hover:text-blue-300 duration-100"}`}
                                     >
                                         {x.label}
                                     </button>

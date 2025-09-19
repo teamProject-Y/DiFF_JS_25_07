@@ -504,7 +504,7 @@ export function WriteArticlePage() {
                 .toastui-editor-main {
                     flex: 1 1 auto !important;
                     min-height: 0 !important;
-                    overflow: auto !important;   /* ← 여기만 스크롤 */
+                    overflow: auto !important; 
                 }
 
                 /* 메인 내부 컨테이너/패널이 메인 높이를 정확히 채우도록 */

@@ -253,6 +253,8 @@ export default function InquiryForm() {
                     </button>
             </div>
         </form>
+            <br />
+            <br />
             <Footer />
             </>
     );
