@@ -100,7 +100,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
                                             ${activeTab === t
                                             ? "font-semibold"
-                                            : "text-gray-500 dark:text-neutral-600 group-hover:font-semibold group-hover:text-gray-700 dark:group-hover:text-gray-300"}`}
+                                            : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}
                                     >
                                      {t}
                                     </span>

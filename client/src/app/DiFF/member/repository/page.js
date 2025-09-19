@@ -1,6 +1,6 @@
 'use client';
 
-import {useRouter, useSearchParams} from 'next/navigation';
+import {useRouter, useSearchParams, usePathname} from 'next/navigation';
 import {fetchUser} from "@/lib/UserAPI";
 import {useEffect, useMemo, useState, useCallback} from "react";
 import {LayoutGroup} from "framer-motion";
@@ -57,6 +57,8 @@ const normalizeRepos = (raw) =>
 export default function RepositoriesPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
+
     const [repositories, setRepositories] = useState([]);
     const [member, setMember] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -69,10 +71,13 @@ export default function RepositoriesPage() {
     const openModal = useCallback(() => setOpenChoice(true), []);
     const closeModal = useCallback(() => setOpenChoice(false), []);
 
-    const [tab, setTab] = useState('posts');const visibleRepos = useMemo(
+    const [tab, setTab] = useState('posts');
+
+    const visibleRepos = useMemo(
         () => (isMyRepos ? repositories : repositories.filter(r => !r.aprivate)),
         [repositories, isMyRepos]
     );
+
     useEffect(() => {
         if (visibleRepos.length === 0) {
             setSelectedRepoId(null);
@@ -224,6 +229,22 @@ export default function RepositoriesPage() {
         isMyRepos ? '/DiFF/member/profile'
             : `/DiFF/member/profile?nickName=${encodeURIComponent(member?.nickName ?? '')}`;
 
+    const repoHref =
+        isMyRepos ? '/DiFF/member/repository'
+            : `/DiFF/member/repository?nickName=${encodeURIComponent(member?.nickName ?? '')}`;
+
+    const tabs = [
+        { key: 'Profile',      label: 'Profile',      href: profileHref },
+        { key: 'Repositories', label: 'Repositories', href: repoHref },
+        { key: 'Settings',     label: 'Settings',     href: '/DiFF/member/settings', visible: isMyRepos },
+    ].filter(t => t.visible !== false);
+
+    const isActive = (t) => {
+        const base = (t.href || '').split('?')[0];
+        if (!base) return false;
+        return pathname === base || pathname.startsWith(base + (base.endsWith('/') ? '' : '/'));
+    };
+
     const startLink = (provider) => {
         if (provider !== 'github') return;
         const link = `/api/DiFF/auth/link/${provider}?mode=link`;
@@ -236,11 +257,15 @@ export default function RepositoriesPage() {
                 <div className="mx-auto max-w-6xl h-full">
 
                     {/* Tabs */}
-                    <div className="flex items-center text-neutral-500">
-                        <TopTab href={profileHref} label="Profile"/>
-                        <TopTab active href="#" label="Repositories"/>
-                        <TopTab href="/DiFF/member/settings" label="Settings"
-                                visible={isMyRepos}/>
+                    <div className="flex items-center border-b dark:border-neutral-700">
+                        {tabs.map(t => (
+                            <TopTabLink
+                                key={t.key}
+                                href={t.href}
+                                label={t.label}
+                                active={isActive(t)}
+                            />
+                        ))}
                     </div>
 
                     <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700 mb-10"/>
@@ -262,7 +287,7 @@ export default function RepositoriesPage() {
                                         ${tab === t.key ?
                                         '-mb-px z-50 bg-gray-50 text-gray-900 dark:bg-neutral-800 dark:text-neutral-300'
                                         : 'bg-gray-200 text-gray-400 dark:bg-neutral-600 dark:text-neutral-300' +
-                                        'dark:bg-neutral-800 dark:text-neutral-400'}`}
+                                        'dark:bg-neutral-800 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-700'}`}
                                 >
                                     {t.label}
                                 </button>
@@ -401,20 +426,32 @@ export default function RepositoriesPage() {
     );
 }
 
-function TopTab({visible = true, href, label, active}) {
-    if (!visible) return null;
-
-    return active ? (
-        <span
-            className="p-4 -mb-px font-semibold text-black dark:text-neutral-300 border-b-2 border-black dark:border-neutral-300">
-      {label}
-    </span>
-    ) : (
+function TopTabLink({ href, label, active }) {
+    return (
         <Link
             href={href}
-            className="p-4 -mb-px hover:text-neutral-700 dark:hover:text-neutral-300"
+            className={`group relative grid items-end p-4 pb-4 ml-2 -mb-px whitespace-nowrap duration-100
+                ${active
+                ? "border-b-2 border-black dark:border-neutral-400"
+                : "hover:border-b-2 hover:border-gray-500 dark:hover:border-neutral-400"}`}
         >
-            {label}
+            {/* 숨은 복제 텍스트: 폰트 굵기 전환 부드럽게 */}
+            <span
+                aria-hidden
+                className="col-start-1 row-start-1 font-semibold h-0 overflow-hidden pointer-events-none select-none duration-100"
+            >
+                {label}
+            </span>
+
+            {/* 실제 라벨 */}
+            <span
+                className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
+                    ${active
+                    ? "font-semibold"
+                    : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}
+            >
+                {label}
+            </span>
         </Link>
     );
 }

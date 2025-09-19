@@ -428,7 +428,7 @@ export default function Page() {
             {(!loggedIn) && (
                 <section
                     id="before-footer"
-                    className="snap-start snap-y-mandatory scroll-mt-4 drop-shadow-2xl flex items-end"
+                    className="snap-start snap-y-mandatory scroll-mt-4"
                 >
                     <Footer />
                 </section>
