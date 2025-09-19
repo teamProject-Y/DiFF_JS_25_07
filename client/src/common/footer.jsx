@@ -1,5 +1,7 @@
 // src/common/Footer.jsx
+
 'use client';
+
 import {useEffect, useRef, useState} from 'react';
 
 export default function Footer() {
