@@ -5,12 +5,12 @@ import FormData from 'form-data';
 import axios from "axios";
 import ignore from 'ignore';
 import chalk from 'chalk';
-
+import { uploadZipToR2, sendDraftMeta } from "../api/api.mjs";
 import {getResponse} from "../util/interaction.mjs";
 import {isUsableRepoName, mkRepo} from "../api/api.mjs";
 import {mkDiFFdirectory} from "../DiFF/init.mjs";
 import {getRepositoryId} from "../DiFF/draft.mjs";
-const BASE_URL = "https://api.diff.io.kr/api/DiFF";
+const BASE_URL = "https://api.diff.io.kr";
 let repoId = 0;
 
 /** git repository 여부 **/
@@ -72,28 +72,15 @@ export async function DiFFinit(memberId, branch) {
 // doAnalysis.js
 export async function doAnalysis(branch, memberId, draftId, diffId) {
     try {
+
         const lastChecksum = await getLastChecksum(branch);
         const repositoryId = await getRepositoryId(branch);
 
         // target 폴더 존재 여부 확인
-        const hasTarget = await new Promise((resolve, reject) => {
-            const p = spawn('[ -d target ] && echo true || echo false', { shell: true });
-            let out = '';
-            let err = '';
-            p.stdout.on('data', d => out += d.toString());
-            p.stderr.on('data', d => err += d.toString());
-            p.on('close', code => {
-                if (code === 0) {
-                    resolve(out.trim() === 'true');
-                } else {
-                    reject(new Error(`target check failed: ${err}`));
-                }
-            });
-            p.on('error', err => reject(new Error(`spawn error: ${err.message}`)));
-        });
+        const hasTarget = await sh('[ -d target ] && echo true || echo false');
 
         // 압축 준비
-        if (hasTarget) {
+        if (hasTarget === "true") {
             await sh(`git archive --format=zip --output=withoutTarget.zip ${branch}`);
             await sh(`rm -rf tempdir difftest.zip`);
             await sh(`mkdir tempdir`);
@@ -105,29 +92,40 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             await sh(`git archive --format=zip --output=difftest.zip ${branch}`);
         }
 
-        if (!fs.existsSync('difftest.zip')) {
-            throw new Error('difftest.zip is not exist.');
+        if (!fs.existsSync("difftest.zip")) {
+            throw new Error("❌ difftest.zip 파일 생성 실패");
         }
 
-        // FormData 생성 및 전송
-        const form = new FormData();
-        form.append('file', fs.createReadStream('difftest.zip'));
-        form.append('meta', JSON.stringify({
+        //  R2 업로드
+        const zipKey = `repo_${repositoryId}/draft_${draftId}_${lastChecksum}.zip`;
+        const ok = await uploadZipToR2("difftest.zip", zipKey);
+
+        if (!ok) throw new Error("❌ R2 업로드 실패");
+
+        // 로컬 zip 삭제
+        fs.unlinkSync("difftest.zip");
+
+        const url = `${BASE_URL}/r2/analyze`;
+        const payload = {
             memberId,
             repositoryId,
             draftId,
             diffId,
             lastChecksum,
-        }));
+            key: zipKey,
+        };
 
-        await axios.post(`${BASE_URL.replace(/\/api\/DiFF$/, "")}/upload`, form, {
-            headers: form.getHeaders(),
+        const res = await axios.post(url, payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
         });
 
         fs.unlinkSync('difftest.zip');
         return true;
+
     } catch (err) {
-        console.error(chalk.red(`Analysis failed: ${err.message}`));
+        console.error(chalk.red(`❌ Analysis failed: ${err.message}`));
         console.error(err.stack);
         return false;
     }

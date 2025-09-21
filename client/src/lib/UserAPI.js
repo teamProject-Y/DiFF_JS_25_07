@@ -11,7 +11,7 @@ export const UserAPI = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-
+console.log("backend url : "+BACKEND);
 
 /** 요청 인터셉터: AccessToken 자동 첨부 */
 UserAPI.interceptors.request.use(
@@ -109,9 +109,11 @@ export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
 
 // 회원 정보 조회
 export const fetchUser = async (nickName) => {
+    console.log("fetching user : ", nickName);
     const response = await UserAPI.get(`/member/profile`, {
         params: nickName ? { nickName } : {},
     });
+
     return response.data;
 };
 
