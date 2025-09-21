@@ -1,4 +1,4 @@
-// pages/usr/home/page.js
+// app/DiFF/home/page.js
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import {useRouter} from "next/navigation"
 import {trendingArticle} from '@/lib/ArticleAPI';
+import Footer from '@/common/footer';
 import {FolderTree} from 'lucide-react';
 
 // 동적 import (Swiper)
@@ -188,8 +189,9 @@ export default function Page() {
         return () => io.disconnect();
     }, [mounted, loggedIn]);
 
-    if (!mounted) return null;
+    const showFooter = mounted && !loggedIn;
 
+    if (!mounted) return null;
 
     if (loggedIn) {
         return <AfterMainPage me={user} trendingArticles={trendingArticles}/>;
@@ -422,12 +424,22 @@ export default function Page() {
                 </div>
             </div>
 
+            {/* 🔻 Footer: BeforePage 전용, 페이지 맨 끝에 스냅 */}
+            {(!loggedIn) && (
+                <section
+                    id="before-footer"
+                    className="snap-start snap-y-mandatory scroll-mt-4"
+                >
+                    <Footer />
+                </section>
+            )}
+
             {/* toggle menu */}
             <div className="pointer-events-none">
                 <button onClick={() =>
                     window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))}
-                        className="fixed right-5 bottom-5 z-50 pointer-events-auto">
-                    <i className="fa-solid fa-power-off text-white cursor-pointer text-3xl hover:text-red-500"></i>
+                        className="fixed right-10 bottom-5 z-50 pointer-events-auto">
+                    <i className="fa-solid fa-power-off text-white cursor-pointer text-3xl hover:text-red-500 duration-100"></i>
                 </button>
             </div>
         </div>

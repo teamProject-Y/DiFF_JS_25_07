@@ -1,5 +1,4 @@
 import axios from "axios";
-import dotenv from "dotenv";
 import { getGitEmail } from "../git/simpleGit.mjs";
 import chalk from "chalk";
 import fs from "fs";
