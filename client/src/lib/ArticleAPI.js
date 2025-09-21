@@ -129,7 +129,9 @@ export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyw
 
 /** 트렌딩 글 */
 export const trendingArticle = async ({ count, days }) => {
+    console.log("🛰 [trendingArticle] count:", count, "days:", days);
     const res = await ArticleAPI.get('/article/trending', {
+
         params: { count, days }
     });
     return res.data;

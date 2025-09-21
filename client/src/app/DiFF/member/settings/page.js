@@ -259,25 +259,26 @@ function SettingsPage() {
             return;
         }
         try {
-            const res = await modifyNickName({nickName: form.nickName});
+            const res = await modifyNickName({ nickName: form.nickName });
 
             if (res && res.resultCode) {
                 if (res.resultCode === "S-1") {
-                    setMember((prev) => ({...prev, nickName: form.nickName}));
+                    setMember((prev) => ({ ...prev, nickName: form.nickName }));
                     setEditingNick(false);
                 } else if (res.resultCode === "F-8") {
-                    alert({intent: "danger", title: res.msg || "This nickname is already in use."});
+                    alert({ intent: "danger", title: res.msg || "This nickname is already in use." });
                 } else if (res.resultCode === "F-7") {
-                    alert({intent: "danger", title: res.msg || "Failed to edit member information"});
+                    alert({ intent: "danger", title: res.msg || "Failed to edit member information" });
                 } else {
-                    alert({intent: "danger", title: res.msg || "Unknown error"});
+                    alert({ intent: "danger", title: res.msg || "Unknown error" });
                 }
             } else {
-                alert({intent: "danger", title: "Invalid server response"});
+                alert({ intent: "danger", title: "Invalid server response" });
             }
         } catch (err) {
             console.error("닉네임 수정 에러:", err);
-            alert({intent: "danger", title: err?.response?.data?.msg || "Server error"});
+            alert({ intent: "danger", title: err?.response?.data?.msg || "Server error" });
+
         }
     };
 
