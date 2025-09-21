@@ -41,7 +41,7 @@ export default function JoinForm() {
             if (resultCode === 'S-1') {
                 alert({
                     intent: "success",
-                    title: serverMsg || "Your registration has been completed. Please verify your email address.",
+                    title: serverMsg || "\nYour registration has been completed. Please verify your email address.",
                 });
 
                 if (accessToken) {
