@@ -3,12 +3,15 @@ primary_region = "nrt"
 
 [build]
 dockerfile = "./client/Dockerfile"
+
 [http_service]
 internal_port = 3000
 force_https = true
-auto_stop_machines = false
-auto_start_machines = true
-min_machines_running = 1
+
+auto_stop_machines = true   # 유휴 시 자동 정지
+auto_start_machines = true  # 요청 오면 자동 기동
+min_machines_running = 0    # 항상 켜둘 인스턴스 0개(= 완전 유휴시 0대로)
+
 processes = ["app"]
 
 [[vm]]
