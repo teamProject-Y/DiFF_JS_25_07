@@ -124,26 +124,6 @@ li {
     display: block;
 }
 
-/*.custom-pagination .swiper-pagination-bullet {*/
-/*    width: 8px !important;*/
-/*    height: 8px !important;*/
-/*    background: #d4d4d4 !important;*/
-/*    opacity: 1 !important;*/
-/*    border-radius: 9999px !important;*/
-/*    margin: 0 6px !important;*/
-/*    transition: background-color 200ms ease, width 200ms ease !important;*/
-/*}*/
-
-/*.custom-pagination .swiper-pagination-bullet-active {*/
-/*    background: #525252 !important;*/
-/*    width: 24px !important;*/
-/*}*/
-
-/*.custom-pagination .swiper-pagination-bullet:focus-visible {*/
-/*    outline: 2px solid #a3a3a3 !important;*/
-/*    outline-offset: 2px !important;*/
-/*}*/
-
 .article-slider {
     --swiper-theme-color: #525252;                 /* 활성 점 색 (neutral-600) */
     --swiper-pagination-bullet-inactive-color: #d4d4d4; /* 비활성 점 색 (neutral-300) */
@@ -338,16 +318,6 @@ li {
     .scrollbar-none::-webkit-scrollbar {
         display: none; /* Chrome, Safari */
     }
-    /*.autofill-fix:-webkit-autofill {*/
-    /*    -webkit-text-fill-color: rgb(17,24,39);*/
-    /*    -webkit-box-shadow: 0 0 0 9999px rgb(250,250,250) inset;*/
-    /*}*/
-    /*@media (prefers-color-scheme: dark) {*/
-    /*    .dark\:autofill-fix:-webkit-autofill {*/
-    /*        -webkit-text-fill-color: #fff;*/
-    /*        -webkit-box-shadow: 0 0 0 9999px rgb(66,66,66) inset;*/
-    /*    }*/
-    /*}*/
 }
 
 .markdown {
@@ -528,3 +498,47 @@ li {
     transition: background-color 9999s ease-out 0s !important;
 }
 .snap-disabled { scroll-snap-type: none !important; }
+
+/* ===== Bell Ringing Button ===== */
+.bell-button {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition-duration: .3s;
+    border: none;
+}
+
+.bell-svg {
+    width: 18px;
+}
+
+.bell-svg path {
+    fill: black;
+}
+
+.dark .bell-svg path {
+    fill: white;
+}
+
+.bell-button:hover .bell-svg {
+    animation: bellRing 0.9s both;
+}
+
+@keyframes bellRing {
+    0%, 100% {
+        transform-origin: top;
+    }
+    15% { transform: rotateZ(10deg); }
+    30% { transform: rotateZ(-10deg); }
+    45% { transform: rotateZ(5deg); }
+    60% { transform: rotateZ(-5deg); }
+    75% { transform: rotateZ(2deg); }
+}
+
+.bell-button:active {
+    transform: scale(0.8);
+}
