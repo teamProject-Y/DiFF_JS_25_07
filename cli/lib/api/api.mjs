@@ -1,19 +1,19 @@
 import axios from "axios";
 import { getGitEmail } from "../git/simpleGit.mjs";
 import chalk from "chalk";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "fs";
 
+<<<<<<< HEAD
 const BASE_URL = "https://api.diff.io.kr/api/DiFF"
+=======
+const BASE_URL = "https://api.diff.io.kr/api/DiFF";
 
-const R2 = new S3Client({
-    region: "auto",
-    endpoint: process.env.R2_ENDPOINT,
-    credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY,
-        secretAccessKey: process.env.R2_SECRET_KEY,
-    },
-});
+// ---------- 📌 R2 Client ----------
+>>>>>>> main
 
+
+// 📦 R2 업로드 함수
 export async function uploadZipToR2(filePath, key) {
     try {
         const fileStream = fs.createReadStream(filePath);
@@ -31,26 +31,20 @@ export async function uploadZipToR2(filePath, key) {
         return false;
     }
 }
-/** diff member check **/
+// ---------- 📌 Git User 확인 ----------
 export async function verifyGitUser() {
     const email = await getGitEmail();
-
-    if (email === null) {
-        return null;
-    }
+    if (!email) return null;
 
     try {
-        const { data } = await axios.post(`${BASE_URL}/draft/verifyGitUser`, {
-            email,
-        });
-
+        const { data } = await axios.post(`${BASE_URL}/draft/verifyGitUser`, { email });
         return data.resultCode.startsWith("S-") ? data.data1 : null;
-    } catch (err) {
+    } catch {
         return null;
     }
 }
 
-/** repository name check **/
+// ---------- 📌 Repo Name 확인 ----------
 export async function isUsableRepoName(memberId, repoName) {
     const { data } = await axios.post(`${BASE_URL}/draft/isUsableRepoName`, {
         memberId,
@@ -59,7 +53,7 @@ export async function isUsableRepoName(memberId, repoName) {
     return data.data1;
 }
 
-/** insert repository DB **/
+// ---------- 📌 Repo DB 생성 ----------
 export async function mkRepo(memberId, repoName, commitHash) {
     const { data } = await axios.post(`${BASE_URL}/draft/mkRepo`, {
         memberId,
@@ -70,20 +64,13 @@ export async function mkRepo(memberId, repoName, commitHash) {
     if (data.resultCode.startsWith("S-")) {
         return data.data1;
     } else {
-        console.log("This repository name is already in use.");
+        console.log(chalk.yellow("⚠️ Repository name already in use."));
         return null;
     }
 }
 
-/** send diff **/
-export async function sendDiFF(
-    memberId,
-    repositoryId,
-    draftId,
-    diffId,
-    checksum,
-    diff
-) {
+// ---------- 📌 Diff 저장 ----------
+export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     try {
         const { data } = await axios.post(`${BASE_URL}/draft/receiveDiff`, {
             memberId,
@@ -94,12 +81,15 @@ export async function sendDiFF(
             diff,
         });
 
+        console.log("✅ server에 diff 보내기 성공:", data.msg);
+
         return data.resultCode?.startsWith("S-") ? true : false;
-    } catch (error) {
+    } catch {
         return false;
     }
 }
 
+// ---------- 📌 Draft 메타데이터 전달 (ZIP 업로드 후 호출) ----------
 export async function sendDraftMeta(memberId, repositoryId, draftId, diffId, checksum, zipKey) {
     try {
         const { data } = await axios.post(`${BASE_URL}/draft/receiveMeta`, {
