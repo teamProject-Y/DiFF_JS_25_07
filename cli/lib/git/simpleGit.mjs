@@ -12,7 +12,6 @@ export async function getGitEmail() {
         if (!email) {
             return null;
         }
-
         return email;
 
     } catch (err) {
