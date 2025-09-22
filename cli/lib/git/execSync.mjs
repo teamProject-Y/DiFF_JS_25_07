@@ -10,7 +10,6 @@ import {getResponse} from "../util/interaction.mjs";
 import {isUsableRepoName, mkRepo} from "../api/api.mjs";
 import {mkDiFFdirectory} from "../DiFF/init.mjs";
 import {getRepositoryId} from "../DiFF/draft.mjs";
-const BASE_URL = "https://api.diff.io.kr";
 let repoId = 0;
 
 /** git repository 여부 **/
@@ -67,9 +66,8 @@ export async function DiFFinit(memberId, branch) {
     q.close();
     return firstChecksum;
 }
+/** 분석 및 업로드 **/
 
-/** 코드 분석 **/
-// doAnalysis.js
 export async function doAnalysis(branch, memberId, draftId, diffId) {
     try {
 
@@ -105,7 +103,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         // 로컬 zip 삭제
         fs.unlinkSync("difftest.zip");
 
-        const url = `${BASE_URL}/r2/analyze`;
+        const url = "https://api.diff.io.kr/r2/analyze";
         const payload = {
             memberId,
             repositoryId,
@@ -130,6 +128,8 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         return false;
     }
 }
+
+
 
 // 비동기로 cmd
 export async function sh(cmd, passthrough = false) {
