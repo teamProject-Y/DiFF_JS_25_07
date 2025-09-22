@@ -21,8 +21,6 @@ program
 
     .action(async (branch, options) => {
 
-        console.log("mkdraft called");/////log/////
-
         /** 선택된 브랜치 **/
         const selectedBranch = branch;
 
@@ -31,21 +29,22 @@ program
         if (!branchCheck) {
             console.log(chalk.red("branch is not exists"));
             process.exit(1);
-        } else console.log("Selected branch:", selectedBranch);/////log/////
+        }
 
         /** git repo 여부 **/
         const checkIsRepo = await existsGitDirectory();
         if (checkIsRepo === 'false') {
             console.log(chalk.red("fatal: not a git repository (or any of the parent directories): .git"));
             process.exit(1);
-        }else console.log("checkIsRepo: ", checkIsRepo);/////log/////
+        }
 
         /** git 설정 이메일 → memberId **/
         const memberId = await verifyGitUser();
         if (memberId === null) {
-            console.log("memberId is null"); /////log/////
+            console.log(chalk.yellow("You need to sign up for DiFF before using this command."));
+            console.log(chalk.blueBright("https://diff.io.kr"));
             process.exit(1);
-        } console.log("memberId: ", memberId);
+        }
 
         /** DiFF 디렉토리 존재 여부 **/
         const isDiFF = await existsDiFF();
@@ -71,9 +70,9 @@ program
         /** 코드 분석 **/
         if (options.analysis) {
             console.log("Starting analysis...");
+
             const isRunning = {value: true};
             const animationPromise = runAnimation(isRunning);
-            console.log("Analysis in progress. This may take a while...");
             const analysis = await doAnalysis(selectedBranch, memberId, draftId, diffId);
 
             isRunning.value = false;
