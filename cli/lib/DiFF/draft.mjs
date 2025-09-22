@@ -22,9 +22,15 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
         return null;
     }
 
+    console.log(chalk.bgGreenBright("diff", diff.substr(0,1000)));  /////////// log //////////
+
     const ok = await sendDiFF(memberId, repositoryId, draftId, diffId, to, diff);
 
     if (ok) {
+
+        console.log(chalk.greenBright("✅ sendDiFF success"));  /////////// log //////////
+        console.log(chalk.greenBright(ok.valueOf()));  /////////// log //////////
+
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);
     }
