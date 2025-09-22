@@ -1,19 +1,30 @@
 'use client';
+
 import {getDraftById, saveDraft} from "@/lib/DraftAPI";
-import {Suspense, useEffect, useState, useCallback, useMemo, useRef} from 'react';
+import {Suspense, useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {writeArticle, getMyRepositories} from '@/lib/ArticleAPI';
 import dynamic from 'next/dynamic';
 import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
 import {useTheme} from "@/common/thema";
+import {Globe, Lock} from "lucide-react";
+import { createPortal } from 'react-dom';
 
 const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
+
+function InlinePortal({ children }) {
+    const [mount, setMount] = useState(null);
+    useEffect(() => { setMount(document.body); }, []);
+    if (!mount) return null;
+    return createPortal(children, mount);
+}
 
 function RepoDropdown({items = [], value, onChange, disabled}) {
     const [open, setOpen] = useState(false);
     const btnRef = useRef(null);
     const menuRef = useRef(null);
+    const [pos, setPos] = useState({left: 0, top: 0, width: 0});
 
     const selected = useMemo(
         () => items.find((r) => Number(r.id) === Number(value)),
@@ -41,6 +52,21 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
         document.addEventListener("mousedown", onDocClick);
         return () => document.removeEventListener("mousedown", onDocClick);
     }, [open]);
+
+    useLayoutEffect(() => {
+           if (!open || !btnRef.current) return;
+           const update = () => {
+                 const r = btnRef.current.getBoundingClientRect();
+                 setPos({ left: r.left, top: r.bottom + 4, width: r.width });
+               };
+           update();
+           window.addEventListener('scroll', update, true); // 내부 스크롤까지
+           window.addEventListener('resize', update);
+           return () => {
+                 window.removeEventListener('scroll', update, true);
+                 window.removeEventListener('resize', update);
+               };
+         }, [open]);
 
     // keyboard
     const onKeyDown = useCallback(
@@ -102,13 +128,14 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
             </button>
 
             {open && (
+                <InlinePortal>
                 <ul
                     ref={menuRef}
                     role="listbox"
-                    className={clsx(
-                        "absolute left-0 top-full z-50 mt-1 w-[24rem] max-w-[70vw] overflow-auto rounded-md border shadow-lg",
-                        "max-h-64 border-neutral-200 bg-white/95 backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-900/95"
-                    )}
+                    style={{ position: 'fixed', left: pos.left, top: pos.top, width: pos.width }}
+                    className="z-[999] mt-1 max-h-64 max-w-[70vw] overflow-auto rounded-md border shadow-lg
+                      border-neutral-200 bg-white/95 backdrop-blur-sm
+                      dark:border-neutral-700 dark:bg-neutral-900/95"
                 >
                     {items.map((r) => {
                         const id = String(r.id);
@@ -138,6 +165,7 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
                         );
                     })}
                 </ul>
+                </InlinePortal>
             )}
         </div>
     );
@@ -412,25 +440,14 @@ export function WriteArticlePage() {
                             <button
                                 type="button"
                                 onClick={() => setIsPublic(!isPublic)}
-                                className={clsx(
-                                    "relative inline-flex h-6 w-11 items-center rounded-full transition",
-                                    isPublic
-                                        ? "bg-neutral-900 dark:bg-neutral-100"
-                                        : "bg-neutral-300 dark:bg-neutral-700"
-                                )}
-                                aria-label={isPublic ? "Public" : "Private"}
-                                title={isPublic ? "Public" : "Private"}
+                                aria-pressed={isPublic}
+                                aria-label={isPublic ? 'Public' : 'Private'}
+                                title={isPublic ? 'Public' : 'Private'}
+                                className="inline-flex items-center justify-center gap-2 rounded-full border w-24 py-1.5 text-sm transition border-neutral-200 bg-white text-neutral-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:focus-visible:ring-neutral-600"
                             >
-                                <span
-                                    className={clsx(
-                                        "inline-block h-4 w-4 transform rounded-full bg-white transition",
-                                        isPublic ? "translate-x-6" : "translate-x-1"
-                                    )}
-                                />
-                                            </button>
-                                            <span className="hidden md:inline text-xs text-neutral-500">
-                                    {isPublic ? "Public" : "Private"}
-                                </span>
+                                {isPublic ? <Globe className="w-4 h-4" strokeWidth={2} /> : <Lock className="w-4 h-4" strokeWidth={2} />}
+                                <span>{isPublic ? 'Public' : 'Private'}</span>
+                            </button>
 
                             <button
                                 type="button"
