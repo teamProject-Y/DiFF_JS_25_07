@@ -102,9 +102,6 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
 
         if (!ok) throw new Error("❌ R2 업로드 실패");
 
-        // 로컬 zip 삭제
-        fs.unlinkSync("difftest.zip");
-
         const url = `${BASE_URL}/r2/analyze`;
         const payload = {
             memberId,

@@ -3,8 +3,6 @@ import { getGitEmail } from "../git/simpleGit.mjs";
 import chalk from "chalk";
 import fs from "fs";
 
-dotenv.config();
-
 const BASE_URL = "https://api.diff.io.kr/api/DiFF"
 
 const R2 = new S3Client({
