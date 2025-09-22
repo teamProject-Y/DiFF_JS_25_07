@@ -155,6 +155,8 @@ export function WriteArticlePage() {
     const router = useRouter();
     const { alert } = useDialog();
     const sp = useSearchParams();
+    const [draftLoading, setDraftLoading] = useState(!!sp.get('draftId'));
+    const [editorKey, setEditorKey] = useState('empty');
 
     // from query
     const repoFromQuery = sp.get('repositoryId');
@@ -183,22 +185,28 @@ export function WriteArticlePage() {
 
     // load draft if present
     useEffect(() => {
-        if (draftId) {
+        let alive = true;
             (async () => {
-                try {
-                    const draft = await getDraftById(draftId);
-                    setIsPublic(draft.isPublic ?? true);
-                    setTitle(draft.title || '');
-                    setBody(draft.body || '');
-                    setRepositoryId(draft.repositoryId || null);
-                    if (draft.diffId) {
-                        setDiffId(draft.diffId);
-                    }
-                } catch (e) {
-                    console.error('Failed to load draft:', e);
-                }
-            })();
-        }
+                  if (!draftId) { setDraftLoading(false); return; }
+                  setDraftLoading(true);
+                  try {
+                        const draft = await getDraftById(draftId);
+                        if (!alive) return;
+                        setIsPublic(draft.isPublic ?? true);
+                        setTitle(draft.title || '');
+                        setBody(draft.body || '');
+                        setRepositoryId(draft.repositoryId || null);
+                        if (draft.diffId) setDiffId(draft.diffId);
+                        // ★ 드래프트 도착 후 key 변경 → 에디터 리마운트(초기값 정확히 반영)
+                            const ver = draft.checksum || draft.updatedAt || Date.now();
+                        setEditorKey(`draft-${draftId}-${ver}`);
+                      } catch (e) {
+                        console.error('Failed to load draft:', e);
+                      } finally {
+                        if (alive) setDraftLoading(false);
+                      }
+                })();
+            return () => { alive = false; };
     }, [draftId]);
 
     // load repos
@@ -446,11 +454,14 @@ export function WriteArticlePage() {
 
                 <div className="flex-1 overflow-hidden">
                     <div className="h-full w-full">
-                        <ToastEditor
-                            initialValue={body}
-                            onChange={(value) => setBody(value)}
-                            height="100%"
-                        />
+                        {!draftLoading && (
+                                    <ToastEditor
+                                      key={editorKey}             // ★ 로드 후 리마운트
+                                      initialValue={body}         // ★ 이 타이밍에 정확히 먹음
+                                      onChange={(value) => setBody(value)}
+                                      height="100%"
+                                    />
+                                  )}
                     </div>
                 </div>
 
