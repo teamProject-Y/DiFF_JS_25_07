@@ -43,14 +43,14 @@ export const setAuthHeader = () => {
         if (ACCESS_TOKEN) {
             ArticleAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         } else {
-            delete ArticleAPI.defaults.headers['Authorization'];  // 없으면 제거
+            delete ArticleAPI.defaults.headers['Authorization'];
         }
 
         // refreshToken도 마찬가지
         if (REFRESH_TOKEN) {
             ArticleAPI.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         } else {
-            delete ArticleAPI.defaults.headers['REFRESH_TOKEN'];  // 없으면 제거
+            delete ArticleAPI.defaults.headers['REFRESH_TOKEN'];
         }
     }
 };
