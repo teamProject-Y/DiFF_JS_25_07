@@ -5,6 +5,7 @@ import {saveInquiry} from '@/lib/NotionAPI';
 import {useState, useEffect, useRef, useMemo} from 'react';
 import {useTheme} from "@/common/thema";
 import {useDialog} from "@/common/commonLayout";
+import Footer from "@/common/footer";
 
 export default function InquiryForm() {
     const router = useRouter();
@@ -111,6 +112,7 @@ export default function InquiryForm() {
     };
 
     return (
+        <>
         <form onSubmit={handleSubmit} className="min-h-full px-32">
             <div className="flex items-center border-b mb-3 dark:border-neutral-700">
                 <button className="p-4 -mb-px border-b-2 font-semibold text-black border-black
@@ -251,5 +253,9 @@ export default function InquiryForm() {
                     </button>
             </div>
         </form>
+            <br />
+            <br />
+            <Footer />
+            </>
     );
 }

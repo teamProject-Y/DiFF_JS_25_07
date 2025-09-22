@@ -3,7 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import {useEffect, useState, Suspense, useRef} from 'react';
 import Link from 'next/link';
-import {useRouter, useSearchParams} from 'next/navigation';
+import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 
@@ -30,6 +30,7 @@ export default function ProfileTab() {
 
 function ProfileInner() {
     const router = useRouter();
+    const pathname = usePathname();
     const { alert } = useDialog();
     const searchParams = useSearchParams();
 
@@ -143,6 +144,19 @@ function ProfileInner() {
         isMyProfile ? '/DiFF/member/repository'
             : `/DiFF/member/repository?nickName=${encodeURIComponent(member?.nickName ?? '')}`;
 
+    const tabs = [
+        { key: 'Profile',      label: 'Profile',      href: '/DiFF/member/profile' },
+        { key: 'Repositories', label: 'Repositories', href: repoHref },
+        { key: 'Settings',     label: 'Settings',     href: '/DiFF/member/settings', visible: isMyProfile },
+    ].filter(t => t.visible !== false);
+
+    const isActive = (t) => {
+        const path = (t.href || '').split('?')[0];
+        if (!path) return false;
+        // 현재 경로가 해당 경로와 같거나, 해당 경로 하위면 active
+        return pathname === path || pathname.startsWith(path + (path.endsWith('/') ? '' : '/'));
+    };
+
     return (
         <div className="w-full h-screen overflow-hidden mx-4 dark:text-neutral-300">
                 <div className="h-full">
@@ -154,12 +168,16 @@ function ProfileInner() {
                 )}
 
                 {/* Tabs */}
-                <div className="bg-white dark:bg-neutral-900 flex items-center text-neutral-500">
-                    <TopTab active href="#" label="Profile"/>
-                    <TopTab href={`${repoHref}`} label="Repositories"/>
-                    <TopTab href="/DiFF/member/settings" label="Settings"
-                            visible={isMyProfile}/>
-                </div>
+                            <div className="flex items-center border-b dark:border-neutral-700">
+                                {tabs.map(t => (
+                                    <TopTabLink
+                                        key={t.key}
+                                        href={t.href}
+                                        label={t.label}
+                                        active={isActive(t)}
+                                    />
+                                ))}
+                            </div>
 
                 <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700"/>
 
@@ -211,7 +229,6 @@ function ProfileInner() {
                                         </a>
                                     )}
 
-                                    {/* mailto:) */}
                                     {member.email && (
                                         <a
                                             href={`mailto:${member.email}`}
@@ -507,3 +524,33 @@ function TopTab({visible = true, href, label, active}) {
         </Link>
     );
 }
+
+function TopTabLink({ href, label, active }) {
+    return (
+        <Link
+            href={href}
+            className={`group relative grid items-end p-4 pb-4 ml-2 -mb-px whitespace-nowrap duration-100
+                ${active
+                ? "border-b-2 border-black dark:border-neutral-400"
+                : "hover:border-b-2 hover:border-gray-500 dark:hover:border-neutral-400"}`}
+        >
+            {/* 숨은 복제 텍스트: 폰트 굵기 전환 부드럽게 */}
+            <span
+                aria-hidden
+                className="col-start-1 row-start-1 font-semibold h-0 overflow-hidden pointer-events-none select-none duration-100"
+            >
+                {label}
+            </span>
+
+            {/* 실제 라벨 */}
+            <span
+                className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
+                    ${active
+                    ? "font-semibold"
+                    : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}
+            >
+                {label}
+            </span>
+        </Link>
+    );
+    }
