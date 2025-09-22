@@ -14,7 +14,6 @@ let repoId = 0;
 
 /** git repository 여부 **/
 export async function existsGitDirectory(){
-
     return execSync('[ -d .git ] && echo true || echo false').toString().trim();
 }
 
@@ -98,10 +97,9 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         const zipKey = `repo_${repositoryId}/draft_${draftId}_${lastChecksum}.zip`;
         const ok = await uploadZipToR2("difftest.zip", zipKey);
 
+        console.log("R2 zipKey:", zipKey);
         if (!ok) throw new Error("❌ R2 업로드 실패");
-
-        // 로컬 zip 삭제
-        fs.unlinkSync("difftest.zip");
+        console.log(chalk.green("✅ R2 업로드 성공 서버 시작"));
 
         const url = "https://api.diff.io.kr/r2/analyze";
         const payload = {
@@ -113,11 +111,68 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             key: zipKey,
         };
 
-        const res = await axios.post(url, payload, {
-            headers: {
-                "Content-Type": "application/json"
-            }
+        // const res = await axios.post(url, payload, {
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     }
+        // });
+        //
+        // if (res.status >= 200 && res.status < 300) {
+        //     console.log(chalk.green(`✅ Analysis succeeded [${res.status}]`));
+        //     console.log(`• result: ${res.data}`);
+        // } else if (res.status >= 400 && res.status < 500) {
+        //     console.error(chalk.yellow(`⚠️ Client error [${res.status}]`));
+        //     console.error(`• server message: ${res.data}`);
+        //     return false;
+        // } else if (res.status >= 500) {
+        //     console.error(chalk.red(`❌ Server error [${res.status}]`));
+        //     console.error(`• server message: ${res.data}`);
+        //     return false;
+        // } else {
+        //     console.error(chalk.yellow(`⚠️ Unexpected status [${res.status}]`));
+        //     console.error(`• body: ${res.data}`);
+        //     return false;
+        // }
+
+        // 스트리밍 호출(무제한 대기)
+        const res = await axios.post(`https://api.diff.io.kr/r2/analyze-stream`, payload, {
+            headers: { "Content-Type": "application/json" },
+            responseType: "stream",
+            timeout: 0,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
         });
+
+        console.log(chalk.gray("⏳ server processing... (will wait until DONE/ERROR)"));
+
+        let done = false;
+        let errorMsg = "";
+        let finalResult = "";
+
+        await new Promise((resolve, reject) => {
+            res.data.on("data", chunk => {
+                const text = chunk.toString("utf8");
+                for (const line of text.split("\n")) {
+                    if (!line) continue;
+                    if (line === "START") console.log("▶️  started");
+                    else if (line === "UNZIPPED") console.log("📦 unzipped");
+                    else if (line === "SCANNED") console.log("🔎 scanned");
+                    else if (line === "SAVED") console.log("💾 saved");
+                    else if (line === "DONE") { done = true; console.log(chalk.green("✅ done")); }
+                    else if (line.startsWith("ERROR")) { errorMsg = line; console.error(chalk.red(line)); }
+                    else if (line === ".") { /* heartbeat */ }
+                    else { finalResult += line + "\n"; } // 결과 본문 누적
+                }
+            });
+            res.data.on("end", resolve);
+            res.data.on("error", reject);
+        });
+
+        // ✅ 엄격 판정: DONE 없거나 ERROR면 실패 처리
+        if (errorMsg) throw new Error(errorMsg);
+        if (!done) throw new Error("Unexpected end without DONE");
+
+        console.log(chalk.green("✅ Analysis result:\n") + finalResult.trim());
 
         fs.unlinkSync('difftest.zip');
         return true;
@@ -128,8 +183,6 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         return false;
     }
 }
-
-
 
 // 비동기로 cmd
 export async function sh(cmd, passthrough = false) {
