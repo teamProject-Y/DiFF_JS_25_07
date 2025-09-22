@@ -65,8 +65,8 @@ export async function DiFFinit(memberId, branch) {
     q.close();
     return firstChecksum;
 }
-/** 분석 및 업로드 **/
 
+/** 업로드 **/
 export async function doAnalysis(branch, memberId, draftId, diffId) {
     try {
 
@@ -111,29 +111,6 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             key: zipKey,
         };
 
-        // const res = await axios.post(url, payload, {
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     }
-        // });
-        //
-        // if (res.status >= 200 && res.status < 300) {
-        //     console.log(chalk.green(`✅ Analysis succeeded [${res.status}]`));
-        //     console.log(`• result: ${res.data}`);
-        // } else if (res.status >= 400 && res.status < 500) {
-        //     console.error(chalk.yellow(`⚠️ Client error [${res.status}]`));
-        //     console.error(`• server message: ${res.data}`);
-        //     return false;
-        // } else if (res.status >= 500) {
-        //     console.error(chalk.red(`❌ Server error [${res.status}]`));
-        //     console.error(`• server message: ${res.data}`);
-        //     return false;
-        // } else {
-        //     console.error(chalk.yellow(`⚠️ Unexpected status [${res.status}]`));
-        //     console.error(`• body: ${res.data}`);
-        //     return false;
-        // }
-
         // 스트리밍 호출(무제한 대기)
         const res = await axios.post(`https://api.diff.io.kr/r2/analyze-stream`, payload, {
             headers: { "Content-Type": "application/json" },
@@ -168,7 +145,6 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             res.data.on("error", reject);
         });
 
-        // ✅ 엄격 판정: DONE 없거나 ERROR면 실패 처리
         if (errorMsg) throw new Error(errorMsg);
         if (!done) throw new Error("Unexpected end without DONE");
 

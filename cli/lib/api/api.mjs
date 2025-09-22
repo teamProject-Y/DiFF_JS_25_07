@@ -6,7 +6,7 @@ import fs from "fs";
 
 const BASE_URL = "https://api.diff.io.kr/api/DiFF";
 
-// ---------- 📌 R2 Client ----------
+// R2 Client
 const R2 = new S3Client({
     region: "auto",
     endpoint: "https://8a70679610ce7aae1dcb2a5c961d8356.r2.cloudflarestorage.com",
@@ -16,7 +16,7 @@ const R2 = new S3Client({
     },
 });
 
-// 📦 R2 업로드 함수
+// R2 업로드 함수
 export async function uploadZipToR2(filePath, key) {
     try {
         const fileStream = fs.createReadStream(filePath);
@@ -34,7 +34,7 @@ export async function uploadZipToR2(filePath, key) {
         return false;
     }
 }
-// ---------- 📌 Git User 확인 ----------
+// Git User 확인
 export async function verifyGitUser() {
     const email = await getGitEmail();
     if (!email) return null;
@@ -47,7 +47,7 @@ export async function verifyGitUser() {
     }
 }
 
-// ---------- 📌 Repo Name 확인 ----------
+// Repo Name 확인
 export async function isUsableRepoName(memberId, repoName) {
     const { data } = await axios.post(`${BASE_URL}/draft/isUsableRepoName`, {
         memberId,
@@ -56,7 +56,7 @@ export async function isUsableRepoName(memberId, repoName) {
     return data.data1;
 }
 
-// ---------- 📌 Repo DB 생성 ----------
+// Repo DB 생성
 export async function mkRepo(memberId, repoName, commitHash) {
     const { data } = await axios.post(`${BASE_URL}/draft/mkRepo`, {
         memberId,
@@ -72,8 +72,7 @@ export async function mkRepo(memberId, repoName, commitHash) {
     }
 }
 
-// ---------- 📌 Diff 저장 ----------
-
+// Diff 저장
 export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum, diff) {
     const t0 = Date.now();
     const tag = (msg) => chalk.cyan(`[sendDiFF d:${draftId} diff:${diffId}] `) + msg;
@@ -106,7 +105,7 @@ export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum
             `${BASE_URL}/draft/receiveDiff`,
             payload,
             {
-                timeout: 1000 * 60 * 2,        // 2분 (필요시 조절)
+                timeout: 1000 * 60 * 5,
                 maxBodyLength: Infinity,
                 maxContentLength: Infinity,
                 headers: { "Content-Type": "application/json" },
@@ -146,7 +145,7 @@ export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum
 }
 
 
-// ---------- 📌 Draft 메타데이터 전달 (ZIP 업로드 후 호출) ----------
+// Draft 메타데이터 전달 (ZIP 업로드 후 호출)
 export async function sendDraftMeta(memberId, repositoryId, draftId, diffId, checksum, zipKey) {
     try {
         const { data } = await axios.post(`${BASE_URL}/draft/receiveMeta`, {
@@ -155,7 +154,7 @@ export async function sendDraftMeta(memberId, repositoryId, draftId, diffId, che
             draftId,
             diffId,
             lastChecksum: checksum,
-            zipKey, // R2에 저장된 ZIP 파일 이름
+            zipKey,
         });
 
         return data.resultCode?.startsWith("S-") ? true : false;
