@@ -435,7 +435,7 @@ export function WriteArticlePage() {
                             <button
                                 type="button"
                                 onClick={() => router.push("/DiFF/article/drafts")}
-                                className="btn2"
+                                className="underline-anim h-9 rounded-md px-3 text-sm dark:text-neutral-400"
                             >
                                 Drafts
                             </button>
