@@ -259,7 +259,7 @@ function SettingsPage() {
             return;
         }
         try {
-            const res = await modifyNickName({ nickName: form.nickName });
+            const res = await modifyNickName({nickName: form.nickName});
 
             if (res && res.resultCode) {
                 if (res.resultCode === "S-1") {
@@ -278,7 +278,6 @@ function SettingsPage() {
         } catch (err) {
             console.error("닉네임 수정 에러:", err);
             alert({ intent: "danger", title: err?.response?.data?.msg || "Server error" });
-
         }
     };
 

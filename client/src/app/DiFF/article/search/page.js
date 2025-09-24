@@ -47,13 +47,11 @@ export default function SearchPage() {
         (async () => {
             setLoading(true);
             try {
-                // 게시글 검색
                 const articleRes = await searchArticles(keyword);
                 if (articleRes?.resultCode?.startsWith('S-')) {
                     setArticles(articleRes.data1 || []);
                 }
 
-                // 멤버 검색
                 const memberRes = await searchMembers(keyword);
                 if (memberRes?.resultCode?.startsWith('S-')) {
                     setMembers(memberRes.data1 || []);
@@ -71,12 +69,10 @@ export default function SearchPage() {
             <div className="h-screen">
                 <div className="mx-auto px-32 flex">
                     <main className="flex-grow">
-                        {/* 타이틀 */}
                         <h1 className="text-2xl font-bold my-4 text-gray-500 dark:text-neutral-500">
                             Showing Results for <span className="text-black dark:text-neutral-300">{'"'}{keyword}{'"'}</span>
                         </h1>
 
-                        {/* 탭 버튼 */}
                         <div className="flex items-center border-b dark:border-neutral-700">
                             {['Article', 'Profile'].map((t) => (
                                 <button
@@ -93,7 +89,6 @@ export default function SearchPage() {
                             ))}
                         </div>
 
-                        {/* 로딩 상태 */}
                         {loading ? (
                             <p>Searching...</p>
                         ) : activeTab === 'Article' ? (
@@ -151,7 +146,6 @@ export default function SearchPage() {
                                                     </div>
                                                 </div>
 
-                                                {/* 이미지 */}
                                                 <div
                                                     className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700
                                                     rounded-xl flex items-center justify-center overflow-hidden">
@@ -182,7 +176,6 @@ export default function SearchPage() {
                                         <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(
                                             m.nickName)}`}
                                         className="flex items-center gap-4 p-6">
-                                        {/* 프로필 이미지 */}
                                         {m.profileUrl ? (
                                             <img
                                                 src={m.profileUrl}
@@ -197,7 +190,6 @@ export default function SearchPage() {
                                             </div>
                                         )}
 
-                                        {/* 닉네임 + 이메일 */}
                                         <div className="ml-4">
                                             <div
                                                 className="text-xl font-bold dark:text-neutral-300"

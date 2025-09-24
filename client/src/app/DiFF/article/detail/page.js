@@ -47,7 +47,6 @@ function ArticleDetailInner() {
     const menuRef = useRef(null);
 
     const [replyMenuOpen, setReplyMenuOpen] = useState(null);
-    // === 팔로우 칩용 state ===
     const [authorId, setAuthorId] = useState(null);
     const [myId, setMyId] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
@@ -88,10 +87,9 @@ function ArticleDetailInner() {
         }
     }, []);
 
-    // 게시글 불러오기
     useEffect(() => {
         if (!id) {
-            console.warn("⚠️ [DetailPage] id 없음 (쿼리스트링 미포함)");
+            console.warn("[DetailPage] id 없음 (쿼리스트링 미포함)");
             return;
         }
 
@@ -112,7 +110,7 @@ function ArticleDetailInner() {
                 }
             } catch (e) {
                 if (!alive) return;
-                console.error('❌ [DetailPage] fetch error:', e);
+                console.error('[DetailPage] fetch error:', e);
                 setErrMsg('에러가 발생했습니다.');
                 setArticle(null);
             } finally {
@@ -125,7 +123,6 @@ function ArticleDetailInner() {
         };
     }, [id]);
 
-    // 좋아요 불러오기
     useEffect(() => {
         if (!id) return;
 
@@ -137,33 +134,30 @@ function ArticleDetailInner() {
                 setLikeCount((prev) => (prev !== like.count ? like.count : prev));
             } catch (e) {
                 if (e?.response?.status === 401) {
-                    // 비로그인: liked=false 유지, count는 기존값 유지/혹은 0
                     setLiked(false);
-                    setLikeCount((c) => c); // 또는 setLikeCount(0);
+                    setLikeCount((c) => c);
                 } else {
-                    console.error("❌ 좋아요 상태 불러오기 실패:", e);
+                    console.error("좋아요 상태 불러오기 실패: ", e);
                 }
             }
         })();
     }, [id, isLoggedIn])
 
-    // 댓글 목록 불러오기
     useEffect(() => {
         if (!id) return;
 
         (async () => {
             try {
                 setReplyLoading(true);
-                const res = await fetchReplies(id); // 서버에서 댓글 리스트 가져오기
+                const res = await fetchReplies(id);
 
-                // 댓글별 좋아요 정보도 같이 불러오기
                 const withLikes = await Promise.all(
                     (res.replies || []).map(async (r) => {
                         try {
                             const likeRes = await fetchReplyLikes(r.id); // { liked, count }
                             return {...r, liked: likeRes.liked, likeCount: likeRes.count};
                         } catch (e) {
-                            console.error("❌ 댓글 좋아요 상태 불러오기 실패:", e);
+                            console.error("댓글 좋아요 상태 불러오기 실패: ", e);
                             return {...r, liked: false, likeCount: 0};
                         }
                     })
@@ -171,14 +165,13 @@ function ArticleDetailInner() {
 
                 setReplies(withLikes);
             } catch (e) {
-                console.error("❌ 댓글 불러오기 실패:", e);
+                console.error("댓글 불러오기 실패: ", e);
             } finally {
                 setReplyLoading(false);
             }
         })();
     }, [id]);
 
-    // 드롭다운
     useEffect(() => {
         if (!menuOpen) return;
         const onDocDown = (e) => {
@@ -201,7 +194,6 @@ function ArticleDetailInner() {
         };
     }, [menuOpen]);
 
-// ESC & outside click to close
     useEffect(() => {
         const onKey = (e) => e.key === 'Escape' && setReplyMenuOpen(null);
         const onDown = (e) => {
@@ -220,7 +212,6 @@ function ArticleDetailInner() {
         };
     }, [replyMenuOpen]);
 
-    // 팔로우 상태 초기화 useEffect 교체
     useEffect(() => {
         (async () => {
             if (!article?.extra__writer) return;
@@ -228,13 +219,11 @@ function ArticleDetailInner() {
 
             try {
 
-                // 1) 작성자 id
                 const u = await fetchUser(article.extra__writer);
                 const targetId = Number(u?.member?.id) || 0;
                 const authorNickN = norm(article.extra__writer);
                 setAuthorId(targetId);
 
-                // ID로 내 글 판정
                 if (myId && targetId && myId === targetId) {
                     setIsMyPost(true);
                     setMember(null);
@@ -242,24 +231,21 @@ function ArticleDetailInner() {
                 }
                 setIsMyPost(false);
 
-                // 팔로잉 리스트
                 const fl = await getFollowingList();
                 const list = fl?.followingList || fl?.data1 || fl?.list || fl?.items || [];
 
-                // ID 우선 → 닉네임 보강
                 const isFollowing =
                     (targetId && list.some(m => getId(m) === targetId)) ||
                     list.some(m => norm(getNick(m)) === authorNickN);
 
                 setMember({id: targetId || null, isFollowing, nickName: article.extra__writer});
             } catch (e) {
-                console.error('❌ 작성자 member 구성 실패:', e);
+                console.error('작성자 member 구성 실패:', e);
                 setMember({id: null, isFollowing: false, nickName: article.extra__writer});
             }
         })();
     }, [id, article?.extra__writer, myId]);
 
-    // 내 회원 ID 로드
     useEffect(() => {
 
         if (!isLoggedIn) {
@@ -280,14 +266,12 @@ function ArticleDetailInner() {
         })();
     }, [id, isLoggedIn]);
 
-    // 글 아이디 바뀌면 팔로우 관련 상태 초기화 (잔존 상태 제거)
     useEffect(() => {
         setIsMyPost(false);
         setMember(null);
         setIsFollowing(false);
     }, [id]);
 
-    // confirm 표시
     const handleDelete = (articleId) => {
         confirm({
             title: "Delete this post?",
@@ -298,7 +282,6 @@ function ArticleDetailInner() {
         });
     };
 
-    // 게시글 삭제
     const doDeleteArticle = async (articleId) => {
         if (!articleId || !article?.userCanDelete) return;
         try {
@@ -322,7 +305,6 @@ function ArticleDetailInner() {
         }
     };
 
-    // 좋아요 토글
     const handleLikeToggle = async () => {
         if (!isLoggedIn) {
             window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}));
@@ -344,7 +326,6 @@ function ArticleDetailInner() {
         }
     };
 
-    // 댓글 작성
     const handleSubmitreply = async (e) => {
         e.preventDefault();
         if (!reply.trim()) return;
@@ -352,7 +333,7 @@ function ArticleDetailInner() {
         try {
             await postReply(id, reply);
             setReply('');
-            // 다시 목록 불러오기
+
             const res = await fetchReplies(id);
             const withLikes = await Promise.all(
                 (res.replies || []).map(async (r) => {
@@ -362,12 +343,11 @@ function ArticleDetailInner() {
             );
             setReplies(withLikes);
         } catch (e) {
-            console.error("❌ 댓글 작성 실패:", e);
+            console.error("댓글 작성 실패:", e);
             alert({intent: "danger", title: "Failed to write comment. Please try again."});
         }
     };
 
-    // 댓글 좋아요 토글
     const handleReplyLikeToggle = async (replyId, liked) => {
         if (!isLoggedIn) {
             window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}));
@@ -390,7 +370,7 @@ function ArticleDetailInner() {
                 );
             }
         } catch (e) {
-            console.error("❌ 댓글 좋아요 토글 실패:", e);
+            console.error("댓글 좋아요 토글 실패:", e);
             alert({intent: "danger", title: "Failed to like at comment. Please try again."});
         }
     };
@@ -414,7 +394,7 @@ function ArticleDetailInner() {
             ) : (
                 <div className="max-w-3xl mx-auto ">
                     <div className="flex justify-between">
-                        {/* 제목 + 날짜 묶음 */}
+                        {/* 제목 + 날짜 */}
                         <div
                             className={`flex items-baseline gap-2 mb-2 ml-2 flex-wrap ${
                                 isLoggedIn ? "pt-0" : "pt-20"
@@ -433,7 +413,7 @@ function ArticleDetailInner() {
 
                         {/* 공유 + 옵션 */}
                         <div className="flex items-center gap-3">
-                            {/* 공유 버튼 */}
+
                             <button
                                 type="button"
                                 className="flex items-center hover:text-gray-900
@@ -458,7 +438,7 @@ function ArticleDetailInner() {
                             >
                                 <i className="fa-solid fa-share-nodes"></i>
                             </button>
-                            {/* 옵션 */}
+
                             <div className="relative">
                                 <button
                                     ref={menuBtnRef}
@@ -478,7 +458,6 @@ function ArticleDetailInner() {
                                     <i className="fa-solid fa-ellipsis-vertical text-xl"></i>
                                 </button>
 
-                                {/*모달 메뉴*/}
                                 {menuOpen && (
                                     <div
                                         ref={menuRef}
@@ -538,10 +517,9 @@ function ArticleDetailInner() {
                         </div>
                     </div>
 
-                    {/* article info */}
                     <div className="flex justify-between items-end text-gray-600 my-4 px-2 dark:text-neutral-400">
                         <div className="flex items-center gap-2">
-                            {/* 닉네임 */}
+
                             <div
                                 onClick={(e) => {
                                     e.preventDefault();
@@ -553,7 +531,6 @@ function ArticleDetailInner() {
                                 {article.extra__writer}
                             </div>
 
-                            {/* 작성자 본인만 공개/비공개 여부 표시 */}
                             {isMyPost && (
                                 <span
                                     className="ml-2 text-xs px-2 py-1 rounded border border-neutral-300 dark:border-neutral-600">
@@ -561,7 +538,6 @@ function ArticleDetailInner() {
                                                     </span>
                             )}
 
-                            {/* 팔로우/언팔로우 버튼 (상대방 프로필일 때만) */}
                             {!isMyPost && member?.id && (
                                 <div className="flex">
                                     <button
@@ -581,7 +557,7 @@ function ArticleDetailInner() {
                                                     setFollowerCount(prev => prev + 1);
                                                 }
                                             } catch (err) {
-                                                console.error("❌ 팔로우/언팔로우 실패:", err);
+                                                console.error("팔로우/언팔로우 실패:", err);
                                                 alert({ intent: "danger", title: "Failed to process. Please try again." });
                                             }
                                         }}
@@ -607,7 +583,7 @@ function ArticleDetailInner() {
                         </div>
 
                         <div className="flex flex-col items-end gap-2">
-                            {/* 좋아요 */}
+
                             <button
                                 type="button"
                                 onClick={isLoggedIn
@@ -627,18 +603,15 @@ function ArticleDetailInner() {
                         </div>
                     </div>
 
-
-                    {/* 본문 */}
                     <div
                         className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg border-t border-b py-6
                         text-gray-800 dark:text-neutral-400 dark:border-neutral-700">
                         <ToastViewer content={article.body} showImages={true}/>
                     </div>
 
-                    {/* 댓글 입력 */}
                     <div className="my-10">
                         {isLoggedIn ? (
-                            // 로그인 상태 → 댓글 입력창
+
                             <form onSubmit={handleSubmitreply} className="relative">
                                 <label htmlFor="comment" className="sr-only">댓글 작성</label>
 
@@ -647,7 +620,7 @@ function ArticleDetailInner() {
                                                border-black/10 focus-within:border-black/20 bg-white/80
                                                dark:bg-neutral-900 dark:focus-within:border-white/30 dark:border-neutral-700"
                                 >
-                                    {/* textarea */}
+
                                     <textarea
                                         id="comment"
                                         ref={textareaRef}
@@ -669,7 +642,6 @@ function ArticleDetailInner() {
                                                  focus:outline-none"
                                     />
 
-                                    {/* 하단 글자수 + 버튼 */}
                                     <div className="absolute bottom-2 right-2 flex items-center gap-3">
                                           <span className="text-xs text-gray-500 dark:text-neutral-500">
                                             {reply.trim().length}/1000
@@ -707,8 +679,6 @@ function ArticleDetailInner() {
                         )}
                     </div>
 
-
-                    {/* 댓글 목록 */}
                     <div className="my-6 space-y-4">
                         {replyLoading ? (
                             <p className="text-gray-500 dark:text-neutral-500">Loading...</p>
@@ -742,7 +712,7 @@ function ArticleDetailInner() {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start gap-3">
                                                 <div className="flex-1">
-                                                    {/* Header: nickname + date (고정) */}
+
                                                     <div className="leading-6 break-words mt-1">
                                                         <Link
                                                             href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
@@ -839,7 +809,7 @@ function ArticleDetailInner() {
                                                 </div>
 
                                                 <div className="flex items-center gap-1 shrink-0">
-                                                    {/*좋아요*/}
+
                                                     <button
                                                         onClick={() => isLoggedIn
                                                             ? handleReplyLikeToggle(r.id, r.liked)
@@ -858,7 +828,6 @@ function ArticleDetailInner() {
                                                             <span className="text-sm">{r.likeCount}</span>}
                                                     </button>
 
-                                                    {/*옵션*/}
                                                     {(r.userCanModify || r.userCanDelete) && (
                                                         <div className="relative">
                                                             <button

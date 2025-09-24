@@ -64,7 +64,6 @@ export default function JoinForm() {
     };
 
 
-
     return (
         <form onSubmit={onSubmit} className="max-w-[460px] mx-auto">
             <div className="text-2xl md:text-3xl font-semibold text-center mb-8">Join</div>
