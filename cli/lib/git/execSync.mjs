@@ -110,7 +110,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             lastChecksum,
             key: zipKey,
         };
-
+      
         // 스트리밍 호출(무제한 대기)
         const res = await axios.post(`https://api.diff.io.kr/r2/analyze-stream`, payload, {
             headers: { "Content-Type": "application/json" },

@@ -35,7 +35,6 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
         ? (selected.name || selected.repoName || `Repo#${selected.id}`)
         : "Select a repository";
 
-    // close on outside click
     useEffect(() => {
         function onDocClick(e) {
             if (!open) return;
@@ -68,7 +67,6 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
                };
          }, [open]);
 
-    // keyboard
     const onKeyDown = useCallback(
         (e) => {
             if (disabled) return;
@@ -186,10 +184,8 @@ export function WriteArticlePage() {
     const [draftLoading, setDraftLoading] = useState(!!sp.get('draftId'));
     const [editorKey, setEditorKey] = useState('empty');
 
-    // from query
     const repoFromQuery = sp.get('repositoryId');
 
-    // state
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [repos, setRepos] = useState([]);
@@ -203,15 +199,11 @@ export function WriteArticlePage() {
     const [diffId, setDiffId] = useState(null);
     const [isPublic, setIsPublic] = useState(true);
 
-    const bg = useTheme() === 'dark' ? '#111214' : '#ffffff';
-
-    // auth check
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!token) router.replace('/DiFF/member/login');
     }, [router]);
 
-    // load draft if present
     useEffect(() => {
         let alive = true;
             (async () => {
@@ -225,7 +217,6 @@ export function WriteArticlePage() {
                         setBody(draft.body || '');
                         setRepositoryId(draft.repositoryId || null);
                         if (draft.diffId) setDiffId(draft.diffId);
-                        // ★ 드래프트 도착 후 key 변경 → 에디터 리마운트(초기값 정확히 반영)
                             const ver = draft.checksum || draft.updatedAt || Date.now();
                         setEditorKey(`draft-${draftId}-${ver}`);
                       } catch (e) {
@@ -237,7 +228,6 @@ export function WriteArticlePage() {
             return () => { alive = false; };
     }, [draftId]);
 
-    // load repos
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -277,7 +267,6 @@ export function WriteArticlePage() {
             .join("");
     }
 
-    // submit (upload)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -302,7 +291,6 @@ export function WriteArticlePage() {
             const res = await writeArticle(data);
             if (res?.resultCode?.startsWith('S-')) {
                 const articleId = res.data1;
-                // router.push(`/DiFF/article/detail?id=${articleId}`);
                 setTimeout(() => router.push(`/DiFF/article/detail?id=${articleId}`), 0);
             } else {
                 setError(res?.msg || 'Failed to write');
@@ -320,7 +308,6 @@ export function WriteArticlePage() {
         }
     };
 
-    // save draft
     const handleSaveDraft = async (e) => {
         e?.preventDefault?.();
         setError('');
@@ -361,7 +348,6 @@ export function WriteArticlePage() {
         }
     };
 
-    // shortcuts: Ctrl/Cmd+S save, Ctrl/Cmd+Enter upload
     useEffect(() => {
         const onKey = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -400,7 +386,6 @@ export function WriteArticlePage() {
                         "bg-white dark:bg-neutral-900"
                     )}
                 >
-                    {/* Title */}
                     <div className="flex-1">
                         <input
                             className={clsx(
@@ -434,9 +419,7 @@ export function WriteArticlePage() {
                             )}
                         </div>
 
-                        {/* Actions */}
                         <div className="col-span-12 sm:col-span-3 md:col-span-3 flex items-center justify-end gap-2">
-                            {/* Visibility toggle */}
                             <button
                                 type="button"
                                 onClick={() => setIsPublic(!isPublic)}
@@ -452,10 +435,7 @@ export function WriteArticlePage() {
                             <button
                                 type="button"
                                 onClick={() => router.push("/DiFF/article/drafts")}
-                                className={clsx(
-                                    "h-9 rounded-md px-3 text-sm text-neutral-600 hover:text-neutral-900 hover:underline",
-                                    "dark:text-neutral-400 dark:hover:text-neutral-100"
-                                )}
+                                className="underline-anim h-9 rounded-md px-3 text-sm dark:text-neutral-400"
                             >
                                 Drafts
                             </button>
@@ -473,8 +453,8 @@ export function WriteArticlePage() {
                     <div className="h-full w-full">
                         {!draftLoading && (
                                     <ToastEditor
-                                      key={editorKey}             // ★ 로드 후 리마운트
-                                      initialValue={body}         // ★ 이 타이밍에 정확히 먹음
+                                      key={editorKey}
+                                      initialValue={body}
                                       onChange={(value) => setBody(value)}
                                       height="100%"
                                     />
@@ -513,7 +493,6 @@ export function WriteArticlePage() {
             </form>
 
             <style jsx global>{`
-                /* ---- Frame: editor full height + sticky toolbar ---- */
                 .toastui-editor-defaultUI {
                     height: 100% !important;
                     display: flex;
@@ -527,45 +506,41 @@ export function WriteArticlePage() {
                     flex: 0 0 auto;
                     background: inherit;
                 }
-
-                /* ---- Main takes the scroll (ONLY here) ---- */
+                
                 .toastui-editor-main {
                     flex: 1 1 auto !important;
                     min-height: 0 !important;
                     overflow: auto !important; 
                 }
-
-                /* 메인 내부 컨테이너/패널이 메인 높이를 정확히 채우도록 */
+                
                 .toastui-editor-main-container {
                     display: flex !important;
                     height: 100% !important;
                     min-height: 0 !important;
                 }
+                
                 .toastui-editor-md-container.toastui-editor-md-vertical-style,
                 .toastui-editor-preview.toastui-editor-vertical-style {
                     flex: 1 1 0% !important;
                     height: 100% !important;
                     min-height: 0 !important;
                 }
-
-                /* ---- Markdown pane: CodeMirror는 'auto-height', 내부 스크롤 제거 ---- */
+                
                 .toastui-editor-md-container .CodeMirror {
-                    height: auto !important;              /* 내용 길이에 맞춰 늘어남 */
+                    height: auto !important;              
                 }
                 .toastui-editor-md-container .CodeMirror-scroll {
-                    overflow-y: hidden !important;        /* 내부 스크롤 금지 (수직) */
-                    overflow-x: auto !important;          /* 수평 스크롤만 허용 */
-                    min-height: 100% !important;          /* 클릭 영역이 패널 높이만큼 확보 */
+                    overflow-y: hidden !important;        
+                    overflow-x: auto !important;          
+                    min-height: 100% !important;          
                 }
-
-                /* ---- WYSIWYG pane도 내부 스크롤 제거 ---- */
+                
                 .toastui-editor-ww-container .ProseMirror {
                     height: auto !important;
                     min-height: 100% !important;
                     overflow: visible !important;
                 }
-
-                /* 탭(Write/Preview) 숨김 */
+                
                 .toastui-editor-defaultUI .toastui-editor-tabs {
                     display: none !important;
                 }
