@@ -10,7 +10,6 @@ import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
 import { Globe, Lock } from "lucide-react";
 
-// 🔑 컴포넌트 밖(모듈 최상단)에서 dynamic 선언 (재마운트 방지)
 const ToastEditor = dynamic(() => import("@/common/toastEditor"), { ssr: false });
 
 export default function ModifyArticlePage() {
@@ -36,7 +35,6 @@ function ModifyArticlePageInner() {
     const [submitting, setSubmitting] = useState(false);
     const [unmountEditor, setUnmountEditor] = useState(false);
 
-    // Load & permission check
     useEffect(() => {
         if (!id) return;
         (async () => {
@@ -69,7 +67,6 @@ function ModifyArticlePageInner() {
         })();
     }, [id, router, alert]);
 
-    // Submit update
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -105,7 +102,6 @@ function ModifyArticlePageInner() {
             await modifyArticle(modifiedArticle, token);
             await alert({ intent: "success", title: "Updated successfully." });
 
-            // 에디터 먼저 언마운트 → 다음 틱에 라우팅 (removeChild 충돌 방지)
             setUnmountEditor(true);
             setTimeout(() => router.push(`/DiFF/article/detail?id=${id}`), 0);
         } catch (e) {
@@ -116,7 +112,6 @@ function ModifyArticlePageInner() {
         }
     };
 
-    // Shortcuts
     useEffect(() => {
         const onKey = (e) => {
             if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 's' || e.key === 'Enter')) {
@@ -140,7 +135,6 @@ function ModifyArticlePageInner() {
                     "bg-white dark:bg-neutral-900"
                 )}>
 
-                    {/* Title */}
                     <div className="flex-1">
                         <input
                             className="w-full truncate rounded p-3 text-5xl font-semibold bg-transparent border-transparent focus:outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
@@ -150,7 +144,6 @@ function ModifyArticlePageInner() {
                         />
                     </div>
 
-                    {/* Visibility */}
                     <div className="flex items-center gap-2 mx-5">
                         <button
                             type="button"
@@ -174,7 +167,6 @@ function ModifyArticlePageInner() {
 
                 <div className="flex-1 overflow-auto">
                     <div className="h-full w-full">
-                        {/* ✅ 글 로딩이 끝난 뒤에만 에디터 렌더 (기존 내용 보존) */}
                         {!unmountEditor && !loading && article && (
                             <ToastEditor key={id} initialValue={body} onChange={setBody} />
                         )}

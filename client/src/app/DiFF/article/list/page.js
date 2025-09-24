@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { fetchArticles, deleteArticle } from '@/lib/ArticleAPI';
+import { fetchArticles } from '@/lib/ArticleAPI';
 import LoadingOverlay from "@/common/loadingOverlay";
 
 function truncate(text = '', max = 100) {
@@ -52,7 +52,7 @@ function ArticleListInner() {
         <LoadingOverlay show={loading} />
 
         <div className="px-32 py-10">
-            <h1 className="text-2xl font-bold mb-4">이 페이지가 보인다면 망한 것이다. rdirect url을 다시 설정해라</h1>
+            <h1 className="text-2xl font-bold mb-4">page failed. redirect url try again.</h1>
             <ul className="space-y-4">
                 {articles.map((article) => (
                     <li key={article.id} className="border-b pb-4">

@@ -542,3 +542,65 @@ li {
 .bell-button:active {
     transform: scale(0.8);
 }
+
+/* Drafts 버튼 스타일 (원본 효과 + 다크 대응) */
+.btn2 {
+    --btn-fg: #fefefe;
+    --btn-bg: #212121;
+    position: relative;
+    display: inline-block;
+    padding: 12px 30px; /* 원본 15px→12px로 살짝 컴팩트 */
+    border: 2px solid var(--btn-fg);
+    text-transform: uppercase;
+    color: var(--btn-fg);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 18px;
+    background: transparent;
+    cursor: pointer;
+    transition: color .3s ease, border-color .3s ease, background-color .3s ease;
+    overflow: hidden;
+    border-radius: 8px; /* 필요 시 제거 */
+}
+.btn2::before,
+.btn2::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background: var(--btn-bg);
+    transition: transform .3s ease-out, height .3s ease-out;
+    will-change: transform, height;
+}
+.btn2::before {
+    width: calc(100% + 6px);
+    height: calc(100% + 2px);
+    transform: scaleY(1);
+}
+.btn2::after {
+    width: calc(100% + 4px);
+    height: calc(100% - 50px);
+    transform: scaleX(1);
+}
+.btn2:hover::before { transform: translateY(-25px); height: 0; }
+.btn2:hover::after  { transform: scaleX(0); transition-delay: .15s; }
+
+.btn2 > .spn2 {
+    position: relative;
+    z-index: 3;
+    background: transparent;
+    border: 0;
+}
+
+/* 포커스 접근성 */
+.btn2:focus-visible {
+    outline: 3px solid rgba(255,255,255,.6);
+    outline-offset: 2px;
+    border-radius: 10px;
+}
+
+/* 다크모드 변수 (원하면 페이지 전역 .dark에 붙이기) */
+.dark .btn2 {
+    --btn-fg: #fefefe;
+    --btn-bg: #111;
+}

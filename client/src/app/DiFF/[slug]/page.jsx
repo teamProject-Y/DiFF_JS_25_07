@@ -1,8 +1,9 @@
 // app/DiFF/[slug]/page.jsx
+
 import { redirect, notFound } from 'next/navigation'
 import { bff } from '@/lib/bff'
 
-export const dynamic = 'force-dynamic'; // 캐시/정적최적화 회피(안전장치)
+export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }) {
     const { slug } = params
@@ -27,10 +28,9 @@ export default async function Page({ params }) {
         'location:', res.headers.get('location'),
         'ctype:', res.headers.get('content-type'));
 
-    // 🔎 여기서 3xx를 직접 잡아 404로 보낼 수 있음
     if (res.status >= 300 && res.status < 400) {
         console.error('[redirect caught]', res.status, res.headers.get('location'))
-        notFound() // (원하면 여기서 로그인 redirect로 바꿔도 됨)
+        notFound() // 원하면 여기서 로그인 redirect로 바꿔도 됨
     }
 
     if (res.status === 401 || res.status === 403 || res.status === 404) {
