@@ -110,30 +110,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             lastChecksum,
             key: zipKey,
         };
-
-        // const res = await axios.post(url, payload, {
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     }
-        // });
-        //
-        // if (res.status >= 200 && res.status < 300) {
-        //     console.log(chalk.green(`✅ Analysis succeeded [${res.status}]`));
-        //     console.log(`• result: ${res.data}`);
-        // } else if (res.status >= 400 && res.status < 500) {
-        //     console.error(chalk.yellow(`⚠️ Client error [${res.status}]`));
-        //     console.error(`• server message: ${res.data}`);
-        //     return false;
-        // } else if (res.status >= 500) {
-        //     console.error(chalk.red(`❌ Server error [${res.status}]`));
-        //     console.error(`• server message: ${res.data}`);
-        //     return false;
-        // } else {
-        //     console.error(chalk.yellow(`⚠️ Unexpected status [${res.status}]`));
-        //     console.error(`• body: ${res.data}`);
-        //     return false;
-        // }
-
+      
         // 스트리밍 호출(무제한 대기)
         const res = await axios.post(`https://api.diff.io.kr/r2/analyze-stream`, payload, {
             headers: { "Content-Type": "application/json" },

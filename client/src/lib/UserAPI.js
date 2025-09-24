@@ -198,14 +198,14 @@ export const uploadProfileImg = async (file) => {
 
 export const requestPasswordReset = async (email) => {
 
-    return axios.post(`/member/findPw`, null, {
+    return UserAPI.post(`/member/findPw`, null, {
         params: { email },
     });
 };
 
 export const updatePassword = async (token, newPw) => {
 
-    return axios.post(`/member/updatePassword`, null, {
+    return UserAPI.post(`/member/updatePassword`, null, {
         params: { token, newPw },
     });
 };
