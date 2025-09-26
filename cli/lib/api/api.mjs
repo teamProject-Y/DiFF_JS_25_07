@@ -77,19 +77,6 @@ export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum
     const t0 = Date.now();
     const tag = (msg) => chalk.cyan(`[sendDiFF d:${draftId} diff:${diffId}] `) + msg;
 
-    // 사전 로그
-    const diffLen = diff ? diff.length : 0;
-    const lineCount = diff ? ((diff.match(/\n/g)?.length ?? 0) + 1) : 0;
-
-    console.log(tag(`🚀 start → memberId=${memberId}, repoId=${repositoryId}, checksum=${chalk.yellow(checksum)}`));
-    console.log(tag(`📝 diff size=${chalk.green(diffLen)} bytes, lines=${chalk.green(lineCount)}`));
-
-    // 선택: DIFF 미리보기 (앞 40줄)
-    if (process.env.DEBUG_DIFF === "1" && diff) {
-        const preview = diff.split("\n").slice(0, 40).join("\n");
-        console.log(tag(chalk.gray("── DIFF preview (first 40) ──\n") + preview + chalk.gray("\n── end preview ──")));
-    }
-
     try {
         const payload = {
             memberId,
@@ -114,14 +101,12 @@ export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum
 
         const ok = data?.resultCode?.startsWith("S-") ?? false;
 
-        console.log(tag(`📨 server responded status=${status}, resultCode=${data?.resultCode}, msg=${data?.msg ?? "<none>"}`));
         if (!ok && data) {
             // 서버가 에러 디테일을 실어줄 수 있으니 같이 찍기
             console.warn(tag(chalk.yellow(`⚠️ server data: ${JSON.stringify(data).slice(0, 800)}${JSON.stringify(data).length > 800 ? " …" : ""}`)));
         }
 
         const dt = ((Date.now() - t0) / 1000).toFixed(2);
-        console.log(tag(chalk.bold(`🏁 end (ok=${ok}) ⏱ ${dt}s`)));
 
         return ok;
     } catch (e) {
@@ -138,12 +123,9 @@ export async function sendDiFF(memberId, repositoryId, draftId, diffId, checksum
             const snippet = typeof resp === "string" ? resp.slice(0, 800) : JSON.stringify(resp).slice(0, 800);
             console.error(tag(chalk.red(`❌ response body: ${snippet}${snippet.length >= 800 ? " …" : ""}`)));
         }
-
-        console.log(tag(chalk.bold(`🏁 end (ok=false) ⏱ ${dt}s`)));
         return false;
     }
 }
-
 
 // Draft 메타데이터 전달 (ZIP 업로드 후 호출)
 export async function sendDraftMeta(memberId, repositoryId, draftId, diffId, checksum, zipKey) {

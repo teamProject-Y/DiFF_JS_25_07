@@ -83,7 +83,8 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             await sh(`mkdir tempdir`);
             await sh(`unzip withoutTarget.zip -d tempdir`);
             await sh(`cp -r target tempdir/`);
-            await sh(`cd tempdir && zip -r ../difftest.zip .`);
+            // await sh(`cd tempdir && zip -r ../difftest.zip .`);
+            await zipDir('tempdir', 'difftest.zip');
             await sh(`rm withoutTarget.zip && rm -rf tempdir`);
         } else {
             await sh(`git archive --format=zip --output=difftest.zip ${branch}`);
@@ -97,9 +98,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         const zipKey = `repo_${repositoryId}/draft_${draftId}_${lastChecksum}.zip`;
         const ok = await uploadZipToR2("difftest.zip", zipKey);
 
-        console.log("R2 zipKey:", zipKey);
         if (!ok) throw new Error("❌ R2 업로드 실패");
-        console.log(chalk.green("✅ R2 업로드 성공 서버 시작"));
 
         const url = "https://api.diff.io.kr/r2/analyze";
         const payload = {
@@ -120,8 +119,6 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
             maxBodyLength: Infinity,
         });
 
-        console.log(chalk.gray("⏳ server processing... (will wait until DONE/ERROR)"));
-
         let done = false;
         let errorMsg = "";
         let finalResult = "";
@@ -131,11 +128,6 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
                 const text = chunk.toString("utf8");
                 for (const line of text.split("\n")) {
                     if (!line) continue;
-                    if (line === "START") console.log("▶️  started");
-                    else if (line === "UNZIPPED") console.log("📦 unzipped");
-                    else if (line === "SCANNED") console.log("🔎 scanned");
-                    else if (line === "SAVED") console.log("💾 saved");
-                    else if (line === "DONE") { done = true; console.log(chalk.green("✅ done")); }
                     else if (line.startsWith("ERROR")) { errorMsg = line; console.error(chalk.red(line)); }
                     else if (line === ".") { /* heartbeat */ }
                     else { finalResult += line + "\n"; } // 결과 본문 누적
@@ -158,6 +150,19 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         console.error(err.stack);
         return false;
     }
+}
+
+// 압축
+export function zipDir(srcDir, outFile) {
+    return new Promise((resolve, reject) => {
+        const output = fs.createWriteStream(outFile);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        output.on('close', resolve);
+        archive.on('error', reject);
+        archive.pipe(output);
+        archive.directory(srcDir, false);
+        archive.finalize();
+    });
 }
 
 // 비동기로 cmd
