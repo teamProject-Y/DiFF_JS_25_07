@@ -101,12 +101,10 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                 </span>
             </button>
 
-            {/* 추가 메뉴 */}
             <div className="text-center my-6 flex justify-center gap-6 text-black">
                 <a href="/DiFF/member/findLoginPw" className="hover:underline">Find PW</a>
             </div>
 
-            {/* 소셜 로그인 */}
             <div className="space-y-4">
                 <a href="/login/google"
                    className="flex items-center justify-center gap-3 border border-black text-black bg-white py-3 px-4 rounded-lg mx-auto">

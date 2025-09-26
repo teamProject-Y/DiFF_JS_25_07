@@ -2,7 +2,6 @@
 
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
-// 날짜 포맷 (KST)
 function getLoginDate() {
     const now = new Date();
     const day = now.toLocaleDateString('en-US', {weekday: 'short', timeZone: 'Asia/Seoul'});
@@ -12,7 +11,6 @@ function getLoginDate() {
     return `${day}\u2009\u2009${month}\u2009\u2009${date}\u2009\u2009${time}`;
 }
 
-/** 기본 타자 효과 */
 function Typewriter({text, speed = 30, onDone, className = ''}) {
     const [displayed, setDisplayed] = useState('');
     const timersRef = useRef([]);
@@ -72,10 +70,8 @@ function TypewriterDotsThenDone({
             if (i < base.length) {
                 timersRef.current.push(setTimeout(typeBase, speed));
             } else {
-                // 1초 후에 ' done.' 붙임
                 timersRef.current.push(setTimeout(() => {
                     setDisplayed(base + suffix);
-                    // 붙인 뒤 0.5초 후 다음 단계 시작
                     timersRef.current.push(setTimeout(() => onDone?.(), delayMs));
                 }, delayMs));
             }
@@ -121,26 +117,24 @@ function MirrorPrompt({
     const hasValue = value?.length > 0;
 
     return (
-        <div
-            className={`prompt-mirror-wrapper ${className}`}
-            onClick={() => taRef.current?.focus()}
-            style={{position: 'relative', width: '80%', paddingLeft: '23px'}}
-            role="group"
-            aria-label="Terminal command input"
+        <div className={`prompt-mirror-wrapper ${className}`}
+             onClick={() => taRef.current?.focus()}
+             style={{position: 'relative', width: '80%', paddingLeft: '23px'}}
+             role="group"
+             aria-label="Terminal command input"
         >
 
-            <div
-                className="prompt-mirror-text"
-                aria-hidden="true"
-                style={{
-                    pointerEvents: 'none',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    lineHeight: 1.2,
-                    fontWeight: 1000,
-                    fontSize: '2rem',
-                    color: '#d1d5db',
-                }}
+            <div className="prompt-mirror-text"
+                 aria-hidden="true"
+                 style={{
+                     pointerEvents: 'none',
+                     whiteSpace: 'pre-wrap',
+                     wordBreak: 'break-word',
+                     lineHeight: 1.2,
+                     fontWeight: 1000,
+                     fontSize: '2rem',
+                     color: '#d1d5db',
+                 }}
             >
                 {hasValue ? (
                     <>
@@ -223,12 +217,11 @@ export default function BeforeMainPage() {
         }
     }, [step, LINES.length]);
 
-// 포커스는 프롬프트 타이핑 완료 후에만
     useEffect(() => {
         if (!showInput || !promptReady) return;
         const t = setTimeout(() => {
             try {
-                inputRef.current?.focus({ preventScroll: true });
+                inputRef.current?.focus({preventScroll: true});
             } catch {
                 inputRef.current?.focus();
             }
@@ -248,15 +241,13 @@ export default function BeforeMainPage() {
         if (!scroller) return;
 
         const scrollToBottom = () => {
-            bottomRef.current?.scrollIntoView({ block: 'end', inline: 'nearest' });
+            bottomRef.current?.scrollIntoView({block: 'end', inline: 'nearest'});
         };
 
-        // 초기 1회
         scrollToBottom();
 
-        // 내용/크기 변화 감지 → 하단으로
         const mo = new MutationObserver(scrollToBottom);
-        mo.observe(scroller, { childList: true, subtree: true });
+        mo.observe(scroller, {childList: true, subtree: true});
 
         const ro = new ResizeObserver(scrollToBottom);
         ro.observe(scroller);
@@ -267,8 +258,6 @@ export default function BeforeMainPage() {
         };
     }, []);
 
-
-    // 단계별 효과
     useEffect(() => {
         if (step < LINES.length) setShowInput(false);
         else if (step === LINES.length) {
@@ -284,13 +273,13 @@ export default function BeforeMainPage() {
             setShowInput(false);
         }
     }, [step, LINES.length]);
+
     useEffect(() => {
         if (!showInput) return;
         const t = setTimeout(() => inputRef.current?.focus({preventScroll: true}), 0);
         return () => clearTimeout(t);
     }, [showInput]);
 
-    // 입력 후 결과 한 줄씩 애니메이션
     useEffect(() => {
         if (step > LINES.length && step <= LINES.length + RESULTS.length) {
             const idx = step - LINES.length - 1;
@@ -340,9 +329,11 @@ export default function BeforeMainPage() {
     }, [COMMAND, LINES.length]);
 
     return (
-        <div
-            className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
-            style={{fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: 'break-word'}}
+        <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
+             style={{
+                 fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
+                 wordBreak: 'break-word'
+             }}
         >
             <style jsx global>{`
                 .terminal-font {
@@ -350,7 +341,6 @@ export default function BeforeMainPage() {
                     line-height: 1.2;
                 }
 
-                /* 커서 */
                 .fake-caret {
                     display: inline-block;
                     width: 0.14em;
@@ -369,7 +359,6 @@ export default function BeforeMainPage() {
                     margin-right: 6px;
                 }
 
-                /* placeholder 앞에 약간의 여백 */
                 @keyframes caret-blink {
                     50% {
                         opacity: 0;
@@ -397,7 +386,6 @@ export default function BeforeMainPage() {
                 }
             `}</style>
 
-            {/* 터미널 헤더 */}
             <div
                 className="flex items-center justify-center h-12 w-full bg-neutral-700 text-white text-center text-xl relative">
                 <div className="absolute flex justify-start w-full ml-3">
@@ -408,32 +396,28 @@ export default function BeforeMainPage() {
                 Welcome to DiFF -- - bash - 45 x 7
             </div>
 
-            {/* 로그 */}
             <div ref={scrollerRef} id="terminalScroll" className="h-[calc(100%-3rem)] overflow-y-auto">
-                <div
-                    className="pt-6 pl-6 pb-4 pr-6 text-left terminal-font text-2xl md:text-4xl break-words"
-                    role="log"
-                    aria-live="polite"
+                <div className="pt-6 pl-6 pb-4 pr-6 text-left terminal-font text-2xl md:text-4xl break-words"
+                     role="log"
+                     aria-live="polite"
                 >
                     {log.map((item, i) => (
                         item.type === 'prompt' ? (
                             <div key={i} className="flex flex-wrap items-start pt-4">
                                 <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
-                                <span className={item.className} style={{ whiteSpace: 'pre-wrap' }}>{item.value}</span>
+                                <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
                             </div>
                         ) : (
                             <div key={i} className={item.className}>{item.text}</div>
                         )
                     ))}
 
-                    {/* 첫 라인 애니메이션 */}
                     {step < LINES.length && (
                         <div className={LINES[step].className}>
-                            <Typewriter text={LINES[step].text} speed={30} onDone={handleAnimDone} />
+                            <Typewriter text={LINES[step].text} speed={30} onDone={handleAnimDone}/>
                         </div>
                     )}
 
-                    {/* 결과 애니메이션 */}
                     {showResultAnim && currentResultText && (
                         <div className="text-white font-bold terminal-font text-2xl md:text-4xl mt-4 break-all">
                             <TypewriterDotsThenDone
@@ -447,9 +431,9 @@ export default function BeforeMainPage() {
                     )}
                 </div>
 
-                {/* 입력 영역 */}
                 {showInput && (
-                    <div className="text-left terminal-font text-2xl md:text-4xl pl-6 pr-6 pb-6 break-words flex items-center">
+                    <div
+                        className="text-left terminal-font text-2xl md:text-4xl pl-6 pr-6 pb-6 break-words flex items-center">
                         {!promptReady ? (
                             <Typewriter
                                 text={PROMPT_PREFIX}
@@ -458,9 +442,8 @@ export default function BeforeMainPage() {
                                 className="text-green-400 font-bold"
                             />
                         ) : (
-                            <span
-                                className="text-green-400 font-bold"
-                                style={{ whiteSpace: 'nowrap' }}
+                            <span className="text-green-400 font-bold"
+                                  style={{whiteSpace: 'nowrap'}}
                             >
                             {PROMPT_PREFIX}
                         </span>
@@ -469,7 +452,10 @@ export default function BeforeMainPage() {
                         {promptReady && (
                             <MirrorPrompt
                                 value={input}
-                                onChange={(v) => { setInput(v); if (error) setError(''); }}
+                                onChange={(v) => {
+                                    setInput(v);
+                                    if (error) setError('');
+                                }}
                                 onSubmit={submitCommand}
                                 placeholder={COMMAND}
                                 inputRefExternal={inputRef}
@@ -478,7 +464,6 @@ export default function BeforeMainPage() {
                     </div>
                 )}
 
-                {/* 에러 메시지 */}
                 {error && (
                     <div className="px-6 pb-6">
                         <div className="text-red-400 text-lg md:text-2xl font-semibold terminal-font">

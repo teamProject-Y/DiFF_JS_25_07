@@ -1,4 +1,3 @@
-// app/DiFF/home/page.js
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
@@ -7,9 +6,7 @@ import Link from 'next/link';
 import {useRouter} from "next/navigation"
 import {trendingArticle} from '@/lib/ArticleAPI';
 import Footer from '@/common/footer';
-import {FolderTree} from 'lucide-react';
 
-// 동적 import (Swiper)
 import {Navigation, Pagination, A11y, Autoplay} from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -20,7 +17,6 @@ const SwiperSlide = dynamic(() => import('swiper/react').then(mod => mod.SwiperS
 SwiperWrapper.displayName = 'SwiperWrapper';
 SwiperSlide.displayName = 'SwiperSlide';
 
-// background
 const sections = [
     {id: 'terminal', color: '#161616'},
     {id: 'docs', color: '#fafafa'},
@@ -28,7 +24,6 @@ const sections = [
     {id: 'trending', color: '#fafafa'}
 ];
 
-// 로그인 분기용: 만료/리프레시
 function isExpired(token, skewMs = 30000) {
     try {
         const payload = JSON.parse(atob((token?.split?.('.')[1] || '')));
@@ -87,7 +82,6 @@ function useMountedLogin() {
     return {mounted, loggedIn};
 }
 
-// JWT payload 파싱
 function parseJwt(token) {
     if (!token) return {};
     try {
@@ -105,7 +99,6 @@ function parseJwt(token) {
     }
 }
 
-// 분기용 컴포넌트 import
 import BeforeMainPage from './BeforeMainPage';
 import AfterMainPage from './AfterMainPage';
 import removeMd from "remove-markdown";
@@ -154,7 +147,6 @@ export default function Page() {
         }
     }, []);
 
-    // page.js
     const lastColorRef = useRef(null);
 
     useEffect(() => {
@@ -178,7 +170,6 @@ export default function Page() {
             const sec = sections.find(s => s.id === best.id);
             if (!sec) return;
 
-            // 같은 색이면 setState 안 함 → 불필요 리렌더 차단
             if (lastColorRef.current !== sec.color) {
                 lastColorRef.current = sec.color;
                 setBgColor(sec.color);
@@ -197,19 +188,17 @@ export default function Page() {
         return <AfterMainPage me={user} trendingArticles={trendingArticles}/>;
     }
 
-    // 로그인 전 화면
     return (
-        <div
-            id="pageScroll"
+        <div id="pageScroll"
             data-scroll-root
             className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-mandatory scroll-smooth"
-            style={{backgroundColor: bgColor}}
-        >
+            style={{backgroundColor: bgColor}}>
             <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
                  ref={el => sectionRefs.current[0] = el}>
-                {/*<div className="">*/}
+
                 <BeforeMainPage/>
-                {/*</div>*/}
+
+
             </div>
 
             <div id="docs" className="is-light-bg min-h-screen w-full pt-20 dark:is-dark-bg"
@@ -222,15 +211,14 @@ export default function Page() {
                 </div>
             </div>
 
-            {/*repository*/}
             <div id="repository"
                  className="h-screen w-full pt-20 bg-white snap-start flex flex-col items-center justify-center"
                  ref={el => sectionRefs.current[2] = el}>
                 <div className="min-h-[10%] font-semibold self-end px-20 text-right">
                     <div className="ml-auto max-w-[920px] flex flex-col items-end gap-3">
-                        {/* Title */}
+
                         <p className="text-[clamp(20px,1.6vw,24px)] font-semibold text-blue-600 tracking-tight
-                        flex items-center gap-3">
+                                      flex items-center gap-3">
                             Repository Management
                             <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
                         </p>
@@ -242,15 +230,11 @@ export default function Page() {
                 <RepoLayoutSample/>
             </div>
 
-            {/* trending */}
             <div id="trending"
                  className="is-light-bg w-full h-screen snap-start bg-gray-100 px-20 pt-20"
                  ref={el => sectionRefs.current[3] = el}>
-
-                {/* Title */}
-
                 <p className="text-[clamp(20px,1.6vw,24px)] font-bold text-blue-600 tracking-tight
-                        flex items-center gap-3">
+                              flex items-center gap-3">
                     <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
                     TRENDING
                 </p>
@@ -260,8 +244,8 @@ export default function Page() {
 
                 <div className="article-slider h-2/3 w-full mt-8 flex relative">
                     <div className="flex absolute right-0 -top-16  font-extralight text-3xl text-neutral-500 z-10">
-                        <button
-                            className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
+                        <button className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center
+                                           bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
                                 <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1" fill="none"
                                       strokeLinecap="round" strokeLinejoin="round"/>
@@ -318,29 +302,25 @@ export default function Page() {
                                                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && router.push(`/DiFF/article/detail?id=${article.id}`)}
                                                 >
 
-                                                    {/* 썸네일 영역 (그라데이션 + 배지 + 메트릭) */}
                                                     <div className="relative h-1/2 w-full bg-neutral-100">
                                                         {imgSrc ? (
                                                             <img src={imgSrc} alt="thumbnail"
                                                                  className="absolute inset-0 w-full h-full object-cover"/>
                                                         ) : (
-                                                            <div
-                                                                className="absolute inset-0 flex items-center justify-center text-neutral-400">
+                                                            <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
                                                                 <span className="text-sm">No Image</span>
                                                             </div>
                                                         )}
 
-                                                        {/* 오버레이 */}
+
                                                         <div
                                                             className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none"/>
 
-                                                        {/* 배지 */}
                                                         <span
                                                             className="absolute left-3 top-3 rounded-full bg-white/90 text-[11px] uppercase tracking-wide px-2 py-1 ring-1 ring-black/5">
                                                             Trending
                                                           </span>
 
-                                                        {/* 메트릭 */}
                                                         <div
                                                             className="absolute right-3 bottom-3 flex items-center gap-3 text-white/90 text-xs">
                                                             <span className="inline-flex items-center gap-1">
@@ -352,10 +332,8 @@ export default function Page() {
                                                         </div>
                                                     </div>
 
-                                                    {/* 본문 영역 */}
                                                     <div className="h-1/2 p-5 flex flex-col">
-                                                        <h3
-                                                            className="text-lg md:text-xl font-semibold clamp-2 mb-1 hover:text-black transition-colors"
+                                                        <h3 className="text-lg md:text-xl font-semibold clamp-2 mb-1 hover:text-black transition-colors"
                                                             title={article.title}
                                                         >
                                                             {article.title}
@@ -365,39 +343,30 @@ export default function Page() {
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
 
-                                                        {/* 푸터 */}
                                                         <div
                                                             className="mt-auto pt-4 flex items-center justify-between border-t border-neutral-200">
                                                             <div className="flex items-center gap-3 min-w-0">
-                                                                {/* 이니셜 아바타 */}
                                                                 {article.extra__profileUrl ? (
-                                                                    <div
-                                                                        className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
-                                                                        <img
-                                                                            src={article.extra__profileUrl}
+                                                                    <div className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
+                                                                        <img src={article.extra__profileUrl}
                                                                             alt="profile"
-                                                                            className="block h-full w-full object-cover"
-                                                                        />
+                                                                            className="block h-full w-full object-cover"/>
                                                                     </div>
                                                                 ) : (
-                                                                    <div
-                                                                        className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-600">
+                                                                    <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-600">
                                                                         {(article.extra__writer?.[0] || "U").toUpperCase()}
                                                                     </div>
                                                                 )}
                                                                 <div className="min-w-0">
                                                                     {article.extra__writer ? (
-                                                                        <Link
-                                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
                                                                             className="hover:underline hover:text-black font-medium truncate"
                                                                             onClick={(e) => e.stopPropagation()}
-                                                                            title={article.extra__writer}
-                                                                        >
+                                                                            title={article.extra__writer}>
                                                                             {article.extra__writer}
                                                                         </Link>
                                                                     ) : (
-                                                                        <span
-                                                                            className="font-medium text-neutral-800">Unknown</span>
+                                                                        <span className="font-medium text-neutral-800">Unknown</span>
                                                                     )}
                                                                     <span className="ml-2 text-xs text-neutral-500">
                                                                       {new Date(article.regDate).toLocaleDateString("en-US", {
@@ -424,17 +393,15 @@ export default function Page() {
                 </div>
             </div>
 
-            {/* 🔻 Footer: BeforePage 전용, 페이지 맨 끝에 스냅 */}
             {(!loggedIn) && (
                 <section
                     id="before-footer"
                     className="snap-start snap-y-mandatory scroll-mt-4"
                 >
-                    <Footer />
+                    <Footer/>
                 </section>
             )}
 
-            {/* toggle menu */}
             <div className="pointer-events-none">
                 <button onClick={() =>
                     window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))}

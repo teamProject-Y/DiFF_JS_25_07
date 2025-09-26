@@ -1,4 +1,4 @@
-// src/common/commonLayout.jsx
+
 'use client';
 
 import Header from '@/common/header';
@@ -9,7 +9,6 @@ import LayMenu from '@/common/layMenu';
 import clsx from 'clsx';
 import ConfirmDialog from '@/common/alertModal';
 
-// alert
 const DialogContext = createContext(null);
 
 export const useDialog = () => {
@@ -39,7 +38,7 @@ export default function CommonLayout({children, modal, pageTitle = 'DiFF'}) {
     const [alertCfg, setAlertCfg] = useState({});
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [confirmCfg, setConfirmCfg] = useState({});
-    const confirmResolveRef = useRef(null); // confirm 결과 저장
+    const confirmResolveRef = useRef(null);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -52,14 +51,12 @@ export default function CommonLayout({children, modal, pageTitle = 'DiFF'}) {
                 setAccessToken(accessToken);
                 router.replace("/DiFF/home/main");
             } else {
-                // 초기 로드 시 localStorage에서 토큰 읽기
                 const saved = localStorage.getItem("accessToken");
                 setAccessToken(saved);
             }
         }
     }, [router]);
 
-    // 다른 탭에서 로그인/로그아웃해도 동기화
     useEffect(() => {
         const onStorage = (e) => {
             if (e.key === 'accessToken') {
@@ -92,7 +89,7 @@ export default function CommonLayout({children, modal, pageTitle = 'DiFF'}) {
     const confirm = useCallback((cfg = {}) => {
         return new Promise((resolve) => {
             confirmResolveRef.current = resolve;
-            // onConfirm / onCancel 래핑해서 Promise 해결
+
             const wrap = {
                 intent: 'danger',
                 title: 'Are you sure?',
@@ -123,7 +120,6 @@ export default function CommonLayout({children, modal, pageTitle = 'DiFF'}) {
         });
     }, []);
 
-    // 모달이 ESC/오버레이로 닫힐 때 confirm Promise도 정리
     const handleConfirmOpenChange = useCallback((v) => {
         setConfirmOpen(v);
         if (!v && confirmResolveRef.current) {
@@ -144,7 +140,7 @@ export default function CommonLayout({children, modal, pageTitle = 'DiFF'}) {
                         'flex gap-0',
                         isAuthed && 'overflow-y-auto h-screen'
                     )}>
-                    {/* 로그인 상태 */}
+
                     <SidebarLayout>
                         <LayMenu/>
                     </SidebarLayout>

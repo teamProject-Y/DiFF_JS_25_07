@@ -3,12 +3,9 @@
 @import "normalize.css/normalize.css";
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* 필요하면 /resource/common.css 내용도 여기로 복붙 */
 
 @font-face {
     font-family: 'SUIT-Regular';
@@ -101,8 +98,7 @@
     font-style: normal;
 }
 
-
-html>body {
+html > body {
     font-family: 'Pretendard-400', sans;
 }
 
@@ -124,29 +120,9 @@ li {
     display: block;
 }
 
-/*.custom-pagination .swiper-pagination-bullet {*/
-/*    width: 8px !important;*/
-/*    height: 8px !important;*/
-/*    background: #d4d4d4 !important;*/
-/*    opacity: 1 !important;*/
-/*    border-radius: 9999px !important;*/
-/*    margin: 0 6px !important;*/
-/*    transition: background-color 200ms ease, width 200ms ease !important;*/
-/*}*/
-
-/*.custom-pagination .swiper-pagination-bullet-active {*/
-/*    background: #525252 !important;*/
-/*    width: 24px !important;*/
-/*}*/
-
-/*.custom-pagination .swiper-pagination-bullet:focus-visible {*/
-/*    outline: 2px solid #a3a3a3 !important;*/
-/*    outline-offset: 2px !important;*/
-/*}*/
-
 .article-slider {
-    --swiper-theme-color: #525252;                 /* 활성 점 색 (neutral-600) */
-    --swiper-pagination-bullet-inactive-color: #d4d4d4; /* 비활성 점 색 (neutral-300) */
+    --swiper-theme-color: #525252;
+    --swiper-pagination-bullet-inactive-color: #d4d4d4;
     --swiper-pagination-bullet-inactive-opacity: 1;
     --swiper-pagination-bullet-size: 8px;
     --swiper-pagination-bullet-horizontal-gap: 6px;
@@ -269,7 +245,6 @@ li {
 }
 
 
-
 /** docs **/
 .title1 {
     font-size: 25px;
@@ -297,7 +272,7 @@ li {
     margin: 1rem 1rem 2rem 0;
 }
 
-.content1{
+.content1 {
     font-size: 1.1rem;
     margin: 2rem 2rem 4rem 2rem;
     font-weight: 400;
@@ -335,19 +310,10 @@ li {
         -ms-overflow-style: none; /* IE, Edge */
         scrollbar-width: none; /* Firefox */
     }
+
     .scrollbar-none::-webkit-scrollbar {
         display: none; /* Chrome, Safari */
     }
-    /*.autofill-fix:-webkit-autofill {*/
-    /*    -webkit-text-fill-color: rgb(17,24,39);*/
-    /*    -webkit-box-shadow: 0 0 0 9999px rgb(250,250,250) inset;*/
-    /*}*/
-    /*@media (prefers-color-scheme: dark) {*/
-    /*    .dark\:autofill-fix:-webkit-autofill {*/
-    /*        -webkit-text-fill-color: #fff;*/
-    /*        -webkit-box-shadow: 0 0 0 9999px rgb(66,66,66) inset;*/
-    /*    }*/
-    /*}*/
 }
 
 .markdown {
@@ -362,16 +328,19 @@ li {
     margin: 1rem 0;
     padding-bottom: 0.3rem;
 }
+
 .markdown h2 {
     font-size: 1.75rem;
     font-weight: bold;
     margin: 1rem 0;
 }
+
 .markdown h3 {
     font-size: 1.5rem;
     font-weight: bold;
     margin: 0.75rem 0;
 }
+
 .markdown h4 {
     font-size: 1.25rem;
     font-weight: bold;
@@ -388,10 +357,12 @@ li {
     list-style-type: disc !important;
     padding-left: 1.5rem;
 }
+
 .markdown ol {
     list-style-type: decimal !important;
     padding-left: 1.5rem;
 }
+
 .markdown li {
     list-style: inherit !important;
 }
@@ -406,6 +377,7 @@ li {
     color: #2563eb;
     text-decoration: underline;
 }
+
 .markdown a:hover {
     color: #1e40af;
 }
@@ -417,6 +389,7 @@ li {
     border-radius: 4px;
     font-family: monospace;
 }
+
 .markdown pre {
     background-color: #1e1e1e;
     color: #f5f5f5;
@@ -441,15 +414,18 @@ li {
     border-collapse: collapse;
     margin: 1rem 0;
 }
+
 .markdown th,
 .markdown td {
     border: 1px solid #ddd;
     padding: 0.5rem;
 }
+
 .markdown th {
     background-color: #f9fafb;
     font-weight: bold;
 }
+
 /* ============================
    Toast UI Viewer Tailwind 스타일 오버라이드
    ============================ */
@@ -514,10 +490,15 @@ li {
     @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-neutral-400 my-3;
 }
 
-#pageScroll { touch-action: pan-y; }
-.article-slider, .swiper { touch-action: pan-x; }
+#pageScroll {
+    touch-action: pan-y;
+}
 
-.white-autofill ,
+.article-slider, .swiper {
+    touch-action: pan-x;
+}
+
+.white-autofill,
 .white-autofill:-webkit-autofill:hover,
 .white-autofill:-webkit-autofill:focus {
     -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
@@ -527,4 +508,116 @@ li {
     caret-color: #111827 !important;
     transition: background-color 9999s ease-out 0s !important;
 }
-.snap-disabled { scroll-snap-type: none !important; }
+
+.snap-disabled {
+    scroll-snap-type: none !important;
+}
+
+.bell-button {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition-duration: .3s;
+    border: none;
+}
+
+.bell-svg {
+    width: 18px;
+}
+
+.bell-svg path {
+    fill: black;
+}
+
+.dark .bell-svg path {
+    fill: white;
+}
+
+.bell-button:hover .bell-svg {
+    animation: bellRing 0.9s both;
+}
+
+@keyframes bellRing {
+    0%, 100% {
+        transform-origin: top;
+    }
+    15% { transform: rotateZ(10deg); }
+    30% { transform: rotateZ(-10deg); }
+    45% { transform: rotateZ(5deg); }
+    60% { transform: rotateZ(-5deg); }
+    75% { transform: rotateZ(2deg); }
+}
+
+.bell-button:active {
+    transform: scale(0.8);
+}
+
+.underline-anim {
+    position: relative;
+    display: inline-block;
+    color: #000;
+    text-decoration: none;
+}
+
+.underline-anim::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: #000;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.3s ease;
+}
+
+.underline-anim:hover::after {
+    transform: scaleX(1);
+}
+
+.dark .underline-anim::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: #fff;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.3s ease;
+}
+
+.dark .underline-anim:hover::after {
+    transform: scaleX(1);
+}
+
+.loader {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    height: 1.5rem;
+    width: 1.5rem;
+    animation: spin 1s linear infinite;
+    stroke: rgba(107, 114, 128, 1);
+}
+
+.loading-text {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    color: rgba(107, 114, 128, 1);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

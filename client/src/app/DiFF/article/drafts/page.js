@@ -1,4 +1,4 @@
-// src/app/DiFF/article/drafts/page.js
+
 'use client';
 
 import {useEffect, useState, useMemo} from 'react';
@@ -15,7 +15,6 @@ export default function DraftsPage() {
     const [deletingId, setDeletingId] = useState(null);
     const [error, setError] = useState('');
 
-    // 로그인 체크 + 목록 로딩
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!token) {
@@ -32,7 +31,7 @@ export default function DraftsPage() {
                 setDrafts(Array.isArray(list) ? list : []);
             } catch (e) {
                 console.error('[DraftsPage] load drafts error:', e);
-                setError('임시저장 목록을 불러오지 못했습니다.');
+                setError('load drafts error.');
             } finally {
                 setLoading(false);
             }
@@ -64,12 +63,12 @@ export default function DraftsPage() {
                 res?.status === 200 ||
                 (typeof resultCode === 'string' && resultCode.startsWith('S-')) ||
                 res?.success === true ||
-                (typeof res?.msg === 'string' && res.msg.includes('성공'));
+                (typeof res?.msg === 'string' && res.msg.includes('SUCCESS'));
 
             if (isSuccess) {
                 setDrafts(prev => prev.filter(d => d.id !== id));
             } else {
-                const msg = res?.msg || '삭제에 실패했습니다.';
+                const msg = res?.msg || 'delect failed.';
                 console.warn('[DraftsPage] delete failed. server msg:', msg);
                 alert({ intent: "danger", title: "Failed to delete. Please try again." });
             }
@@ -92,12 +91,11 @@ export default function DraftsPage() {
                     <li
                         key={draft.id}
                         className="border rounded-lg p-5 flex items-start justify-between gap-3 hover:bg-gray-100
-                       dark:border-neutral-700 dark:hover:bg-neutral-800 dark:text-neutral-300"
+                                   dark:border-neutral-700 dark:hover:bg-neutral-800 dark:text-neutral-300"
                     >
-                        <button
-                            className="text-left flex-1 p-1"
-                            onClick={() => handleOpen(draft)}
-                            title="Go to Write"
+                        <button className="text-left flex-1 p-1"
+                                onClick={() => handleOpen(draft)}
+                                title="Go to Write"
                         >
                             <div className="text-xl font-semibold truncate mb-3">
                                 {draft.title || '(No title)'}
@@ -143,7 +141,7 @@ export default function DraftsPage() {
         <div className="pb-6 px-32 h-full min-h-0 flex flex-col">
             <div className="flex items-center border-b dark:border-neutral-700 mb-3">
                 <button className="p-4 -mb-px font-semibold text-black dark:text-neutral-200 border-b-2 border-black dark:border-neutral-400">
-                    Drafts
+                    DRAFTS
                 </button>
             </div>
 

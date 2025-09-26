@@ -66,20 +66,16 @@ Java, JavaScript, TypeScript, HTML, CSS, PHP, Python, XML, JSON, YAML, Kotlin, S
     return (
         <div className="min-h-screen dark:text-neutral-300">
             <div className="px-8 flex">
-                {/* 사이드바 */}
                 <div className="w-1/5">
                     <DocsSidebar activeKey="/DiFF/docs/analysis" />
                 </div>
 
-                {/* 메인 컨텐츠 */}
                 <main className="flex-1 flex flex-col py-20 items-center
-                max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
-                    {/* Toast UI Viewer */}
+                                 max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
                     <div className="toast-viewer">
                         <DocsViewer content={docContent} />
                     </div>
 
-                    {/* 네비게이션 */}
                     <div className="docsNavi">
                         <a href="../docs/howto" className="mx-10"><ChevronLeft className="w-5 h-5 inline-block"/> 이전글: 2. 사용법</a>
                         <a href="../docs/account" className="mx-10">다음글: 4. 계정 및 보안 <ChevronRight className="w-5 h-5 inline-block"/></a>

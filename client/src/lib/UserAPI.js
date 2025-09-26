@@ -1,19 +1,17 @@
 // src/lib/UserAPI.js
+
 import axios from "axios";
 
-/** EC2 배포 서버 주소 */
 const BACKEND = "https://api.diff.io.kr/api/DiFF";
 
-/** axios custom **/
-/** axios custom **/
 export const UserAPI = axios.create({
-    baseURL: BACKEND,
-    headers: { "Content-Type": "application/json" },
-});
+        baseURL: BACKEND,
+        headers: {"Content-Type": "application/json"},
+    }
+);
 
-console.log("backend url : "+BACKEND);
+console.log("backend url : " + BACKEND);
 
-/** 요청 인터셉터: AccessToken 자동 첨부 */
 UserAPI.interceptors.request.use(
     (config) => {
         const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
@@ -26,7 +24,6 @@ UserAPI.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-/** AccessToken 갱신 */
 const refreshAccessToken = async () => {
     const REFRESH_TOKEN = localStorage.getItem("refreshToken");
     if (!REFRESH_TOKEN) {
@@ -35,8 +32,9 @@ const refreshAccessToken = async () => {
 
     try {
         const res = await axios.post(`${BACKEND}/auth/refresh`, {
-            refreshToken: REFRESH_TOKEN,
-        });
+                refreshToken: REFRESH_TOKEN,
+            }
+        );
 
         const ACCESS_TOKEN = res.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
@@ -53,7 +51,6 @@ const refreshAccessToken = async () => {
     }
 };
 
-/** 응답 인터셉터: 토큰 만료 시 자동 재시도 */
 UserAPI.interceptors.response.use(
     (res) => res,
     async (error) => {
@@ -73,13 +70,10 @@ UserAPI.interceptors.response.use(
     }
 );
 
-// === Auth & 회원 관련 API ===
+export const login = async ({email, loginPw}) => {
 
-// 로그인
-export const login = async ({ email, loginPw }) => {
-
-    const res = await UserAPI.post("/auth/login", { email, loginPw });
-    const { accessToken, refreshToken } = res.data;
+    const res = await UserAPI.post("/auth/login", {email, loginPw});
+    const {accessToken, refreshToken} = res.data;
 
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
@@ -88,16 +82,16 @@ export const login = async ({ email, loginPw }) => {
     return res.data;
 };
 
-// 회원가입
-export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
+export const signUp = async ({loginPw, checkLoginPw, nickName, email}) => {
 
     const res = await UserAPI.post("/auth/join", {
-        loginPw,
-        checkLoginPw,
-        nickName,
-        email,
-    });
-    const { accessToken, refreshToken } = res.data;
+            loginPw,
+            checkLoginPw,
+            nickName,
+            email,
+        }
+    );
+    const {accessToken, refreshToken} = res.data;
 
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
@@ -106,27 +100,24 @@ export const signUp = async ({ loginPw, checkLoginPw, nickName, email }) => {
     return res.data;
 };
 
-
-// 회원 정보 조회
 export const fetchUser = async (nickName) => {
     console.log("fetching user : ", nickName);
     const response = await UserAPI.get(`/member/profile`, {
-        params: nickName ? { nickName } : {},
-    });
+            params: nickName ? {nickName} : {},
+        }
+    );
 
     return response.data;
 };
 
-
-// 5-4. 회원 수정
-export const modifyNickName = async ({ nickName }) => {
-    const data = { nickName };
+export const modifyNickName = async ({nickName}) => {
+    const data = {nickName};
     const response = await UserAPI.put(`/member/doModifyNickName`, data);
     return response.data;
 };
 
-export const modifyIntroduce = async ({ introduce }) => {
-    const data = { introduce };
+export const modifyIntroduce = async ({introduce}) => {
+    const data = {introduce};
     const response = await UserAPI.put(`/member/doModifyIntroduce`, data);
     return response.data;
 };
@@ -136,13 +127,11 @@ export const checkPwUser = async (data) => {
     return response.data;
 }
 
-// 5-5. 회원 탈퇴
 export const deleteUser = async (id) => {
     const response = await UserAPI.delete(`/member/${id}`);
     return response.data;
 };
 
-// 닉네임으로 특정 회원 팔로잉 리스트 조회
 export const getFollowingList = async (nickName) => {
     const url = nickName
         ? `/member/followingList?nickName=${encodeURIComponent(nickName)}`
@@ -152,7 +141,6 @@ export const getFollowingList = async (nickName) => {
     return response.data;
 };
 
-// 닉네임으로 특정 회원 팔로워 리스트 조회
 export const getFollowerList = async (nickName) => {
     const url = nickName
         ? `/member/followerList?nickName=${encodeURIComponent(nickName)}`
@@ -162,19 +150,19 @@ export const getFollowerList = async (nickName) => {
     return response.data;
 };
 
-// 상대방을 팔로우
 export const followMember = async (fromMemberId) => {
     const response = await UserAPI.post(`/member/follow`, null, {
-        params: { fromMemberId },
-    });
+            params: {fromMemberId},
+        }
+    );
     return response.data;
 };
 
-// 상대방을 언팔로우
 export const unfollowMember = async (fromMemberId) => {
     const response = await UserAPI.delete(`/member/unfollow`, {
-        params: { fromMemberId },
-    });
+            params: {fromMemberId},
+        }
+    );
     return response.data;
 };
 
@@ -184,11 +172,12 @@ export const uploadProfileImg = async (file) => {
 
     try {
         const res = await UserAPI.post(`/member/uploadProfileImg`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-        });
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+            }
+        );
         return res.data;
     } catch (err) {
         console.error("업로드 실패:", err);
@@ -198,19 +187,21 @@ export const uploadProfileImg = async (file) => {
 
 export const requestPasswordReset = async (email) => {
 
-    return axios.post(`/member/findPw`, null, {
-        params: { email },
-    });
+    return UserAPI.post(`/member/findPw`, null, {
+            params: {email},
+        }
+    );
 };
 
 export const updatePassword = async (token, newPw) => {
 
-    return axios.post(`/member/updatePassword`, null, {
-        params: { token, newPw },
-    });
+    return UserAPI.post(`/member/updatePassword`, null, {
+            params: {token, newPw},
+        }
+    );
 };
 
 export const searchMembers = async (keyword) => {
-    const res = await UserAPI.get(`/member/search`, { params: { keyword } });
+    const res = await UserAPI.get(`/member/search`, {params: {keyword}});
     return res.data;
 };

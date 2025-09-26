@@ -1,8 +1,8 @@
 // ConfirmDialog.jsx
-import React, { useEffect, useRef, useState } from "react";
-import PropTypes from "prop-types"; // 원치 않으면 지워도 됨
-import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Info, CheckCircle2, XCircle } from "lucide-react";
+import React, {useEffect, useRef, useState} from "react";
+import PropTypes from "prop-types";
+import {AnimatePresence, motion} from "framer-motion";
+import {AlertTriangle, Info, CheckCircle2, XCircle} from "lucide-react";
 
 function cx(...parts) {
     return parts.filter(Boolean).join(" ");
@@ -66,7 +66,6 @@ export default function ConfirmDialog({
     const titleId = "confirm-title";
     const descId = "confirm-desc";
 
-    // ESC to close
     useEffect(() => {
         if (!open || !closeOnEscape) return;
         const onKey = (e) => {
@@ -76,7 +75,6 @@ export default function ConfirmDialog({
         return () => window.removeEventListener("keydown", onKey);
     }, [open, closeOnEscape, onOpenChange]);
 
-    // Autofocus cancel for accessibility
     useEffect(() => {
         if (open && cancelRef.current) cancelRef.current.focus();
     }, [open]);
@@ -108,10 +106,10 @@ export default function ConfirmDialog({
                     <AnimatePresence>
                         <motion.button
                             aria-hidden
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.15 }}
+                            initial={{opacity: 0}}
+                            animate={{opacity: 1}}
+                            exit={{opacity: 0}}
+                            transition={{duration: 0.15}}
                             className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
                             onClick={() => closeOnOverlayClick && onOpenChange(false)}
                         />
@@ -123,10 +121,10 @@ export default function ConfirmDialog({
                         aria-modal="true"
                         aria-labelledby={titleId}
                         aria-describedby={descId}
-                        initial={{ opacity: 0, scale: 0.96 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        transition={{ duration: 0.18 }}
+                        initial={{opacity: 0, scale: 0.96}}
+                        animate={{opacity: 1, scale: 1}}
+                        exit={{opacity: 0, scale: 0.98}}
+                        transition={{duration: 0.18}}
                         className={cx(
                             "relative w-full rounded-lg border bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5",
                             "dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700 dark:ring-0",
@@ -138,7 +136,7 @@ export default function ConfirmDialog({
                             <div className="flex items-start gap-3">
                                 {!hideIcon && (
                                     <div className={cx("mt-0.5", intentMap[intent]?.text || intentMap.neutral.text)}>
-                                        <Icon aria-hidden className="h-5 w-5" />
+                                        <Icon aria-hidden className="h-5 w-5"/>
                                     </div>
                                 )}
                                 <div className="flex-1">
@@ -146,7 +144,8 @@ export default function ConfirmDialog({
                                         {title}
                                     </div>
                                     {message && (
-                                        <p id={descId} className="mt-1 px-0.5 text-sm text-neutral-600 dark:text-neutral-400">
+                                        <p id={descId}
+                                           className="mt-1 px-0.5 text-sm text-neutral-600 dark:text-neutral-400">
                                             {message}
                                         </p>
                                     )}
@@ -186,8 +185,10 @@ export default function ConfirmDialog({
                                     {loading ? (
                                         <span className="inline-flex items-center gap-2">
                                           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden>
-                                            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="4" opacity="0.25" />
-                                            <path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="currentColor" strokeWidth="4" />
+                                            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor"
+                                                    strokeWidth="4" opacity="0.25"/>
+                                            <path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="currentColor"
+                                                  strokeWidth="4"/>
                                           </svg>
                                           Processing...
                                         </span>

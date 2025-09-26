@@ -8,7 +8,7 @@ export const metadata = { title: 'DiFF Docs — 7. 지원' };
 export default function StartPage() {
 
     const docContent = `
-# 6. 고객지원 (Customer Support)
+# 5. 고객지원 (Customer Support)
 
 ## Contact Us
 - **Email**: <diff.io.kr@gmail.com> 
@@ -52,17 +52,15 @@ export default function StartPage() {
     return (
         <div className="min-h-screen dark:text-neutral-300">
             <div className="px-8 flex">
-                {/* 사이드바 */}
                 <div className="w-1/5">
                     <DocsSidebar activeKey="/DiFF/docs/support" />
                 </div>
 
-                {/* 메인 컨텐츠 */}
                 <main className="flex-1 flex flex-col py-20 items-center
-                    max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
-                    {/* Toast UI Viewer */}
+                                 max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
                     <div className="toast-viewer">
                         <DocsViewer content={docContent} />
+
                     </div>
                     <div className="docsNavi">
                         <Link href="/DiFF/docs/account" className="mx-10">

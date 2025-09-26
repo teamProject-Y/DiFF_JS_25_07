@@ -9,13 +9,15 @@ import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
 import {useTheme} from "@/common/thema";
 import {Globe, Lock} from "lucide-react";
-import { createPortal } from 'react-dom';
+import {createPortal} from 'react-dom';
 
 const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
-function InlinePortal({ children }) {
+function InlinePortal({children}) {
     const [mount, setMount] = useState(null);
-    useEffect(() => { setMount(document.body); }, []);
+    useEffect(() => {
+        setMount(document.body);
+    }, []);
     if (!mount) return null;
     return createPortal(children, mount);
 }
@@ -35,7 +37,6 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
         ? (selected.name || selected.repoName || `Repo#${selected.id}`)
         : "Select a repository";
 
-    // close on outside click
     useEffect(() => {
         function onDocClick(e) {
             if (!open) return;
@@ -54,21 +55,20 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
     }, [open]);
 
     useLayoutEffect(() => {
-           if (!open || !btnRef.current) return;
-           const update = () => {
-                 const r = btnRef.current.getBoundingClientRect();
-                 setPos({ left: r.left, top: r.bottom + 4, width: r.width });
-               };
-           update();
-           window.addEventListener('scroll', update, true); // 내부 스크롤까지
-           window.addEventListener('resize', update);
-           return () => {
-                 window.removeEventListener('scroll', update, true);
-                 window.removeEventListener('resize', update);
-               };
-         }, [open]);
+        if (!open || !btnRef.current) return;
+        const update = () => {
+            const r = btnRef.current.getBoundingClientRect();
+            setPos({left: r.left, top: r.bottom + 4, width: r.width});
+        };
+        update();
+        window.addEventListener('scroll', update, true);
+        window.addEventListener('resize', update);
+        return () => {
+            window.removeEventListener('scroll', update, true);
+            window.removeEventListener('resize', update);
+        };
+    }, [open]);
 
-    // keyboard
     const onKeyDown = useCallback(
         (e) => {
             if (disabled) return;
@@ -129,42 +129,42 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
 
             {open && (
                 <InlinePortal>
-                <ul
-                    ref={menuRef}
-                    role="listbox"
-                    style={{ position: 'fixed', left: pos.left, top: pos.top, width: pos.width }}
-                    className="z-[999] mt-1 max-h-64 max-w-[70vw] overflow-auto rounded-md border shadow-lg
+                    <ul
+                        ref={menuRef}
+                        role="listbox"
+                        style={{position: 'fixed', left: pos.left, top: pos.top, width: pos.width}}
+                        className="z-[999] mt-1 max-h-64 max-w-[70vw] overflow-auto rounded-md border shadow-lg
                       border-neutral-200 bg-white/95 backdrop-blur-sm
                       dark:border-neutral-700 dark:bg-neutral-900/95"
-                >
-                    {items.map((r) => {
-                        const id = String(r.id);
-                        const text = r.name || r.repoName || `Repo#${r.id}`;
-                        const isSelected = String(value) === id;
-                        return (
-                            <li
-                                key={id}
-                                role="option"
-                                aria-selected={isSelected}
-                                tabIndex={0}
-                                data-value={id}
-                                onClick={() => {
-                                    onChange?.(Number(id));
-                                    setOpen(false);
-                                    btnRef.current?.focus();
-                                }}
-                                className={clsx(
-                                    "flex cursor-pointer items-center justify-between px-3 py-2 text-sm",
-                                    "text-neutral-800 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800",
-                                    isSelected && "bg-neutral-200/70 dark:bg-neutral-700/60"
-                                )}
-                            >
-                                <span className="truncate">{text}</span>
-                                {isSelected && <i className="fa-solid fa-check text-xs opacity-70"/>}
-                            </li>
-                        );
-                    })}
-                </ul>
+                    >
+                        {items.map((r) => {
+                            const id = String(r.id);
+                            const text = r.name || r.repoName || `Repo#${r.id}`;
+                            const isSelected = String(value) === id;
+                            return (
+                                <li
+                                    key={id}
+                                    role="option"
+                                    aria-selected={isSelected}
+                                    tabIndex={0}
+                                    data-value={id}
+                                    onClick={() => {
+                                        onChange?.(Number(id));
+                                        setOpen(false);
+                                        btnRef.current?.focus();
+                                    }}
+                                    className={clsx(
+                                        "flex cursor-pointer items-center justify-between px-3 py-2 text-sm",
+                                        "text-neutral-800 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800",
+                                        isSelected && "bg-neutral-200/70 dark:bg-neutral-700/60"
+                                    )}
+                                >
+                                    <span className="truncate">{text}</span>
+                                    {isSelected && <i className="fa-solid fa-check text-xs opacity-70"/>}
+                                </li>
+                            );
+                        })}
+                    </ul>
                 </InlinePortal>
             )}
         </div>
@@ -181,15 +181,13 @@ export default function Page() {
 
 export function WriteArticlePage() {
     const router = useRouter();
-    const { alert } = useDialog();
+    const {alert} = useDialog();
     const sp = useSearchParams();
     const [draftLoading, setDraftLoading] = useState(!!sp.get('draftId'));
     const [editorKey, setEditorKey] = useState('empty');
 
-    // from query
     const repoFromQuery = sp.get('repositoryId');
 
-    // state
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [repos, setRepos] = useState([]);
@@ -205,39 +203,41 @@ export function WriteArticlePage() {
 
     const bg = useTheme() === 'dark' ? '#111214' : '#ffffff';
 
-    // auth check
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!token) router.replace('/DiFF/member/login');
     }, [router]);
 
-    // load draft if present
     useEffect(() => {
         let alive = true;
-            (async () => {
-                  if (!draftId) { setDraftLoading(false); return; }
-                  setDraftLoading(true);
-                  try {
-                        const draft = await getDraftById(draftId);
-                        if (!alive) return;
-                        setIsPublic(draft.isPublic ?? true);
-                        setTitle(draft.title || '');
-                        setBody(draft.body || '');
-                        setRepositoryId(draft.repositoryId || null);
-                        if (draft.diffId) setDiffId(draft.diffId);
-                        // ★ 드래프트 도착 후 key 변경 → 에디터 리마운트(초기값 정확히 반영)
-                            const ver = draft.checksum || draft.updatedAt || Date.now();
-                        setEditorKey(`draft-${draftId}-${ver}`);
-                      } catch (e) {
-                        console.error('Failed to load draft:', e);
-                      } finally {
-                        if (alive) setDraftLoading(false);
-                      }
-                })();
-            return () => { alive = false; };
+        (async () => {
+            if (!draftId) {
+                setDraftLoading(false);
+                return;
+            }
+            setDraftLoading(true);
+            try {
+                const draft = await getDraftById(draftId);
+                if (!alive) return;
+                setIsPublic(draft.isPublic ?? true);
+                setTitle(draft.title || '');
+                setBody(draft.body || '');
+                setRepositoryId(draft.repositoryId || null);
+                if (draft.diffId) setDiffId(draft.diffId);
+
+                const ver = draft.checksum || draft.updatedAt || Date.now();
+                setEditorKey(`draft-${draftId}-${ver}`);
+            } catch (e) {
+                console.error('Failed to load draft:', e);
+            } finally {
+                if (alive) setDraftLoading(false);
+            }
+        })();
+        return () => {
+            alive = false;
+        };
     }, [draftId]);
 
-    // load repos
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -266,7 +266,7 @@ export function WriteArticlePage() {
         if (!text) return "";
 
         if (typeof window === "undefined" || !window.crypto?.subtle) {
-            console.warn("❌ crypto.subtle 미지원");
+            console.warn("crypto.subtle Unsupported");
             return "";
         }
 
@@ -277,7 +277,6 @@ export function WriteArticlePage() {
             .join("");
     }
 
-    // submit (upload)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -302,7 +301,6 @@ export function WriteArticlePage() {
             const res = await writeArticle(data);
             if (res?.resultCode?.startsWith('S-')) {
                 const articleId = res.data1;
-                // router.push(`/DiFF/article/detail?id=${articleId}`);
                 setTimeout(() => router.push(`/DiFF/article/detail?id=${articleId}`), 0);
             } else {
                 setError(res?.msg || 'Failed to write');
@@ -320,7 +318,6 @@ export function WriteArticlePage() {
         }
     };
 
-    // save draft
     const handleSaveDraft = async (e) => {
         e?.preventDefault?.();
         setError('');
@@ -342,7 +339,7 @@ export function WriteArticlePage() {
             };
             const res = await saveDraft(data);
             if (res && res.resultCode && res.resultCode.startsWith('S-')) {
-                alert({ intent: "success", title: "Success to save." });
+                alert({intent: "success", title: "Success to save."});
                 if (!draftId && res.data1) setDraftId(res.data1);
                 if (res.data2) setDiffId(res.data2);
             } else {
@@ -361,7 +358,6 @@ export function WriteArticlePage() {
         }
     };
 
-    // shortcuts: Ctrl/Cmd+S save, Ctrl/Cmd+Enter upload
     useEffect(() => {
         const onKey = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -381,11 +377,10 @@ export function WriteArticlePage() {
     }, [submitting, handleSaveDraft]);
 
     return (
-        <div
-            className={clsx(
-                "fixed inset-0 flex flex-col",
-                "bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300"
-            )}
+        <div className={clsx(
+            "fixed inset-0 flex flex-col",
+            "bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300"
+        )}
         >
             <form
                 id="writer-form"
@@ -393,32 +388,30 @@ export function WriteArticlePage() {
                 className="flex-1 flex flex-col min-h-0"
                 aria-live="polite"
             >
-                <div
-                    className={clsx(
-                        "sticky inset-x-0 top-0 z-40 border-b p-3",
-                        "border-neutral-200 dark:border-neutral-700",
-                        "bg-white dark:bg-neutral-900"
-                    )}
+                <div className={clsx(
+                    "sticky inset-x-0 top-0 z-40 border-b p-3",
+                    "border-neutral-200 dark:border-neutral-700",
+                    "bg-white dark:bg-neutral-900"
+                )}
                 >
-                    {/* Title */}
                     <div className="flex-1">
-                        <input
-                            className={clsx(
-                                "w-full truncate rounded p-3 text-5xl font-semibold",
-                                "bg-transparent border-transparent focus:outline-none",
-                                "placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
-                            )}
-                            placeholder="Title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                        <input className={clsx(
+                            "w-full truncate rounded p-3 text-5xl font-semibold",
+                            "bg-transparent border-transparent focus:outline-none",
+                            "placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
+                        )}
+                               placeholder="Title"
+                               value={title}
+                               onChange={(e) => setTitle(e.target.value)}
                         />
                     </div>
 
                     <div className="flex justify-between items-center">
-                        {/* Repo */}
+
                         <div className="col-span-12 sm:col-span-4 md:col-span-3 flex items-center gap-2">
                             {loadingRepos ? (
-                                <div className="h-9 w-48 animate-pulse rounded-md bg-neutral-200/70 dark:bg-neutral-800/70" />
+                                <div
+                                    className="h-9 w-48 animate-pulse rounded-md bg-neutral-200/70 dark:bg-neutral-800/70" />
                             ) : repoError ? (
                                 <div className="truncate text-xs text-red-500">{repoError}</div>
                             ) : repos.length === 0 ? (
@@ -434,9 +427,7 @@ export function WriteArticlePage() {
                             )}
                         </div>
 
-                        {/* Actions */}
                         <div className="col-span-12 sm:col-span-3 md:col-span-3 flex items-center justify-end gap-2">
-                            {/* Visibility toggle */}
                             <button
                                 type="button"
                                 onClick={() => setIsPublic(!isPublic)}
@@ -445,26 +436,25 @@ export function WriteArticlePage() {
                                 title={isPublic ? 'Public' : 'Private'}
                                 className="inline-flex items-center justify-center gap-2 rounded-full border w-24 py-1.5 text-sm transition border-neutral-200 bg-white text-neutral-700 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:focus-visible:ring-neutral-600"
                             >
-                                {isPublic ? <Globe className="w-4 h-4" strokeWidth={2} /> : <Lock className="w-4 h-4" strokeWidth={2} />}
+                                {isPublic ? <Globe className="w-4 h-4" strokeWidth={2}/> :
+                                    <Lock className="w-4 h-4" strokeWidth={2}/>}
                                 <span>{isPublic ? 'Public' : 'Private'}</span>
                             </button>
 
                             <button
                                 type="button"
                                 onClick={() => router.push("/DiFF/article/drafts")}
-                                className={clsx(
-                                    "h-9 rounded-md px-3 text-sm text-neutral-600 hover:text-neutral-900 hover:underline",
-                                    "dark:text-neutral-400 dark:hover:text-neutral-100"
-                                )}
+                                className="underline-anim h-9 rounded-md px-3 text-sm dark:text-neutral-400"
                             >
-                                Drafts
+                                drafts
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {!!error && (
-                    <div className="border-b border-red-200/60 bg-red-50/70 px-3 py-1.5 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
+                    <div
+                        className="border-b border-red-200/60 bg-red-50/70 px-3 py-1.5 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
                         {error}
                     </div>
                 )}
@@ -472,17 +462,18 @@ export function WriteArticlePage() {
                 <div className="flex-1 overflow-hidden">
                     <div className="h-full w-full">
                         {!draftLoading && (
-                                    <ToastEditor
-                                      key={editorKey}             // ★ 로드 후 리마운트
-                                      initialValue={body}         // ★ 이 타이밍에 정확히 먹음
-                                      onChange={(value) => setBody(value)}
-                                      height="100%"
-                                    />
-                                  )}
+                            <ToastEditor
+                                key={editorKey}
+                                initialValue={body}
+                                onChange={(value) => setBody(value)}
+                                height="100%"
+                            />
+                        )}
                     </div>
                 </div>
 
-                <div className="sticky bottom-0 z-50 w-full border-t p-3 bg-white dark:bg-neutral-900 dark:border-neutral-700">
+                <div
+                    className="sticky bottom-0 z-50 w-full border-t p-3 bg-white dark:bg-neutral-900 dark:border-neutral-700">
                     <div className="flex justify-end gap-5">
                         <button
                             type="button"
@@ -513,13 +504,14 @@ export function WriteArticlePage() {
             </form>
 
             <style jsx global>{`
-                /* ---- Frame: editor full height + sticky toolbar ---- */
+
                 .toastui-editor-defaultUI {
                     height: 100% !important;
                     display: flex;
                     flex-direction: column;
                     border: 0 !important;
                 }
+
                 .toastui-editor-toolbar {
                     position: sticky;
                     top: 0;
@@ -528,19 +520,18 @@ export function WriteArticlePage() {
                     background: inherit;
                 }
 
-                /* ---- Main takes the scroll (ONLY here) ---- */
                 .toastui-editor-main {
                     flex: 1 1 auto !important;
                     min-height: 0 !important;
-                    overflow: auto !important; 
+                    overflow: auto !important;
                 }
 
-                /* 메인 내부 컨테이너/패널이 메인 높이를 정확히 채우도록 */
                 .toastui-editor-main-container {
                     display: flex !important;
                     height: 100% !important;
                     min-height: 0 !important;
                 }
+
                 .toastui-editor-md-container.toastui-editor-md-vertical-style,
                 .toastui-editor-preview.toastui-editor-vertical-style {
                     flex: 1 1 0% !important;
@@ -548,24 +539,23 @@ export function WriteArticlePage() {
                     min-height: 0 !important;
                 }
 
-                /* ---- Markdown pane: CodeMirror는 'auto-height', 내부 스크롤 제거 ---- */
                 .toastui-editor-md-container .CodeMirror {
-                    height: auto !important;              /* 내용 길이에 맞춰 늘어남 */
-                }
-                .toastui-editor-md-container .CodeMirror-scroll {
-                    overflow-y: hidden !important;        /* 내부 스크롤 금지 (수직) */
-                    overflow-x: auto !important;          /* 수평 스크롤만 허용 */
-                    min-height: 100% !important;          /* 클릭 영역이 패널 높이만큼 확보 */
+                    height: auto !important;
+
                 }
 
-                /* ---- WYSIWYG pane도 내부 스크롤 제거 ---- */
+                .toastui-editor-md-container .CodeMirror-scroll {
+                    overflow-y: hidden !important;
+                    overflow-x: auto !important;
+                    min-height: 100% !important;
+                }
+
                 .toastui-editor-ww-container .ProseMirror {
                     height: auto !important;
                     min-height: 100% !important;
                     overflow: visible !important;
                 }
 
-                /* 탭(Write/Preview) 숨김 */
                 .toastui-editor-defaultUI .toastui-editor-tabs {
                     display: none !important;
                 }

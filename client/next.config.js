@@ -1,4 +1,5 @@
 // next.config.js
+
 const BACKEND = 'https://api.diff.io.kr/api/DiFF';
 
 module.exports = {
