@@ -1,21 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import {usePathname} from 'next/navigation';
 
 const BASE = '/DiFF/docs';
 
 const NAV_ITEMS = [
-    { href: `${BASE}/intro`,  label: '1. 소개' },
-    { href: `${BASE}/howto`,  label: '2. 사용법' },
-    { href: `${BASE}/analysis`, label: '3. 분석' },
-    { href: `${BASE}/account`,label: '4. 계정 및 보안' },
-    { href: `${BASE}/support`,label: '5. 고객 지원' },
+    {href: `${BASE}/intro`, label: '1. 소개'},
+    {href: `${BASE}/howto`, label: '2. 사용법'},
+    {href: `${BASE}/analysis`, label: '3. 분석'},
+    {href: `${BASE}/account`, label: '4. 계정 및 보안'},
+    {href: `${BASE}/support`, label: '5. 고객 지원'},
 ];
 
-const normalize = (p='') => (p.endsWith('/') && p !== '/' ? p.slice(0, -1) : p);
+const normalize = (p = '') => (p.endsWith('/') && p !== '/' ? p.slice(0, -1) : p);
 
-export default function DocsSidebar({ className = '', activeKey }) {
+export default function DocsSidebar({className = '', activeKey}) {
     const pathname = normalize(usePathname());
     return (
         <aside

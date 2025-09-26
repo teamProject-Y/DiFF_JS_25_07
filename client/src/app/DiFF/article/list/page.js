@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { fetchArticles } from '@/lib/ArticleAPI';
+import { fetchArticles, deleteArticle } from '@/lib/ArticleAPI';
 import LoadingOverlay from "@/common/loadingOverlay";
 
 function truncate(text = '', max = 100) {
@@ -36,7 +36,7 @@ function ArticleListInner() {
                 if (!alive) return;
                 setArticles(res.articles || []);
             } catch (err) {
-                console.error(' 게시글 로딩 실패:', err);
+                console.error(' post load failed:', err);
                 if (!alive) return;
                 setArticles([]);
             } finally {
@@ -49,35 +49,35 @@ function ArticleListInner() {
 
     return (
         <>
-        <LoadingOverlay show={loading} />
+            <LoadingOverlay show={loading} />
 
-        <div className="px-32 py-10">
-            <h1 className="text-2xl font-bold mb-4">page failed. redirect url try again.</h1>
-            <ul className="space-y-4">
-                {articles.map((article) => (
-                    <li key={article.id} className="border-b pb-4">
-                        <Link
-                            href={`/DiFF/article/detail?id=${article.id}`}
-                            className="block group"
-                        >
-                            <h2 className="text-xl font-semibold group-hover:underline">
-                                {article.title}
-                            </h2>
-                            <p className="text-gray-700 mt-1 line-clamp-2">
-                                {article.body}
-                            </p>
-                            <div className="text-sm text-gray-500 mt-2">
-                                작성자: {article.extra__writer ?? '익명'} | {new Date(article.regDate).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                            })}
-                            </div>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-        </div>
+            <div className="px-32 py-10">
+                <h1 className="text-2xl font-bold mb-4">page error. redirect url.</h1>
+                <ul className="space-y-4">
+                    {articles.map((article) => (
+                        <li key={article.id} className="border-b pb-4">
+                            <Link
+                                href={`/DiFF/article/detail?id=${article.id}`}
+                                className="block group"
+                            >
+                                <h2 className="text-xl font-semibold group-hover:underline">
+                                    {article.title}
+                                </h2>
+                                <p className="text-gray-700 mt-1 line-clamp-2">
+                                    {article.body}
+                                </p>
+                                <div className="text-sm text-gray-500 mt-2">
+                                    writer: {article.extra__writer ?? '익명'} | {new Date(article.regDate).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric"
+                                })}
+                                </div>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </>
     );
 }

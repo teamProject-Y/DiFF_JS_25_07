@@ -1,4 +1,5 @@
 // src/app/DiFF/member/repository/AnalysisRecentChart.jsx
+
 'use client';
 
 import '@/common/registerChart';
@@ -121,8 +122,7 @@ export default function AnalysisRecentChart({ history = [], isMyRepo }) {
             <Line
                 data={data}
                 options={{ ...options, plugins: { ...options.plugins, legendGapBetween: { gap: 20 } }}}
-                plugins={[legendGapBetween]}
-            />
+                plugins={[legendGapBetween]} />
         </div>
     );
 }

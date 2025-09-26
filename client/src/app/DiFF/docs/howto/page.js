@@ -142,18 +142,15 @@ git mkdraft \<main\> --no-analysis
     return (
         <div className="min-h-screen dark:text-neutral-300">
             <div className="px-8 flex">
-
                 <div className="w-1/5">
                     <DocsSidebar activeKey="/DiFF/docs/howto" />
                 </div>
 
                 <main className="flex-1 flex flex-col py-20 items-center
-                    max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
-
+                                 max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
                     <div className="toast-viewer">
                         <DocsViewer content={docContent} />
                     </div>
-
                     <div className="docsNavi">
                         <a href="../docs/intro" className="mx-10"><ChevronLeft className="w-5 h-5 inline-block"/> 이전글: 1. 소개</a>
                         <a href="../docs/analysis" className="mx-10">다음글: 3. 분석 <ChevronRight className="w-5 h-5 inline-block"/></a>

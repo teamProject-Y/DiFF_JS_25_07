@@ -1,13 +1,12 @@
 // src/lib/DraftAPI.js
+
 import axios from "axios";
 
-/** EC2 배포 서버 주소 */
 const BACKEND = "https://api.diff.io.kr/api/DiFF";
 
-/** axios custom **/
 export const DraftAPI = axios.create({
     baseURL: BACKEND,
-    headers: { "Content-Type": "application/json" },
+    headers: {"Content-Type": "application/json"},
 });
 
 DraftAPI.interceptors.request.use(
@@ -24,7 +23,6 @@ DraftAPI.interceptors.request.use(
             }
 
             if (REFRESH_TOKEN) {
-                // 백엔드가 기대하는 헤더명이 이거라면 유지
                 config.headers["REFRESH_TOKEN"] = REFRESH_TOKEN;
             } else {
                 delete config.headers["REFRESH_TOKEN"];
@@ -35,12 +33,11 @@ DraftAPI.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-/** 2) 토큰 재발급도 같은 인스턴스로 (baseURL 중복 방지) */
 const refreshAccessToken = async () => {
     if (typeof window === "undefined") return;
     const REFRESH_TOKEN = localStorage.getItem("refreshToken");
     const res = await DraftAPI.get("/auth/refresh", {
-        headers: { REFRESH_TOKEN }, // 필요 시 유지
+        headers: {REFRESH_TOKEN},
     });
     const ACCESS_TOKEN = res.data.accessToken;
     const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
@@ -48,7 +45,6 @@ const refreshAccessToken = async () => {
     DraftAPI.defaults.headers["Authorization"] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
 };
 
-/** 3) 401/403 자동 재시도 */
 DraftAPI.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -69,12 +65,11 @@ DraftAPI.interceptors.response.use(
     }
 );
 
-/** 4) Draft 관련 API */
 export const deleteDraft = async (id) => {
     const url = `/draft/${id}`;
     const res = await DraftAPI.delete(url);
-    // 상태/바디 둘 다 넘겨서 상위에서 정확히 판단
-    return { status: res.status, data: res.data };
+
+    return {status: res.status, data: res.data};
 };
 
 export const DraftsArticle = async () => {
@@ -87,11 +82,7 @@ export const getDraftById = async (id) => {
     return res.data.data1;
 };
 
-
 export const saveDraft = async (data) => {
     const res = await DraftAPI.post('/draft/save', data);
     return res.data;
 }
-
-
-

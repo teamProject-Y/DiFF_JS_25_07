@@ -9,7 +9,6 @@ export default function NotFound() {
     const pathname = usePathname()
 
     useEffect(() => {
-        // Helpful console note for debugging missing routes
         if (pathname) console.warn('DiFF 404 — missing path:', pathname)
     }, [pathname])
 
@@ -33,12 +32,9 @@ export default function NotFound() {
                 </header>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                    <button
-                        type="button"
-                        onClick={() => router.back()}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-[.98]"
-                    >
-                        {/* back icon */}
+                    <button type="button"
+                            onClick={() => router.back()}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-[.98]">
                         <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                             <path fill="currentColor" d="M15 6l-6 6 6 6" />
                         </svg>
@@ -48,22 +44,17 @@ export default function NotFound() {
                     <button
                         type="button"
                         onClick={() => router.refresh()}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-[.98]"
-                    >
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-[.98]">
                         Soft refresh
                     </button>
 
-                    <Link
-                        href="/DiFF"
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50"
-                    >
+                    <Link href="/DiFF"
+                          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50">
                         Go to DiFF
                     </Link>
 
-                    <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition active:scale-[.98]"
-                    >
+                    <Link href="/"
+                          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition active:scale-[.98]">
                         Home
                     </Link>
                 </div>

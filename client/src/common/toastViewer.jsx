@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useRef } from "react";
 import "@toast-ui/editor/dist/toastui-editor-viewer.css";
 import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
@@ -16,7 +17,7 @@ export default function ToastViewer({ content, showImages = true }) {
         const initViewer = async () => {
             const ViewerModule = await import("@toast-ui/editor/dist/toastui-editor-viewer");
             const Viewer = ViewerModule.default;
-            const hljs = (await import("highlight.js")).default; // highlight.js 가져오기
+            const hljs = (await import("highlight.js")).default;
 
             if (viewerRef.current) {
                 viewerInstance = new Viewer({
@@ -25,14 +26,13 @@ export default function ToastViewer({ content, showImages = true }) {
                     theme: theme,
                     customHTMLSanitizer: (html) => {
                         if (!showImages) {
-                            return html.replace(/<image[^>]*>/g, ""); // 이미지 제거 옵션
+                            return html.replace(/<image[^>]*>/g, "");
                         }
                         return html;
                     },
                 });
                 instanceRef.current = viewerInstance;
 
-                // 코드블럭 하이라이트 적용
                 viewerRef.current.querySelectorAll("pre code").forEach((block) => {
                     hljs.highlightElement(block);
                 });
