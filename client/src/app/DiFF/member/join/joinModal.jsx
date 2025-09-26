@@ -82,10 +82,10 @@ export default function JoinForm() {
                        disabled={submitting} />
                 <label htmlFor="email"
                        className="absolute text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10
-                       origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100
-                       peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
-                       peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
-                       start-1">
+                                  origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100
+                                  peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
+                                  peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
+                                  start-1">
                     email
                 </label>
             </div>
@@ -102,10 +102,10 @@ export default function JoinForm() {
                        disabled={submitting} />
                 <label htmlFor="Nick Name"
                        className="absolute text-gray-400  duration-300 transform -translate-y-4 scale-75 top-2 z-10
-                       origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100
-                       peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
-                       peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
-                       start-1">
+                                  origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100
+                                  peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
+                                  peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
+                                  start-1">
                     Nick Name
                 </label>
             </div>
@@ -123,10 +123,10 @@ export default function JoinForm() {
                        disabled={submitting} />
                 <label htmlFor="Password"
                        className="absolute text-gray-400 transform -translate-y-4 scale-75 top-2 z-10 origin-[0]
-                       bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100
-                       peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
-                       peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
-                       start-1">
+                                  bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100
+                                  peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
+                                  peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
+                                  start-1">
                     Password
                 </label>
             </div>
@@ -151,10 +151,10 @@ export default function JoinForm() {
                     className="group py-3 w-full text-sm font-medium bg-black text-white rounded-lg hover:bg-neutral-800 transition disabled:opacity-50"
                     disabled={submitting}>
                   <span className="inline-block relative pr-0 transition-[padding-right] duration-300
-                                 after:content-['»'] after:absolute after:top-1/2 after:-translate-y-1/2
-                                 after:right-0 after:opacity-0 after:translate-x-1 after:transform after:transition-all after:duration-300
-                                 group-hover:pr-4 group-hover:after:opacity-100 group-hover:after:translate-x-0
-                                 group-disabled:after:opacity-0 group-disabled:pr-0">
+                                   after:content-['»'] after:absolute after:top-1/2 after:-translate-y-1/2
+                                   after:right-0 after:opacity-0 after:translate-x-1 after:transform after:transition-all after:duration-300
+                                   group-hover:pr-4 group-hover:after:opacity-100 group-hover:after:translate-x-0
+                                   group-disabled:after:opacity-0 group-disabled:pr-0">
                      {submitting ? 'Signing in…' : 'Signing In'}
                 </span>
             </button>

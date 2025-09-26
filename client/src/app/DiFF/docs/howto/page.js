@@ -142,14 +142,12 @@ git mkdraft \<main\> --no-analysis
     return (
         <div className="min-h-screen dark:text-neutral-300">
             <div className="px-8 flex">
-
                 <div className="w-1/5">
                     <DocsSidebar activeKey="/DiFF/docs/howto" />
                 </div>
 
                 <main className="flex-1 flex flex-col py-20 items-center
-                    max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
-
+                                 max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
                     <div className="toast-viewer">
                         <DocsViewer content={docContent} />
                     </div>

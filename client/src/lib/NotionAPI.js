@@ -1,12 +1,10 @@
 import axios from "axios";
 
-/** EC2 배포 서버 주소 */
 const BACKEND = "https://api.diff.io.kr/api/DiFF";
 
-/** axios custom **/
 export const NotionAPI = axios.create({
     baseURL: BACKEND,
-    headers: { "Content-Type": "application/json" },
+    headers: {"Content-Type": "application/json"},
 });
 
 NotionAPI.interceptors.request.use(
@@ -48,14 +46,13 @@ export const setAuthHeader = () => {
     }
 };
 
-
-/** 3. 토큰 자동 재발급 (Refresh) */
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
         const response = await axios.get(`${BACKEND}/auth/refresh`, {
-            headers: { 'REFRESH_TOKEN': REFRESH_TOKEN }
-        });
+                headers: {'REFRESH_TOKEN': REFRESH_TOKEN}
+            }
+        );
         const ACCESS_TOKEN = response.data.accessToken;
         const TOKEN_TYPE = localStorage.getItem("tokenType");
         localStorage.setItem('accessToken', ACCESS_TOKEN);
@@ -63,7 +60,6 @@ const refreshAccessToken = async () => {
     }
 };
 
-/** 4. 인터셉터로 토큰 만료 자동 처리 */
 NotionAPI.interceptors.response.use(
     response => response,
     async error => {

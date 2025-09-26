@@ -44,7 +44,7 @@ export default function AfterMainPage({me, trendingArticles}) {
             })
             .catch((err) => {
             });
-    }, []); //
+    }, []);
 
     function markAsViewed(articleId) {
         const viewedKey = "viewedArticles";
@@ -68,11 +68,10 @@ export default function AfterMainPage({me, trendingArticles}) {
 
     return (
         <div className="w-full h-screen overflow-hidden
-                    bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">
+                        bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">
             <div className="h-full pb-20">
                 <div className="mx-auto px-32 flex h-full">
                     <main className="flex-1 flex flex-col min-h-0">
-
                         <div className="flex items-center border-b dark:border-neutral-700">
                             {["Trending", "Following"].map((t) => (
                                 <button
@@ -91,8 +90,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                         {t}
                                     </span>
 
-                                    <span
-                                        className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
+                                    <span className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
                                             ${activeTab === t
                                             ? "font-semibold"
                                             : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}
@@ -116,7 +114,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                 onClick={() => handleArticleClick(article.id)}
                                             >
                                                 <div className="flex h-52 border-b p-4 justify-center items-center transition
-                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                     <div className="h-full w-[70%] pr-8 flex flex-col">
                                                         <div className="text-sm ">
                                                             in Trending · by{" "}
@@ -168,12 +166,9 @@ export default function AfterMainPage({me, trendingArticles}) {
                                     })
                                 ) : (
                                     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
-
                                         <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
                                             <i className="fa-solid fa-newspaper text-2xl text-gray-400"></i>
                                         </div>
-
-                                        <p className="text-lg font-medium">No posts from people you follow.</p>
                                     </div>
                                 )
                             ) : followingArticles === null ? (
@@ -187,8 +182,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                             className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                             onClick={() => handleArticleClick(article.id)}
                                         >
-                                            <div
-                                                className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                            <div className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                 <div className="h-full w-[70%] pr-8 flex flex-col">
                                                     <div className="text-sm ">
                                                         in Following · by{" "}
@@ -215,9 +209,9 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                     <div className="flex items-center gap-4 text-sm ">
                                                         <span>
                                                             {new Date(article.regDate).toLocaleDateString("en-US", {
-                                                             year: "numeric",
-                                                             month: "short",
-                                                             day: "numeric",
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric",
                                                             })}
                                                         </span>
                                                         <span>view: {article.hits}</span>
@@ -225,8 +219,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                         <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
                                                     </div>
                                                 </div>
-                                                <div
-                                                    className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
+                                                <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
                                                     {imgSrc ? (
                                                         <img src={imgSrc} alt="thumbnail" className="w-full h-full object-cover" />
                                                     ) : (
@@ -239,7 +232,6 @@ export default function AfterMainPage({me, trendingArticles}) {
                                 })
                             ) : (
                                 <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
-
                                     <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
                                         <i className="fa-solid fa-user-plus text-2xl text-gray-400"></i>
                                     </div>
@@ -260,4 +252,3 @@ export default function AfterMainPage({me, trendingArticles}) {
     );
 
 }
-

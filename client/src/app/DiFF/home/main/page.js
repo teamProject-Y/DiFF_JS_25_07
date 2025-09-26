@@ -1,5 +1,3 @@
-// app/DiFF/home/page.js
-
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
@@ -197,7 +195,10 @@ export default function Page() {
             style={{backgroundColor: bgColor}}>
             <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
                  ref={el => sectionRefs.current[0] = el}>
+
                 <BeforeMainPage/>
+
+
             </div>
 
             <div id="docs" className="is-light-bg min-h-screen w-full pt-20 dark:is-dark-bg"
@@ -217,7 +218,7 @@ export default function Page() {
                     <div className="ml-auto max-w-[920px] flex flex-col items-end gap-3">
 
                         <p className="text-[clamp(20px,1.6vw,24px)] font-semibold text-blue-600 tracking-tight
-                        flex items-center gap-3">
+                                      flex items-center gap-3">
                             Repository Management
                             <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
                         </p>
@@ -232,9 +233,8 @@ export default function Page() {
             <div id="trending"
                  className="is-light-bg w-full h-screen snap-start bg-gray-100 px-20 pt-20"
                  ref={el => sectionRefs.current[3] = el}>
-
                 <p className="text-[clamp(20px,1.6vw,24px)] font-bold text-blue-600 tracking-tight
-                        flex items-center gap-3">
+                              flex items-center gap-3">
                     <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
                     TRENDING
                 </p>
@@ -244,8 +244,8 @@ export default function Page() {
 
                 <div className="article-slider h-2/3 w-full mt-8 flex relative">
                     <div className="flex absolute right-0 -top-16  font-extralight text-3xl text-neutral-500 z-10">
-                        <button
-                            className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
+                        <button className="custom-prev rounded-full m-2 w-10 h-10 flex items-center justify-center
+                                           bg-transparent hover:bg-neutral-800 hover:text-white transition duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
                                 <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1" fill="none"
                                       strokeLinecap="round" strokeLinejoin="round"/>
@@ -312,13 +312,17 @@ export default function Page() {
                                                             </div>
                                                         )}
 
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none"/>
 
-                                                        <span className="absolute left-3 top-3 rounded-full bg-white/90 text-[11px] uppercase tracking-wide px-2 py-1 ring-1 ring-black/5">
+                                                        <div
+                                                            className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none"/>
+
+                                                        <span
+                                                            className="absolute left-3 top-3 rounded-full bg-white/90 text-[11px] uppercase tracking-wide px-2 py-1 ring-1 ring-black/5">
                                                             Trending
                                                           </span>
 
-                                                        <div className="absolute right-3 bottom-3 flex items-center gap-3 text-white/90 text-xs">
+                                                        <div
+                                                            className="absolute right-3 bottom-3 flex items-center gap-3 text-white/90 text-xs">
                                                             <span className="inline-flex items-center gap-1">
                                                               <i className="fa-solid fa-heart"/> {article.extra__sumReaction ?? 0}
                                                             </span>
@@ -330,7 +334,8 @@ export default function Page() {
 
                                                     <div className="h-1/2 p-5 flex flex-col">
                                                         <h3 className="text-lg md:text-xl font-semibold clamp-2 mb-1 hover:text-black transition-colors"
-                                                            title={article.title}>
+                                                            title={article.title}
+                                                        >
                                                             {article.title}
                                                         </h3>
 
@@ -338,9 +343,9 @@ export default function Page() {
                                                             {article.body ? removeMd(article.body) : ""}
                                                         </p>
 
-                                                        <div className="mt-auto pt-4 flex items-center justify-between border-t border-neutral-200">
+                                                        <div
+                                                            className="mt-auto pt-4 flex items-center justify-between border-t border-neutral-200">
                                                             <div className="flex items-center gap-3 min-w-0">
-
                                                                 {article.extra__profileUrl ? (
                                                                     <div className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
                                                                         <img src={article.extra__profileUrl}
@@ -389,9 +394,11 @@ export default function Page() {
             </div>
 
             {(!loggedIn) && (
-                <section id="before-footer"
-                    className="snap-start snap-y-mandatory scroll-mt-4">
-                    <Footer />
+                <section
+                    id="before-footer"
+                    className="snap-start snap-y-mandatory scroll-mt-4"
+                >
+                    <Footer/>
                 </section>
             )}
 

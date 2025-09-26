@@ -117,26 +117,24 @@ function MirrorPrompt({
     const hasValue = value?.length > 0;
 
     return (
-        <div
-            className={`prompt-mirror-wrapper ${className}`}
-            onClick={() => taRef.current?.focus()}
-            style={{position: 'relative', width: '80%', paddingLeft: '23px'}}
-            role="group"
-            aria-label="Terminal command input"
+        <div className={`prompt-mirror-wrapper ${className}`}
+             onClick={() => taRef.current?.focus()}
+             style={{position: 'relative', width: '80%', paddingLeft: '23px'}}
+             role="group"
+             aria-label="Terminal command input"
         >
 
-            <div
-                className="prompt-mirror-text"
-                aria-hidden="true"
-                style={{
-                    pointerEvents: 'none',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    lineHeight: 1.2,
-                    fontWeight: 1000,
-                    fontSize: '2rem',
-                    color: '#d1d5db',
-                }}
+            <div className="prompt-mirror-text"
+                 aria-hidden="true"
+                 style={{
+                     pointerEvents: 'none',
+                     whiteSpace: 'pre-wrap',
+                     wordBreak: 'break-word',
+                     lineHeight: 1.2,
+                     fontWeight: 1000,
+                     fontSize: '2rem',
+                     color: '#d1d5db',
+                 }}
             >
                 {hasValue ? (
                     <>
@@ -223,7 +221,7 @@ export default function BeforeMainPage() {
         if (!showInput || !promptReady) return;
         const t = setTimeout(() => {
             try {
-                inputRef.current?.focus({ preventScroll: true });
+                inputRef.current?.focus({preventScroll: true});
             } catch {
                 inputRef.current?.focus();
             }
@@ -243,13 +241,13 @@ export default function BeforeMainPage() {
         if (!scroller) return;
 
         const scrollToBottom = () => {
-            bottomRef.current?.scrollIntoView({ block: 'end', inline: 'nearest' });
+            bottomRef.current?.scrollIntoView({block: 'end', inline: 'nearest'});
         };
 
         scrollToBottom();
 
         const mo = new MutationObserver(scrollToBottom);
-        mo.observe(scroller, { childList: true, subtree: true });
+        mo.observe(scroller, {childList: true, subtree: true});
 
         const ro = new ResizeObserver(scrollToBottom);
         ro.observe(scroller);
@@ -259,7 +257,6 @@ export default function BeforeMainPage() {
             ro.disconnect();
         };
     }, []);
-
 
     useEffect(() => {
         if (step < LINES.length) setShowInput(false);
@@ -332,16 +329,18 @@ export default function BeforeMainPage() {
     }, [COMMAND, LINES.length]);
 
     return (
-        <div
-            className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
-            style={{fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`, wordBreak: 'break-word'}}
+        <div className="bg-neutral-800 tracking-tight rounded-xl w-4/5 h-4/5 mx-auto overflow-hidden"
+             style={{
+                 fontFamily: `'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace`,
+                 wordBreak: 'break-word'
+             }}
         >
             <style jsx global>{`
                 .terminal-font {
                     font-family: 'SF-Regular', 'Menlo', 'Consolas', 'Courier New', monospace;
                     line-height: 1.2;
                 }
-                
+
                 .fake-caret {
                     display: inline-block;
                     width: 0.14em;
@@ -359,7 +358,7 @@ export default function BeforeMainPage() {
                 .fake-caret.before {
                     margin-right: 6px;
                 }
-                
+
                 @keyframes caret-blink {
                     50% {
                         opacity: 0;
@@ -398,16 +397,15 @@ export default function BeforeMainPage() {
             </div>
 
             <div ref={scrollerRef} id="terminalScroll" className="h-[calc(100%-3rem)] overflow-y-auto">
-                <div
-                    className="pt-6 pl-6 pb-4 pr-6 text-left terminal-font text-2xl md:text-4xl break-words"
-                    role="log"
-                    aria-live="polite"
+                <div className="pt-6 pl-6 pb-4 pr-6 text-left terminal-font text-2xl md:text-4xl break-words"
+                     role="log"
+                     aria-live="polite"
                 >
                     {log.map((item, i) => (
                         item.type === 'prompt' ? (
                             <div key={i} className="flex flex-wrap items-start pt-4">
                                 <span className="text-green-400 font-bold">user@desktop ~ %&nbsp;</span>
-                                <span className={item.className} style={{ whiteSpace: 'pre-wrap' }}>{item.value}</span>
+                                <span className={item.className} style={{whiteSpace: 'pre-wrap'}}>{item.value}</span>
                             </div>
                         ) : (
                             <div key={i} className={item.className}>{item.text}</div>
@@ -416,7 +414,7 @@ export default function BeforeMainPage() {
 
                     {step < LINES.length && (
                         <div className={LINES[step].className}>
-                            <Typewriter text={LINES[step].text} speed={30} onDone={handleAnimDone} />
+                            <Typewriter text={LINES[step].text} speed={30} onDone={handleAnimDone}/>
                         </div>
                     )}
 
@@ -434,7 +432,8 @@ export default function BeforeMainPage() {
                 </div>
 
                 {showInput && (
-                    <div className="text-left terminal-font text-2xl md:text-4xl pl-6 pr-6 pb-6 break-words flex items-center">
+                    <div
+                        className="text-left terminal-font text-2xl md:text-4xl pl-6 pr-6 pb-6 break-words flex items-center">
                         {!promptReady ? (
                             <Typewriter
                                 text={PROMPT_PREFIX}
@@ -443,9 +442,8 @@ export default function BeforeMainPage() {
                                 className="text-green-400 font-bold"
                             />
                         ) : (
-                            <span
-                                className="text-green-400 font-bold"
-                                style={{ whiteSpace: 'nowrap' }}
+                            <span className="text-green-400 font-bold"
+                                  style={{whiteSpace: 'nowrap'}}
                             >
                             {PROMPT_PREFIX}
                         </span>
@@ -454,7 +452,10 @@ export default function BeforeMainPage() {
                         {promptReady && (
                             <MirrorPrompt
                                 value={input}
-                                onChange={(v) => { setInput(v); if (error) setError(''); }}
+                                onChange={(v) => {
+                                    setInput(v);
+                                    if (error) setError('');
+                                }}
                                 onSubmit={submitCommand}
                                 placeholder={COMMAND}
                                 inputRefExternal={inputRef}

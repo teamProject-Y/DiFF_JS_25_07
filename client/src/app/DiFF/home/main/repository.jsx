@@ -806,7 +806,6 @@ export default function SampleRepoLayout() {
                     )}
 
                     <div className="grid grid-cols-[230px_1fr] items-start h-full min-h-0">
-
                         <aside className="h-full overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-100">
                             <ul className="p-4 space-y-2">
                                 <li className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-200 text-gray-700"
@@ -878,12 +877,11 @@ function LoginModal({open, onClose, onLogin}) {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center"
-            aria-modal="true"
-            role="dialog"
+             aria-modal="true"
+             role="dialog"
         >
-
             <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
-                onClick={onClose}
+                 onClick={onClose}
             />
 
             <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl border border-neutral-200 p-6">
@@ -892,29 +890,31 @@ function LoginModal({open, onClose, onLogin}) {
                         <i className="fa-solid fa-lock text-xl text-neutral-700"/>
                     </div>
                     <div className="min-w-0">
-                        <h3 className="text-lg font-semibold text-neutral-900">로그인이 필요해요</h3>
+                        <h3 className="text-lg font-semibold text-neutral-900">you try login.</h3>
                         <p className="mt-1 text-sm text-neutral-600">
-                            계속하려면 로그인 해주세요. 로그인 후 자동으로 이 화면으로 돌아옵니다.
+                            Please login to continue.
                         </p>
                     </div>
                 </div>
 
                 <div className="mt-6 flex gap-2 justify-end">
-                    <button className="px-4 py-2 rounded-lg border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100"
-                        onClick={onClose}>
-                        취소
+                    <button
+                        className="px-4 py-2 rounded-lg border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100"
+                        onClick={onClose}
+                    >
+                        cancel
                     </button>
-                    <button className="px-4 py-2 rounded-lg bg-neutral-900 text-white hover:opacity-90"
-                        onClick={onLogin}>
-                        로그인하기
+                    <button
+                        className="px-4 py-2 rounded-lg bg-neutral-900 text-white hover:opacity-90"
+                        onClick={onLogin}
+                    >
+                        login
                     </button>
                 </div>
             </div>
         </div>
     );
 }
-
-
 
 function InfoView({repo, kickToLogin}) {
     const info = REPO_INFO[repo.id] || {languages: [], history: [], commits: []};
@@ -924,10 +924,8 @@ function InfoView({repo, kickToLogin}) {
     return (
         <div className="absolute inset-0 p-4 overflow-y-auto">
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
-
                 <div className="max-w-[70%] min-w-[70%] flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col gap-3">
-                        {/* Charts */}
                         <div className="h-[35%] relative rounded-xl border shadow-sm p-3 bg-white border-gray-200 pt-9">
                             <div className="absolute top-3 right-4 z-10 flex items-center gap-2">
                                 {[
@@ -954,9 +952,7 @@ function InfoView({repo, kickToLogin}) {
                             )}
                         </div>
 
-                        {/* Commit List */}
-                        <div
-                            className="flex-grow overflow-y-scroll rounded-xl border shadow-sm bg-white border-gray-200">
+                        <div className="flex-grow overflow-y-scroll rounded-xl border shadow-sm bg-white border-gray-200">
                             <CommitListStatic data={commitData} kickToLogin={kickToLogin}/>
                         </div>
                     </div>
@@ -975,8 +971,7 @@ function InfoView({repo, kickToLogin}) {
                                     day: "2-digit",
                                     year: "numeric"
                                 })}</div>
-                            <span
-                                className="ml-auto text-xs px-2 py-1 rounded-full border bg-white border-gray-200">public</span>
+                            <span className="ml-auto text-xs px-2 py-1 rounded-full border bg-white border-gray-200">public</span>
                             {repo.htmlUrl && (
                                 <a
                                     href={repo.htmlUrl}
@@ -991,8 +986,7 @@ function InfoView({repo, kickToLogin}) {
                         </div>
                     </div>
 
-                    <div
-                        className="rounded-xl border shadow-sm p-4 pb-12 bg-white border-gray-200 flex flex-col min-h-0 overflow-hidden">
+                    <div className="rounded-xl border shadow-sm p-4 pb-12 bg-white border-gray-200 flex flex-col min-h-0 overflow-hidden">
                         <div className="font-semibold">Languages</div>
                         <div className="mt-2 grow min-h-0">
                             <LanguageChart languages={info.languages} isMyRepo={true}/>
@@ -1010,9 +1004,6 @@ function InfoView({repo, kickToLogin}) {
     );
 }
 
-// ==========================
-// Posts area (kept)
-// ==========================
 function PostsView({repo}) {
     if (!repo) return null;
     const posts = Array.isArray(repo.posts) ? repo.posts : [];
@@ -1027,8 +1018,9 @@ function PostsView({repo}) {
                         clean, bold, and yours.</p>
 
                     <div className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm
-                        font-medium transition hover:-translate-y-0.5
-                        hover:text-white hover:bg-neutral-700 border-neutral-700 text-neutral-700">
+                                    font-medium transition hover:-translate-y-0.5
+                                    hover:text-white hover:bg-neutral-700 border-neutral-700 text-neutral-700"
+                    >
                         Start a new post →
                     </div>
                 </div>
@@ -1070,15 +1062,11 @@ function PostCardLight({post}) {
     );
 }
 
-// ==========================
-// Commit List
-// ==========================
 function CommitListStatic({data = {commits: []}, kickToLogin}) {
     const commits = Array.isArray(data.commits) ? data.commits : [];
 
     return (
         <div className="relative flex flex-col h-full w-full min-h-0 rounded-lg bg-white">
-            {/* Static header: no inputs, no pagination, light-mode only */}
             <div className="flex justify-between shrink-0 px-3 py-2 border-b bg-gray-100">
                 <div className="flex items-center gap-2">
                     <span className="text-sm">
@@ -1089,7 +1077,6 @@ function CommitListStatic({data = {commits: []}, kickToLogin}) {
                 </div>
             </div>
 
-            {/* Scrollable list */}
             <div className="flex-1 min-h-0 w-full overflow-y-auto px-3">
                 {commits.length === 0 ? (
                     <div className="h-full w-full flex justify-center items-center text-sm text-gray-500">
@@ -1126,8 +1113,8 @@ function CommitListStatic({data = {commits: []}, kickToLogin}) {
                                 </div>
                                 <button onClick={kickToLogin}
                                     className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center
-                                    hover:bg-neutral-100 bg-white border-neutral-200
-                                    dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700">
+                                               hover:bg-neutral-100 bg-white border-neutral-200
+                                               dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700">
                                     Make Draft
                                 </button>
                             </li>

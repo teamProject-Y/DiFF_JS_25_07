@@ -22,7 +22,7 @@ import {useDialog} from "@/common/commonLayout";
 function ArticleDetailInner() {
 
     const searchParams = useSearchParams();
-    const { alert, confirm } = useDialog();
+    const {alert, confirm} = useDialog();
     const router = useRouter();
 
     const id = searchParams.get('id');
@@ -31,16 +31,16 @@ function ArticleDetailInner() {
     const [errMsg, setErrMsg] = useState('');
 
     const [deleting, setDeleting] = useState(false);
-    // 좋아요
+
     const [liked, setLiked] = useState(false);
 
     const [likeCount, setLikeCount] = useState(0);
-    // 댓글 상태
+
     const [replies, setReplies] = useState([]);
     const [reply, setReply] = useState('');
 
     const [replyLoading, setReplyLoading] = useState(false);
-    // 드롭다운
+
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
 
@@ -77,6 +77,7 @@ function ArticleDetailInner() {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         setIsLoggedIn(!!token);
     }, []);
+
     const getNick = (m) =>
         (m?.nickName ?? m?.nickname ?? m?.name ?? m?.user?.nickName ?? m?.user?.name ?? m?.extra__writer ?? '').toString().trim();
 
@@ -89,7 +90,7 @@ function ArticleDetailInner() {
 
     useEffect(() => {
         if (!id) {
-            console.warn("[DetailPage] id 없음 (쿼리스트링 미포함)");
+            console.warn("[DetailPage] No id (without query string)");
             return;
         }
 
@@ -103,7 +104,7 @@ function ArticleDetailInner() {
                 const art = await getArticle(id);
                 if (!alive) return;
                 if (!art) {
-                    setErrMsg('게시글을 불러오지 못했습니다.');
+                    setErrMsg('Failed to load post.');
                     setArticle(null);
                 } else {
                     setArticle(art);
@@ -111,8 +112,9 @@ function ArticleDetailInner() {
             } catch (e) {
                 if (!alive) return;
                 console.error('[DetailPage] fetch error:', e);
-                setErrMsg('에러가 발생했습니다.');
+                setErrMsg('ERROR');
                 setArticle(null);
+              
             } finally {
                 if (alive) setLoading(false);
             }
@@ -132,16 +134,19 @@ function ArticleDetailInner() {
 
                 setLiked((prev) => (prev !== like.liked ? like.liked : prev));
                 setLikeCount((prev) => (prev !== like.count ? like.count : prev));
+              
             } catch (e) {
                 if (e?.response?.status === 401) {
                     setLiked(false);
                     setLikeCount((c) => c);
                 } else {
-                    console.error("좋아요 상태 불러오기 실패: ", e);
+                    console.error("Failed to get like status:", e);
+
                 }
             }
         })();
     }, [id, isLoggedIn])
+
 
     useEffect(() => {
         if (!id) return;
@@ -154,10 +159,11 @@ function ArticleDetailInner() {
                 const withLikes = await Promise.all(
                     (res.replies || []).map(async (r) => {
                         try {
-                            const likeRes = await fetchReplyLikes(r.id); // { liked, count }
+                            const likeRes = await fetchReplyLikes(r.id);
                             return {...r, liked: likeRes.liked, likeCount: likeRes.count};
+                          
                         } catch (e) {
-                            console.error("댓글 좋아요 상태 불러오기 실패: ", e);
+                            console.error("Failed to get comment like status:", e);
                             return {...r, liked: false, likeCount: 0};
                         }
                     })
@@ -165,7 +171,8 @@ function ArticleDetailInner() {
 
                 setReplies(withLikes);
             } catch (e) {
-                console.error("댓글 불러오기 실패: ", e);
+                console.error("Failed to get comments:", e);
+              
             } finally {
                 setReplyLoading(false);
             }
@@ -239,8 +246,9 @@ function ArticleDetailInner() {
                     list.some(m => norm(getNick(m)) === authorNickN);
 
                 setMember({id: targetId || null, isFollowing, nickName: article.extra__writer});
+              
             } catch (e) {
-                console.error('작성자 member 구성 실패:', e);
+                console.error('Failed to configure writer member:', e);
                 setMember({id: null, isFollowing: false, nickName: article.extra__writer});
             }
         })();
@@ -259,7 +267,7 @@ function ArticleDetailInner() {
                 setMyId(Number(me?.member?.id) || null);
             } catch (e) {
                 if (e?.response?.status !== 401) {
-                    console.error('내 정보 로드 실패:', e);
+                    console.error('Failed to load my information:', e);
                 }
                 setMyId(null);
             }
@@ -292,14 +300,14 @@ function ArticleDetailInner() {
                 res?.status === 200 ||
                 (typeof resultCode === 'string' && resultCode.startsWith('S-')) ||
                 res?.success === true ||
-                (typeof res?.msg === 'string' && res.msg.includes('성공'));
+                (typeof res?.msg === 'string' && res.msg.includes('success'));
 
-            if (!isSuccess)  {
-                alert({ intent: "danger", title: "Failed to delete. Please try again." });
+            if (!isSuccess) {
+                alert({intent: "danger", title: "Failed to delete. Please try again."});
             }
         } catch (e) {
             console.error("[ArticleDetail] delete request error:", e);
-            alert({ intent: "danger", title: "Failed to delete. Please try again." });
+            alert({intent: "danger", title: "Failed to delete. Please try again."});
         } finally {
             setDeleting(false);
         }
@@ -321,8 +329,8 @@ function ArticleDetailInner() {
                 setLikeCount((c) => c + 1);
             }
         } catch (e) {
-            console.error("좋아요 토글 실패:", e);
-            alert({ intent: "danger", title: "Failed to like at post. Please try again." });
+            console.error("like toggle failure:", e);
+            alert({intent: "danger", title: "Failed to like at post. Please try again."});
         }
     };
 
@@ -342,8 +350,9 @@ function ArticleDetailInner() {
                 })
             );
             setReplies(withLikes);
+          
         } catch (e) {
-            console.error("댓글 작성 실패:", e);
+            console.error("write comment failure:", e);
             alert({intent: "danger", title: "Failed to write comment. Please try again."});
         }
     };
@@ -370,7 +379,7 @@ function ArticleDetailInner() {
                 );
             }
         } catch (e) {
-            console.error("댓글 좋아요 토글 실패:", e);
+            console.error("comment like toggle failure:", e);
             alert({intent: "danger", title: "Failed to like at comment. Please try again."});
         }
     };
@@ -394,11 +403,9 @@ function ArticleDetailInner() {
             ) : (
                 <div className="max-w-3xl mx-auto ">
                     <div className="flex justify-between">
-                        {/* 제목 + 날짜 */}
-                        <div
-                            className={`flex items-baseline gap-2 mb-2 ml-2 flex-wrap ${
-                                isLoggedIn ? "pt-0" : "pt-20"
-                            }`}
+                        <div className={`flex items-baseline gap-2 mb-2 ml-2 flex-wrap ${
+                            isLoggedIn ? "pt-0" : "pt-20"
+                        }`}
                         >
                             <h1 className="text-3xl font-bold inline">{article.title}</h1>
 
@@ -411,28 +418,27 @@ function ArticleDetailInner() {
                               </span>
                         </div>
 
-                        {/* 공유 + 옵션 */}
                         <div className="flex items-center gap-3">
 
                             <button
                                 type="button"
                                 className="flex items-center hover:text-gray-900
-                                             dark:hover:text-neutral-500 dark:text-neutral-400"
+                                           dark:hover:text-neutral-500 dark:text-neutral-400"
                                 onClick={async () => {
                                     try {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         await navigator.clipboard.writeText(url);
-                                        alert({ intent: "success", title: "Link copied." });
+                                        alert({intent: "success", title: "Link copied."});
                                     } catch {
                                         const url = `${window.location.origin}/DiFF/article/detail?id=${article.id}`;
                                         const input = document.createElement("input");
                                         input.value = url;
-                                        // document.body.appendChild(input);
-                                        if (input.isConnected ) input.remove();
+
+                                        if (input.isConnected) input.remove();
                                         input.select();
                                         document.execCommand("copy");
                                         document.body.removeChild(input);
-                                        alert({ intent: "success", title: "Link copied." });
+                                        alert({intent: "success", title: "Link copied."});
                                     }
                                 }}
                             >
@@ -453,7 +459,7 @@ function ArticleDetailInner() {
                                         }
                                     }}
                                     className="hover:text-gray-900
-                                        dark:hover:text-neutral-500 dark:text-neutral-400"
+                                               dark:hover:text-neutral-500 dark:text-neutral-400"
                                 >
                                     <i className="fa-solid fa-ellipsis-vertical text-xl"></i>
                                 </button>
@@ -463,8 +469,8 @@ function ArticleDetailInner() {
                                         ref={menuRef}
                                         role="menu"
                                         className="absolute right-0 mt-2 z-10 w-44 border origin-top-right rounded-lg font-normal shadow-sm
-                                                    bg-white divide-y divide-gray-100  text-gray-800
-                                                    dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
+                                                   bg-white divide-y divide-gray-100  text-gray-800
+                                                   dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
                                     >
                                         <ul className="py-1 text-sm">
                                             <li>
@@ -475,13 +481,16 @@ function ArticleDetailInner() {
                                                         if (article?.id) {
                                                             router.push(`/DiFF/article/report?id=${article.id}`);
                                                         } else {
-                                                            alert({ intent: "danger", title: "An error occurred. Please try again later." });
+                                                            alert({
+                                                                intent: "danger",
+                                                                title: "An error occurred. Please try again later."
+                                                            });
                                                         }
                                                     }}
                                                     className="w-full text-left block px-4 py-2 hover:bg-gray-100
-                                                            dark:hover:bg-neutral-700"
+                                                               dark:hover:bg-neutral-700"
                                                 >
-                                                    <i className="fa-solid fa-bullhorn"></i> Report
+                                                    <i className="fa-solid fa-bullhorn"></i> REPORT
                                                 </button>
                                             </li>
                                             {article.userCanModify && (
@@ -490,10 +499,10 @@ function ArticleDetailInner() {
                                                         href={`/DiFF/article/modify?id=${article.id}`}
                                                         role="menuitem"
                                                         className="block px-4 py-2 hover:bg-gray-100
-                                                            dark:hover:bg-neutral-700"
+                                                                   dark:hover:bg-neutral-700"
                                                         onClick={() => setMenuOpen(false)}
                                                     >
-                                                        <i className="fa-solid fa-pen"></i> Edit
+                                                        <i className="fa-solid fa-pen"></i> EDIT
                                                     </Link>
                                                 </li>
                                             )}
@@ -504,9 +513,9 @@ function ArticleDetailInner() {
                                                         role="menuitem"
                                                         onClick={() => handleDelete(article.id)}
                                                         className="w-full text-left block px-4 py-2 hover:bg-gray-100 text-red-500
-                                                            dark:hover:bg-neutral-700"
+                                                                   dark:hover:bg-neutral-700"
                                                     >
-                                                        <i className="fa-solid fa-trash-can"></i> Delete
+                                                        <i className="fa-solid fa-trash-can"></i> DELETE
                                                     </button>
                                                 </li>
                                             )}
@@ -526,7 +535,7 @@ function ArticleDetailInner() {
                                     window.location.href = `/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`;
                                 }}
                                 className="mx-2 hover:underline cursor-pointer text-md font-semibold
-                                 hover:text-black dark:hover:text-neutral-300"
+                                           hover:text-black dark:hover:text-neutral-300"
                             >
                                 {article.extra__writer}
                             </div>
@@ -557,8 +566,11 @@ function ArticleDetailInner() {
                                                     setFollowerCount(prev => prev + 1);
                                                 }
                                             } catch (err) {
-                                                console.error("팔로우/언팔로우 실패:", err);
-                                                alert({ intent: "danger", title: "Failed to process. Please try again." });
+                                                console.error("follow/unfollow failure:", err);
+                                                alert({
+                                                    intent: "danger",
+                                                    title: "Failed to process. Please try again."
+                                                });
                                             }
                                         }}
                                         className={`py-1 text-sm rounded-full border transition w-20 
@@ -596,7 +608,7 @@ function ArticleDetailInner() {
                                 <i
                                     className={`${liked ? "fa-solid text-red-500" :
                                         "fa-regular text-gray-500 dark:text-neutral-400"} 
-                        fa-heart text-xl`}
+                                        fa-heart text-xl`}
                                 ></i>
                                 <span className="text-sm">{likeCount}</span>
                             </button>
@@ -605,15 +617,15 @@ function ArticleDetailInner() {
 
                     <div
                         className="prose max-w-none whitespace-pre-wrap leading-relaxed text-lg border-t border-b py-6
-                        text-gray-800 dark:text-neutral-400 dark:border-neutral-700">
-                        <ToastViewer content={article.body} showImages={true}/>
+                                   text-gray-800 dark:text-neutral-400 dark:border-neutral-700">
+                        <ToastViewer content={article.body} showImages={true} />
                     </div>
 
                     <div className="my-10">
                         {isLoggedIn ? (
 
                             <form onSubmit={handleSubmitreply} className="relative">
-                                <label htmlFor="comment" className="sr-only">댓글 작성</label>
+                                <label htmlFor="comment" className="sr-only">comment write</label>
 
                                 <div
                                     className="relative rounded-xl border backdrop-blur-sm shadow-sm transition-all
@@ -636,10 +648,9 @@ function ArticleDetailInner() {
                                         maxLength={1000}
                                         placeholder="What are your thoughts?"
                                         className="block w-full resize-none bg-transparent
-                                                 p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
-                                                 text-gray-900 dark:text-neutral-200
-                                                 placeholder-gray-400 dark:placeholder-neutral-500
-                                                 focus:outline-none"
+                                                   p-4 pr-40 text-sm min-h-[48px] max-h-[192px] overflow-y-auto
+                                                   text-gray-900 dark:text-neutral-200
+                                                   placeholder-gray-400 dark:placeholder-neutral-500 focus:outline-none"
                                     />
 
                                     <div className="absolute bottom-2 right-2 flex items-center gap-3">
@@ -650,14 +661,11 @@ function ArticleDetailInner() {
                                             type="submit"
                                             disabled={!reply.trim()}
                                             className="px-4 py-2 rounded-full
-                                                   bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
-                                                   text-xs font-medium
-                                                   shadow-sm hover:shadow-md
-                                                   transition-all
-                                                   disabled:opacity-40 disabled:cursor-not-allowed
-                                                   active:scale-[0.98]"
+                                                       bg-neutral-900 text-gray-100 dark:bg-neutral-200 dark:text-neutral-900
+                                                       text-xs font-medium shadow-sm hover:shadow-md transition-all
+                                                       disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
                                         >
-                                            Comment
+                                            COMMENT
                                         </button>
                                     </div>
                                 </div>
@@ -688,7 +696,7 @@ function ArticleDetailInner() {
                             replies.map((r) => (
                                 <div key={r.id} className="relative mb-2 border-b pb-4 dark:border-neutral-700">
                                     <div className="flex gap-3">
-                                        {/* Avatar */}
+
                                         <Link
                                             href={`/DiFF/member/profile?nickName=${encodeURIComponent(r.extra__writer)}`}
                                             className="mr-1"
@@ -702,8 +710,8 @@ function ArticleDetailInner() {
                                             ) : (
                                                 <div
                                                     className="w-10 h-10 rounded-full flex items-center justify-center text-2xl font-bold
-                                                     bg-gray-100 border-gray-300
-                                                     dark:text-neutral-500 dark:bg-neutral-600 dark:border-neutral-700">
+                                                               bg-gray-100 border-gray-300
+                                                               dark:text-neutral-500 dark:bg-neutral-600 dark:border-neutral-700">
                                                     <i className="fa-solid fa-skull"></i>
                                                 </div>
                                             )}
@@ -734,8 +742,8 @@ function ArticleDetailInner() {
                                                         <div className="m-1 mt-3">
                                                             <textarea
                                                                 className="w-full bg-transparent resize-none min-h-[30px] max-h-[240px] overflow-y-auto
-                                                                          rounded-md border border-black/10 dark:border-white/15 p-2 text-sm
-                                                                          focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20"
+                                                                           rounded-md border border-black/10 dark:border-white/15 p-2 text-sm
+                                                                           focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20"
                                                                 value={r.editBody ?? r.body ?? ""}
                                                                 onInput={(e) => {
                                                                     e.target.style.height = "auto";
@@ -773,9 +781,9 @@ function ArticleDetailInner() {
                                                                         }
                                                                     }}
                                                                     className="px-3 py-1.5 rounded-full bg-black text-white dark:bg-white dark:text-black text-xs
-                                                                             shadow-sm hover:shadow-md transition"
+                                                                               shadow-sm hover:shadow-md transition"
                                                                 >
-                                                                    Save
+                                                                    SAVE
                                                                 </button>
                                                                 <button
                                                                     onClick={() =>
@@ -792,16 +800,15 @@ function ArticleDetailInner() {
                                                                         )
                                                                     }
                                                                     className="px-3 py-1.5 rounded-full border border-black/15 dark:border-white/20 text-xs
-                                                                            hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                                                               hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                                                                 >
-                                                                    Cancel
+                                                                    CANCEL
                                                                 </button>
                                                             </div>
                                                         </div>
                                                     ) : (
                                                         <div className="m-1 mt-3 flex items-center gap-3 text-gray-500">
-                                                            <span
-                                                                className="whitespace-pre-wrap align-baseline text-gray-800 dark:text-gray-100">
+                                                            <span className="whitespace-pre-wrap align-baseline text-gray-800 dark:text-gray-100">
                                                                 {r.body}
                                                             </span>
                                                         </div>
@@ -814,15 +821,14 @@ function ArticleDetailInner() {
                                                         onClick={() => isLoggedIn
                                                             ? handleReplyLikeToggle(r.id, r.liked)
                                                             : window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))}
-                                                        aria-label="이 댓글 좋아요"
+                                                        aria-label="comment like"
                                                         aria-pressed={r.liked}
                                                         className="p-1 flex items-center gap-1"
                                                         title="like"
                                                     >
-                                                        <i
-                                                            className={`${
-                                                                r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500 dark:text-neutral-400"
-                                                            } fa-heart text-base`}
+                                                        <i className={`${
+                                                            r.liked ? "fa-solid text-red-500" : "fa-regular text-gray-500 dark:text-neutral-400"
+                                                        } fa-heart text-base`}
                                                         />
                                                         {r.likeCount !== 0 &&
                                                             <span className="text-sm">{r.likeCount}</span>}
@@ -838,8 +844,7 @@ function ArticleDetailInner() {
                                                                 onClick={() =>
                                                                     setReplyMenuOpen(replyMenuOpen === r.id ? null : r.id)
                                                                 }
-                                                                className="hover:text-gray-900
-                                                                    dark:hover:text-neutral-500 dark:text-neutral-400"
+                                                                className="hover:text-gray-900 dark:hover:text-neutral-500 dark:text-neutral-400"
                                                                 title="More"
                                                             >
                                                                 <i className="fa-solid fa-ellipsis-vertical text-sm"></i>
@@ -850,8 +855,8 @@ function ArticleDetailInner() {
                                                                     ref={menuRef}
                                                                     role="menu"
                                                                     className="absolute right-0 mt-2 z-20 min-w-36 py-1 overflow-hidden rounded-xl shadow-lg border
-                                                                         bg-white divide-y divide-gray-100  text-gray-800
-                                                                        dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
+                                                                               bg-white divide-y divide-gray-100  text-gray-800
+                                                                               dark:bg-neutral-600 dark:divide-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
                                                                 >
                                                                     {r.userCanModify && (
                                                                         <button
@@ -872,14 +877,14 @@ function ArticleDetailInner() {
                                                                                 );
                                                                             }}
                                                                         >
-                                                                            <i className="fa-solid fa-pen"></i> Edit
+                                                                            <i className="fa-solid fa-pen"></i> EDIT
                                                                         </button>
                                                                     )}
                                                                     {r.userCanDelete && (
                                                                         <button
                                                                             role="menuitem"
                                                                             className="w-full text-left px-4 py-2 text-sm text-red-500
-                                                                                hover:bg-gray-100 dark:hover:bg-neutral-700 "
+                                                                                       hover:bg-gray-100 dark:hover:bg-neutral-700 "
                                                                             onClick={async () => {
                                                                                 setReplyMenuOpen(null);
                                                                                 confirm({
@@ -900,7 +905,7 @@ function ArticleDetailInner() {
                                                                                 });
                                                                             }}
                                                                         >
-                                                                            <i className="fa-solid fa-trash-can"></i> Delete
+                                                                            <i className="fa-solid fa-trash-can"></i> DELETE
                                                                         </button>
                                                                     )}
                                                                 </div>

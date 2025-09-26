@@ -1,4 +1,5 @@
 'use client';
+
 import {useEffect, useMemo, useState} from 'react';
 import {usePathname} from "next/navigation";
 
@@ -26,8 +27,8 @@ export default function SidebarLayout({children}) {
     if (!show || isEditMode) return null;
 
     return <aside className="sideMenu w-56 shrink-0 border-r bg-white/90 backdrop-blur sticky top-20
-                    dark:border-neutral-700 dark:bg-neutral-900/90
-                    h-[calc(100vh-80px)]">
+                             dark:border-neutral-700 dark:bg-neutral-900/90
+                             h-[calc(100vh-80px)]">
         {children}
-        </aside>;
+    </aside>;
 }

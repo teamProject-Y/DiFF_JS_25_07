@@ -2,6 +2,7 @@ import Link from "next/link";
 import {ChevronRight} from "lucide-react";
 import DocsSidebar from "@/app/DiFF/docs/docsSide";
 import DocsViewer from "@/app/DiFF/docs/docsViewer";
+
 export const metadata = { title: 'DiFF Docs — 1. 소개' };
 
 export default function IntroPage() {
@@ -69,14 +70,12 @@ DiFF는 개발 학습자의 기록을 **자동으로 수집·정리**해, **Git 
     return (
         <div className="min-h-screen dark:text-neutral-300">
             <div className="px-8 flex">
-
                 <div className="w-1/5">
                     <DocsSidebar activeKey="/DiFF/docs/intro" />
                 </div>
 
                 <main className="flex-1 flex flex-col py-20 items-center
                     max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
-
                     <div className="toast-viewer">
                         <DocsViewer content={docContent} />
                     </div>

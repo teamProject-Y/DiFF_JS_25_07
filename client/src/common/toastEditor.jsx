@@ -5,16 +5,14 @@ import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "@toast-ui/editor/dist/theme/toastui-editor-dark.css";
 
-// ▼ 코드 하이라이트(공식 플러그인: Prism 사용)
 import "prismjs/themes/prism.css";
 import "@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css";
 import Prism from "prismjs";
 import codeSyntaxHighlight from "@toast-ui/editor-plugin-code-syntax-highlight";
 
-import "highlight.js/styles/atom-one-dark.css"; // <- 스타일만 남겨도 무방하지만, DOM 변형은 절대 X
+import "highlight.js/styles/atom-one-dark.css";
 import { useTheme } from "@/common/thema";
 
-// 이미지 업로드 (Cloudinary)
 const handleUpload = async (file) => {
     const data = new FormData();
     data.append("file", file);
@@ -69,7 +67,6 @@ export default function ToastEditor({ initialValue = "", onChange }) {
     useEffect(() => {
         if (!editorRef.current) return;
 
-        // 번역으로 인한 DOM 변형 방지
         editorRef.current.setAttribute("data-sticky-editor", "1");
         editorRef.current.classList.add("notranslate");
         editorRef.current.setAttribute("translate", "no");
@@ -81,10 +78,6 @@ export default function ToastEditor({ initialValue = "", onChange }) {
             document.head.appendChild(s);
         }
 
-        // ❗️여기서 innerHTML/textContent로 비우지 마세요 (DOM mismatch 위험)
-        // editorRef.current.textContent = "";
-        // editorRef.current.innerHTML = "";
-
         instanceRef.current = new Editor({
             el: editorRef.current,
             height: "100%",
@@ -95,11 +88,10 @@ export default function ToastEditor({ initialValue = "", onChange }) {
             initialValue: typeof initialValue === "string" ? initialValue : "",
             theme,
             codeBlockLanguages: ["javascript", "java", "python", "bash", "sql", "json"],
-            plugins: [[codeSyntaxHighlight, { highlighter: Prism }]], // ★ 공식 플러그인
+            plugins: [[codeSyntaxHighlight, { highlighter: Prism }]],
         });
 
         if (!initialValue) {
-            // 초기 “Write / Preview” 잔여 텍스트 제거 (에디터 API만 사용)
             Promise.resolve().then(() => {
                 if (!instanceRef.current || touchedRef.current) return;
                 const md0 = (instanceRef.current.getMarkdown() || "").trim();
@@ -117,7 +109,6 @@ export default function ToastEditor({ initialValue = "", onChange }) {
         instanceRef.current.addHook("addImageBlobHook", async (blob, callback) => {
             try {
                 const url = await handleUpload(blob);
-                // 권장: callback으로 삽입 (모드별 안전)
                 callback(url, blob?.name ?? "image");
             } catch (e) {
                 console.error("이미지 업로드 실패:", e);
@@ -133,7 +124,7 @@ export default function ToastEditor({ initialValue = "", onChange }) {
                 instanceRef.current = null;
             }
         };
-    }, []); // 초기 1회
+    }, []);
 
     useEffect(() => {
         if (!instanceRef.current) return;

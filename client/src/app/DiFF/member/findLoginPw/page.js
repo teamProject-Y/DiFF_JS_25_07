@@ -65,15 +65,13 @@ export default function FindPasswordPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full rounded-xl border border-neutral-300 bg-neutral-100/70 px-4 py-3 text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-600 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-100"
                             autoComplete="email"
-                            required
-                        />
+                            required />
                     </div>
 
                     <button
                         type="submit"
                         disabled={!canSubmit}
-                        className="group relative inline-flex w-full items-center justify-center rounded-xl border border-neutral-300 bg-neutral-900 px-4 py-3 text-sm font-medium text-neutral-100 transition-all hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-100 dark:text-neutral-900"
-                    >
+                        className="group relative inline-flex w-full items-center justify-center rounded-xl border border-neutral-300 bg-neutral-900 px-4 py-3 text-sm font-medium text-neutral-100 transition-all hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-100 dark:text-neutral-900">
                         {loading && (
                             <span className="absolute left-4 inline-block h-4 w-4 animate-spin rounded-full border border-neutral-500 border-t-transparent dark:border-neutral-400 dark:border-t-transparent" />
                         )}
@@ -85,8 +83,7 @@ export default function FindPasswordPage() {
                     <div
                         className="mt-5 rounded-xl border border-neutral-300 px-4 py-3 text-sm text-neutral-700 dark:border-neutral-700 dark:text-neutral-300"
                         role="status"
-                        aria-live="polite"
-                    >
+                        aria-live="polite">
                         {msg.text}
                     </div>
                 )}

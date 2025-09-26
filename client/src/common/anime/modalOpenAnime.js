@@ -1,31 +1,33 @@
-// src/common/useModalOpenIntro.js
+
 'use client';
 
 import { useEffect } from 'react';
 import { useAnimationControls } from 'framer-motion';
 
 export default function useModalOpenIntro(open) {
-    const logoCtrl  = useAnimationControls(); // 텍스트 폴딩
-    const loadCtrl  = useAnimationControls(); // 흰 로딩 레이어 페이드아웃
-    const coverCtrl = useAnimationControls(); // 커버 clip-path 오픈
+    const logoCtrl  = useAnimationControls();
+    const loadCtrl  = useAnimationControls();
+    const coverCtrl = useAnimationControls();
 
-    // Variants
     const letterVariants = {
         initial: { rotateX: 0, opacity: 1 },
         fold:    { rotateX: 90, opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } },
     };
+
     const logoWrapVariants = {
         initial: {},
         fold: { transition: { staggerChildren: 0.05 } },
     };
+
     const loadingLayerVariants = {
         shown:  { opacity: 1 },
         hidden: { opacity: 0, transition: { duration: 0.3, ease: 'easeOut' } },
     };
+
     const coverVariants = {
-        initial: { clipPath: 'inset(0% 0% 0% 0% round 24px)' }, // 전체 덮힘
+        initial: { clipPath: 'inset(0% 0% 0% 0% round 24px)' },
         slide: {
-            clipPath: 'inset(0% 0% 0% 100% round 24px)',          // 좌->우 오픈
+            clipPath: 'inset(0% 0% 0% 100% round 24px)',
             transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] },
             transitionEnd: { display: 'none', visibility: 'hidden' },
         },
