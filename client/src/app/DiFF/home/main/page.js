@@ -189,16 +189,15 @@ export default function Page() {
     }
 
     return (
-        <div
-            id="pageScroll"
+        <div id="pageScroll"
             data-scroll-root
             className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-mandatory scroll-smooth"
-            style={{backgroundColor: bgColor}}
-        >
+            style={{backgroundColor: bgColor}}>
             <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
                  ref={el => sectionRefs.current[0] = el}>
 
                 <BeforeMainPage/>
+
 
             </div>
 
@@ -217,6 +216,7 @@ export default function Page() {
                  ref={el => sectionRefs.current[2] = el}>
                 <div className="min-h-[10%] font-semibold self-end px-20 text-right">
                     <div className="ml-auto max-w-[920px] flex flex-col items-end gap-3">
+
                         <p className="text-[clamp(20px,1.6vw,24px)] font-semibold text-blue-600 tracking-tight
                                       flex items-center gap-3">
                             Repository Management
@@ -307,8 +307,7 @@ export default function Page() {
                                                             <img src={imgSrc} alt="thumbnail"
                                                                  className="absolute inset-0 w-full h-full object-cover"/>
                                                         ) : (
-                                                            <div
-                                                                className="absolute inset-0 flex items-center justify-center text-neutral-400">
+                                                            <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
                                                                 <span className="text-sm">No Image</span>
                                                             </div>
                                                         )}
@@ -348,33 +347,26 @@ export default function Page() {
                                                             className="mt-auto pt-4 flex items-center justify-between border-t border-neutral-200">
                                                             <div className="flex items-center gap-3 min-w-0">
                                                                 {article.extra__profileUrl ? (
-                                                                    <div
-                                                                        className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
-                                                                        <img
-                                                                            src={article.extra__profileUrl}
+                                                                    <div className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
+                                                                        <img src={article.extra__profileUrl}
                                                                             alt="profile"
-                                                                            className="block h-full w-full object-cover"
-                                                                        />
+                                                                            className="block h-full w-full object-cover"/>
                                                                     </div>
                                                                 ) : (
-                                                                    <div
-                                                                        className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-600">
+                                                                    <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-600">
                                                                         {(article.extra__writer?.[0] || "U").toUpperCase()}
                                                                     </div>
                                                                 )}
                                                                 <div className="min-w-0">
                                                                     {article.extra__writer ? (
-                                                                        <Link
-                                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
                                                                             className="hover:underline hover:text-black font-medium truncate"
                                                                             onClick={(e) => e.stopPropagation()}
-                                                                            title={article.extra__writer}
-                                                                        >
+                                                                            title={article.extra__writer}>
                                                                             {article.extra__writer}
                                                                         </Link>
                                                                     ) : (
-                                                                        <span
-                                                                            className="font-medium text-neutral-800">Unknown</span>
+                                                                        <span className="font-medium text-neutral-800">Unknown</span>
                                                                     )}
                                                                     <span className="ml-2 text-xs text-neutral-500">
                                                                       {new Date(article.regDate).toLocaleDateString("en-US", {

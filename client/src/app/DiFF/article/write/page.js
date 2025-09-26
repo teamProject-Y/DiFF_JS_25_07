@@ -301,7 +301,6 @@ export function WriteArticlePage() {
             const res = await writeArticle(data);
             if (res?.resultCode?.startsWith('S-')) {
                 const articleId = res.data1;
-                // router.push(`/DiFF/article/detail?id=${articleId}`);
                 setTimeout(() => router.push(`/DiFF/article/detail?id=${articleId}`), 0);
             } else {
                 setError(res?.msg || 'Failed to write');
@@ -428,7 +427,6 @@ export function WriteArticlePage() {
                             )}
                         </div>
 
-
                         <div className="col-span-12 sm:col-span-3 md:col-span-3 flex items-center justify-end gap-2">
                             <button
                                 type="button"
@@ -543,6 +541,7 @@ export function WriteArticlePage() {
 
                 .toastui-editor-md-container .CodeMirror {
                     height: auto !important;
+
                 }
 
                 .toastui-editor-md-container .CodeMirror-scroll {

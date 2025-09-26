@@ -281,25 +281,36 @@ export default function Header() {
 
                 {/* 검색창 */}
                 {accessToken && (
-                    <form onSubmit={handleSearch} className="relative flex items-center gap-2 rounded-full border overflow-hidden
-                    text-neutral-500 bg-white dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500">
-                        <div
-                            className="px-3 flex overflow-hidden"
-                        >
+                    <form
+                        onSubmit={handleSearch}
+                        className="relative flex items-center gap-2 rounded-full overflow-hidden
+               border border-neutral-300/70 bg-white text-neutral-600
+               focus-within:border-neutral-900 transition-colors duration-200
+               dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700
+               dark:focus-within:border-neutral-300"
+                    >
+                        <div className="px-3 flex items-center w-full">
                             <input
                                 type="text"
                                 placeholder="Search anything"
                                 value={keyword}
                                 autoComplete="on"
                                 onChange={(e) => setKeyword(e.target.value)}
-                                className="p-2 w-64 focus:outline-none dark:bg-neutral-800 dark:placeholder-neutral-500"
+                                className="p-2 w-64 bg-transparent focus:outline-none
+                   placeholder-neutral-400 dark:placeholder-neutral-500"
                             />
-                            <button type="submit">
-                                <i className="fa-solid fa-magnifying-glass"></i>
+                            <button
+                                type="submit"
+                                className="p-2 pr-3 text-neutral-500 hover:text-neutral-700
+                   dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors"
+                                aria-label="Search"
+                            >
+                                <i className="fa-solid fa-magnifying-glass" />
                             </button>
                         </div>
                     </form>
                 )}
+
 
                 <ul className="flex items-center gap-8 text-xl font-semibold pr-8 dark:text-neutral-300">
                     {accessToken ? (

@@ -748,7 +748,6 @@ const COMMIT_DATA = {
     }
 };
 
-
 export default function SampleRepoLayout() {
 
     const [selectedRepoId, setSelectedRepoId] = useState(
@@ -792,8 +791,7 @@ export default function SampleRepoLayout() {
                                 {key: "posts", label: "Posts"},
                                 {key: "info", label: "Info"},
                             ].map((t) => (
-                                <button
-                                    key={t.key}
+                                <button key={t.key}
                                     onClick={() => setTab(t.key)}
                                     className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition ${
                                         tab === t.key
@@ -820,8 +818,7 @@ export default function SampleRepoLayout() {
                                 {DATA.repositories.map((r) => {
                                     const sel = r.id === selectedRepoId;
                                     return (
-                                        <li
-                                            key={r.id}
+                                        <li key={r.id}
                                             onClick={() => setSelectedRepoId(r.id)}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${
                                                 sel ? "bg-gray-200 text-gray-900" : "hover:bg-gray-200 text-gray-700"
@@ -1089,18 +1086,15 @@ function CommitListStatic({data = {commits: []}, kickToLogin}) {
                     <ul className="divide-y max-w-full divide-gray-200">
                         {commits.map((c) => (
                             <li key={c.sha} className="py-4 flex items-start gap-3">
-                                <img
-                                    src={c.authorAvatarUrl || "https://avatars.githubusercontent.com/u/0?v=4"}
+                                <img src={c.authorAvatarUrl || "https://avatars.githubusercontent.com/u/0?v=4"}
                                     alt=""
-                                    className="w-10 h-10 rounded-full object-cover self-center"
-                                />
+                                    className="w-10 h-10 rounded-full object-cover self-center"/>
                                 <div className="min-w-0 flex-1 max-w-2/3">
                                     <a className="font-medium truncate hover:underline clamp-1"
                                         href={c.htmlUrl || "#"}
                                         target="_blank"
                                         rel="noreferrer"
-                                        title={c.message}
-                                    >
+                                        title={c.message}>
                                         {c.message || "(no message)"}
                                     </a>
                                     <div className="flex gap-1 text-xs text-gray-500 mt-0.5">
@@ -1117,8 +1111,7 @@ function CommitListStatic({data = {commits: []}, kickToLogin}) {
                                         <span>{c.sha}</span>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={kickToLogin}
+                                <button onClick={kickToLogin}
                                     className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center
                                                hover:bg-neutral-100 bg-white border-neutral-200
                                                dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700">

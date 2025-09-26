@@ -60,6 +60,7 @@ export default function StartPage() {
                                  max-w-[640px] sm:max-w-[700px] md:max-w-[760px] lg:max-w-[820px] xl:max-w-[880px] px-4 sm:px-6 lg:px-10">
                     <div className="toast-viewer">
                         <DocsViewer content={docContent} />
+
                     </div>
                     <div className="docsNavi">
                         <Link href="/DiFF/docs/account" className="mx-10">

@@ -151,6 +151,7 @@ git mkdraft \<main\> --no-analysis
                     <div className="toast-viewer">
                         <DocsViewer content={docContent} />
                     </div>
+
                     <div className="docsNavi">
                         <a href="../docs/intro" className="mx-10"><ChevronLeft className="w-5 h-5 inline-block"/> 이전글: 1. 소개</a>
                         <a href="../docs/analysis" className="mx-10">다음글: 3. 분석 <ChevronRight className="w-5 h-5 inline-block"/></a>
