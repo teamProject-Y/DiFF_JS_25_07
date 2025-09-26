@@ -113,9 +113,7 @@ export default function ReportForm() {
                     />
                 </div>
 
-                {/* Name + Email */}
                 <div className="my-6 flex justify-between">
-                    {/* Name */}
                     <div className="w-2/5">
                         <div className="flex items-baseline gap-2">
                             <label htmlFor="nickName" className="mb-2 font-medium text-gray-900 dark:text-neutral-300">
@@ -148,7 +146,6 @@ export default function ReportForm() {
                         </div>
                     </div>
 
-                    {/* Email */}
                     <div className="w-3/5 pl-8">
                         <div className="flex items-baseline gap-2">
                             <label htmlFor="email" className="mb-2 font-medium text-gray-900 dark:text-neutral-300">
@@ -185,7 +182,6 @@ export default function ReportForm() {
                     </div>
                 </div>
 
-                {/* Message */}
                 <div className="mb-10">
                     <div className="flex items-baseline gap-2">
                         <label htmlFor="message" className="mb-2 font-medium text-gray-900 dark:text-neutral-300">

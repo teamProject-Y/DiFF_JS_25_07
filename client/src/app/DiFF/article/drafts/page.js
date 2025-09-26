@@ -15,7 +15,6 @@ export default function DraftsPage() {
     const [deletingId, setDeletingId] = useState(null);
     const [error, setError] = useState('');
 
-    // 로그인 체크 + 목록 로딩
     useEffect(() => {
         const token = typeof window !== 'undefined' && localStorage.getItem('accessToken');
         if (!token) {

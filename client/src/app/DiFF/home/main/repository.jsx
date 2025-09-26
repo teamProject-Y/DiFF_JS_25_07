@@ -748,7 +748,6 @@ const COMMIT_DATA = {
     }
 };
 
-
 export default function SampleRepoLayout() {
 
     const [selectedRepoId, setSelectedRepoId] = useState(
@@ -784,17 +783,15 @@ export default function SampleRepoLayout() {
         <section className="flex-grow w-full pt-6 pb-14 text-gray-800">
             <div className="w-[85%] h-full mx-auto flex flex-col">
 
-                {/* Content Area */}
                 <div className="relative flex-1 min-h-0">
-                    {/* Secondary Tabs */}
+
                     {DATA.repositories.length > 0 && (
                         <div className="absolute -top-9 left-[230px] flex">
                             {[
                                 {key: "posts", label: "Posts"},
                                 {key: "info", label: "Info"},
                             ].map((t) => (
-                                <button
-                                    key={t.key}
+                                <button key={t.key}
                                     onClick={() => setTab(t.key)}
                                     className={`px-4 py-2 text-sm border-t border-r border-l rounded-t-xl transition ${
                                         tab === t.key
@@ -809,7 +806,7 @@ export default function SampleRepoLayout() {
                     )}
 
                     <div className="grid grid-cols-[230px_1fr] items-start h-full min-h-0">
-                        {/* Left Sidebar */}
+
                         <aside className="h-full overflow-y-auto rounded-l-lg border-t border-l border-b bg-gray-100">
                             <ul className="p-4 space-y-2">
                                 <li className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-200 text-gray-700"
@@ -822,8 +819,7 @@ export default function SampleRepoLayout() {
                                 {DATA.repositories.map((r) => {
                                     const sel = r.id === selectedRepoId;
                                     return (
-                                        <li
-                                            key={r.id}
+                                        <li key={r.id}
                                             onClick={() => setSelectedRepoId(r.id)}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${
                                                 sel ? "bg-gray-200 text-gray-900" : "hover:bg-gray-200 text-gray-700"
@@ -847,7 +843,6 @@ export default function SampleRepoLayout() {
                             onLinkGithub={kickToLogin}
                         />
 
-                        {/* Main Content */}
                         <div className="relative border rounded-r-lg h-full overflow-hidden bg-gray-50 border-gray-200">
                             {tab === "info" && selectedRepo ? (
                                 <InfoView repo={selectedRepo} kickToLogin={kickToLogin}/>
@@ -875,7 +870,6 @@ export default function SampleRepoLayout() {
 function LoginModal({open, onClose, onLogin}) {
     if (!open) return null;
 
-    // ESC로 닫기
     useEffect(() => {
         const h = (e) => e.key === "Escape" && onClose?.();
         window.addEventListener("keydown", h);
@@ -883,17 +877,15 @@ function LoginModal({open, onClose, onLogin}) {
     }, [onClose]);
 
     return (
-        <div
-            className="fixed inset-0 z-[100] flex items-center justify-center"
+        <div className="fixed inset-0 z-[100] flex items-center justify-center"
             aria-modal="true"
             role="dialog"
         >
-            {/* backdrop */}
-            <div
-                className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
+
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
                 onClick={onClose}
             />
-            {/* panel */}
+
             <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl border border-neutral-200 p-6">
                 <div className="flex items-start gap-3">
                     <div className="shrink-0 mt-0.5">
@@ -908,16 +900,12 @@ function LoginModal({open, onClose, onLogin}) {
                 </div>
 
                 <div className="mt-6 flex gap-2 justify-end">
-                    <button
-                        className="px-4 py-2 rounded-lg border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100"
-                        onClick={onClose}
-                    >
+                    <button className="px-4 py-2 rounded-lg border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100"
+                        onClick={onClose}>
                         취소
                     </button>
-                    <button
-                        className="px-4 py-2 rounded-lg bg-neutral-900 text-white hover:opacity-90"
-                        onClick={onLogin}
-                    >
+                    <button className="px-4 py-2 rounded-lg bg-neutral-900 text-white hover:opacity-90"
+                        onClick={onLogin}>
                         로그인하기
                     </button>
                 </div>
@@ -927,9 +915,7 @@ function LoginModal({open, onClose, onLogin}) {
 }
 
 
-// ==========================
-// INFO View
-// ==========================
+
 function InfoView({repo, kickToLogin}) {
     const info = REPO_INFO[repo.id] || {languages: [], history: [], commits: []};
     const [chartTab, setChartTab] = useState("recent");
@@ -938,7 +924,7 @@ function InfoView({repo, kickToLogin}) {
     return (
         <div className="absolute inset-0 p-4 overflow-y-auto">
             <div className="flex gap-3 h-full w-full overflow-y-scroll">
-                {/* Left 70% */}
+
                 <div className="max-w-[70%] min-w-[70%] flex flex-col">
                     <div className="flex-1 overflow-y-auto flex flex-col gap-3">
                         {/* Charts */}
@@ -1040,11 +1026,9 @@ function PostsView({repo}) {
                         Start your first post and keep it
                         clean, bold, and yours.</p>
 
-                    <div
-                        className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm
+                    <div className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm
                         font-medium transition hover:-translate-y-0.5
-                        hover:text-white hover:bg-neutral-700 border-neutral-700 text-neutral-700"
-                    >
+                        hover:text-white hover:bg-neutral-700 border-neutral-700 text-neutral-700">
                         Start a new post →
                     </div>
                 </div>
@@ -1066,8 +1050,7 @@ function PostCardLight({post}) {
             <div className="p-4">
                 <div className="flex items-start justify-between gap-4">
                     <h2 className="line-clamp-2 text-base font-semibold tracking-tight text-gray-900">{post.title || "Untitled"}</h2>
-                    <span
-                        className="ml-2 text-xs px-2 py-1 rounded border border-gray-300">{post.isPublic ? "public" : "private"}</span>
+                    <span className="ml-2 text-xs px-2 py-1 rounded border border-gray-300">{post.isPublic ? "public" : "private"}</span>
                 </div>
                 <div className="ml-1 my-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
                     <span>view {post.hits ?? 0}</span>
@@ -1116,19 +1099,15 @@ function CommitListStatic({data = {commits: []}, kickToLogin}) {
                     <ul className="divide-y max-w-full divide-gray-200">
                         {commits.map((c) => (
                             <li key={c.sha} className="py-4 flex items-start gap-3">
-                                <img
-                                    src={c.authorAvatarUrl || "https://avatars.githubusercontent.com/u/0?v=4"}
+                                <img src={c.authorAvatarUrl || "https://avatars.githubusercontent.com/u/0?v=4"}
                                     alt=""
-                                    className="w-10 h-10 rounded-full object-cover self-center"
-                                />
+                                    className="w-10 h-10 rounded-full object-cover self-center"/>
                                 <div className="min-w-0 flex-1 max-w-2/3">
-                                    <a
-                                        className="font-medium truncate hover:underline clamp-1"
+                                    <a className="font-medium truncate hover:underline clamp-1"
                                         href={c.htmlUrl || "#"}
                                         target="_blank"
                                         rel="noreferrer"
-                                        title={c.message}
-                                    >
+                                        title={c.message}>
                                         {c.message || "(no message)"}
                                     </a>
                                     <div className="flex gap-1 text-xs text-gray-500 mt-0.5">
@@ -1145,8 +1124,7 @@ function CommitListStatic({data = {commits: []}, kickToLogin}) {
                                         <span>{c.sha}</span>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={kickToLogin}
+                                <button onClick={kickToLogin}
                                     className="shrink-0 px-3 py-1 rounded-lg border text-sm self-center
                                     hover:bg-neutral-100 bg-white border-neutral-200
                                     dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-700">

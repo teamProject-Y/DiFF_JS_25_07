@@ -259,7 +259,7 @@ function SettingsPage() {
             return;
         }
         try {
-            const res = await modifyNickName({ nickName: form.nickName });
+            const res = await modifyNickName({nickName: form.nickName});
 
             if (res && res.resultCode) {
                 if (res.resultCode === "S-1") {
@@ -278,7 +278,6 @@ function SettingsPage() {
         } catch (err) {
             console.error("닉네임 수정 에러:", err);
             alert({ intent: "danger", title: err?.response?.data?.msg || "Server error" });
-
         }
     };
 
@@ -313,7 +312,7 @@ function SettingsPage() {
         <div className="w-full h-[calc(100vh-theme(spacing.20))] overflow-hidden mx-4 dark:text-neutral-300">
             {/*<div className="h-full">*/}
             <div className="mx-auto flex h-full">
-                <main className="flex-1 flex flex-col min-h-0 max-w-6xl">
+                <main className="flex-1 flex flex-col min-h-0 max-w-6xl mx-auto">
                     <div className="flex items-center border-b dark:border-neutral-700">
                         {tabs.map(t => (
                             <TopTabLink
