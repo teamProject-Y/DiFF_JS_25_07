@@ -105,7 +105,7 @@ function ModifyArticlePageInner() {
             setUnmountEditor(true);
             setTimeout(() => router.push(`/DiFF/article/detail?id=${id}`), 0);
         } catch (e) {
-            console.error('❌ Update failed:', e);
+            console.error('Update failed:', e);
             await alert({ intent: "danger", title: "Failed to update. Please try again." });
         } finally {
             setSubmitting(false);
@@ -136,11 +136,10 @@ function ModifyArticlePageInner() {
                 )}>
 
                     <div className="flex-1">
-                        <input
-                            className="w-full truncate rounded p-3 text-5xl font-semibold bg-transparent border-transparent focus:outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
-                            placeholder="Title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                        <input className="w-full truncate rounded p-3 text-5xl font-semibold bg-transparent border-transparent focus:outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
+                               placeholder="Title"
+                               value={title}
+                               onChange={(e) => setTitle(e.target.value)}
                         />
                     </div>
 
@@ -179,7 +178,7 @@ function ModifyArticlePageInner() {
                             href={`/DiFF/article/detail?id=${id}`}
                             className="rounded-md border px-5 py-2 font-medium border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-100/60 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
                         >
-                            Cancel
+                            CANCEL
                         </Link>
                         <button
                             type="submit"

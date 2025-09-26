@@ -1,31 +1,27 @@
 // lib/ArticleAPI.js
+
 import axios from "axios";
 import {DraftAPI} from "@/lib/DraftAPI";
 import { UserAPI } from "@/lib/UserAPI";
-import {ReflectAdapter as RepositoryAPI} from "next/dist/server/web/spec-extension/adapters/reflect";
 
-/** EC2 배포 서버 주소 (api/DiFF 까지 포함) */
 const BACKEND = "https://api.diff.io.kr/api/DiFF";
 
-/** axios custom **/
 export const ArticleAPI = axios.create({
     baseURL: BACKEND,
     headers: { "Content-Type": "application/json" },
 });
+
 ArticleAPI.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
             const TOKEN_TYPE = localStorage.getItem("tokenType") || "Bearer";
             const ACCESS_TOKEN = localStorage.getItem("accessToken");
-            // console.log("📦 accessToken:", ACCESS_TOKEN);
 
             if (ACCESS_TOKEN) {
                 config.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
             }
 
             const REFRESH_TOKEN = localStorage.getItem("refreshToken");
-            // console.log("📦 refreshToken:", REFRESH_TOKEN);
-            // console.log("🚀 최종 요청 헤더:", config.headers);
         }
         return config;
     },
@@ -39,14 +35,12 @@ export const setAuthHeader = () => {
         const ACCESS_TOKEN = localStorage.getItem("accessToken");
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
 
-        // accessToken이 있을 때만 Authorization 헤더 설정
         if (ACCESS_TOKEN) {
             ArticleAPI.defaults.headers['Authorization'] = `${TOKEN_TYPE} ${ACCESS_TOKEN}`;
         } else {
             delete ArticleAPI.defaults.headers['Authorization'];
         }
 
-        // refreshToken도 마찬가지
         if (REFRESH_TOKEN) {
             ArticleAPI.defaults.headers['REFRESH_TOKEN'] = REFRESH_TOKEN;
         } else {
@@ -55,8 +49,6 @@ export const setAuthHeader = () => {
     }
 };
 
-
-/** 3. 토큰 자동 재발급 (Refresh) */
 const refreshAccessToken = async () => {
     if (typeof window !== "undefined") {
         const REFRESH_TOKEN = localStorage.getItem("refreshToken");
@@ -70,7 +62,6 @@ const refreshAccessToken = async () => {
     }
 };
 
-/** 4. 인터셉터로 토큰 만료 자동 처리 */
 ArticleAPI.interceptors.response.use(
     response => response,
     async error => {
@@ -92,11 +83,9 @@ ArticleAPI.interceptors.response.use(
 function normalizeArticlePayload(data) {
     const payload = { ...(data || {}) };
 
-    // 숫자 필드 정규화
     if (payload.repositoryId != null) payload.repositoryId = Number(payload.repositoryId);
     if (payload.draftId != null) payload.draftId = Number(payload.draftId);
 
-    // checksum 동의어 흡수 → payload.checksum 으로 고정
     const foundChecksum =
         payload.checksum ??
         payload.commitHash ??
@@ -108,7 +97,7 @@ function normalizeArticlePayload(data) {
     if (typeof foundChecksum === "string" && foundChecksum.trim()) {
         payload.checksum = foundChecksum.trim();
     }
-    // 중복 키 제거(백엔드가 checksum만 받게 깔끔히)
+
     delete payload.commitHash;
     delete payload.commit_id;
     delete payload.commitId;
@@ -117,7 +106,6 @@ function normalizeArticlePayload(data) {
     return payload;
 }
 
-/** 5. Auth/회원 관련 API들 */
 export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyword = "", page = 1 }) => {
     const rid = repositoryId ?? repoId;
     const res = await ArticleAPI.get('/article/list', {
@@ -127,51 +115,43 @@ export const fetchArticles = async ({ repositoryId, repoId, searchItem = 0, keyw
     return res.data;
 };
 
-/** 트렌딩 글 */
 export const trendingArticle = async ({ count, days }) => {
     console.log("🛰 [trendingArticle] count:", count, "days:", days);
     const res = await ArticleAPI.get('/article/trending', {
-
         params: { count, days }
     });
     return res.data;
 };
 
-
-/** 글 작성 */
 export const writeArticle = async (data) => {
     if (data?.repositoryId != null) data = { ...data, repositoryId: Number(data.repositoryId) };
     if (data?.draftId != null) data = { ...data, draftId: Number(data.draftId) };
 
     const res = await ArticleAPI.post('/article/doWrite', data);
-    return res.data; // ResultData
+    return res.data;
 };
 
-/** 내 레포지토리 조회 */
 export const getMyRepositories = async () => {
     const res = await ArticleAPI.get('/repository/my');
     const repos = res.data?.data1?.repositories ?? res.data?.repositories ?? [];
     return Array.isArray(repos) ? repos : [];
 };
 
-/** 평균 메트릭 조회 */
 export const getAverageMetrics = async (repositoryId) => {
     const res = await ArticleAPI.get(`/repository/average/${repositoryId}`);
     return res.data;
 };
 
-/** 글 상세 조회 */
 export const getArticle = async (id) => {
     const res = await ArticleAPI.get('/article/detail', { params: { id } });
     return res.data.data1;
 }
 
-/** 글 수정 */
 export const modifyArticle = async (article, token) => {
     const res = await ArticleAPI.post('/article/modify', article, {
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // 🔑 토큰 추가
+            "Authorization": `Bearer ${token}`
         }
     });
     return res.data;

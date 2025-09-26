@@ -1,10 +1,10 @@
-// app/DiFF/not-found.jsx
 'use client';
 
-import { useEffect } from 'react';
+import {useEffect} from 'react';
 import ErrorScreen from '@/common/screen/errorScreen';
 
 export default function NotFound() {
+
     useEffect(() => {
         const main = document.querySelector('main');
         if (!main) return;
@@ -31,9 +31,9 @@ export default function NotFound() {
     return (
         <>
             <style>{`
-        .sideMenu { display: none !important; }
-        .content  { margin-left: 0 !important; width: 100% !important; }
-      `}</style>
+                      .sideMenu { display: none !important; }
+                      .content  { margin-left: 0 !important; width: 100% !important; }
+                    `}</style>
 
             <ErrorScreen
                 code="404"

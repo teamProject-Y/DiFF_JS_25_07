@@ -76,7 +76,6 @@ export function AddRepoModal({
             githubOwner: r?.githubOwner ?? null,
         }));
 
-    // 깃허브 미연동 상태에서 모달이 열리면 리스트/선택값 클리어
     useEffect(() => {
         if (!open) return;
         if (!isGithubLinked) {
@@ -88,7 +87,6 @@ export function AddRepoModal({
         }
     }, [open, isGithubLinked]);
 
-    // 모달 열림 + 깃허브 연동된 경우에만 리포 불러오기
     useEffect(() => {
         if (!open || !isGithubLinked) return;
         setGhErr('');
@@ -214,8 +212,7 @@ export function AddRepoModal({
                     style={{zIndex: 200}}
                     onClick={onClose}
                     aria-modal="true"
-                    role="dialog"
-                >
+                    role="dialog">
                     <motion.div
                         initial={{y: 12, opacity: 0, scale: 0.98}}
                         animate={{y: 0, opacity: 1, scale: 1}}
@@ -231,8 +228,7 @@ export function AddRepoModal({
                             className="absolute top-4 right-4 p-1 rounded-full
                                    text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900
                                    dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
-                            type="button"
-                        >
+                            type="button">
                             <i className="fa-solid fa-xmark text-xl"></i>
                         </button>
 
@@ -241,12 +237,10 @@ export function AddRepoModal({
                         </h2>
 
                         <div className="flex-1 min-h-0 flex gap-4">
-                            {/* 왼쪽: 직접 생성 */}
                             <form
                                 onSubmit={submitCreate}
                                 className="w-[45%] bg-white rounded-lg border p-4 flex flex-col mr-2
-                                            border-neutral-200 dark:bg-neutral-950/60 dark:border-neutral-800"
-                            >
+                                            border-neutral-200 dark:bg-neutral-950/60 dark:border-neutral-800">
                                 <p className="text-lg font-bold mb-3 text-neutral-900 dark:text-neutral-100">
                                     Create directly here
                                 </p>
@@ -265,12 +259,10 @@ export function AddRepoModal({
                                         aria-invalid={nameInvalid}
                                         aria-describedby={nameInvalid ? 'name-error' : undefined}
                                         className={`w-full rounded-lg px-3 py-2 border border-neutral-300
-                                              text-neutral-900 placeholder-neutral-400
-                                              focus:outline-none focus:ring-1 focus:ring-neutral-900
-                                              dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:placeholder-neutral-500
-                                              ${nameInvalid ? 'border-red-500 focus:ring-red-500 dark:focus:ring-red-400' : ''}`}
-                                    />
-
+                                                    text-neutral-900 placeholder-neutral-400
+                                                    focus:outline-none focus:ring-1 focus:ring-neutral-900
+                                                    dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:placeholder-neutral-500
+                                                    ${nameInvalid ? 'border-red-500 focus:ring-red-500 dark:focus:ring-red-400' : ''}`} />
                                     <p id="name-error"
                                        className={`mt-1 text-xs pl-2 ${nameInvalid ? 'text-red-500' : 'text-transparent'}`}>
                                         Please enter repository name
@@ -283,7 +275,6 @@ export function AddRepoModal({
                                         Visibility *
                                     </label>
                                     <div className="relative">
-                                        {/* 토글 버튼 */}
                                         <button
                                             ref={visBtnRef}
                                             type="button"
@@ -293,23 +284,20 @@ export function AddRepoModal({
                                             className="border w-full rounded-lg font-medium px-4 py-2 inline-flex items-center justify-between
                                                        border-neutral-300 hover:bg-neutral-100 focus:bg-neutral-100
                                                        dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100
-                                                       dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
-                                        >
+                                                       dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
                                             {visibility}
                                             <svg
                                                 className="w-2.5 h-2.5 ms-3"
                                                 aria-hidden="true"
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
-                                                viewBox="0 0 10 6"
-                                            >
+                                                viewBox="0 0 10 6">
                                                 <path
                                                     stroke="currentColor"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                     strokeWidth="2"
-                                                    d="m1 1 4 4 4-4"
-                                                />
+                                                    d="m1 1 4 4 4-4" />
                                             </svg>
                                         </button>
 
@@ -321,8 +309,7 @@ export function AddRepoModal({
                                                              bg-white border-neutral-200 divide-y divide-neutral-100
                                                              dark:bg-neutral-900 dark:border-neutral-800 dark:divide-neutral-800"
                                                 role="listbox"
-                                                tabIndex={-1}
-                                            >
+                                                tabIndex={-1}>
                                                 <ul className="py-1 font-medium w-full text-neutral-700 dark:text-neutral-200">
                                                     {['Public', 'Private'].map((opt) => (
                                                         <li
@@ -333,8 +320,7 @@ export function AddRepoModal({
                                                                 setVisibility(opt);
                                                                 setVisOpen(false);
                                                             }}
-                                                            className="cursor-pointer px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 w-full"
-                                                        >
+                                                            className="cursor-pointer px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 w-full">
                                                             {opt}
                                                         </li>
                                                     ))}
@@ -355,9 +341,8 @@ export function AddRepoModal({
                                         placeholder=" "
                                         rows={5}
                                         className="w-full border rounded-lg px-3 py-2 resize-none focus:ring-1
-                                                 border-neutral-300 text-neutral-900 focus:ring-neutral-900
-                                                 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:focus:ring-neutral-100"
-                                    />
+                                                   border-neutral-300 text-neutral-900 focus:ring-neutral-900
+                                                   dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:focus:ring-neutral-100" />
                                 </div>
 
                                 {err && <p className="text-red-500 text-sm">{err}</p>}
@@ -368,14 +353,12 @@ export function AddRepoModal({
                                         type="submit"
                                         disabled={submitting || !name.trim()}
                                         className="w-full px-4 py-2 rounded-lg bg-neutral-900 text-white disabled:opacity-60 hover:bg-neutral-800
-                                                dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
-                                    >
+                                                   dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
                                         {submitting ? 'Creating…' : 'Create Repository'}
                                     </button>
                                 </div>
                             </form>
 
-                            {/* 오른쪽: 깃허브에서 가져오기 */}
                             <div className="w-[55%] bg-white rounded-lg border p-4
                             border-neutral-200 dark:bg-neutral-950/60 dark:border-neutral-800">
                                 <div className="flex flex-col h-full">
@@ -384,7 +367,6 @@ export function AddRepoModal({
                                     </p>
 
                                     {!isGithubLinked ? (
-                                        // 깃허브 미연동: 연동 유도 UI
                                         <div className="flex-1 flex flex-col items-center justify-center text-center rounded-lg
                                                         border-2 border-dashed p-8 border-neutral-300 dark:border-neutral-700">
                                             <h4 className="text-base font-semibold mb-1 text-neutral-900 dark:text-neutral-100">
@@ -397,8 +379,7 @@ export function AddRepoModal({
                                                 type="button"
                                                 onClick={handleLinkGithub}
                                                 className="inline-flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-1 text-sm font-medium text-white hover:bg-neutral-800
-                                                            dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
-                                            >
+                                                            dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
                                                 <i className="fa-brands fa-github text-2xl"/>
                                                 Link GitHub
                                             </button>
@@ -412,14 +393,12 @@ export function AddRepoModal({
                                                 placeholder="Search repository"
                                                 className="w-full border rounded-lg px-3 py-2 my-5
                                                          border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:ring-1 focus:ring-neutral-900
-                                                         dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:ring-neutral-100"
-                                            />
+                                                         dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:ring-neutral-100" />
 
                                             <div
                                                 className="flex-1 min-h-0 border rounded-lg overflow-y-auto p-2 mb-8
                                                         border-neutral-300 dark:border-neutral-700"
-                                                style={{scrollbarGutter: 'stable', maxHeight: 360}}
-                                            >
+                                                style={{scrollbarGutter: 'stable', maxHeight: 360}}>
                                                 {ghLoading &&
                                                     <p className="text-sm text-neutral-500 px-1 py-2">Loading...</p>}
                                                 {ghErr && <p className="text-sm text-red-500 px-1 py-2">{ghErr}</p>}
@@ -449,34 +428,28 @@ export function AddRepoModal({
                                                                         ? 'bg-neutral-100 border-neutral-300 dark:bg-neutral-800 dark:border-neutral-700'
                                                                         : 'hover:bg-neutral-50 border-transparent dark:hover:bg-neutral-800'
                                                                 }`}
-                                                                title={repoName}
-                                                            >
+                                                                title={repoName}>
                                                                 <div className="flex items-center gap-3 min-w-0">
                                                                     <span
                                                                         className={`inline-block w-3 h-3 rounded-full border ${
                                                                             selected
                                                                                 ? 'bg-neutral-900 border-neutral-900 dark:bg-neutral-100 dark:border-neutral-100'
                                                                                 : 'bg-white border-neutral-400 dark:bg-neutral-900 dark:border-neutral-600'
-                                                                        }`}
-                                                                    />
+                                                                        }`} />
                                                                     <div className="min-w-0">
-                                                                        <div
-                                                                            className="truncate font-medium text-neutral-900 dark:text-neutral-100">
+                                                                        <div className="truncate font-medium text-neutral-900 dark:text-neutral-100">
                                                                             {repoName}
                                                                         </div>
                                                                         {owner && (
-                                                                            <div
-                                                                                className="text-xs text-neutral-400 truncate">@{owner}</div>
+                                                                            <div className="text-xs text-neutral-400 truncate">@{owner}</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
-                                                                <span
-                                                                    className={`text-xs px-2 py-0.5 rounded-lg border ${
+                                                                <span className={`text-xs px-2 py-0.5 rounded-lg border ${
                                                                         isPrivate
                                                                             ? 'border-neutral-900 bg-neutral-900 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900'
                                                                             : 'border-neutral-200 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'
-                                                                    }`}
-                                                                >
+                                                                    }`} >
                                                                     {isPrivate ? 'Private' : 'Public'}
                                                                 </span>
                                                             </li>
@@ -489,8 +462,7 @@ export function AddRepoModal({
                                                 onClick={submitImportRepo}
                                                 disabled={submitting || !ghSelectedId}
                                                 className="mt-auto w-full px-4 py-2 rounded-lg bg-neutral-900 text-white disabled:opacity-60 hover:bg-neutral-800
-                                                    dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
-                                            >
+                                                           dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200">
                                                 {submitting ? 'Importing…' : 'Import Selected'}
                                             </button>
                                         </>

@@ -1,11 +1,11 @@
 'use client';
+
 import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getFollowingList } from "@/lib/UserAPI";
 import { useRouter } from "next/navigation"
 import LoginSpeedDial from "@/common/toogle/loginSpeedDial";
-
 
 export default function LayMenu() {
     const [following, setFollowing] = useState([]);
@@ -33,7 +33,7 @@ export default function LayMenu() {
     return (
         <nav className="content top-20 h-[calc(100vh-80px)] mx-auto max-w-7xl flex justify-around">
             {/* 왼쪽 메뉴 */}
-            <aside className="py-3 w-64 relative"> {/* relative 추가 */}
+            <aside className="py-3 w-64 relative">
                 <nav className=" text-gray-600 mb-6">
                     {menuItems.map(({ href, label }) => {
                         const isActive =
@@ -79,7 +79,7 @@ export default function LayMenu() {
                                             />
                                         ) : (
                                             <div className="w-8 h-8 rounded-full flex items-center justify-center border
-                                                bg-gray-100 dark:bg-neutral-700 dark:border-neutral-700">
+                                                            bg-gray-100 dark:bg-neutral-700 dark:border-neutral-700">
                                                 <i className="fa-solid fa-skull text-gray-400 dark:text-neutral-300" />
                                             </div>
                                         )}
@@ -93,15 +93,15 @@ export default function LayMenu() {
                     )}
                 </div>
 
-                    <LoginSpeedDial
-                        writeHref="/DiFF/article/write"
-                        draftsHref="/DiFF/article/drafts"
-                        onToggleTheme={() => {
-                            document.documentElement.classList.toggle("dark");
-                            localStorage.theme =
-                                document.documentElement.classList.contains("dark") ? "dark" : "";
-                        }}
-                    />
+                <LoginSpeedDial
+                    writeHref="/DiFF/article/write"
+                    draftsHref="/DiFF/article/drafts"
+                    onToggleTheme={() => {
+                        document.documentElement.classList.toggle("dark");
+                        localStorage.theme =
+                            document.documentElement.classList.contains("dark") ? "dark" : "";
+                    }}
+                />
             </aside>
         </nav>
     );

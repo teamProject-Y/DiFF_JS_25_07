@@ -1,20 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, CheckCircle2, ShieldCheck, Zap, X, GitFork } from "lucide-react";
+import {useEffect, useRef, useState} from "react";
+import {AnimatePresence, motion} from "framer-motion";
+import {Sparkles, CheckCircle2, ShieldCheck, Zap, X, GitFork} from "lucide-react";
 
 import LoginForm from "@/app/DiFF/member/login/loginModal";
 import JoinForm from "@/app/DiFF/member/join/joinModal";
 import ModalOpenIntro from "@/common/anime/modalOpenIntro";
 import RepoLayoutSample from "@/app/DiFF/home/main/repository";
 
-export default function ModalLayout({ children }) {
-    // 'login' | 'join' | null
+export default function ModalLayout({children}) {
+
     const [mode, setMode] = useState(null);
     const isModalOpen = mode !== null;
 
-    // slide direction
     const prevRef = useRef(mode);
     const [dir, setDir] = useState(1);
 
@@ -28,10 +27,8 @@ export default function ModalLayout({ children }) {
 
     const panelLeft = mode === "join" ? "40%" : "0%";
 
-    // close
     const closeModal = () => setMode(null);
 
-    // open via window event
     useEffect(() => {
         const handler = (e) => {
             setMode(e.detail); // 'login' | 'join'
@@ -60,16 +57,16 @@ export default function ModalLayout({ children }) {
             {isModalOpen && (
                 <motion.div
                     key="modal-root"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    exit={{opacity: 0}}
                 >
                     {/* dim */}
                     <motion.div
                         className="fixed inset-0 z-[100] bg-black/60"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        exit={{opacity: 0}}
                         onClick={closeModal}
                     />
 
@@ -78,19 +75,22 @@ export default function ModalLayout({ children }) {
                         className="fixed inset-0 z-[101] flex items-center justify-center p-6"
                         role="dialog"
                         aria-modal="true"
-                        initial={{ opacity: 0, y: 24, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 24, scale: 0.98 }}
-                        transition={{ duration: 0.22 }}
+                        initial={{opacity: 0, y: 24, scale: 0.98}}
+                        animate={{opacity: 1, y: 0, scale: 1}}
+                        exit={{opacity: 0, y: 24, scale: 0.98}}
+                        transition={{duration: 0.22}}
                         onClick={closeModal}
                     >
                         <div className="relative w-[min(1100px,92vw)] h-[min(640px,78vh)]
-                        rounded-3xl overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.35)] bg-white"
+                                        rounded-3xl overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.35)] bg-white"
                              onClick={(e) => e.stopPropagation()}>
                             <button
-                                onClick={(e) => { e.stopPropagation(); closeModal(); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    closeModal();
+                                }}
                                 className="absolute right-3 top-3 z-50 h-8 w-8 rounded-full text-xl
-                                flex justify-center items-center"
+                                           flex justify-center items-center"
                                 aria-label="close"
                             >
                                 <X
@@ -101,27 +101,26 @@ export default function ModalLayout({ children }) {
 
                             <div className={`relative grid w-full h-full
                             ${mode === 'login' ? "grid-cols-[60%_40%]" : "grid-cols-[40%_60%]"}`}>
-                            {/* LEFT */}
                                 <div className="relative z-10 flex items-center justify-center">
                                     <div className="w-[80%] max-w-[400px]">
                                         <AnimatePresence mode="wait" custom={dir}>
                                             {mode === "join" ? (
                                                 <motion.div
                                                     key="join-left"
-                                                    initial={{ x: 40 * dir, opacity: 0 }}
-                                                    animate={{ x: 0, opacity: 1 }}
-                                                    exit={{ x: -40 * dir, opacity: 0 }}
-                                                    transition={{ duration: 0.22 }}
+                                                    initial={{x: 40 * dir, opacity: 0}}
+                                                    animate={{x: 0, opacity: 1}}
+                                                    exit={{x: -40 * dir, opacity: 0}}
+                                                    transition={{duration: 0.22}}
                                                 >
-                                                    <JoinForm />
+                                                    <JoinForm/>
                                                 </motion.div>
                                             ) : (
                                                 <motion.div
                                                     key="login-left"
-                                                    initial={{ x: 40 * dir, opacity: 0 }}
-                                                    animate={{ x: 0, opacity: 1 }}
-                                                    exit={{ x: -40 * dir, opacity: 0 }}
-                                                    transition={{ duration: 0.22 }}
+                                                    initial={{x: 40 * dir, opacity: 0}}
+                                                    animate={{x: 0, opacity: 1}}
+                                                    exit={{x: -40 * dir, opacity: 0}}
+                                                    transition={{duration: 0.22}}
                                                 >
                                                 </motion.div>
                                             )}
@@ -129,41 +128,42 @@ export default function ModalLayout({ children }) {
                                     </div>
                                 </div>
 
-                                {/* RIGHT (Animated black panel replacement) */}
                                 <motion.div
                                     className="absolute inset-y-0 right-0 w-[60%] overflow-hidden z-20"
                                     initial={false}
-                                    animate={{ left: panelLeft }}
-                                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                                    animate={{left: panelLeft}}
+                                    transition={{duration: 0.28, ease: [0.22, 1, 0.36, 1]}}
                                     aria-hidden={mode !== "join"}
                                 >
-                                    <PanelBG />
+                                    <PanelBG/>
                                     <div className="relative z-10 h-full text-white">
-                                        <PanelContent mode={mode} dir={dir} onToggle={() => setMode(mode === "login" ? "join" : "login")} />
+                                        <PanelContent mode={mode} dir={dir}
+                                                      onToggle={() => setMode(mode === "login" ? "join" : "login")}/>
                                     </div>
                                 </motion.div>
 
-                                {/* RIGHT column (forms) */}
-                                <div className={`relative z-10 flex items-center justify-center ${mode === "join" ? "pointer-events-none" : ""}`}>
+                                <div
+                                    className={`relative z-10 flex items-center justify-center ${mode === "join" ? "pointer-events-none" : ""}`}>
                                     <div className="w-[80%] max-w-[400px]">
                                         <AnimatePresence mode="wait" custom={dir}>
                                             {mode === "login" ? (
                                                 <motion.div
                                                     key="login-right"
-                                                    initial={{ x: -40 * dir, opacity: 0 }}
-                                                    animate={{ x: 0, opacity: 1 }}
-                                                    exit={{ x: 40 * dir, opacity: 0 }}
-                                                    transition={{ duration: 0.22 }}
+                                                    initial={{x: -40 * dir, opacity: 0}}
+                                                    animate={{x: 0, opacity: 1}}
+                                                    exit={{x: 40 * dir, opacity: 0}}
+                                                    transition={{duration: 0.22}}
                                                 >
-                                                    <LoginForm callbackUrl="/DiFF/home/main" afterLoginUriFromPage={undefined} />
+                                                    <LoginForm callbackUrl="/DiFF/home/main"
+                                                               afterLoginUriFromPage={undefined}/>
                                                 </motion.div>
                                             ) : (
                                                 <motion.div
                                                     key="join-right"
-                                                    initial={{ x: -40 * dir, opacity: 0 }}
-                                                    animate={{ x: 0, opacity: 1 }}
-                                                    exit={{ x: 40 * dir, opacity: 0 }}
-                                                    transition={{ duration: 0.22 }}
+                                                    initial={{x: -40 * dir, opacity: 0}}
+                                                    animate={{x: 0, opacity: 1}}
+                                                    exit={{x: 40 * dir, opacity: 0}}
+                                                    transition={{duration: 0.22}}
                                                 >
                                                 </motion.div>
                                             )}
@@ -172,14 +172,13 @@ export default function ModalLayout({ children }) {
                                 </div>
                             </div>
 
-                            <RepoLayoutSample />
-                            <ModalLayout />
-                            <ModalOpenIntro open={isModalOpen} brandText="DiFF" />
+                            <RepoLayoutSample/>
+                            <ModalLayout/>
+                            <ModalOpenIntro open={open} brandText="DiFF" animationColor="#37FF8B"/>
                         </div>
                     </motion.div>
 
-                    {/* keep children mounted for routing */}
-                    <div style={{ display: "none" }}>{children}</div>
+                    <div style={{display: "none"}}>{children}</div>
                 </motion.div>
             )}
         </AnimatePresence>
@@ -191,30 +190,31 @@ function PanelBG() {
     return (
         <div className="absolute inset-0">
             {/* Mesh gradient base */}
-            <div className="absolute inset-0 bg-black" />
+            <div className="absolute inset-0 bg-black"/>
 
             {/* Subtle grid overlay with radial fade */}
-            <div className="absolute inset-0 opacity-25 [mask-image:radial-gradient(800px_800px_at_70%_50%,#000,transparent)]">
+            <div
+                className="absolute inset-0 opacity-25 [mask-image:radial-gradient(800px_800px_at_70%_50%,#000,transparent)]">
             </div>
 
             {/* Floating glow blobs */}
             <motion.div
                 className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-cyan-400/30 blur-3xl"
-                initial={{ y: 0, opacity: 0.3 }}
-                animate={{ y: [0, 30, 0], opacity: [0.5, 0.8, 0.5] }}
-                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                initial={{y: 0, opacity: 0.3}}
+                animate={{y: [0, 30, 0], opacity: [0.5, 0.8, 0.5]}}
+                transition={{duration: 12, repeat: Infinity, ease: "easeInOut"}}
             />
             <motion.div
                 className="absolute bottom-[-60px] left-[-60px] w-64 h-64 rounded-full bg-sky-500/25 blur-3xl"
-                initial={{ y: 0, opacity: 0.3 }}
-                animate={{ y: [0, -38, 0], opacity: [0.5, 0.8, 0.5] }}
-                transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                initial={{y: 0, opacity: 0.3}}
+                animate={{y: [0, -38, 0], opacity: [0.5, 0.8, 0.5]}}
+                transition={{duration: 14, repeat: Infinity, ease: "easeInOut"}}
             />
         </div>
     );
 }
 
-function PanelContent({ mode, dir, onToggle }) {
+function PanelContent({mode, dir, onToggle}) {
     const [tipIdx, setTipIdx] = useState(0);
 
     const tips = [
@@ -235,7 +235,7 @@ function PanelContent({ mode, dir, onToggle }) {
         <div className="h-full px-10 md:px-12 py-9 flex flex-col justify-between">
             {/* Top brand */}
             <div className="flex items-center gap-2 text-white/90">
-                <GitFork className="w-5 h-5" />
+                <GitFork className="w-5 h-5"/>
                 <span className="font-semibold tracking-wide">DiFF</span>
             </div>
 
@@ -245,28 +245,29 @@ function PanelContent({ mode, dir, onToggle }) {
                     {mode === "join" ? (
                         <motion.div
                             key="join-copy"
-                            initial={{ x: 24 * dir, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: -24 * dir, opacity: 0 }}
-                            transition={{ duration: 0.25 }}
+                            initial={{x: 24 * dir, opacity: 0}}
+                            animate={{x: 0, opacity: 1}}
+                            exit={{x: -24 * dir, opacity: 0}}
+                            transition={{duration: 0.25}}
                         >
                             <h2 className="text-3xl md:text-4xl font-bold leading-tight">
                                 Create your DiFF account
                             </h2>
                             <p className="mt-3 text-white/80 max-w-[34ch]">
-                                Turn code changes into beautiful, shareable write-ups. Private by default. Fast by design.
+                                Turn code changes into beautiful, shareable write-ups. Private by default. Fast by
+                                design.
                             </p>
                             <ul className="mt-6 space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <CheckCircle2 className="mt-0.5 w-5 h-5 text-green-500/70" />
+                                    <CheckCircle2 className="mt-0.5 w-5 h-5 text-green-500/70"/>
                                     <span className="text-white/85">Keep your commit history in sync</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <ShieldCheck className="mt-0.5 w-5 h-5 text-white/90" />
+                                    <ShieldCheck className="mt-0.5 w-5 h-5 text-white/90"/>
                                     <span className="text-white/85">Private repos stay private</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <Zap className="mt-0.5 w-5 h-5 text-yellow-500/70" />
+                                    <Zap className="mt-0.5 w-5 h-5 text-yellow-500/70"/>
                                     <span className="text-white/85">Generate polished drafts from diffs</span>
                                 </li>
                             </ul>
@@ -274,10 +275,10 @@ function PanelContent({ mode, dir, onToggle }) {
                     ) : (
                         <motion.div
                             key="login-copy"
-                            initial={{ x: -24 * dir, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: 24 * dir, opacity: 0 }}
-                            transition={{ duration: 0.25 }}
+                            initial={{x: -24 * dir, opacity: 0}}
+                            animate={{x: 0, opacity: 1}}
+                            exit={{x: 24 * dir, opacity: 0}}
+                            transition={{duration: 0.25}}
                         >
                             <h2 className="text-3xl md:text-4xl font-bold leading-tight">
                                 Welcome back !
@@ -292,10 +293,10 @@ function PanelContent({ mode, dir, onToggle }) {
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={tipIdx}
-                                        initial={{ y: 8, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        exit={{ y: -8, opacity: 0 }}
-                                        transition={{ duration: 0.22 }}
+                                        initial={{y: 8, opacity: 0}}
+                                        animate={{y: 0, opacity: 1}}
+                                        exit={{y: -8, opacity: 0}}
+                                        transition={{duration: 0.22}}
                                         className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md px-4 py-3 text-sm"
                                     >
                                         <span className="font-medium">Tip</span>

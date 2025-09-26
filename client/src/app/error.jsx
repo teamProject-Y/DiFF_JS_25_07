@@ -1,10 +1,9 @@
-// app/DiFF/error.jsx
 'use client';
 
-import { useEffect } from 'react';
+import {useEffect} from 'react';
 import ErrorScreen from '@/common/screen/errorScreen';
 
-export default function Error({ error, reset }) {
+export default function Error({error, reset}) {
     const code = (error && error.status) || 500
 
     useEffect(() => {
@@ -33,9 +32,9 @@ export default function Error({ error, reset }) {
     return (
         <>
             <style>{`
-        .sideMenu { display: none !important; }
-        .content  { margin-left: 0 !important; width: 100% !important; }
-      `}</style>
+                      .sideMenu { display: none !important; }
+                      .content  { margin-left: 0 !important; width: 100% !important; }
+                    `}</style>
 
             <ErrorScreen
                 code={String(code)}
