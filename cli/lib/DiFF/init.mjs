@@ -5,7 +5,6 @@ import {DateTime} from "luxon";
 
 /** DiFF 디렉토리 만들기 **/
 export async function mkDiFFdirectory(repositoryId) {
-    if (fs.existsSync(".DiFF")) return;
 
     const branches = await getBranchCreationTimes();
 
@@ -22,8 +21,8 @@ export async function mkDiFFdirectory(repositoryId) {
 
 /** directory 생성 **/
 async function createDiFFRoot() {
-    fs.mkdirSync(".DiFF");
-    fs.mkdirSync(".DiFF/logs");
+    fs.mkdirSync(".DiFF", { recursive: true });
+    fs.mkdirSync(".DiFF/logs", { recursive: true });
 }
 
 /** config file 생성, 작성 **/
@@ -41,27 +40,64 @@ async function createConfigFile(repositoryId) {
 
 /** meta file 생성 **/
 async function createMetaFile() {
-    fs.writeFileSync(".DiFF/meta", JSON.stringify([], null, 2));
+    const metaPath = ".DiFF/meta";
+    if (!fs.existsSync(metaPath)) {
+        fs.writeFileSync(metaPath, JSON.stringify([], null, 2));
+    }
 }
 
 /** 브랜치 생성 순 반환 **/
 async function getBranchCreationTimes() {
 
-    const dir = ".git/logs/refs/heads";
-    const branches = fs.readdirSync(dir);
+    const headsRoot = path.join(".git", "logs", "refs", "heads");
+
+    if (!fs.existsSync(headsRoot) || !fs.statSync(headsRoot).isDirectory()) {
+        return [];
+    }
+
+    function walkFiles(dir) {
+        const out = [];
+        for (const entry of fs.readdirSync(dir)) {
+            const p = path.join(dir, entry);
+            const st = fs.statSync(p);
+            if (st.isDirectory()) {
+                out.push(...walkFiles(p));                 
+            } else if (st.isFile()) {
+                out.push(p);                               
+            }
+            // 심볼릭 링크 등은 무시
+        }
+        return out;
+    }
+
+    const files = walkFiles(headsRoot);                    
     const result = [];
 
-    for (const branch of branches) {
-        const content = fs.readFileSync(path.join(dir, branch), "utf-8");
-        const firstLine = content.split("\n")[0];
-        const parts = firstLine.split(" ");
+    for (const filePath of files) {
+        const name = path.relative(headsRoot, filePath).replace(/\\/g, '/');
 
-        const fromHash = parts[0];
-        const toHash = parts[1];
-        const timestamp = parseInt(parts[4], 10);
-        const event = firstLine.split('\t')[1];
+        const content = fs.readFileSync(filePath, "utf-8");
 
-        result.push({ name: branch, timestamp: timestamp, fromHash: fromHash, toHash: toHash, event: event });
+        const firstLine = (content.split("\n").find(Boolean) || "").trim();
+        if (!firstLine) continue;
+
+        const tsMatch = firstLine.match(/\s(\d{10})\s[+-]\d{4}\s*\t/);        
+        const timestamp = tsMatch ? parseInt(tsMatch[1], 10) : NaN;           
+
+
+        const parts = firstLine.split(/\s+/);
+        const fromHash = parts[0] || null;                                    
+        const toHash = parts[1] || null;                                      
+
+        const tabIdx = firstLine.indexOf('\t');                                
+        const event = tabIdx >= 0 ? firstLine.slice(tabIdx + 1) : "";          
+
+        if (!Number.isNaN(timestamp)) {
+            result.push({ name, timestamp, fromHash, toHash, event });
+        } else {
+            const st = fs.statSync(filePath);
+            result.push({ name, timestamp: Math.floor(st.mtimeMs / 1000), fromHash, toHash, event }); 
+        }
     }
 
     result.sort((a, b) => a.timestamp - b.timestamp);
@@ -97,6 +133,9 @@ async function createBranchLog(branchName) {
     }
 
     const logPath = path.join(logsDir, `${branchName}.json`);
-    fs.writeFileSync(logPath, "[]");
+    
+    if (!fs.existsSync(logPath)) {                         
+        fs.mkdirSync(path.dirname(logPath), { recursive: true }); 
+        fs.writeFileSync(logPath, "[]");
+    }
 }
-
