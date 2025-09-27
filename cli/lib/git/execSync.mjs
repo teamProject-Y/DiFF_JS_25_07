@@ -69,31 +69,38 @@ export async function DiFFinit(memberId, branch) {
 
 export async function doAnalysis(branch, memberId, draftId, diffId) {
     try {
-
         const lastChecksum = await getLastChecksum(branch);
         const repositoryId = await getRepositoryId(branch);
 
-        // target 폴더 존재 여부 확인
-        const hasTarget = await sh('[ -d target ] && echo true || echo false');
+        // 1. git archive (소스만)
+        await sh(`git archive --format=zip --output=withoutBuild.zip ${branch}`);
+        await sh(`rm -rf tempdir difftest.zip`);
+        await sh(`mkdir tempdir`);
+        await sh(`unzip withoutBuild.zip -d tempdir`);
 
-        // 압축 준비
-        if (hasTarget === "true") {
-            await sh(`git archive --format=zip --output=withoutTarget.zip ${branch}`);
-            await sh(`rm -rf tempdir difftest.zip`);
-            await sh(`mkdir tempdir`);
-            await sh(`unzip withoutTarget.zip -d tempdir`);
+        // 2. 빌드 산출물 복사 (Maven/Gradle/IntelliJ 모두 지원)
+        if (fs.existsSync("target")) {
+            console.log("📦 Maven target 추가");
             await sh(`cp -r target tempdir/`);
-            await sh(`cd tempdir && zip -r ../difftest.zip .`);
-            await sh(`rm withoutTarget.zip && rm -rf tempdir`);
-        } else {
-            await sh(`git archive --format=zip --output=difftest.zip ${branch}`);
         }
+        if (fs.existsSync("build/classes")) {
+            console.log("📦 Gradle build/classes 추가");
+            await sh(`mkdir -p tempdir/build && cp -r build/classes tempdir/build/`);
+        }
+        if (fs.existsSync("out/production")) {
+            console.log("📦 IntelliJ out/production 추가");
+            await sh(`mkdir -p tempdir/out && cp -r out tempdir/`);
+        }
+
+        // 3. 최종 zip 생성
+        await sh(`cd tempdir && zip -r ../difftest.zip .`);
+        await sh(`rm withoutBuild.zip && rm -rf tempdir`);
 
         if (!fs.existsSync("difftest.zip")) {
             throw new Error("❌ difftest.zip 파일 생성 실패");
         }
 
-        //  R2 업로드
+        // 4. R2 업로드
         const zipKey = `repo_${repositoryId}/draft_${draftId}_${lastChecksum}.zip`;
         const ok = await uploadZipToR2("difftest.zip", zipKey);
 
@@ -101,17 +108,10 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         if (!ok) throw new Error("❌ R2 업로드 실패");
         console.log(chalk.green("✅ R2 업로드 성공 서버 시작"));
 
+        // 5. 서버에 분석 요청 (스트리밍)
         const url = "https://api.diff.io.kr/r2/analyze";
-        const payload = {
-            memberId,
-            repositoryId,
-            draftId,
-            diffId,
-            lastChecksum,
-            key: zipKey,
-        };
-      
-        // 스트리밍 호출(무제한 대기)
+        const payload = { memberId, repositoryId, draftId, diffId, lastChecksum, key: zipKey };
+
         const res = await axios.post(`https://api.diff.io.kr/r2/analyze-stream`, payload, {
             headers: { "Content-Type": "application/json" },
             responseType: "stream",
@@ -138,14 +138,13 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
                     else if (line === "DONE") { done = true; console.log(chalk.green("✅ done")); }
                     else if (line.startsWith("ERROR")) { errorMsg = line; console.error(chalk.red(line)); }
                     else if (line === ".") { /* heartbeat */ }
-                    else { finalResult += line + "\n"; } // 결과 본문 누적
+                    else { finalResult += line + "\n"; }
                 }
             });
             res.data.on("end", resolve);
             res.data.on("error", reject);
         });
 
-        // ✅ 엄격 판정: DONE 없거나 ERROR면 실패 처리
         if (errorMsg) throw new Error(errorMsg);
         if (!done) throw new Error("Unexpected end without DONE");
 
@@ -160,6 +159,7 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
         return false;
     }
 }
+
 
 // 비동기로 cmd
 export async function sh(cmd, passthrough = false) {
