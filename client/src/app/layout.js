@@ -10,6 +10,7 @@ export default function RootLayout({children, modal}) {
     return (
         <html lang="ko" suppressHydrationWarning>
         <head>
+            {/* 다크모드 초기화 스크립트 */}
             <Script id="theme-init" strategy="beforeInteractive">
                 {`(function(){
                     try {
@@ -42,6 +43,21 @@ export default function RootLayout({children, modal}) {
                 })();`}
             </Script>
 
+            {/* ✅ Google Analytics GA4 */}
+            <Script
+                src="https://www.googletagmanager.com/gtag/js?id=G-45BH0SS23E"
+                strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+                {`
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'G-45BH0SS23E', {
+                    page_path: window.location.pathname,
+                  });
+                `}
+            </Script>
         </head>
         <body className="text-neutral-900 dark:bg-neutral-900 dark:text-neutral-300">
         <Suspense fallback={null}>
