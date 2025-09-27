@@ -1,14 +1,12 @@
 import {UserAPI} from "@/lib/UserAPI";
 import {ArticleAPI} from "@/lib/ArticleAPI";
 
-// fetch github repository
 export const getGithubRepos = async () => {
     const response = await UserAPI.get(`/github/repos`, {});
     return response.data;
 };
 
 export const createRepository = async (data) => {
-
 
     try {
         const res = await ArticleAPI.post("/repository/createRepository", data);
@@ -19,13 +17,13 @@ export const createRepository = async (data) => {
 };
 
 export const renameRepository = async (id, name) => {
-    const payload = { id, name };
+    const payload = {id, name};
 
     try {
         const res = await ArticleAPI.post(
             "/repository/rename",
             payload,
-            { headers: { "Content-Type": "application/json" } }
+            {headers: {"Content-Type": "application/json"}}
         );
         return res.data;
     } catch (err) {
@@ -74,7 +72,6 @@ export const getGithubCommitList = async (repo, opts = {}) => {
         throw new Error('Missing repository');
     }
 
-    // https://github.com/teamProject-Y/DiFF
     const owner = repo.githubOwner ?? repo.url.split('/')[3];
     const repoName = repo.githubName ?? repo.url.split('/')[4];
 
@@ -92,7 +89,7 @@ export const getGithubCommitList = async (repo, opts = {}) => {
     const code = data.resultCode || data.code || '';
 
     if (code && !String(code).startsWith('S-')) {
-        return { resultCode: code, message: res.msg || '커밋 조회 실패', data: [] };
+        return {resultCode: code, message: res.msg || '커밋 조회 실패', data: []};
     }
 
     const raw =
@@ -101,39 +98,38 @@ export const getGithubCommitList = async (repo, opts = {}) => {
         [];
 
     const normalize = (c) => ({
-        sha: c.sha,
-        htmlUrl: c.htmlUrl || c.html_url,
-        message: (c.message || '').split('\n')[0],
-        authorName: c.authorName ?? c.AuthorName,
-        authorLogin: c.authorLogin ?? c.AuthorLogin,
-        authorAvatarUrl: c.authorAvatarUrl ?? c.AuthorAvatarUrl,
-        authoredAt: c.authoredAt ?? c.AuthoredAt,
-        parentSha:
-            c.parentSha ??
-            (Array.isArray(c.parents) && c.parents.length > 0 ? c.parents[0]?.sha : null),
-    });
+            sha: c.sha,
+            htmlUrl: c.htmlUrl || c.html_url,
+            message: (c.message || '').split('\n')[0],
+            authorName: c.authorName ?? c.AuthorName,
+            authorLogin: c.authorLogin ?? c.AuthorLogin,
+            authorAvatarUrl: c.authorAvatarUrl ?? c.AuthorAvatarUrl,
+            authoredAt: c.authoredAt ?? c.AuthoredAt,
+            parentSha:
+                c.parentSha ??
+                (Array.isArray(c.parents) && c.parents.length > 0 ? c.parents[0]?.sha : null),
+        }
+    );
 
     return Array.isArray(raw) ? raw.map(normalize) : [];
 };
 
 export const connectRepository = async (repoId, url) => {
-    // 1) validate
-    const v = await ArticleAPI.get(`/github/validate`, { params: { url } });
-    const code = String(v.data?.resultCode ?? v.data?.msg ?? "");
-    if (code.startsWith("F-")) return v.data; // 실패면 그대로 반환
 
-    // 2) validate 응답에서 owner/name/defaultBranch 꺼내기
-    const owner         = v.data?.data?.owner         ?? v.data?.data1?.owner         ?? "";
-    const name          = v.data?.data?.name          ?? v.data?.data1?.name          ?? "";
+    const v = await ArticleAPI.get(`/github/validate`, {params: {url}});
+    const code = String(v.data?.resultCode ?? v.data?.msg ?? "");
+    if (code.startsWith("F-")) return v.data;
+
+    const owner = v.data?.data?.owner ?? v.data?.data1?.owner ?? "";
+    const name = v.data?.data?.name ?? v.data?.data1?.name ?? "";
     const defaultBranch = v.data?.data?.defaultBranch ?? v.data?.data1?.defaultBranch ?? "";
 
-    // 3) connect: POST + 쿼리 파라미터 (바디 없음이면 data 자리에 null)
-    const { data } = await ArticleAPI.post(
+    const {data} = await ArticleAPI.post(
         `/repository/connect`,
         null,
         {
             params: {
-                repoId, // ← 서버 파라미터 이름과 동일!
+                repoId,
                 url,
                 owner,
                 name,
@@ -160,13 +156,14 @@ export const mkDraft = async (repoId, owner, repoName, sha) => {
 export const deleteRepository = async (id) => {
     try {
         const res = await UserAPI.delete(`/repository/${id}`, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return res.data;
     } catch (error) {
         console.error("Error deleting repository:", error);
-        return { resultCode: "F-ERROR", msg: error.message };
+        return {resultCode: "F-ERROR", msg: error.message};
     }
 };

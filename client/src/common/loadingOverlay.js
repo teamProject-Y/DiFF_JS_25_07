@@ -1,4 +1,5 @@
 'use client';
+
 import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 
@@ -19,7 +20,7 @@ export default function LoadingOverlay({ show }) {
                 justifyContent: 'center',
             }}
         >
-            {/* 자유롭게 스피너 넣기 */}
+
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-black border-t-transparent" />
         </div>,
         document.body

@@ -15,7 +15,7 @@ import {
 
 import { Bar, Radar } from 'react-chartjs-2';
 
-// chart.js 플러그인 등록
+// chart.js 플러그인
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -29,7 +29,7 @@ ChartJS.register(
 );
 
 export default function QualityPage() {
-    // 예시 데이터 (프로젝트 3개)
+    // 예시 데이터
     const projects = ['Project A', 'Project B', 'Project C'];
 
     const groupedBarData = {

@@ -1,4 +1,3 @@
-// src/contrast.js
 
 // hex(#RGB, #RRGGBB, #RRGGBBAA) / rgb()/rgba() 문자열 지원
 function toRGB(color) {
@@ -54,10 +53,11 @@ function luminanceFromRGB([r, g, b]) {
  * @param {string} opts.dark  - 어두운 텍스트 색 (기본 '#111111')
  * @param {number} opts.threshold - 밝기 임계값 0~1 (기본 0.55)
  */
+
 export function getContrastColor(bg, opts = {}) {
     const { light = "#ffffff", dark = "#111111", threshold = 0.55 } = opts;
     const rgb = toRGB(bg);
-    if (!rgb) return dark; // 파싱 실패 시 기본 어두운 글자색
+    if (!rgb) return dark;
 
     const L = luminanceFromRGB(rgb);
     return L > threshold ? dark : light;
@@ -67,6 +67,7 @@ export function getContrastColor(bg, opts = {}) {
  * 루트 엘리먼트에 CSS 변수로 자동 대비 색을 주입합니다. (선택)
  * @example: root.style.color = 'var(--auto-fg)'
  */
+
 export function applyAutoContrast(root, bg, opts) {
     if (!root) return;
     const fg = getContrastColor(bg, opts);

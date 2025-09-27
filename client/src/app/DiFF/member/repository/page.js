@@ -123,7 +123,6 @@ export default function RepositoriesPage() {
             });
     }, [router, searchParams]);
 
-    // 교체: 선택된 레포도 보이는 목록 기준
     const selectedRepo = useMemo(
         () => visibleRepos.find((r) => r.id === selectedRepoId) || null,
         [visibleRepos, selectedRepoId]

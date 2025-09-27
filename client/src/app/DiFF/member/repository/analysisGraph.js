@@ -17,12 +17,10 @@ const gradeBaseColor = (key) => {
 export const Circle = ({ grade = 'E' }) => {
     const key = String(grade).toUpperCase();
     return (
-        <div
-            className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-neutral-900/60"
-            style={{ backgroundColor: gradeBaseColor(key) }}
-            aria-label={`Grade ${key}`}
-            title={`Grade ${key}`}
-        >
+        <div className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-neutral-900/60"
+             style={{ backgroundColor: gradeBaseColor(key) }}
+             aria-label={`Grade ${key}`}
+             title={`Grade ${key}`}>
             {key}
         </div>
     );
@@ -60,42 +58,31 @@ export default function AnalysisGraph({analysis}) {
     return (
         <div className="p-1 flex items-center justify-around text-sm flex-nowrap font-bold">
 
-            {/* Security */}
             <div className="flex flex-col jusitify-center items-center gap-3">
-                <div className="flex items-center gap-3"><Circle
-                    grade={analysis.gradeSecurity}/> {analysis.vulnerabilities}</div>
+                <div className="flex items-center gap-3"><Circle grade={analysis.gradeSecurity}/> {analysis.vulnerabilities}</div>
                 <span className="font-medium text-xs">Security</span>
             </div>
 
-            {/* Reliability */}
             <div className="flex flex-col jusitify-center items-center gap-3">
-                <div className="flex items-center gap-3"><Circle grade={analysis.gradeReliability}/> {analysis.bugs}
-                </div>
+                <div className="flex items-center gap-3"><Circle grade={analysis.gradeReliability}/> {analysis.bugs}</div>
                 <span className="font-medium text-xs">Reliability</span>
             </div>
 
-            {/* Maintainability */}
             <div className="flex flex-col jusitify-center items-center gap-3">
-                <div className="flex items-center gap-3"><Circle
-                    grade={analysis.gradeMaintainability}/>{analysis.codeSmells}</div>
+                <div className="flex items-center gap-3"><Circle grade={analysis.gradeMaintainability}/>{analysis.codeSmells}</div>
                 <span className="font-medium text-xs">Maintainability</span>
             </div>
 
-            {/* Complexity */}
             <div className="flex flex-col jusitify-center items-center gap-3">
-                <div className="flex items-center gap-3"><Circle
-                    grade={analysis.gradeComplexity}/> {analysis.complexity}</div>
+                <div className="flex items-center gap-3"><Circle grade={analysis.gradeComplexity}/> {analysis.complexity}</div>
                 <span className="font-medium text-xs">Complexity</span>
             </div>
 
-            {/* Coverage */}
             <div className="flex flex-col jusitify-center items-center gap-3">
-                <div className="flex items-center gap-3"><Circle grade={analysis.gradeCoverage}/> {analysis.coverage} %
-                </div>
+                <div className="flex items-center gap-3"><Circle grade={analysis.gradeCoverage}/> {analysis.coverage} %</div>
                 <span className="font-medium text-xs">Coverage</span>
             </div>
 
-            {/* Duplications */}
             <div className="flex flex-col jusitify-center items-center gap-3">
                 <div className="flex justify-center items-center gap-3">
                     <div className="w-7 h-7">

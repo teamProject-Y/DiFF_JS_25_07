@@ -98,7 +98,6 @@ function SettingsPage() {
         }
     };
 
-    // 소셜 로그인 연동
     const startLink = (provider) => {
         if (provider !== 'google' && provider !== 'github') return;
         const url = `/api/DiFF/auth/link/${provider}?mode=link`;
@@ -259,26 +258,25 @@ function SettingsPage() {
             return;
         }
         try {
-            const res = await modifyNickName({ nickName: form.nickName });
+            const res = await modifyNickName({nickName: form.nickName});
 
             if (res && res.resultCode) {
                 if (res.resultCode === "S-1") {
-                    setMember((prev) => ({ ...prev, nickName: form.nickName }));
+                    setMember((prev) => ({...prev, nickName: form.nickName}));
                     setEditingNick(false);
                 } else if (res.resultCode === "F-8") {
-                    alert({ intent: "danger", title: res.msg || "This nickname is already in use." });
+                    alert({intent: "danger", title: res.msg || "This nickname is already in use."});
                 } else if (res.resultCode === "F-7") {
-                    alert({ intent: "danger", title: res.msg || "Failed to edit member information" });
+                    alert({intent: "danger", title: res.msg || "Failed to edit member information"});
                 } else {
-                    alert({ intent: "danger", title: res.msg || "Unknown error" });
+                    alert({intent: "danger", title: res.msg || "Unknown error"});
                 }
             } else {
-                alert({ intent: "danger", title: "Invalid server response" });
+                alert({intent: "danger", title: "Invalid server response"});
             }
         } catch (err) {
             console.error("닉네임 수정 에러:", err);
-            alert({ intent: "danger", title: err?.response?.data?.msg || "Server error" });
-
+            alert({intent: "danger", title: err?.response?.data?.msg || "Server error"});
         }
     };
 
@@ -311,7 +309,6 @@ function SettingsPage() {
 
     return (
         <div className="w-full h-[calc(100vh-theme(spacing.20))] overflow-hidden mx-4 dark:text-neutral-300">
-            {/*<div className="h-full">*/}
             <div className="mx-auto flex h-full">
                 <main className="flex-1 flex flex-col min-h-0 max-w-6xl mx-auto">
                     <div className="flex items-center border-b dark:border-neutral-700">
@@ -320,8 +317,7 @@ function SettingsPage() {
                                 key={t.key}
                                 href={t.href}
                                 label={t.label}
-                                active={isActive(t)}
-                            />
+                                active={isActive(t)}/>
                         ))}
                     </div>
 
@@ -330,7 +326,6 @@ function SettingsPage() {
 
                             <div className="flex gap-6 px-2">
 
-                                {/* LEFT */}
                                 <div className="flex flex-col gap-4">
 
                                     <Card>
@@ -350,8 +345,7 @@ function SettingsPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => fileInputRef.current?.click()}
-                                                    className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-neutral-900/70 py-1 text-[12px] text-neutral-200 backdrop-blur"
-                                                >
+                                                    className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-neutral-900/70 py-1 text-[12px] text-neutral-200 backdrop-blur">
                                                     <i className="fa-regular fa-camera"></i>
                                                     <span>Edit</span>
                                                 </button>
@@ -392,23 +386,20 @@ function SettingsPage() {
                                                                         if (e.key === "Escape") cancelEditNick();
                                                                     }}
                                                                     className="flex-grow min-w-0 w-[80%] px-2 py-1 mr-2 rounded-md border text-xl font-semibold
-                                                                        focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                                                    placeholder="nickname"
-                                                                />
+                                                                               focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                                                    placeholder="nickname"/>
                                                                 <button
                                                                     onClick={onSaveNick}
                                                                     className="p-1"
                                                                     title="Save"
-                                                                    aria-label="Save nickname"
-                                                                >
+                                                                    aria-label="Save nickname">
                                                                     <i className="fa-solid fa-check"></i>
                                                                 </button>
                                                                 <button
                                                                     onClick={cancelEditNick}
                                                                     className="p-1"
                                                                     title="Cancel"
-                                                                    aria-label="Cancel edit"
-                                                                >
+                                                                    aria-label="Cancel edit">
                                                                     <i className="fa-solid fa-xmark"></i>
                                                                 </button>
                                                             </>
@@ -421,8 +412,7 @@ function SettingsPage() {
                                                                     onClick={() => setEditingNick(true)}
                                                                     className="pb-1 text-base text-neutral-400"
                                                                     title="Rename"
-                                                                    aria-label="Rename nickname"
-                                                                >
+                                                                    aria-label="Rename nickname">
                                                                     <i className="fa-solid fa-pen"></i>
                                                                 </button>
                                                             </>
@@ -439,15 +429,13 @@ function SettingsPage() {
                                                         brand="google"
                                                         label={linked.google ? "Connected" : "Connect"}
                                                         onClick={() => !linked.google && startLink("google")}
-                                                        disabled={linked.google}
-                                                    />
+                                                        disabled={linked.google}/>
 
                                                     <LinkBtn
                                                         brand="github"
                                                         label={linked.github ? "Connected" : "Connect"}
                                                         onClick={() => !linked.github && startLink("github")}
-                                                        disabled={linked.github}
-                                                    />
+                                                        disabled={linked.github}/>
 
                                                 </div>
                                             </div>
@@ -463,8 +451,7 @@ function SettingsPage() {
                                                 return (
                                                     <div
                                                         key={item.key}
-                                                        className="flex items-center justify-between py-3"
-                                                    >
+                                                        className="flex items-center justify-between py-3">
                                                         <div className="pr-2">
                                                             <div
                                                                 className="mb-1 text-base font-medium">{item.title}</div>
@@ -503,8 +490,8 @@ function SettingsPage() {
                                                 type="button"
                                                 onClick={onClickRemove}
                                                 className="rounded px-3 py-1.5 text-sm self-end border
-                                                               border-gray-300 hover:border-red-500 hover:text-red-500
-                                                               dark:border-gray-400 dark:hover:border-red-500">
+                                                           border-gray-300 hover:border-red-500 hover:text-red-500
+                                                           dark:border-gray-400 dark:hover:border-red-500">
                                                 Delete account
                                             </button>
                                         </div>
@@ -576,8 +563,7 @@ function SettingsPage() {
                                                                         language={match[1]}
                                                                         PreTag="div"
                                                                         wrapLongLines
-                                                                        {...props}
-                                                                    >
+                                                                        {...props}>
                                                                         {String(children).replace(/\n$/, "")}
                                                                     </SyntaxHighlighter>
                                                                 ) : (
@@ -648,8 +634,8 @@ function TopTabLink({href, label, active}) {
 
             <span className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
                    ${active
-                    ? "font-semibold"
-                    : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}>
+                ? "font-semibold"
+                : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}>
                 {label}
             </span>
         </Link>

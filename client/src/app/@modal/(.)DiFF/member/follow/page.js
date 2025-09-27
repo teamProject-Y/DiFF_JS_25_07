@@ -29,13 +29,14 @@ export default function FollowModal() {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-96 max-h-[70vh] flex flex-col">
+
                 {/* 헤더 */}
                 <div className="flex justify-between items-center p-4 border-b">
                     <h2 className="text-lg font-semibold">
-                        {type === "follower" ? "팔로워 목록" : "팔로잉 목록"}
+                        {type === "follower" ? "Follower list" : "Following list"}
                     </h2>
                     <button
-                        onClick={() => window.history.back()} // 닫기
+                        onClick={() => window.history.back()}
                         className="text-gray-500 hover:text-gray-700"
                     >
                         ✖
@@ -54,7 +55,7 @@ export default function FollowModal() {
                         </ul>
                     ) : (
                         <p className="text-center text-gray-500">
-                            {type === "follower" ? "팔로워가 없습니다." : "팔로잉한 사용자가 없습니다."}
+                            {type === "follower" ? "don't have a follower." : "No user followed."}
                         </p>
                     )}
                 </div>

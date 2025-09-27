@@ -1,4 +1,5 @@
 // member/repository/commitList.jsx
+
 'use client';
 
 import {useEffect, useState, useMemo} from 'react';
@@ -20,7 +21,6 @@ const parseOwnerRepo = (url = '') => {
     }
 };
 
-// ResultData 혹은 axios error에서 code/message 안전 추출
 function extractResult(eOrData) {
     const data =
         eOrData?.response?.data ??
@@ -44,13 +44,11 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
     const repoUrl = repo?.url ?? '';
     const repoDefaultBranch = repo?.defaultBranch || 'main';
 
-    // URL에서 owner/repo 파싱값
     const [ownerFromUrl, nameFromUrl] = useMemo(
         () => parseOwnerRepo(repoUrl),
         [repoUrl]
     );
 
-    // 최종 사용할 owner/name (언더스코어 → 하이픈 치환 포함)
     const safeOwner = useMemo(
         () =>
             (repo?.githubOwner || repo?.owner || ownerFromUrl || '')
@@ -64,7 +62,6 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
 
     const connected = !!repoUrl;
 
-    // ===== UI 상태 =====
     const [branch, setBranch] = useState(repoDefaultBranch);
     const [page, setPage] = useState(1);
     const perPage = 10;
@@ -77,7 +74,6 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
     const [drafting, setDrafting] = useState(false);
     const uiDisabled = !enabled || loading || drafting;
 
-    // 외부 refreshSignal → 내부 tick 증가
     useEffect(() => {
         if (!enabled) return;
         if (!connected) return;
@@ -86,14 +82,12 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
         }
     }, [refreshSignal, enabled, connected]);
 
-    // repo.url이 갱신되면(연결 직후) 한 번 더 강제 리프레시
     useEffect(() => {
         if (!enabled) return;
         if (!connected) return;
         setRefreshTick((n) => n + 1);
     }, [repoUrl, enabled, connected]);
 
-    // repo 식별/브랜치 기본값 바뀌면 초기화
     useEffect(() => {
         setBranch(repoDefaultBranch);
         setPage(1);
@@ -126,7 +120,6 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                     perPage,
                 });
 
-                // API가 ResultData를 200으로 줄 수도 있으니 방어
                 if (!cancelled) {
                     if (Array.isArray(listOrResult)) {
                         setCommits(listOrResult);
@@ -178,7 +171,6 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
         }
     }
 
-    // ===== 파생 상태 =====
     const resultCode = err?.code || '';
     const isNoCommitsF2 = resultCode === 'F-2';
     const isEmptyList = !loading && !err && Array.isArray(commits) && commits.length === 0;
@@ -208,13 +200,11 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                         placeholder="e.g. main"
                         className="px-2 py-1 rounded-md border text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 dark:border-neutral-700 dark:bg-neutral-800"
                         style={{ minWidth: 200 }}
-                        disabled={!enabled}
-                    />
+                        disabled={!enabled} />
                     <button
                         onClick={() => setRefreshTick((n) => n + 1)}
                         className="px-3 py-1 rounded-lg border text-sm bg-white hover:bg-neutral-100 border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                        disabled={uiDisabled}
-                    >
+                        disabled={uiDisabled}>
                         Refresh
                     </button>
                 </div>
@@ -222,16 +212,14 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                     <button
                         className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
                         disabled={page <= 1 || uiDisabled}
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    >
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}>
                         Prev
                     </button>
                     <span className="text-xs text-neutral-500">Page {page}</span>
                     <button
                         className="px-3 py-1 rounded-lg border text-sm disabled:opacity-50 bg-white border-neutral-200 dark:bg-neutral-900/50 dark:border-neutral-700"
                         disabled={uiDisabled}
-                        onClick={() => setPage((p) => p + 1)}
-                    >
+                        onClick={() => setPage((p) => p + 1)}>
                         Next
                     </button>
                 </div>
@@ -257,7 +245,6 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                     </div>
                 )}
 
-                {/* F-2 : 커밋 없음 → 멋진 Empty State */}
                 {!loading && isNoCommitsF2 && (
                     <div className="h-full flex items-center">
                         <div className="mx-auto rounded-lg border border-dashed w-[90%]
@@ -287,8 +274,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                     className="px-3 py-1.5 rounded-lg border text-sm
                                     bg-white hover:bg-neutral-100 border-neutral-200
                                     dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                                    disabled={uiDisabled}
-                                >
+                                    disabled={uiDisabled}>
                                     Reload
                                 </button>
                                 {ghCommitsUrl && (
@@ -298,8 +284,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                         className="px-3 py-1.5 rounded-lg border text-sm
                                         bg-neutral-900 text-white hover:opacity-90
                                         dark:bg-neutral-300 dark:text-neutral-900 "
-                                        rel="noreferrer"
-                                    >
+                                        rel="noreferrer">
                                         View on GitHub
                                     </a>
                                 )}
@@ -308,7 +293,6 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                     </div>
                 )}
 
-                {/* 기타 에러(네트워크/권한 등) */}
                 {!!err && !isNoCommitsF2 && !loading && (
                     <div className="py-8">
                         <div className="mx-auto max-w-xl flex items-start gap-3 rounded-xl text-red-700 dark:text-red-400 px-4 py-3">
@@ -324,8 +308,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                         className="px-2.5 py-1 rounded-md border text-xs
                                         bg-white hover:bg-neutral-100 border-neutral-200
                                         dark:bg-neutral-900/50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                                        disabled={!enabled}
-                                    >
+                                        disabled={!enabled}>
                                         Retry
                                     </button>
                                 </div>
@@ -334,14 +317,12 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                     </div>
                 )}
 
-                {/* 빈 배열(정상 200, 데이터 없음) */}
                 {!loading && !err && isEmptyList && (
                     <div className="py-6 text-sm text-neutral-500">
                         No commits in this repository yet
                     </div>
                 )}
 
-                {/* 정상 렌더링 */}
                 {!loading && !err && !isNoCommitsF2 && !drafting && Array.isArray(commits) && commits.length > 0 && (
                     <ul className="divide-y max-w-full divide-neutral-200 dark:divide-neutral-700">
                         {commits.map((c) => (
@@ -359,8 +340,7 @@ export default function CommitList({ repo, refreshSignal, enabled = true }) {
                                         className="font-medium truncate hover:underline clamp-1"
                                         href={c.htmlUrl || '#'}
                                         target="_blank"
-                                        rel="noreferrer"
-                                    >
+                                        rel="noreferrer">
                                         {c.message || '(no message)'}
                                     </a>
                                     <div className="flex gap-1 text-xs text-neutral-500 mt-0.5">
