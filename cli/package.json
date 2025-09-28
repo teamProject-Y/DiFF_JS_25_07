@@ -1,10 +1,10 @@
 {
   "name": "git-mkdraft",
-  "version": "1.0.8",
-  "description": "Git 확장 명령어 CLI 도구",
+  "version": "1.0.9",
+  "description": "diff.io.kr에서 사용 가능한 초안 자동 생성 CLI 도구",
   "type": "module",
   "bin": {
-    "git-mkdraft": "./bin/index.mjs"
+    "git-mkdraft": "bin/index.mjs"
   },
   "scripts": {
     "cli": "node ./bin/index.mjs"
