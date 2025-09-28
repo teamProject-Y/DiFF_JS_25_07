@@ -80,16 +80,13 @@ export async function doAnalysis(branch, memberId, draftId, diffId) {
 
         // 2. 빌드 산출물 복사 (Maven/Gradle/IntelliJ 모두 지원)
         if (fs.existsSync("target")) {
-            console.log("📦 Maven target 추가");
             await fse.copy("target", "tempdir/target");
         }
         if (fs.existsSync("build/classes")) {
-            console.log("📦 Gradle build/classes 추가");
             await fse.ensureDir("tempdir/build");
             await fse.copy("build/classes", "tempdir/build/classes");
         }
         if (fs.existsSync("out/production")) {
-            console.log("📦 IntelliJ out/production 추가");
             await fse.ensureDir("tempdir/out");
             await fse.copy("out", "tempdir/out");
         }
