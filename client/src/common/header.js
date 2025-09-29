@@ -284,7 +284,7 @@ export default function Header() {
                     <form
                         onSubmit={handleSearch}
                         className="relative flex items-center gap-2 rounded-full overflow-hidden
-               border border-neutral-300/70 bg-white text-neutral-600
+                                   border border-neutral-300/70 bg-white text-neutral-600
                focus-within:border-neutral-900 transition-colors duration-200
                dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700
                dark:focus-within:border-neutral-300"
@@ -329,7 +329,6 @@ export default function Header() {
                                     )}
                                 </button>
 
-                                {/* 드롭다운 */}
                                 {open && (
                                     <div
                                         role="menu"
@@ -337,20 +336,26 @@ export default function Header() {
                                         className="absolute right-0 mt-2 w-80 z-50"
                                     >
 
-                                        <span
-                                            className="pointer-events-none absolute right-4 -top-1.5 h-3 w-3 rotate-45 rounded-sm z-20
-                                                       border border-neutral-200 bg-white
-                                                       dark:border-neutral-700 dark:bg-neutral-800"
-                                        ></span>
+                                        <span className="pointer-events-none absolute right-5 -top-2 z-20 w-0 h-0
+                                                         border-l-[7px] border-r-[7px] border-b-[8px]
+                                                         border-l-transparent border-r-transparent
+                                                         border-b-neutral-300
+                                                         dark:border-b-neutral-600"
+                                        />
 
-                                        <div
-                                            className="rounded-2xl border border-neutral-200 bg-white p-2 shadow z-30
+                                        <span className="pointer-events-none absolute right-5 -top-[7px] z-30 w-0 h-0
+                                                         border-l-[7px] border-r-[7px] border-b-[8px]
+                                                         border-l-transparent border-r-transparent
+                                                         border-b-white
+                                                         dark:border-b-neutral-800"
+                                        />
+
+                                        <div className="rounded-2xl border border-neutral-200 bg-white p-2 shadow z-30
                                                        dark:border-neutral-700 dark:bg-neutral-800"
                                         >
 
                                             <div className="mb-2 flex items-center justify-between px-2">
-                                                  <span
-                                                      className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                                                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                                                     Notifications
                                                   </span>
                                                 <button
@@ -375,8 +380,7 @@ export default function Header() {
                                                                 className="group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2 transition
                                                                            hover:bg-neutral-100/70 dark:hover:bg-neutral-900/50"
                                                             >
-                                                                  <span
-                                                                      className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full
+                                                                  <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full
                                                                                  border border-neutral-300 text-neutral-500
                                                                                  dark:border-neutral-700 dark:text-neutral-400"
                                                                   >
@@ -391,8 +395,7 @@ export default function Header() {
                                                                         {n.message}
                                                                     </div>
                                                                     {n.type && (
-                                                                        <div
-                                                                            className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                                                                        <div className="mt-0.5 text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                                                                             {n.type === 'ARTICLE' ? 'POST' : n.type}
                                                                         </div>
                                                                     )}

@@ -67,7 +67,7 @@ function ArticleListInner() {
                                     {article.body}
                                 </p>
                                 <div className="text-sm text-gray-500 mt-2">
-                                    writer: {article.extra__writer ?? '익명'} | {new Date(article.regDate).toLocaleDateString("en-US", {
+                                    writer: {article.extra__writer ?? 'anonymity'} | {new Date(article.regDate).toLocaleDateString("en-US", {
                                     year: "numeric",
                                     month: "short",
                                     day: "numeric"

@@ -9,11 +9,11 @@ import clsx from "clsx";
 import {useDialog} from "@/common/commonLayout";
 import {useTheme} from "@/common/thema";
 import {Globe, Lock} from "lucide-react";
-import {createPortal} from 'react-dom';
+import { createPortal } from 'react-dom';
 
 const ToastEditor = dynamic(() => import('@/common/toastEditor'), {ssr: false});
 
-function InlinePortal({children}) {
+function InlinePortal({ children }) {
     const [mount, setMount] = useState(null);
     useEffect(() => {
         setMount(document.body);
@@ -129,11 +129,11 @@ function RepoDropdown({items = [], value, onChange, disabled}) {
 
             {open && (
                 <InlinePortal>
-                    <ul
-                        ref={menuRef}
-                        role="listbox"
-                        style={{position: 'fixed', left: pos.left, top: pos.top, width: pos.width}}
-                        className="z-[999] mt-1 max-h-64 max-w-[70vw] overflow-auto rounded-md border shadow-lg
+                <ul
+                    ref={menuRef}
+                    role="listbox"
+                    style={{ position: 'fixed', left: pos.left, top: pos.top, width: pos.width }}
+                    className="z-[999] mt-1 max-h-64 max-w-[70vw] overflow-auto rounded-md border shadow-lg
                       border-neutral-200 bg-white/95 backdrop-blur-sm
                       dark:border-neutral-700 dark:bg-neutral-900/95"
                     >
@@ -181,7 +181,7 @@ export default function Page() {
 
 export function WriteArticlePage() {
     const router = useRouter();
-    const {alert} = useDialog();
+    const { alert } = useDialog();
     const sp = useSearchParams();
     const [draftLoading, setDraftLoading] = useState(!!sp.get('draftId'));
     const [editorKey, setEditorKey] = useState('empty');
@@ -339,7 +339,7 @@ export function WriteArticlePage() {
             };
             const res = await saveDraft(data);
             if (res && res.resultCode && res.resultCode.startsWith('S-')) {
-                alert({intent: "success", title: "Success to save."});
+                alert({ intent: "success", title: "Success to save." });
                 if (!draftId && res.data1) setDraftId(res.data1);
                 if (res.data2) setDiffId(res.data2);
             } else {
@@ -394,6 +394,7 @@ export function WriteArticlePage() {
                     "bg-white dark:bg-neutral-900"
                 )}
                 >
+                    {/* Title */}
                     <div className="flex-1">
                         <input className={clsx(
                             "w-full truncate rounded p-3 text-5xl font-semibold",

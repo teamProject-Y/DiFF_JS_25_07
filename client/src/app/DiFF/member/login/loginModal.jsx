@@ -28,7 +28,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
             const {resultCode, msg, data1: accessToken, data2: refreshToken} = result;
 
             if (resultCode !== "S-1" || !accessToken) {
-                setError(msg || "로그인 실패");
+                setError(msg || "login failed");
                 setSubmitting(false);
                 return;
             }
@@ -63,14 +63,14 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                        onChange={onChange}
                        placeholder=" "
                        className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 rounded-lg border
-                       focus:outline-none focus:ring-0 focus:border-blue-600 peer bg-white white-autofill"
+                                  focus:outline-none focus:ring-0 focus:border-blue-600 peer bg-white white-autofill"
                        autoComplete="username"
                        required
                        disabled={submitting} />
                 <label htmlFor="email"
                        className="absolute text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2
-                       peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
-                       peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
+                                  peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
+                                  peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
                     email
                 </label>
             </div>
@@ -90,13 +90,13 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                 </label>
             </div>
             <button type="submit"
-                className="group py-3 w-full text-sm font-medium bg-black text-white rounded-lg hover:bg-neutral-800 transition disabled:opacity-50"
-                disabled={submitting}>
+                    className="group py-3 w-full text-sm font-medium bg-black text-white rounded-lg hover:bg-neutral-800 transition disabled:opacity-50"
+                    disabled={submitting}>
                   <span className="inline-block relative pr-0 transition-[padding-right] duration-300
-                                 after:content-['»'] after:absolute after:top-1/2 after:-translate-y-1/2
-                                 after:right-0 after:opacity-0 after:translate-x-1 after:transform after:transition-all after:duration-300
-                                 group-hover:pr-4 group-hover:after:opacity-100 group-hover:after:translate-x-0
-                                 group-disabled:after:opacity-0 group-disabled:pr-0">
+                                   after:content-['»'] after:absolute after:top-1/2 after:-translate-y-1/2
+                                   after:right-0 after:opacity-0 after:translate-x-1 after:transform after:transition-all after:duration-300
+                                   group-hover:pr-4 group-hover:after:opacity-100 group-hover:after:translate-x-0
+                                   group-disabled:after:opacity-0 group-disabled:pr-0">
                      {submitting ? 'Signing up…' : 'Sign Up'}
                 </span>
             </button>
