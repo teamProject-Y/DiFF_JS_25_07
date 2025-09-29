@@ -47,7 +47,6 @@ function ArticleDetailInner() {
     const menuRef = useRef(null);
 
     const [replyMenuOpen, setReplyMenuOpen] = useState(null);
-
     const [authorId, setAuthorId] = useState(null);
     const [myId, setMyId] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
@@ -138,11 +137,11 @@ function ArticleDetailInner() {
 
             } catch (e) {
                 if (e?.response?.status === 401) {
-
                     setLiked(false);
                     setLikeCount((c) => c);
                 } else {
                     console.error("Failed to get like status:", e);
+
                 }
             }
         })();
@@ -173,6 +172,7 @@ function ArticleDetailInner() {
                 setReplies(withLikes);
             } catch (e) {
                 console.error("Failed to get comments:", e);
+
             } finally {
                 setReplyLoading(false);
             }

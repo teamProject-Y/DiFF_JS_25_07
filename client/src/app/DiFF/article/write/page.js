@@ -428,7 +428,6 @@ export function WriteArticlePage() {
                             )}
                         </div>
 
-
                         <div className="col-span-12 sm:col-span-3 md:col-span-3 flex items-center justify-end gap-2">
                             <button
                                 type="button"
@@ -543,6 +542,7 @@ export function WriteArticlePage() {
 
                 .toastui-editor-md-container .CodeMirror {
                     height: auto !important;
+
                 }
 
                 .toastui-editor-md-container .CodeMirror-scroll {

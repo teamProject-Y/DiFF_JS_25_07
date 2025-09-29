@@ -200,6 +200,7 @@ export default function Page() {
 
                 <BeforeMainPage/>
 
+
             </div>
 
             <div id="docs" className="is-light-bg min-h-screen w-full pt-20 dark:is-dark-bg"
@@ -373,7 +374,8 @@ export default function Page() {
                                                                             {article.extra__writer}
                                                                         </Link>
                                                                     ) : (
-                                                                        <span className="font-medium text-neutral-800">Unknown</span>
+                                                                        <span
+                                                                            className="font-medium text-neutral-800">Unknown</span>
                                                                     )}
                                                                     <span className="ml-2 text-xs text-neutral-500">
                                                                       {new Date(article.regDate).toLocaleDateString("en-US", {
