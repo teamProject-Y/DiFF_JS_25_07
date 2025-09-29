@@ -63,8 +63,6 @@ export default function JoinForm() {
         }
     };
 
-
-
     return (
         <form onSubmit={onSubmit} className="max-w-[460px] mx-auto">
             <div className="text-2xl md:text-3xl font-semibold text-center mb-8">Join</div>
@@ -80,7 +78,7 @@ export default function JoinForm() {
                                   border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                        autoComplete="username"
                        required
-                       disabled={submitting} />
+                       disabled={submitting}/>
                 <label htmlFor="email"
                        className="absolute text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10
                                   origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100
@@ -107,7 +105,7 @@ export default function JoinForm() {
                                   peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
                                   peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
                                   start-1">
-                    Nick Name
+                    nickname
                 </label>
             </div>
 

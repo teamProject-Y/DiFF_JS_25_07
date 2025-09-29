@@ -43,7 +43,6 @@ export function AddRepoModal({
         setSubmitting(false);
         setVisOpen(false);
 
-        // setGhList([]);
         setGhLoading(false);
         setGhErr('');
         setGhQuery('');
@@ -95,7 +94,7 @@ export function AddRepoModal({
             try {
                 const json = await getGithubRepos();
                 if (json?.resultCode && String(json.resultCode).startsWith('F')) {
-                    throw new Error(json?.msg || '깃허브 리포 불러오기 실패');
+                    throw new Error(json?.msg || 'github repository get failed');
                 }
 
                 const list = Array.isArray(json?.data)
@@ -108,7 +107,7 @@ export function AddRepoModal({
                 setGhList(normalized);
 
             } catch (e) {
-                setGhErr(e?.message || '요청 실패');
+                setGhErr(e?.message || 'request failed');
             } finally {
                 setGhLoading(false);
             }
@@ -146,10 +145,10 @@ export function AddRepoModal({
                 setVisibility('Public');
                 setTouchedName(false);
             } else {
-                setErr(res?.msg || '생성 실패');
+                setErr(res?.msg || 'add failed');
             }
         } catch (e) {
-            setErr(e?.message || '요청 실패');
+            setErr(e?.message || 'request failed');
         } finally {
             setSubmitting(false);
         }
@@ -159,7 +158,7 @@ export function AddRepoModal({
         const repo = filteredGh.find((r) => String(r.id) === String(ghSelectedId));
 
         if (!repo) {
-            setGhErr('가져올 리포지토리를 선택하세요.');
+            setGhErr('choose your repository.');
             return;
         }
         setGhErr('');

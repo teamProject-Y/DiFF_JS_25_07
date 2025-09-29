@@ -189,10 +189,12 @@ export default function Page() {
     }
 
     return (
-        <div id="pageScroll"
+        <div
+            id="pageScroll"
             data-scroll-root
             className="w-full transition-colors duration-700 h-screen overflow-y-scroll overscroll-none snap-y snap-mandatory scroll-smooth"
-            style={{backgroundColor: bgColor}}>
+            style={{backgroundColor: bgColor}}
+        >
             <div id="terminal" className="is-dark-bg h-screen w-full pt-20 snap-start dark:is-light-bg"
                  ref={el => sectionRefs.current[0] = el}>
 
@@ -211,6 +213,7 @@ export default function Page() {
                 </div>
             </div>
 
+            {/*repository*/}
             <div id="repository"
                  className="h-screen w-full pt-20 bg-white snap-start flex flex-col items-center justify-center"
                  ref={el => sectionRefs.current[2] = el}>
@@ -230,13 +233,14 @@ export default function Page() {
                 <RepoLayoutSample/>
             </div>
 
+            {/* trending */}
             <div id="trending"
                  className="is-light-bg w-full h-screen snap-start bg-gray-100 px-20 pt-20"
                  ref={el => sectionRefs.current[3] = el}>
                 <p className="text-[clamp(20px,1.6vw,24px)] font-bold text-blue-600 tracking-tight
                               flex items-center gap-3">
                     <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
-                    TRENDING
+                    Trending
                 </p>
                 <p className="text-neutral-700 truncate font-semibold">
                     What the community is reading right now
@@ -332,6 +336,7 @@ export default function Page() {
                                                         </div>
                                                     </div>
 
+                                                    {/* 본문 영역 */}
                                                     <div className="h-1/2 p-5 flex flex-col">
                                                         <h3 className="text-lg md:text-xl font-semibold clamp-2 mb-1 hover:text-black transition-colors"
                                                             title={article.title}
@@ -350,7 +355,8 @@ export default function Page() {
                                                                     <div className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
                                                                         <img src={article.extra__profileUrl}
                                                                             alt="profile"
-                                                                            className="block h-full w-full object-cover"/>
+                                                                            className="block h-full w-full object-cover"
+                                                                        />
                                                                     </div>
                                                                 ) : (
                                                                     <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-600">
@@ -359,14 +365,17 @@ export default function Page() {
                                                                 )}
                                                                 <div className="min-w-0">
                                                                     {article.extra__writer ? (
-                                                                        <Link href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                        <Link
+                                                                            href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
                                                                             className="hover:underline hover:text-black font-medium truncate"
                                                                             onClick={(e) => e.stopPropagation()}
-                                                                            title={article.extra__writer}>
+                                                                            title={article.extra__writer}
+                                                                        >
                                                                             {article.extra__writer}
                                                                         </Link>
                                                                     ) : (
-                                                                        <span className="font-medium text-neutral-800">Unknown</span>
+                                                                        <span
+                                                                            className="font-medium text-neutral-800">Unknown</span>
                                                                     )}
                                                                     <span className="ml-2 text-xs text-neutral-500">
                                                                       {new Date(article.regDate).toLocaleDateString("en-US", {
@@ -385,7 +394,7 @@ export default function Page() {
                                         );
                                     })
                                 ) : (
-                                    <div>트렌딩 게시물이 없습니다.</div>
+                                    <div>no trending posts.</div>
                                 )}
                             </SwiperWrapper>
                         )
@@ -398,10 +407,11 @@ export default function Page() {
                     id="before-footer"
                     className="snap-start snap-y-mandatory scroll-mt-4"
                 >
-                    <Footer/>
+                    <Footer />
                 </section>
             )}
 
+            {/* toggle menu */}
             <div className="pointer-events-none">
                 <button onClick={() =>
                     window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))}
