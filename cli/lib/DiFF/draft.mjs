@@ -9,6 +9,7 @@ import axios from "axios";
 import {sendDiFF} from "../api/api.mjs";
 import {appendMeta} from "./init.mjs";
 const BASE_URL = "https://api.diff.io.kr/api/DiFF";
+
 // mkDraft 함수
 export async function mkDraft(memberId, branch, draftId, diffId) {
 
@@ -22,15 +23,9 @@ export async function mkDraft(memberId, branch, draftId, diffId) {
         return null;
     }
 
-    console.log(chalk.bgGreenBright("diff", diff.substr(0,1000)));  /////////// log //////////
-
     const ok = await sendDiFF(memberId, repositoryId, draftId, diffId, to, diff);
 
     if (ok) {
-
-        console.log(chalk.greenBright("✅ sendDiFF success"));  /////////// log //////////
-        console.log(chalk.greenBright(ok.valueOf()));  /////////// log //////////
-
         await updateMeta(branch, to);
         await appendLogs(branch, from, to);
     }
@@ -135,12 +130,10 @@ export async function getLastRequestChecksum(branch){
     const DiFFexists = execSync('[ -d .DiFF ] && echo true || echo false').toString().trim();
 
     if(DiFFexists === 'false') {
-        // console.err('fatal: not a DiFF repository: .DiFF');
         return null;
     }
     const metaPath = '.DiFF/meta';
     if (!fs.existsSync(metaPath)) {
-        // console.err('fatal: .DiFF/meta not found');
         return null;
     }
 
@@ -148,7 +141,6 @@ export async function getLastRequestChecksum(branch){
     const entry = meta.find(e => e.branchName === branch);
 
     if (!entry) {
-        // console.err(`no metadata found for branch: ${branch}`);
         return null;
     }
 
