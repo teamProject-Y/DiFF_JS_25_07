@@ -141,7 +141,7 @@ export default function DraftsPage() {
         <div className="pb-6 px-32 h-full min-h-0 flex flex-col">
             <div className="flex items-center border-b dark:border-neutral-700 mb-3">
                 <button className="p-4 -mb-px font-semibold text-black dark:text-neutral-200 border-b-2 border-black dark:border-neutral-400">
-                    DRAFTS
+                    Drafts
                 </button>
             </div>
 

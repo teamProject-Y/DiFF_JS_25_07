@@ -486,7 +486,7 @@ function ArticleDetailInner() {
                                                     className="w-full text-left block px-4 py-2 hover:bg-gray-100
                                                                dark:hover:bg-neutral-700"
                                                 >
-                                                    <i className="fa-solid fa-bullhorn"></i> REPORT
+                                                    <i className="fa-solid fa-bullhorn"></i> Report
                                                 </button>
                                             </li>
                                             {article.userCanModify && (
@@ -498,7 +498,7 @@ function ArticleDetailInner() {
                                                                    dark:hover:bg-neutral-700"
                                                         onClick={() => setMenuOpen(false)}
                                                     >
-                                                        <i className="fa-solid fa-pen"></i> EDIT
+                                                        <i className="fa-solid fa-pen"></i> Edit
                                                     </Link>
                                                 </li>
                                             )}
@@ -511,7 +511,7 @@ function ArticleDetailInner() {
                                                         className="w-full text-left block px-4 py-2 hover:bg-gray-100 text-red-500
                                                                    dark:hover:bg-neutral-700"
                                                     >
-                                                        <i className="fa-solid fa-trash-can"></i> DELETE
+                                                        <i className="fa-solid fa-trash-can"></i> Delete
                                                     </button>
                                                 </li>
                                             )}
@@ -661,7 +661,7 @@ function ArticleDetailInner() {
                                                        text-xs font-medium shadow-sm hover:shadow-md transition-all
                                                        disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
                                         >
-                                            COMMENT
+                                            Comment
                                         </button>
                                     </div>
                                 </div>
@@ -675,7 +675,7 @@ function ArticleDetailInner() {
                                     }
                                     className="font-medium underline hover:text-gray-700 dark:hover:text-neutral-200"
                                 >
-                                    LOGIN
+                                    Login
                                 </button>
                                 {" "}
                                 to write a comment.
@@ -779,7 +779,7 @@ function ArticleDetailInner() {
                                                                     className="px-3 py-1.5 rounded-full bg-black text-white dark:bg-white dark:text-black text-xs
                                                                                shadow-sm hover:shadow-md transition"
                                                                 >
-                                                                    SAVE
+                                                                    Save
                                                                 </button>
                                                                 <button
                                                                     onClick={() =>
@@ -798,7 +798,7 @@ function ArticleDetailInner() {
                                                                     className="px-3 py-1.5 rounded-full border border-black/15 dark:border-white/20 text-xs
                                                                                hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                                                                 >
-                                                                    CANCEL
+                                                                    Cancel
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -873,7 +873,7 @@ function ArticleDetailInner() {
                                                                                 );
                                                                             }}
                                                                         >
-                                                                            <i className="fa-solid fa-pen"></i> EDIT
+                                                                            <i className="fa-solid fa-pen"></i> Edit
                                                                         </button>
                                                                     )}
                                                                     {r.userCanDelete && (
@@ -901,7 +901,7 @@ function ArticleDetailInner() {
                                                                                 });
                                                                             }}
                                                                         >
-                                                                            <i className="fa-solid fa-trash-can"></i> DELETE
+                                                                            <i className="fa-solid fa-trash-can"></i> Delete
                                                                         </button>
                                                                     )}
                                                                 </div>

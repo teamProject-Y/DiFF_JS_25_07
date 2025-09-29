@@ -1,4 +1,3 @@
-// pages/DiFF/member/page.js
 
 "use client";
 

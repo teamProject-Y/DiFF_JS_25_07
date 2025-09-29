@@ -236,7 +236,7 @@ export default function Page() {
                 <p className="text-[clamp(20px,1.6vw,24px)] font-bold text-blue-600 tracking-tight
                               flex items-center gap-3">
                     <span className="hidden sm:inline-block w-5 h-5 rounded-full border-[6px] border-blue-600"/>
-                    TRENDING
+                    Trending
                 </p>
                 <p className="text-neutral-700 truncate font-semibold">
                     What the community is reading right now
@@ -393,7 +393,7 @@ export default function Page() {
                                         );
                                     })
                                 ) : (
-                                    <div>트렌딩 게시물이 없습니다.</div>
+                                    <div>no trending posts.</div>
                                 )}
                             </SwiperWrapper>
                         )
