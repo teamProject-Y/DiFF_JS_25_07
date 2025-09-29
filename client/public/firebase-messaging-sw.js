@@ -18,7 +18,7 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.data?.title || "알림";
     const notificationOptions = {
         body: payload.data?.body || "내용 없음",
-        icon: "/icon.png",
+        icon: "/diff.png",
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
