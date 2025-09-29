@@ -284,7 +284,7 @@ export default function Header() {
                     <form
                         onSubmit={handleSearch}
                         className="relative flex items-center gap-2 rounded-full overflow-hidden
-               border border-neutral-300/70 bg-white text-neutral-600
+                                   border border-neutral-300/70 bg-white text-neutral-600
                focus-within:border-neutral-900 transition-colors duration-200
                dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700
                dark:focus-within:border-neutral-300"
