@@ -178,7 +178,7 @@ function ModifyArticlePageInner() {
                             href={`/DiFF/article/detail?id=${id}`}
                             className="rounded-md border px-5 py-2 font-medium border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-100/60 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
                         >
-                            Cancel
+                            CANCEL
                         </Link>
                         <button
                             type="submit"

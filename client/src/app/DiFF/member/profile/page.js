@@ -190,13 +190,15 @@ function ProfileInner() {
                             <div className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{err}</div>
                         )}
 
+                        {/* Tabs */}
                         <div className="flex items-center border-b dark:border-neutral-700">
                             {tabs.map(t => (
                                 <TopTabLink
                                     key={t.key}
                                     href={t.href}
                                     label={t.label}
-                                    active={isActive(t)}/>
+                                    active={isActive(t)}
+                                />
                             ))}
                         </div>
 
@@ -221,7 +223,7 @@ function ProfileInner() {
                                     <div className="mt-4 self-center text-center">
                                         <div className="text-xl font-semibold">{member.nickName}</div>
 
-                                        {/*소셜, 팔로우*/}
+                                        {/* 소셜, 팔로우 */}
                                         <div
                                             className="UserProfile_icons__mCrr mt-3 flex items-center justify-center gap-4">
                                             {githubUrl && (
@@ -233,7 +235,8 @@ function ProfileInner() {
                                                     className="inline-flex items-center justify-center w-12 h-12
                                                                text-gray-400 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors duration-100"
                                                     aria-label="GitHub profile"
-                                                    title="GitHub profile">
+                                                    title="GitHub profile"
+                                                >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
                                                         fill="currentColor"
@@ -256,13 +259,14 @@ function ProfileInner() {
                                                         xmlns="http://www.w3.org/2000/svg"
                                                         fill="currentColor"
                                                         viewBox="0 0 32 32"
-                                                        className="h-8 w-8">
+                                                        className="h-8 w-8"
+                                                    >
                                                         <path d="M16 16.871 1.019 5H30.98L16 16.871zm0 3.146L1 8.131V27h30V8.131L16 20.017z"/>
                                                     </svg>
                                                 </a>
                                             )}
 
-                                            {/*팔로우 / 언팔로우*/}
+                                            {/* 팔로우/언팔로우 */}
                                             {!isMyProfile && member?.id && (
                                                 <div className="flex">
                                                     <button
@@ -310,17 +314,19 @@ function ProfileInner() {
                                         </div>
                                     </div>
 
-                                    {/*팔로잉 / 팔로워*/}
+                                    {/* 팔로잉/팔로워 */}
                                     <div className="mt-4 flex items-center gap-4 text-sm self-center">
                                         <i className="fa-solid fa-user-group text-md"></i>
                                         <button
                                             onClick={() => setOpenModal('follower')}
-                                            className="flex items-center gap-2 hover:underline">
+                                            className="flex items-center gap-2 hover:underline"
+                                        >
                                             <span className="opacity-70">Follower </span> {followerCount}
                                         </button>
                                         <button
                                             onClick={() => setOpenModal('following')}
-                                            className="flex items-center gap-2 hover:underline">
+                                            className="flex items-center gap-2 hover:underline"
+                                        >
                                             <span className="opacity-70">Following </span> {followingCount}
                                         </button>
                                     </div>
@@ -346,7 +352,6 @@ function ProfileInner() {
                                                 </ul>
                                             </div>
                                         </div>
-
                                 </div>
                             </aside>
 
@@ -370,7 +375,8 @@ function ProfileInner() {
                                                                 style={oneDark}
                                                                 language={match[1]}
                                                                 PreTag="div"
-                                                                {...props}>
+                                                                {...props}
+                                                            >
                                                                 {String(children).replace(/\n$/, "")}
                                                             </SyntaxHighlighter>
                                                         ) : (
@@ -401,7 +407,7 @@ function ProfileInner() {
                             </div>
                         </div>
 
-                        {/*목록 모달*/}
+                        {/* 목록 모달 */}
                         {openModal && (
                             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50"
                                 onClick={() => setOpenModal(null)}>
@@ -410,9 +416,9 @@ function ProfileInner() {
                                      onClick={(e) => e.stopPropagation()}
                                      role="dialog"
                                      aria-modal="true"
-                                     aria-labelledby="connections-title">
+                                     aria-labelledby="connections-title"
+                                >
 
-                                    {/*헤더*/}
                                     <div className="mb-2 flex items-center justify-between">
                                         <h2 id="connections-title"
                                             className="m-2 text-lg font-semibold">Connections</h2>
@@ -424,7 +430,7 @@ function ProfileInner() {
                                         </button>
                                     </div>
 
-                                    {/*탭*/}
+                                    {/* 탭 */}
                                     <div className="mb-3 grid grid-cols-2 gap-1 rounded-xl border border-neutral-300 bg-neutral-100/60 p-1
                                                     dark:border-neutral-700 dark:bg-neutral-900/60">
                                         <button
@@ -434,7 +440,8 @@ function ProfileInner() {
                                         ${openModal === 'follower'
                                                 ? 'bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900'
                                                 : 'text-neutral-700 hover:bg-neutral-200/50 dark:text-neutral-300 dark:hover:bg-neutral-800/50'}`}
-                                            aria-pressed={openModal === 'follower'}>
+                                            aria-pressed={openModal === 'follower'}
+                                        >
                                             Followers
                                         </button>
                                         <button
@@ -444,12 +451,13 @@ function ProfileInner() {
                                          ${openModal === 'following'
                                                 ? 'bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900'
                                                 : 'text-neutral-700 hover:bg-neutral-200/50 dark:text-neutral-300 dark:hover:bg-neutral-800/50'}`}
-                                            aria-pressed={openModal === 'following'}>
+                                            aria-pressed={openModal === 'following'}
+                                        >
                                             Following
                                         </button>
                                     </div>
 
-                                    {/*리스트*/}
+                                    {/* 리스트 */}
                                     {(() => {
                                         const list = (openModal === 'follower' ? followerList : followingList) ?? [];
 
@@ -466,15 +474,18 @@ function ProfileInner() {
                                                         <li
                                                             key={u?.id ?? u?.nickName ?? idx}
                                                             className="flex items-center gap-3"
-                                                            onClick={() => setOpenModal(null)}>
+                                                            onClick={() => setOpenModal(null)}
+                                                        >
                                                             <Link
                                                                 href={`/DiFF/member/profile?nickName=${encodeURIComponent(u?.nickName ?? '')}`}
-                                                                className="w-full flex items-center gap-3 p-4">
+                                                                className="w-full flex items-center gap-3 p-4"
+                                                            >
                                                                 {imgSrc ? (
                                                                     <img
                                                                         src={imgSrc}
                                                                         alt={u?.nickName || 'user'}
-                                                                        className="h-8 w-8 rounded-full border object-cover dark:border-neutral-700" />
+                                                                        className="h-8 w-8 rounded-full border object-cover dark:border-neutral-700"
+                                                                    />
                                                                 ) : (
                                                                     <div
                                                                         className="h-8 w-8 rounded-full border flex items-center justify-center

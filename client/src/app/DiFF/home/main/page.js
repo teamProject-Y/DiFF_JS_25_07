@@ -212,11 +212,13 @@ export default function Page() {
                 </div>
             </div>
 
+            {/*repository*/}
             <div id="repository"
                  className="h-screen w-full pt-20 bg-white snap-start flex flex-col items-center justify-center"
                  ref={el => sectionRefs.current[2] = el}>
                 <div className="min-h-[10%] font-semibold self-end px-20 text-right">
                     <div className="ml-auto max-w-[920px] flex flex-col items-end gap-3">
+
                         <p className="text-[clamp(20px,1.6vw,24px)] font-semibold text-blue-600 tracking-tight
                                       flex items-center gap-3">
                             Repository Management
@@ -230,6 +232,7 @@ export default function Page() {
                 <RepoLayoutSample/>
             </div>
 
+            {/* trending */}
             <div id="trending"
                  className="is-light-bg w-full h-screen snap-start bg-gray-100 px-20 pt-20"
                  ref={el => sectionRefs.current[3] = el}>
@@ -307,8 +310,7 @@ export default function Page() {
                                                             <img src={imgSrc} alt="thumbnail"
                                                                  className="absolute inset-0 w-full h-full object-cover"/>
                                                         ) : (
-                                                            <div
-                                                                className="absolute inset-0 flex items-center justify-center text-neutral-400">
+                                                            <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
                                                                 <span className="text-sm">No Image</span>
                                                             </div>
                                                         )}
@@ -333,6 +335,7 @@ export default function Page() {
                                                         </div>
                                                     </div>
 
+                                                    {/* 본문 영역 */}
                                                     <div className="h-1/2 p-5 flex flex-col">
                                                         <h3 className="text-lg md:text-xl font-semibold clamp-2 mb-1 hover:text-black transition-colors"
                                                             title={article.title}
@@ -348,17 +351,14 @@ export default function Page() {
                                                             className="mt-auto pt-4 flex items-center justify-between border-t border-neutral-200">
                                                             <div className="flex items-center gap-3 min-w-0">
                                                                 {article.extra__profileUrl ? (
-                                                                    <div
-                                                                        className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
-                                                                        <img
-                                                                            src={article.extra__profileUrl}
+                                                                    <div className="h-8 w-8 rounded-full overflow-hidden bg-neutral-200">
+                                                                        <img src={article.extra__profileUrl}
                                                                             alt="profile"
                                                                             className="block h-full w-full object-cover"
                                                                         />
                                                                     </div>
                                                                 ) : (
-                                                                    <div
-                                                                        className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-600">
+                                                                    <div className="h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-600">
                                                                         {(article.extra__writer?.[0] || "U").toUpperCase()}
                                                                     </div>
                                                                 )}
@@ -373,8 +373,7 @@ export default function Page() {
                                                                             {article.extra__writer}
                                                                         </Link>
                                                                     ) : (
-                                                                        <span
-                                                                            className="font-medium text-neutral-800">Unknown</span>
+                                                                        <span className="font-medium text-neutral-800">Unknown</span>
                                                                     )}
                                                                     <span className="ml-2 text-xs text-neutral-500">
                                                                       {new Date(article.regDate).toLocaleDateString("en-US", {
@@ -406,10 +405,11 @@ export default function Page() {
                     id="before-footer"
                     className="snap-start snap-y-mandatory scroll-mt-4"
                 >
-                    <Footer/>
+                    <Footer />
                 </section>
             )}
 
+            {/* toggle menu */}
             <div className="pointer-events-none">
                 <button onClick={() =>
                     window.dispatchEvent(new CustomEvent("open-modal", {detail: "login"}))}

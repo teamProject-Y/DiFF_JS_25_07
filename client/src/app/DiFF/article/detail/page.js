@@ -22,7 +22,7 @@ import {useDialog} from "@/common/commonLayout";
 function ArticleDetailInner() {
 
     const searchParams = useSearchParams();
-    const {alert, confirm} = useDialog();
+    const { alert, confirm } = useDialog();
     const router = useRouter();
 
     const id = searchParams.get('id');
@@ -115,6 +115,7 @@ function ArticleDetailInner() {
                 console.error('[DetailPage] fetch error:', e);
                 setErrMsg('ERROR');
                 setArticle(null);
+
             } finally {
                 if (alive) setLoading(false);
             }
@@ -134,6 +135,7 @@ function ArticleDetailInner() {
 
                 setLiked((prev) => (prev !== like.liked ? like.liked : prev));
                 setLikeCount((prev) => (prev !== like.count ? like.count : prev));
+
             } catch (e) {
                 if (e?.response?.status === 401) {
 
@@ -160,6 +162,7 @@ function ArticleDetailInner() {
                         try {
                             const likeRes = await fetchReplyLikes(r.id);
                             return {...r, liked: likeRes.liked, likeCount: likeRes.count};
+
                         } catch (e) {
                             console.error("Failed to get comment like status:", e);
                             return {...r, liked: false, likeCount: 0};
@@ -243,6 +246,7 @@ function ArticleDetailInner() {
                     list.some(m => norm(getNick(m)) === authorNickN);
 
                 setMember({id: targetId || null, isFollowing, nickName: article.extra__writer});
+
             } catch (e) {
                 console.error('Failed to configure writer member:', e);
                 setMember({id: null, isFollowing: false, nickName: article.extra__writer});
@@ -346,8 +350,9 @@ function ArticleDetailInner() {
                 })
             );
             setReplies(withLikes);
+
         } catch (e) {
-            console.error("write comment failure:", e);
+            console.error("comment failed:", e);
             alert({intent: "danger", title: "Failed to write comment. Please try again."});
         }
     };
@@ -398,7 +403,6 @@ function ArticleDetailInner() {
             ) : (
                 <div className="max-w-3xl mx-auto ">
                     <div className="flex justify-between">
-
                         <div className={`flex items-baseline gap-2 mb-2 ml-2 flex-wrap ${
                             isLoggedIn ? "pt-0" : "pt-20"
                         }`}

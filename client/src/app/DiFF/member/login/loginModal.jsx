@@ -66,7 +66,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                                   focus:outline-none focus:ring-0 focus:border-blue-600 peer bg-white white-autofill"
                        autoComplete="username"
                        required
-                       disabled={submitting}/>
+                       disabled={submitting} />
                 <label htmlFor="email"
                        className="absolute text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2
                                   peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2
@@ -83,7 +83,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                        className="block px-2.5 pb-2.5 pt-4 w-full text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                        autoComplete="current-password"
                        required
-                       disabled={submitting}/>
+                       disabled={submitting} />
                 <label htmlFor="Password"
                        className="absolute text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">
                     Password
@@ -101,12 +101,10 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                 </span>
             </button>
 
-            {/*추가 메뉴*/}
             <div className="text-center my-6 flex justify-center gap-6 text-black">
                 <a href="/DiFF/member/findLoginPw" className="hover:underline">Find PW</a>
             </div>
 
-            {/*소셜 로그인*/}
             <div className="space-y-4">
                 <a href="/login/google"
                    className="flex items-center justify-center gap-3 border border-black text-black bg-white py-3 px-4 rounded-lg mx-auto">
@@ -119,7 +117,7 @@ export default function LoginForm({open, callbackUrl = '/DiFF/home/main', afterL
                               d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                         <path fill="#34A853"
                               d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                        <path fill="none" d="M0 0h48v48H0z"/>
+                        <path fill="none" d="M0 0h48v48H0z" />
                     </svg>
                     <span>Sign in with Google</span>
                 </a>
