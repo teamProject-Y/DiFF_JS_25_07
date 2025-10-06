@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {useEffect, useState} from "react";
-import {followingArticleList, increaseArticleHits} from "@/lib/ArticleAPI";
+import {followingArticleList, increaseArticleHits, recentArticles} from "@/lib/ArticleAPI";
 import {getFollowingList} from "@/lib/UserAPI";
 import removeMd from "remove-markdown";
 import {saveFcmTokenToServer} from "@/lib/FirebaseAPI";
@@ -17,6 +17,7 @@ export default function AfterMainPage({me, trendingArticles}) {
     const [activeTab, setActiveTab] = useState("Trending");
     const [followingArticles, setFollowingArticles] = useState(null);
     const [following, setFollowing] = useState([]);
+    const [recent, setRecent] = useState([]);
 
     useEffect(() => {
         const run = async () => {
@@ -66,6 +67,22 @@ export default function AfterMainPage({me, trendingArticles}) {
         }
     };
 
+    useEffect(() => {
+        recentArticles({ count: 100 })
+            .then((res) => {
+                if (res && res.articles) {
+                    setRecent(res.articles);
+                } else {
+                    setRecent([]);
+                }
+            })
+            .catch((err) => {
+                console.error("❌ [recentArticles] 요청 실패:", err);
+            });
+    }, []);
+
+
+
     return (
         <div className="w-full h-screen overflow-hidden
                         bg-white text-black dark:bg-neutral-900 dark:text-neutral-200">
@@ -73,7 +90,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                 <div className="mx-auto px-32 flex h-full">
                     <main className="flex-1 flex flex-col min-h-0">
                         <div className="flex items-center border-b dark:border-neutral-700">
-                            {["Trending", "Following"].map((t) => (
+                            {["Trending", "Following", "Recent"].map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setActiveTab(t)}
@@ -92,8 +109,8 @@ export default function AfterMainPage({me, trendingArticles}) {
 
                                     <span className={`col-start-1 row-start-1 leading-none transition-[font-weight,color] duration-100
                                             ${activeTab === t
-                                            ? "font-semibold"
-                                            : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}
+                                        ? "font-semibold"
+                                        : "text-gray-500 dark:text-neutral-600 group-hover:text-gray-700 dark:group-hover:text-gray-300 duration-100"}`}
                                     >
                                      {t}
                                     </span>
@@ -113,8 +130,7 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                 className="block cursor-pointer text-gray-500 dark:text-neutral-400"
                                                 onClick={() => handleArticleClick(article.id)}
                                             >
-                                                <div className="flex h-52 border-b p-4 justify-center items-center transition
-                                                                hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                                <div className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
                                                     <div className="h-full w-[70%] pr-8 flex flex-col">
                                                         <div className="text-sm ">
                                                             in Trending · by{" "}
@@ -135,18 +151,91 @@ export default function AfterMainPage({me, trendingArticles}) {
                                                                 {article.title}
                                                             </h2>
                                                             <p className="text-sm overflow-hidden whitespace-normal [overflow-wrap:anywhere] [word-break:break-word]"
-                                                               style={{ display:'-webkit-box', WebkitBoxOrient:'vertical', WebkitLineClamp:2 }}>
+                                                               style={{
+                                                                   display: '-webkit-box',
+                                                                   WebkitBoxOrient: 'vertical',
+                                                                   WebkitLineClamp: 2
+                                                               }}>
                                                                 {article.body ? removeMd(article.body) : ""}
                                                             </p>
                                                         </div>
                                                         <div className="flex items-center gap-4 text-sm ">
-                                                            <span>
-                                                                {new Date(article.regDate).toLocaleDateString("en-US", {
-                                                                    year: "numeric",
-                                                                    month: "short",
-                                                                    day: "numeric",
-                                                                })}
-                                                            </span>
+                                                          <span>
+                                                            {new Date(article.regDate).toLocaleDateString("en-US", {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric",
+                                                            })}
+                                                          </span>
+                                                            <span>view: {article.hits}</span>
+                                                            <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                            <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
+                                                        {imgSrc ? (
+                                                            <img src={imgSrc} alt="thumbnail"
+                                                                 className="w-full h-full object-cover"/>
+                                                        ) : (
+                                                            <span className="dark:text-neutral-400 text-gray-400">No Image</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
+                                        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                            <i className="fa-solid fa-newspaper text-2xl text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                )
+                            ) : activeTab === "Following" ? (
+                                followingArticles === null ? (
+                                    <></>
+                                ) : followingArticles.length > 0 ? (
+                                    followingArticles.map((article, idx) => {
+                                        const imgSrc = extractFirstImage(article.body);
+                                        return (
+                                            <div
+                                                key={idx}
+                                                className="block cursor-pointer text-gray-500 dark:text-neutral-400"
+                                                onClick={() => handleArticleClick(article.id)}
+                                            >
+                                                <div className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                                    <div className="h-full w-[70%] pr-8 flex flex-col">
+                                                        <div className="text-sm ">
+                                                            in Following · by{" "}
+                                                            {article.extra__writer ? (
+                                                                <Link
+                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                    className="hover:underline cursor-pointer hover:text-black dark:hover:text-neutral-200"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    {article.extra__writer}
+                                                                </Link>
+                                                            ) : (
+                                                                "Unknown"
+                                                            )}
+                                                        </div>
+                                                        <div className="py-2 flex-grow">
+                                                            <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">
+                                                                {article.title}
+                                                            </h2>
+                                                            <p className="clamp-2 text-sm overflow-hidden">
+                                                                {article.body ? removeMd(article.body) : ""}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-sm ">
+                                                          <span>
+                                                            {new Date(article.regDate).toLocaleDateString("en-US", {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric",
+                                                            })}
+                                                          </span>
                                                             <span>view: {article.hits}</span>
                                                             <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
                                                             <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
@@ -167,83 +256,95 @@ export default function AfterMainPage({me, trendingArticles}) {
                                 ) : (
                                     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
                                         <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
-                                            <i className="fa-solid fa-newspaper text-2xl text-gray-400"></i>
+                                            <i className="fa-solid fa-user-plus text-2xl text-gray-400"></i>
                                         </div>
+                                        <p className="text-lg font-medium">No posts from people you follow.</p>
+                                        <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
+                                            Start following someone to see their posts here.
+                                        </a>
                                     </div>
                                 )
-                            ) : followingArticles === null ? (
-                                <></>
-                            ) : followingArticles.length > 0 ? (
-                                followingArticles.map((article, idx) => {
-                                    const imgSrc = extractFirstImage(article.body);
-                                    return (
-                                        <div
-                                            key={idx}
-                                            className="block cursor-pointer text-gray-500 dark:text-neutral-400"
-                                            onClick={() => handleArticleClick(article.id)}
-                                        >
-                                            <div className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
-                                                <div className="h-full w-[70%] pr-8 flex flex-col">
-                                                    <div className="text-sm ">
-                                                        in Following · by{" "}
-                                                        {article.extra__writer ? (
-                                                            <Link
-                                                                href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
-                                                                className="hover:underline cursor-pointer hover:text-black dark:hover:text-neutral-200"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                {article.extra__writer}
-                                                            </Link>
-                                                        ) : (
-                                                            "Unknown"
-                                                        )}
-                                                    </div>
-                                                    <div className="py-2 flex-grow">
-                                                        <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">
-                                                            {article.title}
-                                                        </h2>
-                                                        <p className="clamp-2 text-sm overflow-hidden">
-                                                            {article.body ? removeMd(article.body) : ""}
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-sm ">
-                                                        <span>
+                            ) : (
+                                /* Recent 탭 */
+                                recent && recent.length > 0 ? (
+                                    recent.map((article, idx) => {
+                                        const imgSrc = extractFirstImage(article.body);
+                                        return (
+                                            <div
+                                                key={idx}
+                                                className="block cursor-pointer text-gray-500 dark:text-neutral-400"
+                                                onClick={() => handleArticleClick(article.id)}
+                                            >
+                                                <div
+                                                    className="flex h-52 border-b p-4 justify-center items-center transition hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                                                    <div className="h-full w-[70%] pr-8 flex flex-col">
+                                                        <div className="text-sm ">
+                                                            in Recent · by{" "}
+                                                            {article.extra__writer ? (
+                                                                <Link
+                                                                    href={`/DiFF/member/profile?nickName=${encodeURIComponent(article.extra__writer)}`}
+                                                                    className="hover:underline cursor-pointer hover:text-black dark:hover:text-neutral-200"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    {article.extra__writer}
+                                                                </Link>
+                                                            ) : (
+                                                                "Unknown"
+                                                            )}
+                                                        </div>
+                                                        <div className="py-2 flex-grow">
+                                                            <h2 className="text-2xl py-2 font-black text-gray-900 dark:text-neutral-300">
+                                                                {article.title}
+                                                            </h2>
+                                                            <p className="text-sm overflow-hidden whitespace-normal [overflow-wrap:anywhere] [word-break:break-word]"
+                                                               style={{
+                                                                   display: '-webkit-box',
+                                                                   WebkitBoxOrient: 'vertical',
+                                                                   WebkitLineClamp: 2
+                                                               }}>
+                                                                {article.body ? removeMd(article.body) : ""}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-sm ">
+                                                          <span>
                                                             {new Date(article.regDate).toLocaleDateString("en-US", {
                                                                 year: "numeric",
                                                                 month: "short",
                                                                 day: "numeric",
                                                             })}
-                                                        </span>
-                                                        <span>view: {article.hits}</span>
-                                                        <span><i className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
-                                                        <span><i className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
+                                                          </span>
+                                                            <span>view: {article.hits}</span>
+                                                            <span><i
+                                                                className="fa-regular fa-comment"></i> {article.extra__sumReplies}</span>
+                                                            <span><i
+                                                                className="fa-regular fa-heart"></i> {article.extra__sumReaction}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
+                                                        {imgSrc ? (
+                                                            <img src={imgSrc} alt="thumbnail"
+                                                                 className="w-full h-full object-cover"/>
+                                                        ) : (
+                                                            <span className="dark:text-neutral-400 text-gray-400">No Image</span>
+                                                        )}
                                                     </div>
                                                 </div>
-                                                <div className="w-[30%] h-[100%] bg-gray-200 dark:bg-neutral-700 rounded-xl flex items-center justify-center overflow-hidden">
-                                                    {imgSrc ? (
-                                                        <img src={imgSrc} alt="thumbnail" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <span className="dark:text-neutral-400 text-gray-400">No Image</span>
-                                                    )}
-                                                </div>
                                             </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div
+                                        className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
+                                        <div
+                                            className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                            <i className="fa-solid fa-clock-rotate-left text-2xl text-gray-400"></i>
                                         </div>
-                                    );
-                                })
-                            ) : (
-                                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-500">
-                                    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
-                                        <i className="fa-solid fa-user-plus text-2xl text-gray-400"></i>
+                                        <p className="text-lg font-medium">No recent posts available.</p>
                                     </div>
-
-                                    <p className="text-lg font-medium">No posts from people you follow.</p>
-                                    <a href="/DiFF/member/explore" className="text-sm text-blue-500 mt-2 hover:underline">
-                                        Start following someone to see their posts here.
-                                    </a>
-                                </div>
+                                )
                             )}
                         </div>
-
 
                     </main>
                 </div>

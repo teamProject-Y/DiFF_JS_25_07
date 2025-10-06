@@ -123,6 +123,12 @@ export const trendingArticle = async ({ count, days }) => {
     return res.data;
 };
 
+export const recentArticles = async ({ count = 100 } = {}) => {
+    const res = await ArticleAPI.get('/article/recent', {
+        params: { count },
+    });
+    return res.data;
+};
 export const writeArticle = async (data) => {
     if (data?.repositoryId != null) data = { ...data, repositoryId: Number(data.repositoryId) };
     if (data?.draftId != null) data = { ...data, draftId: Number(data.draftId) };
